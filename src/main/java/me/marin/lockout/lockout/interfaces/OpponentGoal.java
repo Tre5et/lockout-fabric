@@ -4,16 +4,15 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 public interface OpponentGoal extends HasTooltipInfo {
     @Override
-    default List<String> getTooltip(LockoutTeam team, PlayerEntity player) {
+    default List<String> getTooltip(LockoutTeam team, Player player) {
         if (((Goal) this).isCompleted()) return List.of();
         List<String> tooltip = new ArrayList<>();
         Lockout lockout = LockoutServer.lockout;
@@ -26,7 +25,7 @@ public interface OpponentGoal extends HasTooltipInfo {
 
         if (!notMet.isEmpty()) {
             tooltip.add("Have not met the condition:");
-            tooltip.addAll(HasTooltipInfo.commaSeparatedList(notMet.stream().map(t -> t.getColor() + t.getDisplayName() + Formatting.RESET).toList()));
+            tooltip.addAll(HasTooltipInfo.commaSeparatedList(notMet.stream().map(t -> t.getColor() + t.getDisplayName() + ChatFormatting.RESET).toList()));
         }
 
         return tooltip;
@@ -47,9 +46,9 @@ public interface OpponentGoal extends HasTooltipInfo {
                 .toList();
 
         if (notMet.isEmpty()) {
-            tooltip.add(Formatting.GRAY + " " + Formatting.ITALIC + "None");
+            tooltip.add(ChatFormatting.GRAY + " " + ChatFormatting.ITALIC + "None");
         } else {
-            tooltip.addAll(HasTooltipInfo.commaSeparatedList(notMet.stream().map(t -> t.getColor() + t.getDisplayName() + Formatting.RESET).toList()));
+            tooltip.addAll(HasTooltipInfo.commaSeparatedList(notMet.stream().map(t -> t.getColor() + t.getDisplayName() + ChatFormatting.RESET).toList()));
         }
 
         tooltip.add("Teams that HAVE met the condition:");
@@ -58,9 +57,9 @@ public interface OpponentGoal extends HasTooltipInfo {
                 .map(t -> (LockoutTeam) t)
                 .toList();
         if (met.isEmpty()) {
-            tooltip.add(Formatting.GRAY + " " + Formatting.ITALIC + "None");
+            tooltip.add(ChatFormatting.GRAY + " " + ChatFormatting.ITALIC + "None");
         } else {
-            tooltip.addAll(HasTooltipInfo.commaSeparatedList(met.stream().map(t -> t.getColor() + t.getDisplayName() + Formatting.RESET).toList()));
+            tooltip.addAll(HasTooltipInfo.commaSeparatedList(met.stream().map(t -> t.getColor() + t.getDisplayName() + ChatFormatting.RESET).toList()));
         }
         tooltip.add(" ");
 

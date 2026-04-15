@@ -7,9 +7,8 @@ import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.interfaces.MostStatGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 import java.util.UUID;
 
 public class HaveMostAdvancementsGoal extends Goal implements TextureProvider, MostStatGoal {
@@ -28,7 +27,7 @@ public class HaveMostAdvancementsGoal extends Goal implements TextureProvider, M
         return null;
     }
 
-    private static final Identifier TEXTURE = Identifier.of(Constants.NAMESPACE, "textures/custom/more_advancements.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/more_advancements.png");
     @Override
     public Identifier getTextureIdentifier() {
         return TEXTURE;

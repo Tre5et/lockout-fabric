@@ -4,23 +4,23 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.datafixers.util.Either;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.client.LockoutClient;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.bar.Bar;
-import net.minecraft.client.gui.hud.bar.LocatorBar;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.client.resource.waypoint.WaypointStyleAsset;
-import net.minecraft.client.world.ClientWaypointHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.SkinTextures;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraft.world.waypoint.EntityTickProgress;
-import net.minecraft.world.waypoint.TrackedWaypoint;
-import net.minecraft.world.waypoint.Waypoint;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.contextualbar.ContextualBarRenderer;
+import net.minecraft.client.gui.contextualbar.LocatorBarRenderer;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.WaypointStyle;
+import net.minecraft.client.waypoints.ClientWaypointManager;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.PlayerSkin;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.waypoints.PartialTickSupplier;
+import net.minecraft.world.waypoints.TrackedWaypoint;
+import net.minecraft.world.waypoints.Waypoint;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,58 +30,58 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.util.function.Consumer;
 import java.util.UUID;
 
-@Mixin(LocatorBar.class)
-public abstract class LocatorBarMixin implements Bar {
+@Mixin(LocatorBarRenderer.class)
+public abstract class LocatorBarMixin implements ContextualBarRenderer {
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow @Final private Minecraft minecraft;
 
-    @Shadow @Final private static Identifier ARROW_UP;
-    @Shadow @Final private static Identifier ARROW_DOWN;
+    @Shadow @Final private static Identifier LOCATOR_BAR_ARROW_UP;
+    @Shadow @Final private static Identifier LOCATOR_BAR_ARROW_DOWN;
 
     @Redirect(
-            method = "renderAddons",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWaypointHandler;forEachWaypoint(Lnet/minecraft/entity/Entity;Ljava/util/function/Consumer;)V")
+            method = "render",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/waypoints/ClientWaypointManager;forEachWaypoint(Lnet/minecraft/world/entity/Entity;Ljava/util/function/Consumer;)V")
     )
-    private void lockout$renderHeads(ClientWaypointHandler instance, Entity entity, Consumer<TrackedWaypoint> originalAction, DrawContext context, RenderTickCounter tickCounter) {
-        World world = entity.getEntityWorld();
-        int centerY = getCenterY(this.client.getWindow());
-        EntityTickProgress entityTickProgress = e -> tickCounter.getTickProgress(!world.getTickManager().shouldSkipTick(e));
+    private void lockout$renderHeads(ClientWaypointManager instance, Entity entity, Consumer<TrackedWaypoint> originalAction, GuiGraphics context, DeltaTracker tickCounter) {
+        Level world = entity.level();
+        int centerY = top(this.minecraft.getWindow());
+        PartialTickSupplier entityTickProgress = e -> tickCounter.getGameTimeDeltaPartialTick(!world.tickRateManager().isEntityFrozen(e));
 
         instance.forEachWaypoint(entity, waypoint -> {
             // Original filtering logic
-            if ((Boolean) waypoint.getSource().left().map(uuid -> uuid.equals(entity.getUuid())).orElse(false)) {
+            if ((Boolean) waypoint.id().left().map(uuid -> uuid.equals(entity.getUUID())).orElse(false)) {
                 return;
             }
 
-            double yaw = waypoint.getRelativeYaw(world, (TrackedWaypoint.YawProvider) this.client.gameRenderer.getCamera(), entityTickProgress);
+            double yaw = waypoint.yawAngleToCamera(world, (TrackedWaypoint.Camera) this.minecraft.gameRenderer.getMainCamera(), entityTickProgress);
             if (yaw <= -60.0 || yaw > 60.0) {
                 return;
             }
 
-            int centerX = MathHelper.ceil((this.client.getWindow().getScaledWidth() - 9) / 2.0F);
-            int offset = MathHelper.floor(yaw * 173.0 / 2.0 / 60.0);
+            int centerX = Mth.ceil((this.minecraft.getWindow().getGuiScaledWidth() - 9) / 2.0F);
+            int offset = Mth.floor(yaw * 173.0 / 2.0 / 60.0);
             int x = centerX + offset;
             int y = centerY - 2;
             int size = 9;
 
-            Waypoint.Config config = waypoint.getConfig();
-            Either<UUID, String> source = waypoint.getSource();
+            Waypoint.Icon config = waypoint.icon();
+            Either<UUID, String> source = waypoint.id();
 
             boolean renderedHead = false;
 
             if (source.left().isPresent()) {
                 UUID uuid = source.left().get();
-                PlayerListEntry entry = this.client.getNetworkHandler() != null ? this.client.getNetworkHandler().getPlayerListEntry(uuid) : null;
+                PlayerInfo entry = this.minecraft.getConnection() != null ? this.minecraft.getConnection().getPlayerInfo(uuid) : null;
 
                 if (entry != null) {
                     LockoutTeam team = LockoutClient.lockout != null ? LockoutClient.lockout.getPlayerTeam(uuid) : null;
                     int teamColor = -1;
                     if (team != null) {
-                        Integer val = team.getColor().getColorValue();
+                        Integer val = team.getColor().getColor();
                         if (val != null) teamColor = val | 0xFF000000;
                     }
 
-                    SkinTextures textures = entry.getSkinTextures();
+                    PlayerSkin textures = entry.getSkin();
                     Identifier skin = textures.body().texturePath();
 
                     // Render border if team color exists
@@ -94,36 +94,36 @@ public abstract class LocatorBarMixin implements Bar {
                     }
 
                     // Render head base
-                    context.drawTexture(RenderPipelines.GUI_TEXTURED, skin, x, y, 8, 8, size, size, 8, 8, 64, 64, -1);
+                    context.blit(RenderPipelines.GUI_TEXTURED, skin, x, y, 8, 8, size, size, 8, 8, 64, 64, -1);
                     // Render hat layer
-                    context.drawTexture(RenderPipelines.GUI_TEXTURED, skin, x, y, 40, 8, size, size, 8, 8, 64, 64, -1);
+                    context.blit(RenderPipelines.GUI_TEXTURED, skin, x, y, 40, 8, size, size, 8, 8, 64, 64, -1);
                     renderedHead = true;
                 }
             }
 
             if (!renderedHead) {
                 // Fallback to original sprite rendering
-                WaypointStyleAsset style = this.client.getWaypointStyleAssetManager().get(config.style);
-                float dist = MathHelper.sqrt((float) waypoint.squaredDistanceTo(entity));
-                Identifier identifier = style.getSpriteForDistance(dist);
+                WaypointStyle style = this.minecraft.getWaypointStyles().get(config.style);
+                float dist = Mth.sqrt((float) waypoint.distanceSquared(entity));
+                Identifier identifier = style.sprite(dist);
                 int color = config.color.orElseGet(() -> 0xFFFFFF);
 
-                context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, identifier, x, y, size, size, color);
+                context.blitSprite(RenderPipelines.GUI_TEXTURED, identifier, x, y, size, size, color);
             }
 
             // Original pitch/arrow logic
-            TrackedWaypoint.Pitch pitch = waypoint.getPitch(world, (TrackedWaypoint.PitchProvider) this.client.gameRenderer, entityTickProgress);
-            if (pitch != TrackedWaypoint.Pitch.NONE) {
+            TrackedWaypoint.PitchDirection pitch = waypoint.pitchDirectionToCamera(world, (TrackedWaypoint.Projector) this.minecraft.gameRenderer, entityTickProgress);
+            if (pitch != TrackedWaypoint.PitchDirection.NONE) {
                 int arrowY;
                 Identifier arrowSprite;
-                if (pitch == TrackedWaypoint.Pitch.DOWN) {
+                if (pitch == TrackedWaypoint.PitchDirection.DOWN) {
                     arrowY = 6;
-                    arrowSprite = ARROW_DOWN;
+                    arrowSprite = LOCATOR_BAR_ARROW_DOWN;
                 } else {
                     arrowY = -6;
-                    arrowSprite = ARROW_UP;
+                    arrowSprite = LOCATOR_BAR_ARROW_UP;
                 }
-                context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, arrowSprite, x + 1, centerY + arrowY, 7, 5);
+                context.blitSprite(RenderPipelines.GUI_TEXTURED, arrowSprite, x + 1, centerY + arrowY, 7, 5);
             }
         });
     }

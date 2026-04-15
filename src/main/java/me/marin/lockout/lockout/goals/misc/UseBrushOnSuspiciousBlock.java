@@ -3,12 +3,11 @@ package me.marin.lockout.lockout.goals.misc;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.texture.CustomTextureRenderer;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.List;
 
 public class UseBrushOnSuspiciousBlock extends Goal implements CustomTextureRenderer {
@@ -24,16 +23,16 @@ public class UseBrushOnSuspiciousBlock extends Goal implements CustomTextureRend
 
     @Override
     public ItemStack getTextureItemStack() {
-        return Items.BRUSH.getDefaultStack();
+        return Items.BRUSH.getDefaultInstance();
     }
 
-    private static final List<ItemStack> SUSPICIOUS_BLOCKS = List.of(Items.SUSPICIOUS_GRAVEL.getDefaultStack(), Items.SUSPICIOUS_SAND.getDefaultStack());
-    private static final Identifier TEXTURE = Identifier.of(Constants.NAMESPACE, "textures/custom/overlay/brush_overlay.png");
+    private static final List<ItemStack> SUSPICIOUS_BLOCKS = List.of(Items.SUSPICIOUS_GRAVEL.getDefaultInstance(), Items.SUSPICIOUS_SAND.getDefaultInstance());
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/overlay/brush_overlay.png");
     @Override
-    public boolean renderTexture(DrawContext context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
         int mod = tick % (60 * SUSPICIOUS_BLOCKS.size());
-        context.drawItem(SUSPICIOUS_BLOCKS.get(mod / 60), x, y);
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
+        context.renderItem(SUSPICIOUS_BLOCKS.get(mod / 60), x, y);
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
         return true;
     }
 

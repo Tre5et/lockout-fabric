@@ -4,8 +4,8 @@ import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.interfaces.OpponentGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 
 public class OpponentEatsFoodGoal extends Goal implements TextureProvider, OpponentGoal {
 
@@ -23,7 +23,7 @@ public class OpponentEatsFoodGoal extends Goal implements TextureProvider, Oppon
         return null;
     }
 
-    private static final Identifier TEXTURE = Identifier.of(Constants.NAMESPACE, "textures/custom/opponent/no_food.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/opponent/no_food.png");
     @Override
     public Identifier getTextureIdentifier() {
         return TEXTURE;

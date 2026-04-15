@@ -1,12 +1,12 @@
 package me.marin.lockout.lockout.goals.misc;
 
 import me.marin.lockout.lockout.Goal;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class FillShelfGoal extends Goal {
 
-    private static final ItemStack ITEM_STACK = Items.OAK_SHELF.getDefaultStack();
+    private static final ItemStack ITEM_STACK = Items.OAK_SHELF.getDefaultInstance();
 
     public FillShelfGoal(String id, String data) {
         super(id, data);

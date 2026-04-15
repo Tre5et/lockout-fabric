@@ -3,9 +3,9 @@ package me.marin.lockout.lockout.goals.ride;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.interfaces.RideEntityGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
 
 public class RideNautilusGoal extends RideEntityGoal implements TextureProvider {
 
@@ -28,7 +28,7 @@ public class RideNautilusGoal extends RideEntityGoal implements TextureProvider 
         return null;
     }
 
-    private static final Identifier TEXTURE = Identifier.of(Constants.NAMESPACE, "textures/custom/ride_nautilus.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/ride_nautilus.png");
     @Override
     public Identifier getTextureIdentifier() {
         return TEXTURE;

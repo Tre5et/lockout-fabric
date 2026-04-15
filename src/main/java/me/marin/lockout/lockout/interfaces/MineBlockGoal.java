@@ -1,8 +1,7 @@
 package me.marin.lockout.lockout.interfaces;
 
 import me.marin.lockout.lockout.Goal;
-import net.minecraft.item.Item;
-
+import net.minecraft.world.item.Item;
 import java.util.List;
 
 public abstract class MineBlockGoal extends Goal {

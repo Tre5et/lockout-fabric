@@ -5,32 +5,31 @@ import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.lockout.interfaces.KillSpecificMobsGoal;
 import me.marin.lockout.lockout.texture.CycleTexturesProvider;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class Kill30UndeadMobsGoal extends KillSpecificMobsGoal implements CycleTexturesProvider {
 
-    private static final ItemStack ITEM_STACK = Items.WOODEN_SWORD.getDefaultStack();
+    private static final ItemStack ITEM_STACK = Items.WOODEN_SWORD.getDefaultInstance();
     static {
         ITEM_STACK.setCount(30);
     }
     private static final List<Identifier> TEXTURES = List.of(
-            Identifier.of(Constants.NAMESPACE, "textures/custom/undead/kill_zombie.png"),
-            Identifier.of(Constants.NAMESPACE, "textures/custom/undead/kill_wither_skeleton.png"),
-            Identifier.of(Constants.NAMESPACE, "textures/custom/undead/kill_zombie_villager.png"),
-            Identifier.of(Constants.NAMESPACE, "textures/custom/undead/kill_drowned.png"),
-            Identifier.of(Constants.NAMESPACE, "textures/custom/undead/kill_husk.png"),
-            Identifier.of(Constants.NAMESPACE, "textures/custom/undead/kill_stray.png"),
-            Identifier.of(Constants.NAMESPACE, "textures/custom/undead/kill_zoglin.png")
+            Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/undead/kill_zombie.png"),
+            Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/undead/kill_wither_skeleton.png"),
+            Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/undead/kill_zombie_villager.png"),
+            Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/undead/kill_drowned.png"),
+            Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/undead/kill_husk.png"),
+            Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/undead/kill_stray.png"),
+            Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/undead/kill_zoglin.png")
     );
     /* undead:
     drowned, husk, phantom, skeleton, skeleton horse, stray, wither, wither skeleton, zoglin, zombie,
@@ -90,14 +89,14 @@ public class Kill30UndeadMobsGoal extends KillSpecificMobsGoal implements CycleT
     }
 
     @Override
-    public boolean renderTexture(DrawContext context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
         CycleTexturesProvider.super.renderTexture(context, x, y, tick);
-        context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, ITEM_STACK, x, y);
+        context.renderItemDecorations(Minecraft.getInstance().font, ITEM_STACK, x, y);
         return true;
     }
 
     @Override
-    public List<String> getTooltip(LockoutTeam team, PlayerEntity player) {
+    public List<String> getTooltip(LockoutTeam team, Player player) {
         List<String> tooltip = new ArrayList<>();
 
         tooltip.add(" ");

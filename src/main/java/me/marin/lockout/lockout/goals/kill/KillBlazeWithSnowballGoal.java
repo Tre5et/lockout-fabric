@@ -3,10 +3,9 @@ package me.marin.lockout.lockout.goals.kill;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.interfaces.KillMobGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.mob.BlazeEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
 
 public class KillBlazeWithSnowballGoal extends KillMobGoal implements TextureProvider {
 
@@ -24,7 +23,7 @@ public class KillBlazeWithSnowballGoal extends KillMobGoal implements TexturePro
         return null; // Using custom texture instead
     }
 
-    private static final Identifier TEXTURE = Identifier.of(Constants.NAMESPACE, "textures/custom/kill/kill_blaze_snowball.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/kill/kill_blaze_snowball.png");
     
     @Override
     public Identifier getTextureIdentifier() {

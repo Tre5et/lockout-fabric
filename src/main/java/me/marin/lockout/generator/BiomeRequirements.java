@@ -1,25 +1,24 @@
 package me.marin.lockout.generator;
 
 import me.marin.lockout.LocateData;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.biome.Biome;
-
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.Biome;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class BiomeRequirements {
 
-    public static BiomeRequirement single(RegistryKey<Biome> biome) {
+    public static BiomeRequirement single(ResourceKey<Biome> biome) {
         return new SingleBiomeRequirement(biome);
     }
 
-    public static BiomeRequirement anyOf(List<RegistryKey<Biome>> biomes) {
+    public static BiomeRequirement anyOf(List<ResourceKey<Biome>> biomes) {
         return new AnyOfBiomeRequirement(biomes);
     }
 
     @SafeVarargs
-    public static BiomeRequirement anyOf(RegistryKey<Biome>... biomes) {
+    public static BiomeRequirement anyOf(ResourceKey<Biome>... biomes) {
         return new AnyOfBiomeRequirement(Arrays.asList(biomes));
     }
 
@@ -40,33 +39,33 @@ public class BiomeRequirements {
     }
 
     private static class SingleBiomeRequirement implements BiomeRequirement {
-        private final RegistryKey<Biome> biome;
+        private final ResourceKey<Biome> biome;
 
-        public SingleBiomeRequirement(RegistryKey<Biome> biome) {
+        public SingleBiomeRequirement(ResourceKey<Biome> biome) {
             this.biome = biome;
         }
 
         @Override
-        public boolean isMet(Map<RegistryKey<Biome>, LocateData> biomes) {
+        public boolean isMet(Map<ResourceKey<Biome>, LocateData> biomes) {
             LocateData data = biomes.get(biome);
             return data != null && data.wasLocated();
         }
 
         @Override
-        public void collectBiomes(java.util.Collection<RegistryKey<Biome>> collector) {
+        public void collectBiomes(java.util.Collection<ResourceKey<Biome>> collector) {
             collector.add(biome);
         }
     }
 
     private static class AnyOfBiomeRequirement implements BiomeRequirement {
-        private final List<RegistryKey<Biome>> requiredBiomes;
+        private final List<ResourceKey<Biome>> requiredBiomes;
 
-        public AnyOfBiomeRequirement(List<RegistryKey<Biome>> requiredBiomes) {
+        public AnyOfBiomeRequirement(List<ResourceKey<Biome>> requiredBiomes) {
             this.requiredBiomes = requiredBiomes;
         }
 
         @Override
-        public boolean isMet(Map<RegistryKey<Biome>, LocateData> biomes) {
+        public boolean isMet(Map<ResourceKey<Biome>, LocateData> biomes) {
             return requiredBiomes.stream().anyMatch(biome -> {
                 LocateData data = biomes.get(biome);
                 return data != null && data.wasLocated();
@@ -74,7 +73,7 @@ public class BiomeRequirements {
         }
 
         @Override
-        public void collectBiomes(java.util.Collection<RegistryKey<Biome>> collector) {
+        public void collectBiomes(java.util.Collection<ResourceKey<Biome>> collector) {
             collector.addAll(requiredBiomes);
         }
     }
@@ -87,12 +86,12 @@ public class BiomeRequirements {
         }
 
         @Override
-        public boolean isMet(Map<RegistryKey<Biome>, LocateData> biomes) {
+        public boolean isMet(Map<ResourceKey<Biome>, LocateData> biomes) {
             return requirements.stream().allMatch(req -> req.isMet(biomes));
         }
 
         @Override
-        public void collectBiomes(java.util.Collection<RegistryKey<Biome>> collector) {
+        public void collectBiomes(java.util.Collection<ResourceKey<Biome>> collector) {
             for (BiomeRequirement req : requirements) {
                 req.collectBiomes(collector);
             }
@@ -107,12 +106,12 @@ public class BiomeRequirements {
         }
 
         @Override
-        public boolean isMet(Map<RegistryKey<Biome>, LocateData> biomes) {
+        public boolean isMet(Map<ResourceKey<Biome>, LocateData> biomes) {
             return requirements.stream().anyMatch(req -> req.isMet(biomes));
         }
 
         @Override
-        public void collectBiomes(java.util.Collection<RegistryKey<Biome>> collector) {
+        public void collectBiomes(java.util.Collection<ResourceKey<Biome>> collector) {
             for (BiomeRequirement req : requirements) {
                 req.collectBiomes(collector);
             }

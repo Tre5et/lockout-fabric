@@ -3,13 +3,12 @@ package me.marin.lockout.lockout.goals.obtain;
 import me.marin.lockout.lockout.goals.util.GoalDataConstants;
 import me.marin.lockout.lockout.interfaces.ObtainAllItemsGoal;
 import me.marin.lockout.lockout.interfaces.RequiresAmount;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.DyeColor;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.List;
 
 public class Obtain64ColoredConcreteGoal extends ObtainAllItemsGoal implements RequiresAmount {
@@ -25,7 +24,7 @@ public class Obtain64ColoredConcreteGoal extends ObtainAllItemsGoal implements R
 
         GOAL_NAME = "Obtain 64 " + GoalDataConstants.getDyeColorFormatted(DYE_COLOR) + " Concrete";
         ITEMS = List.of(getConcreteColor(data));
-        ITEM_STACK = getConcreteColor(data).getDefaultStack();
+        ITEM_STACK = getConcreteColor(data).getDefaultInstance();
         ITEM_STACK.setCount(64);
     }
 
@@ -67,9 +66,9 @@ public class Obtain64ColoredConcreteGoal extends ObtainAllItemsGoal implements R
     }
 
     @Override
-    public boolean renderTexture(DrawContext context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
         super.renderTexture(context, x, y, tick);
-        context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, ITEM_STACK, x, y);
+        context.renderItemDecorations(Minecraft.getInstance().font, ITEM_STACK, x, y);
         return true;
     }
 

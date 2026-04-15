@@ -52,13 +52,12 @@ import me.marin.lockout.lockout.goals.tame_animal.TameWolfGoal;
 import me.marin.lockout.lockout.goals.util.GoalDataConstants;
 import me.marin.lockout.lockout.goals.wear_armor.*;
 import me.marin.lockout.lockout.goals.workstation.*;
-import net.minecraft.util.DyeColor;
-
+import net.minecraft.world.item.DyeColor;
 import java.util.List;
 
 import static me.marin.lockout.lockout.GoalRegistry.INSTANCE;
-import static net.minecraft.world.biome.BiomeKeys.*;
-import static net.minecraft.world.gen.structure.StructureKeys.*;
+import static net.minecraft.world.level.biome.Biomes.*;
+import static net.minecraft.world.level.levelgen.structure.BuiltinStructures.*;
 
 public class DefaultGoalRegister {
 
@@ -413,7 +412,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.FILL_CAMPFIRE, FillCampfireWithFoodGoal.class);
         INSTANCE.register(GoalType.PUT_FLOWER_IN_POT, PutFlowerInPotGoal.class);
         INSTANCE.register(GoalType.KILL_ALL_RAID_MOBS, KillAllRaidMobsGoal.class, new GoalRequirements.Builder()
-                .structures(List.of(PILLAGER_OUTPOST, MANSION))
+                .structures(List.of(PILLAGER_OUTPOST, WOODLAND_MANSION))
                 .build()
         );
         INSTANCE.register(GoalType.FILL_CHISELED_BOOKSHELF, FillChiseledBookshelfGoal.class);

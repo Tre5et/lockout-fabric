@@ -1,9 +1,9 @@
 package me.marin.lockout.lockout.goals.misc;
 
 import me.marin.lockout.lockout.Goal;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class FillArmorStandGoal extends Goal {
 
@@ -21,7 +21,7 @@ public class FillArmorStandGoal extends Goal {
 
     @Override
     public ItemStack getTextureItemStack() {
-        return ITEM.getDefaultStack();
+        return ITEM.getDefaultInstance();
     }
 
 }

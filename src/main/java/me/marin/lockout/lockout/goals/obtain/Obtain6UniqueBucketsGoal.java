@@ -2,10 +2,9 @@ package me.marin.lockout.lockout.goals.obtain;
 
 import me.marin.lockout.Utility;
 import me.marin.lockout.lockout.interfaces.ObtainSomeOfTheItemsGoal;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import java.util.List;
 
 public class Obtain6UniqueBucketsGoal extends ObtainSomeOfTheItemsGoal {
@@ -44,7 +43,7 @@ public class Obtain6UniqueBucketsGoal extends ObtainSomeOfTheItemsGoal {
     }
 
     @Override
-    public boolean renderTexture(DrawContext context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
         super.renderTexture(context, x, y, tick);
         Utility.drawStackCount(context, x, y, String.valueOf(getAmount()));
         return true;

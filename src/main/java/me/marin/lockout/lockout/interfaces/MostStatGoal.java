@@ -4,9 +4,8 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +13,7 @@ public interface MostStatGoal extends HasTooltipInfo {
     int getStat(LockoutTeam team);
 
     @Override
-    default List<String> getTooltip(LockoutTeam team, PlayerEntity player) {
+    default List<String> getTooltip(LockoutTeam team, Player player) {
         List<String> tooltip = new ArrayList<>();
         Lockout lockout = LockoutServer.lockout;
 
@@ -32,7 +31,7 @@ public interface MostStatGoal extends HasTooltipInfo {
 
         tooltip.add(" ");
         for (LockoutTeam t : lockout.getTeams()) {
-            tooltip.add(t.getColor() + t.getDisplayName() + Formatting.RESET + ": " + getStat(t));
+            tooltip.add(t.getColor() + t.getDisplayName() + ChatFormatting.RESET + ": " + getStat(t));
         }
         tooltip.add(" ");
 

@@ -4,12 +4,11 @@ import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -17,7 +16,7 @@ import java.util.Map;
 
 public abstract class GetUniqueAdvancementsGoal extends Goal implements RequiresAmount, Trackable<LockoutTeam, LinkedHashSet<Identifier>>, TextureProvider, HasTooltipInfo {
 
-    private final ItemStack DISPLAY_ITEM_STACK = Items.APPLE.getDefaultStack();
+    private final ItemStack DISPLAY_ITEM_STACK = Items.APPLE.getDefaultInstance();
 
     public GetUniqueAdvancementsGoal(String id, String data) {
         super(id, data);
@@ -35,13 +34,13 @@ public abstract class GetUniqueAdvancementsGoal extends Goal implements Requires
     }
 
     @Override
-    public List<String> getTooltip(LockoutTeam team, PlayerEntity player) {
+    public List<String> getTooltip(LockoutTeam team, Player player) {
         List<String> tooltip = new ArrayList<>();
         var advancements = getTrackerMap().getOrDefault(team, new LinkedHashSet<>());
 
         tooltip.add(" ");
         tooltip.add("Advancements: " + advancements.size() + "/" + getAmount());
-        tooltip.addAll(HasTooltipInfo.commaSeparatedList(advancements.stream().map(id -> LockoutServer.server.getAdvancementLoader().get(id).value().display().get().getTitle().getString()).toList()));
+        tooltip.addAll(HasTooltipInfo.commaSeparatedList(advancements.stream().map(id -> LockoutServer.server.getAdvancements().get(id).value().display().get().getTitle().getString()).toList()));
         tooltip.add(" ");
 
         return tooltip;
@@ -54,7 +53,7 @@ public abstract class GetUniqueAdvancementsGoal extends Goal implements Requires
         tooltip.add(" ");
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
             var advancements = getTrackerMap().getOrDefault(team, new LinkedHashSet<>());
-            tooltip.add(team.getColor() + team.getDisplayName() + Formatting.RESET + ": " + advancements.size() + "/" + getAmount());
+            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + advancements.size() + "/" + getAmount());
         }
         tooltip.add(" ");
 

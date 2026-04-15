@@ -4,11 +4,10 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.goals.misc.ConstructCopperGolemGoal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.block.CarvedPumpkinBlock;
-import net.minecraft.entity.passive.CopperGolemEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.CarvedPumpkinBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,26 +17,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(CarvedPumpkinBlock.class)
 public class CarvedPumpkinBlockMixin {
 
-    @Inject(method = "trySpawnEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/CopperGolemEntity;onSpawn(Lnet/minecraft/block/Oxidizable$OxidationLevel;)V"))
-    public void onCopperGolemSpawn(World world, BlockPos pos, CallbackInfo ci) {
-        if (world.isClient()) return;
+    @Inject(method = "trySpawnGolem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/golem/CopperGolem;spawn(Lnet/minecraft/world/level/block/WeatheringCopper$WeatherState;)V"))
+    public void onCopperGolemSpawn(Level world, BlockPos pos, CallbackInfo ci) {
+        if (world.isClientSide()) return;
 
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
 
-        lockout$onCopperGolemSpawn(lockout, (ServerWorld) world, pos);
+        lockout$onCopperGolemSpawn(lockout, (ServerLevel) world, pos);
     }
 
     @Unique
-    private static void lockout$onCopperGolemSpawn(Lockout lockout, ServerWorld world, BlockPos pos) {
+    private static void lockout$onCopperGolemSpawn(Lockout lockout, ServerLevel world, BlockPos pos) {
         // Find the nearest player to the copper golem spawn location
-        var players = world.getPlayers();
+        var players = world.players();
         if (players.isEmpty()) return;
 
         var nearestPlayer = players.stream()
                 .min((p1, p2) -> {
-                    double dist1 = p1.getBlockPos().getSquaredDistance(pos);
-                    double dist2 = p2.getBlockPos().getSquaredDistance(pos);
+                    double dist1 = p1.blockPosition().distSqr(pos);
+                    double dist2 = p2.blockPosition().distSqr(pos);
                     return Double.compare(dist1, dist2);
                 })
                 .orElse(null);

@@ -6,18 +6,17 @@ import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goals.util.GoalDataConstants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
-import net.minecraft.client.gui.widget.ScrollableWidget;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractScrollArea;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
-public class BoardBuilderSearchWidget extends ScrollableWidget {
+public class BoardBuilderSearchWidget extends AbstractScrollArea {
 
     private static final int MARGIN_X = 3;
     private static final int MARGIN_Y = 3;
@@ -43,7 +42,7 @@ public class BoardBuilderSearchWidget extends ScrollableWidget {
     private static GoalEntry hovered;
     private List<GoalEntry> visibleGoals;
 
-    public BoardBuilderSearchWidget(int x, int y, int width, int height, Text text) {
+    public BoardBuilderSearchWidget(int x, int y, int width, int height, Component text) {
         super(x, y, width, height, text);
         for (String id : GoalRegistry.INSTANCE.getRegisteredGoals()) {
             registeredGoals.putIfAbsent(id, new GoalEntry(id));
@@ -52,26 +51,26 @@ public class BoardBuilderSearchWidget extends ScrollableWidget {
         searchUpdated(BoardBuilderData.INSTANCE.getSearch());
     }
 
-    public void setScrollY(double scrollY) {
-        super.setScrollY(scrollY);
+    public void setScrollAmount(double scrollY) {
+        super.setScrollAmount(scrollY);
     }
 
-    public double getScrollY() {
-        return super.getScrollY();
+    public double scrollAmount() {
+        return super.scrollAmount();
     }
 
     @Override
-    protected int getContentsHeightWithPadding() {
+    protected int contentHeight() {
         return visibleGoals.size() * ITEM_HEIGHT;
     }
 
     @Override
-    protected double getDeltaYPerScroll() {
+    protected double scrollRate() {
         return ITEM_HEIGHT / 2.0;
     }
 
     @Override
-    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    protected void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         this.rowWidth = getWidth() - MARGIN_X * 2;
         this.left = getX() + MARGIN_X;
         this.top = getY();
@@ -83,12 +82,12 @@ public class BoardBuilderSearchWidget extends ScrollableWidget {
 
         int y = 4;
         for (GoalEntry goalEntry : visibleGoals) {
-            goalEntry.render(context, getX() + MARGIN_X, getY() + y - (int)getScrollY() - 3, Objects.equals(goalEntry, hovered), delta);
+            goalEntry.renderContent(context, getX() + MARGIN_X, getY() + y - (int)scrollAmount() - 3, Objects.equals(goalEntry, hovered), delta);
             y += 18;
         }
 
         context.disableScissor();
-        this.drawScrollbar(context, this.right, this.top);
+        this.renderScrollbar(context, this.right, this.top);
     }
 
     protected final GoalEntry getEntryAtPosition(double x, double y) {
@@ -96,7 +95,7 @@ public class BoardBuilderSearchWidget extends ScrollableWidget {
         int centerX = this.left + this.width / 2;
         int left = centerX - halfRowWidth;
         int right = centerX + halfRowWidth;
-        int scrolledY = MathHelper.floor(y - (double)this.top) + (int)getScrollY() - MARGIN_Y + 3;
+        int scrolledY = Mth.floor(y - (double)this.top) + (int)scrollAmount() - MARGIN_Y + 3;
         int idx = scrolledY / ITEM_HEIGHT;
         if (x < (this.right + MARGIN_X - 6) && x >= (double) left && x <= (double) right && idx >= 0 && scrolledY >= 0 && idx < visibleGoals.size()) {
             return registeredGoals.get(visibleGoals.get(idx).goal.getId());
@@ -105,24 +104,24 @@ public class BoardBuilderSearchWidget extends ScrollableWidget {
     }
 
     public void searchUpdated(String search) {
-        setScrollY(0);
+        setScrollAmount(0);
         visibleGoals = new ArrayList<>(registeredGoals.values()).stream().filter(goalEntry -> goalEntry.displayName.toLowerCase().contains(search.toLowerCase())).collect(Collectors.toList());
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean consumed) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean consumed) {
         if (hovered != null) {
             BoardBuilderData.INSTANCE.setGoal(hovered.goal);
-            MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0f));
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
         }
-        var bl = checkScrollbarDragged(click);
+        var bl = updateScrolling(click);
         return super.mouseClicked(click, consumed) || bl;
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
+    protected void updateWidgetNarration(NarrationElementOutput builder) {}
 
-    public static final class GoalEntry extends AlwaysSelectedEntryListWidget.Entry<GoalEntry> {
+    public static final class GoalEntry extends ObjectSelectionList.Entry<GoalEntry> {
 
         private final Goal goal;
         public final String displayName;
@@ -141,22 +140,22 @@ public class BoardBuilderSearchWidget extends ScrollableWidget {
 
 
         @Override
-        public Text getNarration() {
-            return Text.empty();
+        public Component getNarration() {
+            return Component.empty();
         }
 
         @Override
-        public void render(DrawContext context, int x, int y, boolean hovered, float tickDelta) {
-            TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+        public void renderContent(GuiGraphics context, int x, int y, boolean hovered, float tickDelta) {
+            Font textRenderer = Minecraft.getInstance().font;
 
             goal.render(context, textRenderer, x, y);
-            context.drawTextWithShadow(textRenderer, displayName, x + 18, y + 5, Color.WHITE.getRGB());
+            context.drawString(textRenderer, displayName, x + 18, y + 5, Color.WHITE.getRGB());
             if (hovered) {
                 // Draw border manually since drawBorder method doesn't exist
-                context.fill(x - 1, y - 1, x + 18 + textRenderer.getWidth(displayName) + 1, y, Color.LIGHT_GRAY.getRGB());
-                context.fill(x - 1, y + 15, x + 18 + textRenderer.getWidth(displayName) + 1, y + 16, Color.LIGHT_GRAY.getRGB());
+                context.fill(x - 1, y - 1, x + 18 + textRenderer.width(displayName) + 1, y, Color.LIGHT_GRAY.getRGB());
+                context.fill(x - 1, y + 15, x + 18 + textRenderer.width(displayName) + 1, y + 16, Color.LIGHT_GRAY.getRGB());
                 context.fill(x - 1, y - 1, x, y + 16, Color.LIGHT_GRAY.getRGB());
-                context.fill(x + 18 + textRenderer.getWidth(displayName), y - 1, x + 18 + textRenderer.getWidth(displayName) + 1, y + 16, Color.LIGHT_GRAY.getRGB());
+                context.fill(x + 18 + textRenderer.width(displayName), y - 1, x + 18 + textRenderer.width(displayName) + 1, y + 16, Color.LIGHT_GRAY.getRGB());
             }
         }
     }

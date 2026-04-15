@@ -4,10 +4,10 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.goals.misc.AngerZombifiedPiglinGoal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.entity.LazyEntityReference;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.ZombifiedPiglinEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityReference;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.zombie.ZombifiedPiglin;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,23 +16,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.UUID;
 
-@Mixin(ZombifiedPiglinEntity.class)
+@Mixin(ZombifiedPiglin.class)
 public class ZombifiedPiglinEntityMixin {
 
-    @Inject(method = "setAngryAt", at = @At("HEAD"))
-    public void setAngryAt(@Nullable LazyEntityReference<LivingEntity> angryAt, CallbackInfo ci) {
-        ZombifiedPiglinEntity pigman = (ZombifiedPiglinEntity) (Object) this;
-        if (pigman.getEntityWorld().isClient()) return;
+    @Inject(method = "setPersistentAngerTarget", at = @At("HEAD"))
+    public void setAngryAt(@Nullable EntityReference<LivingEntity> angryAt, CallbackInfo ci) {
+        ZombifiedPiglin pigman = (ZombifiedPiglin) (Object) this;
+        if (pigman.level().isClientSide()) return;
 
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) {
             return;
         }
 
-        ServerPlayerEntity player;
+        ServerPlayer player;
         try {
-            LivingEntity target = angryAt.getEntityByClass(pigman.getEntityWorld(), LivingEntity.class);
-            if (target instanceof ServerPlayerEntity serverPlayer) {
+            LivingEntity target = angryAt.getEntity(pigman.level(), LivingEntity.class);
+            if (target instanceof ServerPlayer serverPlayer) {
                  player = serverPlayer;
             } else {
                  return;

@@ -1,17 +1,16 @@
 package me.marin.lockout.lockout.goals.obtain;
 
 import me.marin.lockout.lockout.interfaces.ObtainSomeOfTheItemsGoal;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.List;
 
 public class Obtain4UniqueHorseArmorGoal extends ObtainSomeOfTheItemsGoal {
 
-    private static final ItemStack ITEM_STACK = Items.DIAMOND_HORSE_ARMOR.getDefaultStack();
+    private static final ItemStack ITEM_STACK = Items.DIAMOND_HORSE_ARMOR.getDefaultInstance();
     static {
         ITEM_STACK.setCount(4);
     }
@@ -45,9 +44,9 @@ public class Obtain4UniqueHorseArmorGoal extends ObtainSomeOfTheItemsGoal {
     }
 
     @Override
-    public boolean renderTexture(DrawContext context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
         super.renderTexture(context, x, y, tick);
-        context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, ITEM_STACK, x, y);
+        context.renderItemDecorations(Minecraft.getInstance().font, ITEM_STACK, x, y);
         return true;
     }
 

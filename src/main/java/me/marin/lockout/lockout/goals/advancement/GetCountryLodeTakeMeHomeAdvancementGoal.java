@@ -1,11 +1,10 @@
 package me.marin.lockout.lockout.goals.advancement;
 
 import me.marin.lockout.lockout.interfaces.AdvancementGoal;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.List;
 
 public class GetCountryLodeTakeMeHomeAdvancementGoal extends AdvancementGoal {
@@ -16,7 +15,7 @@ public class GetCountryLodeTakeMeHomeAdvancementGoal extends AdvancementGoal {
         super(id, data);
     }
 
-    private static final List<Identifier> ADVANCEMENTS = List.of(Identifier.of("minecraft", "adventure/use_lodestone"));
+    private static final List<Identifier> ADVANCEMENTS = List.of(Identifier.fromNamespaceAndPath("minecraft", "adventure/use_lodestone"));
     @Override
     public List<Identifier> getAdvancements() {
         return ADVANCEMENTS;
@@ -29,7 +28,7 @@ public class GetCountryLodeTakeMeHomeAdvancementGoal extends AdvancementGoal {
 
     @Override
     public ItemStack getTextureItemStack() {
-        return ITEM.getDefaultStack();
+        return ITEM.getDefaultInstance();
     }
 
 }

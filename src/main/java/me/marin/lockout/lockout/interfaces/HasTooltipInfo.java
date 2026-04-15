@@ -1,15 +1,14 @@
 package me.marin.lockout.lockout.interfaces;
 
 import me.marin.lockout.LockoutTeam;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.List;
 
 public interface HasTooltipInfo {
 
-    List<String> getTooltip(LockoutTeam team, PlayerEntity player);
+    List<String> getTooltip(LockoutTeam team, Player player);
     List<String> getSpectatorTooltip();
 
     int MAX_LINE_SIZE = 45;
@@ -37,7 +36,7 @@ public interface HasTooltipInfo {
                 boolean canFit = sb.length() + word.length() + (isLastWord && !isLast ? 1 : 0) <= MAX_LINE_SIZE;
 
                 if (!canFit) {
-                    lines.add(Formatting.GRAY + " " + Formatting.ITALIC + sb.toString().trim());
+                    lines.add(ChatFormatting.GRAY + " " + ChatFormatting.ITALIC + sb.toString().trim());
                     sb.setLength(0);
                 }
 
@@ -50,7 +49,7 @@ public interface HasTooltipInfo {
         }
 
         if (!sb.isEmpty()) {
-            lines.add(Formatting.GRAY + " " + Formatting.ITALIC + sb.toString().trim());
+            lines.add(ChatFormatting.GRAY + " " + ChatFormatting.ITALIC + sb.toString().trim());
         }
         return lines;
     }

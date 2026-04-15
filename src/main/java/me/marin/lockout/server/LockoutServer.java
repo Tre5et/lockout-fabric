@@ -22,63 +22,62 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.command.argument.GameProfileArgumentType;
-import net.minecraft.command.permission.LeveledPermissionPredicate;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.scoreboard.ServerScoreboard;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerConfigEntry;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.command.AdvancementCommand;
-import net.minecraft.server.command.CommandOutput;
-import net.minecraft.server.command.LocateCommand;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.stat.StatType;
-import net.minecraft.stat.Stats;
-import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameMode;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.server.ServerScoreboard;
+import net.minecraft.server.commands.AdvancementCommands;
+import net.minecraft.server.commands.LocateCommand;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.stats.StatType;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.scores.PlayerTeam;
 import oshi.util.tuples.Pair;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 
 import java.util.*;
-import java.util.UUID;
 
 import static me.marin.lockout.Constants.PLACEHOLDER_PERM_STRING;
 
 public class LockoutServer {
 
-    public static int forfeitCommand(CommandContext<ServerCommandSource> context) {
+    public static int forfeitCommand(CommandContext<CommandSourceStack> context) {
         if (!Lockout.isLockoutRunning(lockout)) return 0;
         
-        ServerPlayerEntity player = context.getSource().getPlayer();
+        ServerPlayer player = context.getSource().getPlayer();
         if (player == null || !lockout.isLockoutPlayer(player)) {
-            context.getSource().sendError(Text.literal("You are not participating in the Lockout match."));
+            context.getSource().sendFailure(Component.literal("You are not participating in the Lockout match."));
             return 0;
         }
 
-        LockoutTeam team = lockout.getPlayerTeam(player.getUuid());
+        LockoutTeam team = lockout.getPlayerTeam(player.getUUID());
         LockoutTeamServer teamServer = (LockoutTeamServer) team;
 
         // Broadcast first
-        server.getPlayerManager().broadcast(Text.literal(team.getDisplayName() + " has forfeited the match."), false);
+        server.getPlayerList().broadcastSystemMessage(Component.literal(team.getDisplayName() + " has forfeited the match."), false);
 
         // Process all members of the team
         for (UUID memberId : teamServer.getPlayerIds()) {
-            ServerPlayerEntity teamMember = server.getPlayerManager().getPlayer(memberId);
+            ServerPlayer teamMember = server.getPlayerList().getPlayer(memberId);
             if (teamMember != null) {
-                teamMember.changeGameMode(GameMode.SPECTATOR);
+                teamMember.setGameMode(GameType.SPECTATOR);
             }
         }
 
@@ -88,8 +87,8 @@ public class LockoutServer {
     }
 
     public static final int LOCATE_SEARCH = 750;
-    public static final Map<RegistryKey<Biome>, LocateData> BIOME_LOCATE_DATA = new HashMap<>();
-    public static final Map<RegistryKey<Structure>, LocateData> STRUCTURE_LOCATE_DATA = new HashMap<>();
+    public static final Map<ResourceKey<Biome>, LocateData> BIOME_LOCATE_DATA = new HashMap<>();
+    public static final Map<ResourceKey<Structure>, LocateData> STRUCTURE_LOCATE_DATA = new HashMap<>();
     public static final List<DyeColor> AVAILABLE_DYE_COLORS = new ArrayList<>();
 
     private static int lockoutStartTime;
@@ -150,9 +149,9 @@ public class LockoutServer {
                 
                 if (currentTime - joinTime > timeoutMs) {
                     // Timeout expired, kick player
-                    ServerPlayerEntity player = server.getPlayerManager().getPlayer(playerUuid);
+                    ServerPlayer player = server.getPlayerList().getPlayer(playerUuid);
                     if (player != null) {
-                        player.networkHandler.disconnect(Text.of("Missing Lockout mod.\nServer is using Lockout v" + LockoutInitializer.MOD_VERSION.getFriendlyString() + "."));
+                        player.connection.disconnect(Component.nullToEmpty("Missing Lockout mod.\nServer is using Lockout v" + LockoutInitializer.MOD_VERSION.getFriendlyString() + "."));
                     }
                     return true; // Remove from map
                 }
@@ -171,38 +170,38 @@ public class LockoutServer {
         });
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, minecraftServer) -> {
-            waitingForVersionPacketPlayersMap.remove(handler.getPlayer().getUuid());
+            waitingForVersionPacketPlayersMap.remove(handler.getPlayer().getUUID());
         });
 
         ServerPlayNetworking.registerGlobalReceiver(LockoutVersionPayload.ID, (payload, context) -> {
             // Client has Lockout mod, compare versions, then kick or initialize
-            ServerPlayerEntity player = context.player();
-            waitingForVersionPacketPlayersMap.remove(player.getUuid());
+            ServerPlayer player = context.player();
+            waitingForVersionPacketPlayersMap.remove(player.getUUID());
 
             String version = payload.version();
             if (!version.equals(LockoutInitializer.MOD_VERSION.getFriendlyString())) {
-                player.networkHandler.disconnect(Text.of("Wrong Lockout version: v" + version + ".\nServer is using Lockout v" + LockoutInitializer.MOD_VERSION.getFriendlyString() + "."));
+                player.connection.disconnect(Component.nullToEmpty("Wrong Lockout version: v" + version + ".\nServer is using Lockout v" + LockoutInitializer.MOD_VERSION.getFriendlyString() + "."));
                 return;
             }
 
             if (!Lockout.isLockoutRunning(lockout)) return;
 
-            if (lockout.isLockoutPlayer(player.getUuid())) {
-                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUuid());
+            if (lockout.isLockoutPlayer(player.getUUID())) {
+                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
                 for (Goal goal : lockout.getBoard().getGoals()) {
                     if (goal instanceof HasTooltipInfo hasTooltipInfo) {
                         ServerPlayNetworking.send(player, new UpdateTooltipPayload(goal.getId(), String.join("\n", hasTooltipInfo.getTooltip(team, player))));
                     }
                 }
-                player.changeGameMode(GameMode.SURVIVAL);
+                player.setGameMode(GameType.SURVIVAL);
             } else {
                 for (Goal goal : lockout.getBoard().getGoals()) {
                     if (goal instanceof HasTooltipInfo hasTooltipInfo) {
                         ServerPlayNetworking.send(player, new UpdateTooltipPayload(goal.getId(), String.join("\n", hasTooltipInfo.getSpectatorTooltip())));
                     }
                 }
-                player.changeGameMode(GameMode.SPECTATOR);
-                player.sendMessage(Text.literal("You are spectating this match.").formatted(Formatting.GRAY, Formatting.ITALIC));
+                player.setGameMode(GameType.SPECTATOR);
+                player.sendSystemMessage(Component.literal("You are spectating this match.").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             }
 
             ServerPlayNetworking.send(player, lockout.getTeamsGoalsPacket());
@@ -213,11 +212,11 @@ public class LockoutServer {
         });
 
         ServerPlayNetworking.registerGlobalReceiver(CustomBoardPayload.ID, (payload, context) -> {
-            ServerPlayerEntity player = context.player();
+            ServerPlayer player = context.player();
 
             if (!server.isSingleplayer()) {
-                if (!Permissions.check(player, PLACEHOLDER_PERM_STRING, LeveledPermissionPredicate.GAMEMASTERS.getLevel())) {
-                    player.sendMessage(Text.literal("You do not have the permission for this command!").formatted(Formatting.RED));
+                if (!Permissions.check(player, PLACEHOLDER_PERM_STRING, LevelBasedPermissionSet.GAMEMASTER.level())) {
+                    player.sendSystemMessage(Component.literal("You do not have the permission for this command!").withStyle(ChatFormatting.RED));
                     return;
                 }
             }
@@ -225,7 +224,7 @@ public class LockoutServer {
             boolean clearBoard = payload.boardOrClear().isEmpty();
             if (clearBoard) {
                 CUSTOM_BOARD = null;
-                player.sendMessage(Text.literal("Removed custom board."));
+                player.sendSystemMessage(Component.literal("Removed custom board."));
             } else {
                 // validate board
                 List<String> invalidGoals = new ArrayList<>();
@@ -235,23 +234,23 @@ public class LockoutServer {
                     }
                 }
                 if (!invalidGoals.isEmpty()) {
-                    player.sendMessage(Text.literal("Invalid board. Could not create goals:\n" + String.join("\n", invalidGoals)));
+                    player.sendSystemMessage(Component.literal("Invalid board. Could not create goals:\n" + String.join("\n", invalidGoals)));
                     return;
                 }
                 CUSTOM_BOARD = new LockoutBoard(payload.boardOrClear().get());
-                player.sendMessage(Text.literal("Set custom board."));
+                player.sendSystemMessage(Component.literal("Set custom board."));
             }
         });
     }
 
-    public static LocateData locateBiome(MinecraftServer server, RegistryKey<Biome> biome) {
+    public static LocateData locateBiome(MinecraftServer server, ResourceKey<Biome> biome) {
         if (BIOME_LOCATE_DATA.containsKey(biome)) return BIOME_LOCATE_DATA.get(biome);
 
-        var spawnPoint = server.getOverworld().getSpawnPoint();
-        var currentPos = spawnPoint.getPos();
+        var spawnPoint = server.overworld().getRespawnData();
+        var currentPos = spawnPoint.pos();
 
-        var pair = server.getOverworld().locateBiome(
-                biomeRegistryEntry -> biomeRegistryEntry.matchesKey(biome),
+        var pair = server.overworld().findClosestBiome3d(
+                biomeRegistryEntry -> biomeRegistryEntry.is(biome),
                 currentPos,
                 LOCATE_SEARCH,
                 32,
@@ -259,7 +258,7 @@ public class LockoutServer {
 
         LocateData data= new LocateData(false,0);
         if (pair != null) {
-            int distance = MathHelper.floor(LocateCommand.getDistance(currentPos.getX(), currentPos.getZ(), pair.getFirst().getX(), pair.getFirst().getZ()));
+            int distance = Mth.floor(LocateCommand.dist(currentPos.getX(), currentPos.getZ(), pair.getFirst().getX(), pair.getFirst().getZ()));
             if (distance < LOCATE_SEARCH) {
                 data = new LocateData(true, distance);
             }
@@ -269,17 +268,17 @@ public class LockoutServer {
         return data;
     }
 
-    public static LocateData locateStructure(MinecraftServer server, RegistryKey<Structure> structure) {
+    public static LocateData locateStructure(MinecraftServer server, ResourceKey<Structure> structure) {
         if (STRUCTURE_LOCATE_DATA.containsKey(structure)) return STRUCTURE_LOCATE_DATA.get(structure);
 
-        var spawnPoint = server.getOverworld().getSpawnPoint();
-        var currentPos = spawnPoint.getPos();
+        var spawnPoint = server.overworld().getRespawnData();
+        var currentPos = spawnPoint.pos();
 
-        Registry<Structure> registry = server.getOverworld().getRegistryManager().getOrThrow(RegistryKeys.STRUCTURE);
-        RegistryEntryList<Structure> structureList = RegistryEntryList.of(registry.getOrThrow(structure));
+        Registry<Structure> registry = server.overworld().registryAccess().lookupOrThrow(Registries.STRUCTURE);
+        HolderSet<Structure> structureList = HolderSet.direct(registry.getOrThrow(structure));
 
-        var pair = server.getOverworld().getChunkManager().getChunkGenerator().locateStructure(
-                server.getOverworld(),
+        var pair = server.overworld().getChunkSource().getGenerator().findNearestMapStructure(
+                server.overworld(),
                 structureList,
                 currentPos,
                 LOCATE_SEARCH,
@@ -287,7 +286,7 @@ public class LockoutServer {
 
         LocateData data = new LocateData(false, 0);
         if (pair != null) {
-            int distance = MathHelper.floor(LocateCommand.getDistance(currentPos.getX(), currentPos.getZ(), pair.getFirst().getX(), pair.getFirst().getZ()));
+            int distance = Mth.floor(LocateCommand.dist(currentPos.getX(), currentPos.getZ(), pair.getFirst().getX(), pair.getFirst().getZ()));
             if (distance < LOCATE_SEARCH) {
                 data = new LocateData(true, distance);
             }
@@ -297,7 +296,7 @@ public class LockoutServer {
         return data;
     }
 
-    public static int lockoutCommandLogic(CommandContext<ServerCommandSource> context) {
+    public static int lockoutCommandLogic(CommandContext<CommandSourceStack> context) {
         List<LockoutTeamServer> teams = new ArrayList<>();
 
         int ret = parseArgumentsIntoTeams(teams, context, false);
@@ -308,7 +307,7 @@ public class LockoutServer {
         return 1;
     }
 
-    public static int blackoutCommandLogic(CommandContext<ServerCommandSource> context) {
+    public static int blackoutCommandLogic(CommandContext<CommandSourceStack> context) {
         List<LockoutTeamServer> teams = new ArrayList<>();
 
         int ret = parseArgumentsIntoTeams(teams, context, true);
@@ -323,46 +322,46 @@ public class LockoutServer {
         // Clear old runnables
         gameStartRunnables.clear();
 
-        PlayerManager playerManager = server.getPlayerManager();
-        List<ServerPlayerEntity> allServerPlayers = playerManager.getPlayerList();
+        PlayerList playerManager = server.getPlayerList();
+        List<ServerPlayer> allServerPlayers = playerManager.getPlayers();
         List<UUID> allLockoutPlayers = teams.stream()
                 .flatMap(team -> team.getPlayerIds().stream())
                 .toList();
         List<UUID> allSpectatorPlayers = allServerPlayers.stream()
-                .map(ServerPlayerEntity::getUuid)
+                .map(ServerPlayer::getUUID)
                 .filter(uuid -> !allLockoutPlayers.contains(uuid))
                 .toList();
 
-        for (ServerPlayerEntity serverPlayer : allServerPlayers) {
-            serverPlayer.getInventory().clear();
+        for (ServerPlayer serverPlayer : allServerPlayers) {
+            serverPlayer.getInventory().clearContent();
             serverPlayer.setHealth(serverPlayer.getMaxHealth());
-            serverPlayer.clearStatusEffects();
-            serverPlayer.getHungerManager().setSaturationLevel(5);
-            serverPlayer.getHungerManager().setFoodLevel(20);
-            serverPlayer.getHungerManager().exhaustion = 0.0f;
-            serverPlayer.setExperienceLevel(0);
+            serverPlayer.removeAllEffects();
+            serverPlayer.getFoodData().setSaturation(5);
+            serverPlayer.getFoodData().setFoodLevel(20);
+            serverPlayer.getFoodData().exhaustionLevel = 0.0f;
+            serverPlayer.setExperienceLevels(0);
             serverPlayer.setExperiencePoints(0);
-            serverPlayer.setOnFire(false);
+            serverPlayer.setSharedFlagOnFire(false);
 
             // Clear all stats
-            for (@SuppressWarnings("unchecked") StatType<Object> statType : new StatType[]{Stats.CRAFTED, Stats.MINED, Stats.USED, Stats.BROKEN, Stats.PICKED_UP, Stats.DROPPED, Stats.KILLED, Stats.KILLED_BY, Stats.CUSTOM}) {
-                for (Identifier id : statType.getRegistry().getIds()) {
-                    serverPlayer.resetStat(statType.getOrCreateStat(statType.getRegistry().get(id)));
+            for (@SuppressWarnings("unchecked") StatType<Object> statType : new StatType[]{Stats.ITEM_CRAFTED, Stats.BLOCK_MINED, Stats.ITEM_USED, Stats.ITEM_BROKEN, Stats.ITEM_PICKED_UP, Stats.ITEM_DROPPED, Stats.ENTITY_KILLED, Stats.ENTITY_KILLED_BY, Stats.CUSTOM}) {
+                for (Identifier id : statType.getRegistry().keySet()) {
+                    serverPlayer.resetStat(statType.get(statType.getRegistry().getValue(id)));
                 }
             }
-            serverPlayer.getStatHandler().sendStats(serverPlayer);
+            serverPlayer.getStats().sendStats(serverPlayer);
             // Clear all advancements
-            AdvancementCommand.Operation.REVOKE.processAll(serverPlayer, server.getAdvancementLoader().getAdvancements(), false);
+            AdvancementCommands.Action.REVOKE.perform(serverPlayer, server.getAdvancements().getAllAdvancements(), false);
 
-            if (allLockoutPlayers.contains(serverPlayer.getUuid())) {
-                serverPlayer.changeGameMode(GameMode.ADVENTURE);
+            if (allLockoutPlayers.contains(serverPlayer.getUUID())) {
+                serverPlayer.setGameMode(GameType.ADVENTURE);
             } else {
-                serverPlayer.changeGameMode(GameMode.SPECTATOR);
-                serverPlayer.sendMessage(Text.literal("You are spectating this match.").formatted(Formatting.GRAY, Formatting.ITALIC));
+                serverPlayer.setGameMode(GameType.SPECTATOR);
+                serverPlayer.sendSystemMessage(Component.literal("You are spectating this match.").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             }
         }
 
-        ServerWorld world = server.getWorld(ServerWorld.OVERWORLD);
+        ServerLevel world = server.getLevel(ServerLevel.OVERWORLD);
 
         // Generate & set board
         LockoutBoard lockoutBoard;
@@ -374,9 +373,9 @@ public class LockoutServer {
             if (lockoutBoard == null) {
                 String errorMessage = "Cannot generate board: Not enough goals enabled in goal-pool.yml. Please enable more goals or reduce board size.";
                 for (UUID playerUuid : allLockoutPlayers) {
-                    ServerPlayerEntity player = playerManager.getPlayer(playerUuid);
+                    ServerPlayer player = playerManager.getPlayer(playerUuid);
                     if (player != null) {
-                        player.sendMessage(Text.literal(errorMessage).formatted(Formatting.RED), false);
+                        player.displayClientMessage(Component.literal(errorMessage).withStyle(ChatFormatting.RED), false);
                     }
                 }
                 return; // Abort lockout start
@@ -409,46 +408,46 @@ public class LockoutServer {
             }
         }
 
-        for (ServerPlayerEntity player : allServerPlayers) {
+        for (ServerPlayer player : allServerPlayers) {
             ServerPlayNetworking.send(player, lockout.getTeamsGoalsPacket());
             ServerPlayNetworking.send(player, lockout.getUpdateTimerPacket());
 
-            if (!lockout.isSoloBlackout() && lockout.isLockoutPlayer(player.getUuid()) && LockoutConfig.getInstance().giveCompasses) {
-                player.giveItemStack(compassHandler.newCompass());
+            if (!lockout.isSoloBlackout() && lockout.isLockoutPlayer(player.getUUID()) && LockoutConfig.getInstance().giveCompasses) {
+                player.addItem(compassHandler.newCompass());
             }
         }
 
-        world.setTimeOfDay(0);
+        world.setDayTime(0);
 
         // Unfreeze ticks when lockout/blackout game starts
         var unfreezeCommand = "tick unfreeze";
-        var unfreezeParseResults = server.getCommandManager().getDispatcher().parse(unfreezeCommand, server.getCommandSource());
-        server.getCommandManager().execute(unfreezeParseResults, unfreezeCommand);
+        var unfreezeParseResults = server.getCommands().getDispatcher().parse(unfreezeCommand, server.createCommandSourceStack());
+        server.getCommands().performCommand(unfreezeParseResults, unfreezeCommand);
 
         for (int i = 3; i >= 0; i--) {
             if (i > 0) {
                 final int secs = i;
                 ((LockoutRunnable) () -> {
-                    playerManager.broadcast(Text.literal("Starting in " + secs + "..."), false);
+                    playerManager.broadcastSystemMessage(Component.literal("Starting in " + secs + "..."), false);
                 }).runTaskAfter(20L * (lockoutStartTime - i));
             } else {
                 ((LockoutRunnable) () -> {
                     lockout.setStarted(true);
 
-                    for (ServerPlayerEntity player : allServerPlayers) {
+                    for (ServerPlayer player : allServerPlayers) {
                         if (player == null) continue;
                         ServerPlayNetworking.send(player, StartLockoutPayload.INSTANCE);
-                        if (allLockoutPlayers.contains(player.getUuid())) {
-                            player.changeGameMode(GameMode.SURVIVAL);
+                        if (allLockoutPlayers.contains(player.getUUID())) {
+                            player.setGameMode(GameType.SURVIVAL);
                             
                             // Update waypoint color to match team color with variation for team members
-                            LockoutTeam playerTeam = lockout.getPlayerTeam(player.getUuid());
+                            LockoutTeam playerTeam = lockout.getPlayerTeam(player.getUUID());
                             if (playerTeam != null) {
                                 updatePlayerWaypointColor(player, playerTeam.getColor());
                             }
                         }
                     }
-                    server.getPlayerManager().broadcast(Text.literal(lockout.getModeName() + " has begun."), false);
+                    server.getPlayerList().broadcastSystemMessage(Component.literal(lockout.getModeName() + " has begun."), false);
                 }).runTaskAfter(20L * lockoutStartTime);
             }
         }
@@ -459,9 +458,9 @@ public class LockoutServer {
      * @param player The player whose waypoint color should be updated
      * @param teamColor The team's color formatting
      */
-    public static void updatePlayerWaypointColor(ServerPlayerEntity player, Formatting teamColor) {
+    public static void updatePlayerWaypointColor(ServerPlayer player, ChatFormatting teamColor) {
         try {
-            Integer colorValue = teamColor.getColorValue();
+            Integer colorValue = teamColor.getColor();
             if (colorValue == null) {
                 return; // Skip if color has no RGB value
             }
@@ -471,21 +470,21 @@ public class LockoutServer {
             String command = String.format("waypoint modify %s color hex %s", player.getName().getString(), hexColor);
             
             // Create command source with appropriate permissions and silent execution
-            ServerCommandSource commandSource = new ServerCommandSource(
-                CommandOutput.DUMMY, // Use dummy output to suppress chat messages
-                player.getEntityPos(),
-                player.getRotationClient(),
-                player.getEntityWorld(),
-                LeveledPermissionPredicate.OWNERS, // Permission level 4 (op level)
+            CommandSourceStack commandSource = new CommandSourceStack(
+                CommandSource.NULL, // Use dummy output to suppress chat messages
+                player.position(),
+                player.getRotationVector(),
+                player.level(),
+                LevelBasedPermissionSet.OWNER, // Permission level 4 (op level)
                 player.getName().getString(),
-                Text.empty(),
+                Component.empty(),
                 server,
                 player
             );
             
             // Parse and execute the command
-            var parseResults = server.getCommandManager().getDispatcher().parse(command, commandSource);
-            server.getCommandManager().execute(parseResults, command);
+            var parseResults = server.getCommands().getDispatcher().parse(command, commandSource);
+            server.getCommands().performCommand(parseResults, command);
         } catch (Exception e) {
             // Silently ignore errors to avoid disrupting game start
             // Waypoint modification is not critical for game functionality
@@ -540,47 +539,47 @@ public class LockoutServer {
         return (r << 16) | (g << 8) | b;
     }
 
-    private static int parseArgumentsIntoTeams(List<LockoutTeamServer> teams, CommandContext<ServerCommandSource> context, boolean isBlackout) {
+    private static int parseArgumentsIntoTeams(List<LockoutTeamServer> teams, CommandContext<CommandSourceStack> context, boolean isBlackout) {
         String argument = null;
 
-        PlayerManager playerManager = server.getPlayerManager();
+        PlayerList playerManager = server.getPlayerList();
 
         try {
             argument = context.getArgument("player names", String.class);
             String[] players = argument.split(" +");
             if (isBlackout) {
                 if (players.length == 0) {
-                    context.getSource().sendError(Text.literal("Not enough players listed."));
+                    context.getSource().sendFailure(Component.literal("Not enough players listed."));
                     return 0;
                 }
 
                 List<String> playerNames = new ArrayList<>();
                 for (String player : players) {
-                    if (playerManager.getPlayer(player) == null) {
-                        context.getSource().sendError(Text.literal("Player " + player + " is invalid."));
+                    if (playerManager.getPlayerByName(player) == null) {
+                        context.getSource().sendFailure(Component.literal("Player " + player + " is invalid."));
                         return 0;
                     }
-                    playerNames.add(playerManager.getPlayer(player).getName().getString());
+                    playerNames.add(playerManager.getPlayerByName(player).getName().getString());
                 }
-                teams.add(new LockoutTeamServer(playerNames, Formatting.byColorIndex(Lockout.COLOR_ORDERS[0]), server));
+                teams.add(new LockoutTeamServer(playerNames, ChatFormatting.getById(Lockout.COLOR_ORDERS[0]), server));
 
             } else {
                 if (players.length < 2) {
-                    context.getSource().sendError(Text.literal("Not enough players listed. Make sure you separate player names with spaces."));
+                    context.getSource().sendFailure(Component.literal("Not enough players listed. Make sure you separate player names with spaces."));
                     return 0;
                 }
                 if (players.length > 16) {
-                    context.getSource().sendError(Text.literal("Too many players listed."));
+                    context.getSource().sendFailure(Component.literal("Too many players listed."));
                     return 0;
                 }
 
                 for (int i = 0; i < players.length; i++) {
                     String player = players[i];
-                    if (playerManager.getPlayer(player) == null) {
-                        context.getSource().sendError(Text.literal("Player " + player + " is invalid."));
+                    if (playerManager.getPlayerByName(player) == null) {
+                        context.getSource().sendFailure(Component.literal("Player " + player + " is invalid."));
                         return 0;
                     }
-                    teams.add(new LockoutTeamServer(List.of(playerManager.getPlayer(player).getName().getString()), Formatting.byColorIndex(Lockout.COLOR_ORDERS[i]), server));
+                    teams.add(new LockoutTeamServer(List.of(playerManager.getPlayerByName(player).getName().getString()), ChatFormatting.getById(Lockout.COLOR_ORDERS[i]), server));
                 }
             }
 
@@ -594,63 +593,63 @@ public class LockoutServer {
                 String[] teamNames = argument.split(" +");
                 if (isBlackout) {
                     if (teamNames.length == 0) {
-                        context.getSource().sendError(Text.literal("Not enough teams listed."));
+                        context.getSource().sendFailure(Component.literal("Not enough teams listed."));
                         return 0;
                     }
                     if (teamNames.length > 1) {
-                        context.getSource().sendError(Text.literal("Only one team can play Blackout."));
+                        context.getSource().sendFailure(Component.literal("Only one team can play Blackout."));
                         return 0;
                     }
                 } else {
                     if (teamNames.length < 2) {
-                        context.getSource().sendError(Text.literal("Not enough teams listed. Make sure you separate team names with spaces."));
+                        context.getSource().sendFailure(Component.literal("Not enough teams listed. Make sure you separate team names with spaces."));
                         return 0;
                     }
                     if (teamNames.length > 16) {
-                        context.getSource().sendError(Text.literal("Too many teams listed."));
+                        context.getSource().sendFailure(Component.literal("Too many teams listed."));
                         return 0;
                     }
                 }
 
-                List<Team> scoreboardTeams = new ArrayList<>();
+                List<PlayerTeam> scoreboardTeams = new ArrayList<>();
                 for (String teamName : teamNames) {
-                    Team team = scoreboard.getTeam(teamName);
+                    PlayerTeam team = scoreboard.getPlayerTeam(teamName);
                     if (team == null) {
-                        context.getSource().sendError(Text.literal("Team " + teamName + " is invalid."));
+                        context.getSource().sendFailure(Component.literal("Team " + teamName + " is invalid."));
                         return 0;
                     }
-                    for (String player : team.getPlayerList()) {
-                        if (playerManager.getPlayer(player) == null) {
-                            context.getSource().sendError(Text.literal("Player " + player + " on team " + teamName + " is invalid. Remove them from the team and try again."));
+                    for (String player : team.getPlayers()) {
+                        if (playerManager.getPlayerByName(player) == null) {
+                            context.getSource().sendFailure(Component.literal("Player " + player + " on team " + teamName + " is invalid. Remove them from the team and try again."));
                             return 0;
                         }
                     }
                     scoreboardTeams.add(team);
                 }
-                for (Team team : scoreboardTeams) {
-                    if (team.getPlayerList().isEmpty()) {
-                        context.getSource().sendError(Text.literal("Team " + team.getName() + " doesn't have any players."));
+                for (PlayerTeam team : scoreboardTeams) {
+                    if (team.getPlayers().isEmpty()) {
+                        context.getSource().sendFailure(Component.literal("Team " + team.getName() + " doesn't have any players."));
                         return 0;
                     }
-                    Formatting teamColor = team.getColor();
-                    if (teamColor.getColorValue() == null || teamHasColor(teams, teamColor)) {
+                    ChatFormatting teamColor = team.getColor();
+                    if (teamColor.getColor() == null || teamHasColor(teams, teamColor)) {
                         // Select an available color.
                         boolean found = false;
                         for (int colorOrder : Lockout.COLOR_ORDERS) {
-                            if (!teamHasColor(teams, Formatting.byColorIndex(colorOrder))) {
+                            if (!teamHasColor(teams, ChatFormatting.getById(colorOrder))) {
                                 found = true;
-                                team.setColor(Formatting.byColorIndex(colorOrder));
+                                team.setColor(ChatFormatting.getById(colorOrder));
                                 break;
                             }
                         }
                         if (!found) {
-                            context.getSource().sendError(Text.literal("Could not find assignable color for team " + team.getName() + ". Try recreating teams."));
+                            context.getSource().sendFailure(Component.literal("Could not find assignable color for team " + team.getName() + ". Try recreating teams."));
                             return 0;
                         }
                     }
                     List<String> actualPlayerNames = new ArrayList<>();
-                    for (String playerName : team.getPlayerList()) {
-                        actualPlayerNames.add(playerManager.getPlayer(playerName).getName().getString());
+                    for (String playerName : team.getPlayers()) {
+                        actualPlayerNames.add(playerManager.getPlayerByName(playerName).getName().getString());
                     }
                     teams.add(new LockoutTeamServer(new ArrayList<>(actualPlayerNames), team.getColor(), server));
                 }
@@ -658,13 +657,13 @@ public class LockoutServer {
         }
 
         if (argument == null) {
-            context.getSource().sendError(Text.literal("Illegal argument."));
+            context.getSource().sendFailure(Component.literal("Illegal argument."));
             return 0;
         }
         return 1;
     }
 
-    private static boolean teamHasColor(List<LockoutTeamServer> teams, Formatting color) {
+    private static boolean teamHasColor(List<LockoutTeamServer> teams, ChatFormatting color) {
         for (LockoutTeam lockoutTeam : teams) {
             if (lockoutTeam.getColor() == color) {
                 return true;
@@ -673,57 +672,57 @@ public class LockoutServer {
         return false;
     }
 
-    public static int setChat(CommandContext<ServerCommandSource> context, ChatManager.Type type) {
-        ServerPlayerEntity player = context.getSource().getPlayer();
+    public static int setChat(CommandContext<CommandSourceStack> context, ChatManager.Type type) {
+        ServerPlayer player = context.getSource().getPlayer();
         if (player == null) {
-            context.getSource().sendError(Text.literal("This is a player-only command."));
+            context.getSource().sendFailure(Component.literal("This is a player-only command."));
             return 0;
         }
 
         ChatManager.Type curr = ChatManager.getChat(player);
         if (curr == type) {
-            player.sendMessage(Text.of("You are already chatting in " + type.name() + "."));
+            player.sendSystemMessage(Component.nullToEmpty("You are already chatting in " + type.name() + "."));
         } else {
-            player.sendMessage(Text.of("You are now chatting in " + type.name() + "."));
+            player.sendSystemMessage(Component.nullToEmpty("You are now chatting in " + type.name() + "."));
             ChatManager.setChat(player, type);
         }
         return 1;
     }
 
-    public static int giveGoal(CommandContext<ServerCommandSource> context) {
+    public static int giveGoal(CommandContext<CommandSourceStack> context) {
         try {
             if (!Lockout.isLockoutRunning(lockout)) {
-                context.getSource().sendError(Text.literal("There's no active lockout match."));
+                context.getSource().sendFailure(Component.literal("There's no active lockout match."));
                 return 0;
             }
 
             int idx = context.getArgument("goal number", Integer.class);
 
-            Collection<PlayerConfigEntry> playerConfigs;
+            Collection<NameAndId> playerConfigs;
             try {
-                playerConfigs = GameProfileArgumentType.getProfileArgument(context, "player name");
+                playerConfigs = GameProfileArgument.getGameProfiles(context, "player name");
             } catch (CommandSyntaxException e) {
-                context.getSource().sendError(Text.literal("Invalid target."));
+                context.getSource().sendFailure(Component.literal("Invalid target."));
                 return 0;
             }
 
             if (playerConfigs.size() != 1) {
-                context.getSource().sendError(Text.literal("Invalid number of targets."));
+                context.getSource().sendFailure(Component.literal("Invalid number of targets."));
                 return 0;
             }
-            PlayerConfigEntry playerConfig = playerConfigs.stream().findFirst().get();
+            NameAndId playerConfig = playerConfigs.stream().findFirst().get();
             if (!lockout.isLockoutPlayer(playerConfig.id())) {
-                context.getSource().sendError(Text.literal("Player " + playerConfig.name() + " is not playing Lockout."));
+                context.getSource().sendFailure(Component.literal("Player " + playerConfig.name() + " is not playing Lockout."));
                 return 0;
             }
 
             if (idx > lockout.getBoard().getGoals().size()) {
-                context.getSource().sendError(Text.literal("Goal number does not exist on the board."));
+                context.getSource().sendFailure(Component.literal("Goal number does not exist on the board."));
                 return 0;
             }
             Goal goal = lockout.getBoard().getGoals().get(idx - 1);
 
-            context.getSource().sendMessage(Text.of("Gave " + playerConfig.name() + " goal \"" + goal.getGoalName() + "\"."));
+            context.getSource().sendSystemMessage(Component.nullToEmpty("Gave " + playerConfig.name() + " goal \"" + goal.getGoalName() + "\"."));
             lockout.updateGoalCompletion(goal, playerConfig.id());
             return 1;
         } catch (RuntimeException e) {
@@ -732,23 +731,23 @@ public class LockoutServer {
         }
     }
 
-    public static int setStartTime(CommandContext<ServerCommandSource> context) {
+    public static int setStartTime(CommandContext<CommandSourceStack> context) {
         int seconds = context.getArgument("seconds", Integer.class);
 
         lockoutStartTime = seconds;
-        context.getSource().sendMessage(Text.of("Updated start time to " + seconds + "s."));
+        context.getSource().sendSystemMessage(Component.nullToEmpty("Updated start time to " + seconds + "s."));
         return 1;
     }
 
-    public static int setBoardSize(CommandContext<ServerCommandSource> context) {
+    public static int setBoardSize(CommandContext<CommandSourceStack> context) {
         int size = context.getArgument("board size", Integer.class);
 
         boardSize = size;
-        context.getSource().sendMessage(Text.of("Updated board size to " + size + "."));
+        context.getSource().sendSystemMessage(Component.nullToEmpty("Updated board size to " + size + "."));
         return 1;
     }
 
-    public static int setGiveCompasses(CommandContext<ServerCommandSource> context) {
+    public static int setGiveCompasses(CommandContext<CommandSourceStack> context) {
         boolean giveCompasses = context.getArgument("giveCompasses", Boolean.class);
         LockoutConfig.getInstance().giveCompasses = giveCompasses;
         LockoutConfig.save();
@@ -756,43 +755,43 @@ public class LockoutServer {
         String message = giveCompasses
                 ? "Compasses will now be given to players"
                 : "Compasses will no longer be given to players";
-        context.getSource().sendFeedback(() -> Text.literal(message), true);
+        context.getSource().sendSuccess(() -> Component.literal(message), true);
         return 1;
     }
 
-    public static int reloadGoalPool(CommandContext<ServerCommandSource> context) {
+    public static int reloadGoalPool(CommandContext<CommandSourceStack> context) {
         try {
             GoalPoolConfig.load();
-            context.getSource().sendFeedback(() -> Text.literal("Goal pool configuration reloaded successfully."), true);
+            context.getSource().sendSuccess(() -> Component.literal("Goal pool configuration reloaded successfully."), true);
             return 1;
         } catch (Exception e) {
             Lockout.error(e);
-            context.getSource().sendError(Text.literal("Failed to reload goal pool configuration. Check the server logs for details."));
+            context.getSource().sendFailure(Component.literal("Failed to reload goal pool configuration. Check the server logs for details."));
             return 0;
         }
     }
 
-    public static int getNearbyStructures(CommandContext<ServerCommandSource> context) {
+    public static int getNearbyStructures(CommandContext<CommandSourceStack> context) {
         List<String> found = new ArrayList<>();
-        for (Map.Entry<RegistryKey<Structure>, LocateData> entry : STRUCTURE_LOCATE_DATA.entrySet()) {
+        for (Map.Entry<ResourceKey<Structure>, LocateData> entry : STRUCTURE_LOCATE_DATA.entrySet()) {
             if (entry.getValue().wasLocated()) {
-                found.add(entry.getKey().getValue().getPath());
+                found.add(entry.getKey().identifier().getPath());
             }
         }
         Collections.sort(found);
-        server.getPlayerManager().broadcast(Text.empty().append(Text.literal("Found Structures:").formatted(Formatting.GOLD, Formatting.BOLD)).append(Text.literal("\n" + String.join("\n", found))), false);
+        server.getPlayerList().broadcastSystemMessage(Component.empty().append(Component.literal("Found Structures:").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(Component.literal("\n" + String.join("\n", found))), false);
         return 1;
     }
 
-    public static int getNearbyBiomes(CommandContext<ServerCommandSource> context) {
+    public static int getNearbyBiomes(CommandContext<CommandSourceStack> context) {
         List<String> found = new ArrayList<>();
-        for (Map.Entry<RegistryKey<Biome>, LocateData> entry : BIOME_LOCATE_DATA.entrySet()) {
+        for (Map.Entry<ResourceKey<Biome>, LocateData> entry : BIOME_LOCATE_DATA.entrySet()) {
             if (entry.getValue().wasLocated()) {
-                found.add(entry.getKey().getValue().getPath());
+                found.add(entry.getKey().identifier().getPath());
             }
         }
         Collections.sort(found);
-        server.getPlayerManager().broadcast(Text.empty().append(Text.literal("Found Biomes:").formatted(Formatting.GOLD, Formatting.BOLD)).append(Text.literal("\n" + String.join("\n", found))), false);
+        server.getPlayerList().broadcastSystemMessage(Component.empty().append(Component.literal("Found Biomes:").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(Component.literal("\n" + String.join("\n", found))), false);
         return 1;
     }
 

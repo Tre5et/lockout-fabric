@@ -1,8 +1,8 @@
 package me.marin.lockout.lockout.goals.misc;
 
 import me.marin.lockout.lockout.Goal;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class MapBannerWaypointGoal extends Goal {
 
@@ -17,6 +17,6 @@ public class MapBannerWaypointGoal extends Goal {
 
     @Override
     public ItemStack getTextureItemStack() {
-        return Items.FILLED_MAP.getDefaultStack();
+        return Items.FILLED_MAP.getDefaultInstance();
     }
 }

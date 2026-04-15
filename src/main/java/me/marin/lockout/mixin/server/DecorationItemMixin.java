@@ -4,14 +4,12 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.goals.misc.PlacePaintingGoal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.decoration.AbstractDecorationEntity;
-import net.minecraft.entity.decoration.GlowItemFrameEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.DecorationItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.util.ActionResult;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.HangingEntityItem;
+import net.minecraft.world.item.context.UseOnContext;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -19,21 +17,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(DecorationItem.class)
+@Mixin(HangingEntityItem.class)
 public class DecorationItemMixin {
 
-    @Shadow @Final private EntityType<? extends AbstractDecorationEntity> entityType;
+    @Shadow @Final private EntityType<? extends HangingEntity> type;
 
-    @Inject(method = "useOnBlock", at = @At("RETURN"))
-    public void onUseOnBlock(ItemUsageContext context, CallbackInfoReturnable<ActionResult> cir) {
-        if (context.getWorld().isClient()) return;
-        if (cir.getReturnValue() != ActionResult.SUCCESS) return;
-        if (this.entityType != EntityType.PAINTING) return;
+    @Inject(method = "useOn", at = @At("RETURN"))
+    public void onUseOnBlock(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
+        if (context.getLevel().isClientSide()) return;
+        if (cir.getReturnValue() != InteractionResult.SUCCESS) return;
+        if (this.type != EntityType.PAINTING) return;
 
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
 
-        PlayerEntity player = context.getPlayer();
+        Player player = context.getPlayer();
 
         for (Goal goal : lockout.getBoard().getGoals()) {
             if (goal == null) continue;

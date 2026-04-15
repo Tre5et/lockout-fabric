@@ -6,20 +6,19 @@ import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.interfaces.HasTooltipInfo;
 import me.marin.lockout.lockout.texture.CustomTextureRenderer;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class Boat2KmGoal extends Goal implements CustomTextureRenderer, HasTooltipInfo {
 
-    private static final ItemStack ITEM_STACK = Items.OAK_BOAT.getDefaultStack();
+    private static final ItemStack ITEM_STACK = Items.OAK_BOAT.getDefaultInstance();
     public Boat2KmGoal(String id, String data) {
         super(id, data);
     }
@@ -35,14 +34,14 @@ public class Boat2KmGoal extends Goal implements CustomTextureRenderer, HasToolt
     }
 
     @Override
-    public boolean renderTexture(DrawContext context, int x, int y, int tick) {
-        context.drawItem(ITEM_STACK, x, y);
-        context.drawStackOverlay(MinecraftClient.getInstance().textRenderer,  ITEM_STACK, x, y, "2km");
+    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+        context.renderItem(ITEM_STACK, x, y);
+        context.renderItemDecorations(Minecraft.getInstance().font,  ITEM_STACK, x, y, "2km");
         return true;
     }
 
     @Override
-    public List<String> getTooltip(LockoutTeam team, PlayerEntity player) {
+    public List<String> getTooltip(LockoutTeam team, Player player) {
         List<String> tooltip = new ArrayList<>();
         int maxDistance = 0;
         for (UUID playerId : ((LockoutTeamServer) team).getPlayerIds()) {
@@ -66,7 +65,7 @@ public class Boat2KmGoal extends Goal implements CustomTextureRenderer, HasToolt
             for (UUID playerId : ((LockoutTeamServer) team).getPlayerIds()) {
                 maxDistance = Math.max(maxDistance, LockoutServer.lockout.distanceBoated.getOrDefault(playerId, 0));
             }
-            tooltip.add(team.getColor() + team.getDisplayName() + Formatting.RESET + ": " + Math.min(2000, maxDistance / 100) + "/2000m");
+            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + Math.min(2000, maxDistance / 100) + "/2000m");
         }
         tooltip.add(" ");
 

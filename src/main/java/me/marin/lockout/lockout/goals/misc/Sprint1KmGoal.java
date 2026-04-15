@@ -8,22 +8,21 @@ import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.interfaces.HasTooltipInfo;
 import me.marin.lockout.lockout.texture.CustomTextureRenderer;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class Sprint1KmGoal extends Goal implements CustomTextureRenderer, HasTooltipInfo {
 
-    private static final ItemStack ITEM_STACK = Items.SUGAR.getDefaultStack();
+    private static final ItemStack ITEM_STACK = Items.SUGAR.getDefaultInstance();
     public Sprint1KmGoal(String id, String data) {
         super(id, data);
     }
@@ -38,16 +37,16 @@ public class Sprint1KmGoal extends Goal implements CustomTextureRenderer, HasToo
         return null;
     }
 
-    private static final Identifier TEXTURE = Identifier.of(Constants.NAMESPACE, "textures/custom/sprint_1km.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/sprint_1km.png");
     @Override
-    public boolean renderTexture(DrawContext context, int x, int y, int tick) {
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
-        context.drawStackOverlay(MinecraftClient.getInstance().textRenderer,  ITEM_STACK, x, y, "1km");
+    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
+        context.renderItemDecorations(Minecraft.getInstance().font,  ITEM_STACK, x, y, "1km");
         return true;
     }
 
     @Override
-    public List<String> getTooltip(LockoutTeam team, PlayerEntity player) {
+    public List<String> getTooltip(LockoutTeam team, Player player) {
         List<String> tooltip = new ArrayList<>();
         int maxDistance = 0;
         for (UUID playerId : ((LockoutTeamServer) team).getPlayerIds()) {
@@ -71,7 +70,7 @@ public class Sprint1KmGoal extends Goal implements CustomTextureRenderer, HasToo
             for (UUID playerId : ((LockoutTeamServer) team).getPlayerIds()) {
                 maxDistance = Math.max(maxDistance, LockoutServer.lockout.distanceSprinted.getOrDefault(playerId, 0));
             }
-            tooltip.add(team.getColor() + team.getDisplayName() + Formatting.RESET + ": " + Math.min(1000, maxDistance / 100) + "/1000m");
+            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + Math.min(1000, maxDistance / 100) + "/1000m");
         }
         tooltip.add(" ");
 

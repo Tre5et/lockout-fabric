@@ -17,15 +17,12 @@ import me.marin.lockout.lockout.interfaces.OpponentObtainsItemGoal;
 import me.marin.lockout.lockout.interfaces.RideEntityGoal;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SaddledComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -51,45 +48,45 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
             if (goal == null) continue;
 
             if (goal instanceof HaveMostXPLevelsGoal) {
-                for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                    lockout.levels.put(player.getUuid(), player.isDead() ? 0 : player.experienceLevel);
+                for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                    lockout.levels.put(player.getUUID(), player.isDeadOrDying() ? 0 : player.experienceLevel);
                 }
                 lockout.recalculateXPGoal(goal);
             }
 
             if (goal instanceof HaveMostHoppersGoal) {
-                for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                    if (!lockout.isLockoutPlayer(player.getUuid())) continue;
+                for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                    if (!lockout.isLockoutPlayer(player.getUUID())) continue;
                     
-                    int hopperCount = player.getInventory().count(Items.HOPPER);
-                    lockout.playerHopperCounts.put(player.getUuid(), hopperCount);
+                    int hopperCount = player.getInventory().countItem(Items.HOPPER);
+                    lockout.playerHopperCounts.put(player.getUUID(), hopperCount);
                 }
                 lockout.recalculateHoppersGoal(goal);
             }
 
             if (goal instanceof HaveMostLeaflitterGoal) {
-                for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                    if (!lockout.isLockoutPlayer(player.getUuid())) continue;
+                for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                    if (!lockout.isLockoutPlayer(player.getUUID())) continue;
                     
-                    int leaflitterCount = player.getInventory().count(Items.LEAF_LITTER);
-                    lockout.playerLeaflitterCounts.put(player.getUuid(), leaflitterCount);
+                    int leaflitterCount = player.getInventory().countItem(Items.LEAF_LITTER);
+                    lockout.playerLeaflitterCounts.put(player.getUUID(), leaflitterCount);
                 }
                 lockout.recalculateLeaflitterGoal(goal);
             }
 
             if (goal instanceof HaveMostDiamondBlocksGoal) {
-                for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                    if (!lockout.isLockoutPlayer(player.getUuid())) continue;
+                for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                    if (!lockout.isLockoutPlayer(player.getUUID())) continue;
                     
-                    int diamondBlockCount = player.getInventory().count(Items.DIAMOND_BLOCK);
-                    lockout.playerDiamondBlockCounts.put(player.getUuid(), diamondBlockCount);
+                    int diamondBlockCount = player.getInventory().countItem(Items.DIAMOND_BLOCK);
+                    lockout.playerDiamondBlockCounts.put(player.getUUID(), diamondBlockCount);
                 }
                 lockout.recalculateDiamondBlocksGoal(goal);
             }
 
             if (goal.isCompleted()) continue;
 
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 if (goal instanceof ObtainItemsGoal obtainItemsGoal) {
                     if (obtainItemsGoal.satisfiedBy(player.getInventory())) {
                         if (goal instanceof OpponentObtainsItemGoal opponentObtainsItemGoal) {
@@ -100,14 +97,14 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
                     }
                 }
 
-                if (goal instanceof RideEntityGoal rideEntityGoal && player.hasVehicle()) {
+                if (goal instanceof RideEntityGoal rideEntityGoal && player.isPassenger()) {
                     EntityType<?> vehicle = player.getVehicle().getType();
 
                     if (Objects.equals(vehicle, rideEntityGoal.getEntityType()) || (rideEntityGoal.getEntityType() == EntityType.NAUTILUS && vehicle == EntityType.ZOMBIE_NAUTILUS)) {
                         boolean allow = true;
                         if (Objects.equals(vehicle, EntityType.PIG)) {
                             boolean hasCarrotOnAStick = false;
-                            var handItem = player.getInventory().getSelectedStack();
+                            var handItem = player.getInventory().getSelectedItem();
                             if (handItem.getItem().equals(Items.CARROT_ON_A_STICK)) {
                                 hasCarrotOnAStick = true;
                             }
@@ -119,27 +116,27 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
                     }
                 }
                 if (goal instanceof EmptyHungerBarGoal) {
-                    if (player.getHungerManager().getFoodLevel() == 0) {
+                    if (player.getFoodData().getFoodLevel() == 0) {
                         lockout.completeGoal(goal, player);
                     }
                 }
                 if (goal instanceof ReachHeightLimitGoal) {
-                    if (player.getY() >= 320 && player.getEntityWorld().getRegistryKey() == ServerWorld.OVERWORLD) {
+                    if (player.getY() >= 320 && player.level().dimension() == ServerLevel.OVERWORLD) {
                         lockout.completeGoal(goal, player);
                     }
                 }
                 if (goal instanceof ReachNetherRoofGoal) {
-                    if (player.getY() >= 128 && player.getEntityWorld().getRegistryKey() == ServerWorld.NETHER) {
+                    if (player.getY() >= 128 && player.level().dimension() == ServerLevel.NETHER) {
                         lockout.completeGoal(goal, player);
                     }
                 }
                 if (goal instanceof ReachBedrockGoal) {
-                    if (player.getY() < 10 && Objects.equals(player.getEntityWorld().getBlockState(player.getBlockPos().down()).getBlock(), Blocks.BEDROCK)) {
+                    if (player.getY() < 10 && Objects.equals(player.level().getBlockState(player.blockPosition().below()).getBlock(), Blocks.BEDROCK)) {
                         lockout.completeGoal(goal, player);
                     }
                 }
                 if (goal instanceof OpponentTouchesWaterGoal) {
-                    if (Objects.equals(player.getEntityWorld().getBlockState(player.getBlockPos()).getBlock(), Blocks.WATER)) {
+                    if (Objects.equals(player.level().getBlockState(player.blockPosition()).getBlock(), Blocks.WATER)) {
                         lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " touched water.");
                     }
                 }
@@ -148,7 +145,7 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
 
         lockout.tick();
         if (lockout.getTicks() % 20 == 0) {
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 ServerPlayNetworking.send(player, lockout.getUpdateTimerPacket());
             }
         }

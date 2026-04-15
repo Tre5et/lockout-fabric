@@ -11,18 +11,17 @@ import me.marin.lockout.lockout.goals.opponent.*;
 import me.marin.lockout.lockout.interfaces.IncrementStatGoal;
 import me.marin.lockout.lockout.interfaces.ReachXPLevelGoal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ArrowEntity;
-import net.minecraft.entity.projectile.thrown.EggEntity;
-import net.minecraft.entity.projectile.thrown.SnowballEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEgg;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,31 +30,31 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public abstract class PlayerMixin {
 
-    @Inject(method = "collideWithEntity", at = @At("HEAD"))
+    @Inject(method = "touch", at = @At("HEAD"))
     public void onCollide(Entity entity, CallbackInfo ci) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
 
-        PlayerEntity player = (PlayerEntity) (Object) this;
-        if (player.getEntityWorld().isClient()) return;
+        Player player = (Player) (Object) this;
+        if (player.level().isClientSide()) return;
 
         for (Goal goal : lockout.getBoard().getGoals()) {
             if (goal == null) continue;
             if (goal.isCompleted()) continue;
 
             if (goal instanceof OpponentHitBySnowballGoal) {
-                if (entity instanceof SnowballEntity snowballEntity) {
-                    if (snowballEntity.getOwner() instanceof PlayerEntity shooter && !Objects.equals(player, shooter)) {
+                if (entity instanceof Snowball snowballEntity) {
+                    if (snowballEntity.getOwner() instanceof Player shooter && !Objects.equals(player, shooter)) {
                         lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " hit by " + shooter.getName().getString() + " with a Snowball.");
                     }
                 }
             }
             if (goal instanceof OpponentHitByEggGoal) {
-                if (entity instanceof EggEntity snowballEntity) {
-                    if (snowballEntity.getOwner() instanceof PlayerEntity shooter && !Objects.equals(player, shooter)) {
+                if (entity instanceof ThrownEgg snowballEntity) {
+                    if (snowballEntity.getOwner() instanceof Player shooter && !Objects.equals(player, shooter)) {
                         lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " hit by " + shooter.getName().getString() + " with an Egg.");
                     }
                 }
@@ -63,27 +62,27 @@ public abstract class PlayerMixin {
         }
     }
 
-    @Inject(method = "damage", at = @At("HEAD"), cancellable = true)
-    public void onStartMatch(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
+    public void onStartMatch(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
-        if (world.isClient()) return;
+        if (world.isClientSide()) return;
         if (!lockout.hasStarted()) {
             cir.setReturnValue(false);
         }
     }
 
-    @Inject(method = "damage", at = @At("RETURN"))
-    public void onDamage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "hurtServer", at = @At("RETURN"))
+    public void onDamage(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
         if (!cir.getReturnValue()) return;
 
-        PlayerEntity player = (PlayerEntity) (Object) this;
-        if (player.getEntityWorld().isClient()) return;
+        Player player = (Player) (Object) this;
+        if (player.level().isClientSide()) return;
 
-        if (!lockout.isLockoutPlayer(player.getUuid())) return;
-        LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUuid());
+        if (!lockout.isLockoutPlayer(player.getUUID())) return;
+        LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
 
         lockout.damageTaken.putIfAbsent(team, 0d);
         lockout.damageTaken.merge(team, (double)amount, Double::sum);
@@ -99,13 +98,13 @@ public abstract class PlayerMixin {
                 }
             }
             if (goal instanceof OpponentTakesFallDamageGoal) {
-                if (source.isOf(DamageTypes.FALL)) {
+                if (source.is(DamageTypes.FALL)) {
                     lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " took fall damage.");
                 }
             }
             if (goal instanceof OpponentHitByArrowGoal) {
-                if (source.getSource() instanceof ArrowEntity arrowEntity) {
-                    if (arrowEntity.getOwner() instanceof PlayerEntity shooter && !Objects.equals(player, shooter)) {
+                if (source.getDirectEntity() instanceof Arrow arrowEntity) {
+                    if (arrowEntity.getOwner() instanceof Player shooter && !Objects.equals(player, shooter)) {
                         lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " hit by " + shooter.getName().getString() + " with an Arrow.");
                     }
                 }
@@ -118,10 +117,10 @@ public abstract class PlayerMixin {
         }
     }
 
-    @Inject(method = "incrementStat(Lnet/minecraft/util/Identifier;)V", at = @At("HEAD"))
+    @Inject(method = "awardStat(Lnet/minecraft/resources/Identifier;)V", at = @At("HEAD"))
     public void onIncrementStat(Identifier stat, CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
-        if (player.getEntityWorld().isClient()) return;
+        Player player = (Player) (Object) this;
+        if (player.level().isClientSide()) return;
 
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
@@ -139,51 +138,51 @@ public abstract class PlayerMixin {
         }
     }
 
-    @Inject(method = "increaseStat(Lnet/minecraft/util/Identifier;I)V", at = @At("HEAD"))
+    @Inject(method = "awardStat(Lnet/minecraft/resources/Identifier;I)V", at = @At("HEAD"))
     public void onIncreaseStat(Identifier stat, int amount, CallbackInfo ci) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
-        PlayerEntity player = (PlayerEntity) (Object) this;
-        if (player.getEntityWorld().isClient()) return;
+        Player player = (Player) (Object) this;
+        if (player.level().isClientSide()) return;
 
         for (Goal goal : lockout.getBoard().getGoals()) {
             if (goal == null) continue;
             if (goal.isCompleted()) continue;
             if (goal instanceof Sprint1KmGoal && stat.equals(Stats.SPRINT_ONE_CM)) {
-                lockout.distanceSprinted.putIfAbsent(player.getUuid(), 0);
-                lockout.distanceSprinted.merge(player.getUuid(), amount, Integer::sum);
+                lockout.distanceSprinted.putIfAbsent(player.getUUID(), 0);
+                lockout.distanceSprinted.merge(player.getUUID(), amount, Integer::sum);
 
-                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUuid());
+                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
                 if (team != null) {
                     team.sendTooltipUpdate(goal);
                 }
 
-                if (lockout.distanceSprinted.get(player.getUuid()) >= (100 * 1000)) {
+                if (lockout.distanceSprinted.get(player.getUUID()) >= (100 * 1000)) {
                     lockout.completeGoal(goal, player);
                 }
             }
             if (goal instanceof Boat2KmGoal && stat.equals(Stats.BOAT_ONE_CM)) {
-                lockout.distanceBoated.putIfAbsent(player.getUuid(), 0);
-                lockout.distanceBoated.merge(player.getUuid(), amount, Integer::sum);
+                lockout.distanceBoated.putIfAbsent(player.getUUID(), 0);
+                lockout.distanceBoated.merge(player.getUUID(), amount, Integer::sum);
 
-                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUuid());
+                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
                 if (team != null) {
                     team.sendTooltipUpdate(goal);
                 }
 
-                if (lockout.distanceBoated.get(player.getUuid()) >= (100 * 2000)) {
+                if (lockout.distanceBoated.get(player.getUUID()) >= (100 * 2000)) {
                     lockout.completeGoal(goal, player);
                 }
             }
         }
     }
 
-    @Inject(method = "addExperienceLevels", at = @At("TAIL"))
+    @Inject(method = "giveExperienceLevels", at = @At("TAIL"))
     public void onExperienceLevelUp(int levels, CallbackInfo ci) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
-        PlayerEntity player = (PlayerEntity) (Object) this;
-        if (player.getEntityWorld().isClient()) return;
+        Player player = (Player) (Object) this;
+        if (player.level().isClientSide()) return;
 
         for (Goal goal : lockout.getBoard().getGoals()) {
             if (goal == null) continue;
@@ -197,14 +196,14 @@ public abstract class PlayerMixin {
         }
     }
 
-    @Inject(method = "takeShieldHit", at = @At(value = "TAIL"))
-    public void onTakeShieldHit(ServerWorld world, LivingEntity attacker, CallbackInfo ci) {
+    @Inject(method = "blockUsingItem", at = @At(value = "TAIL"))
+    public void onTakeShieldHit(ServerLevel world, LivingEntity attacker, CallbackInfo ci) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
-        PlayerEntity player = (PlayerEntity) (Object) this;
-        if (player.getEntityWorld().isClient()) return;
+        Player player = (Player) (Object) this;
+        if (player.level().isClientSide()) return;
 
-        float f = attacker.getWeaponDisableBlockingForSeconds();
+        float f = attacker.getSecondsToDisableBlocking();
 
         for (Goal goal : lockout.getBoard().getGoals()) {
             if (goal == null) continue;

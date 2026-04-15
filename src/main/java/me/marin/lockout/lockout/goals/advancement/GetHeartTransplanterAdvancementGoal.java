@@ -1,16 +1,15 @@
 package me.marin.lockout.lockout.goals.advancement;
 
 import me.marin.lockout.lockout.interfaces.AdvancementGoal;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import java.util.List;
 
 public class GetHeartTransplanterAdvancementGoal extends AdvancementGoal {
 
-    private static final ItemStack ITEM_STACK = Blocks.CREAKING_HEART.asItem().getDefaultStack();
-    private static final List<Identifier> ADVANCEMENTS = List.of(Identifier.of("minecraft", "adventure/heart_transplanter"));
+    private static final ItemStack ITEM_STACK = Blocks.CREAKING_HEART.asItem().getDefaultInstance();
+    private static final List<Identifier> ADVANCEMENTS = List.of(Identifier.fromNamespaceAndPath("minecraft", "adventure/heart_transplanter"));
 
     public GetHeartTransplanterAdvancementGoal(String id, String data) {
         super(id, data);

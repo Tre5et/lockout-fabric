@@ -1,7 +1,7 @@
 package me.marin.lockout;
 
 import lombok.Getter;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -13,17 +13,17 @@ public class LockoutTeam {
     private final List<String> players;
     private final List<UUID> playerIds;
     @Getter
-    private final Formatting color;
+    private final ChatFormatting color;
     @Getter
     private int points = 0;
     @Getter
     private boolean forfeited = false;
 
-    public LockoutTeam(List<String> playerNames, Formatting formattingColor) {
+    public LockoutTeam(List<String> playerNames, ChatFormatting formattingColor) {
         this(playerNames, new ArrayList<>(), formattingColor);
     }
 
-    public LockoutTeam(List<String> playerNames, List<UUID> playerIds, Formatting formattingColor) {
+    public LockoutTeam(List<String> playerNames, List<UUID> playerIds, ChatFormatting formattingColor) {
         this.players = playerNames;
         this.playerIds = playerIds;
         this.color = formattingColor;
@@ -57,8 +57,8 @@ public class LockoutTeam {
         this.points--;
     }
 
-    public static String formattingToString(Formatting formatting) {
-        return StringUtils.capitalize(formatting.asString().replace("_", " "));
+    public static String formattingToString(ChatFormatting formatting) {
+        return StringUtils.capitalize(formatting.getSerializedName().replace("_", " "));
     }
 
 }

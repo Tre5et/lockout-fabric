@@ -5,23 +5,22 @@ import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.texture.CustomTextureRenderer;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
 public abstract class VisitUniqueBiomesGoal extends Goal implements RequiresAmount, HasTooltipInfo, CustomTextureRenderer {
 
-    private static final Identifier TEXTURE = Identifier.of(Constants.NAMESPACE, "textures/custom/unique_biomes.png");
-    private final ItemStack DISPLAY_ITEM_STACK = Items.MAP.getDefaultStack();
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/unique_biomes.png");
+    private final ItemStack DISPLAY_ITEM_STACK = Items.MAP.getDefaultInstance();
 
     public VisitUniqueBiomesGoal(String id, String data) {
         super(id, data);
@@ -34,14 +33,14 @@ public abstract class VisitUniqueBiomesGoal extends Goal implements RequiresAmou
     }
 
     @Override
-    public boolean renderTexture(DrawContext context, int x, int y, int tick) {
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
-        context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, DISPLAY_ITEM_STACK, x, y);
+    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
+        context.renderItemDecorations(Minecraft.getInstance().font, DISPLAY_ITEM_STACK, x, y);
         return true;
     }
 
     @Override
-    public List<String> getTooltip(LockoutTeam team, PlayerEntity player) {
+    public List<String> getTooltip(LockoutTeam team, Player player) {
         List<String> tooltip = new ArrayList<>();
         var biomes = LockoutServer.lockout.visitedBiomes.getOrDefault(team, new LinkedHashSet<>());
 
@@ -60,7 +59,7 @@ public abstract class VisitUniqueBiomesGoal extends Goal implements RequiresAmou
         tooltip.add(" ");
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
             var biomes = LockoutServer.lockout.visitedBiomes.getOrDefault(team, new LinkedHashSet<>());
-            tooltip.add(team.getColor() + team.getDisplayName() + Formatting.RESET + ": " + biomes.size() + "/" + getAmount());
+            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + biomes.size() + "/" + getAmount());
         }
         tooltip.add(" ");
 

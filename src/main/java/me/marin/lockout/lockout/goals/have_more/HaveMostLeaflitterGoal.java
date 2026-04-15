@@ -7,17 +7,16 @@ import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.interfaces.MostStatGoal;
 import me.marin.lockout.lockout.texture.CustomTextureRenderer;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.UUID;
 
 public class HaveMostLeaflitterGoal extends Goal implements CustomTextureRenderer, MostStatGoal {
 
-    private static final ItemStack ITEM_STACK = Items.LEAF_LITTER.getDefaultStack();
+    private static final ItemStack ITEM_STACK = Items.LEAF_LITTER.getDefaultInstance();
     
     public HaveMostLeaflitterGoal(String id, String data) {
         super(id, data);
@@ -33,12 +32,12 @@ public class HaveMostLeaflitterGoal extends Goal implements CustomTextureRendere
         return ITEM_STACK;
     }
 
-    private static final Identifier TEXTURE = Identifier.of(Constants.NAMESPACE, "textures/custom/overlay/up_overlay.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/overlay/up_overlay.png");
     
     @Override
-    public boolean renderTexture(DrawContext context, int x, int y, int tick) {
-        context.drawItem(ITEM_STACK, x, y);
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0,0, 16, 16, 16, 16);
+    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+        context.renderItem(ITEM_STACK, x, y);
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0,0, 16, 16, 16, 16);
         return true;
     }
 

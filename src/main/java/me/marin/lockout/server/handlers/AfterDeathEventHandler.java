@@ -13,18 +13,17 @@ import me.marin.lockout.lockout.goals.opponent.OpponentDies3TimesGoal;
 import me.marin.lockout.lockout.goals.opponent.OpponentDiesGoal;
 import me.marin.lockout.lockout.interfaces.*;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.entity.damage.DamageTypes;
-import net.minecraft.entity.damage.FallLocation;
-import net.minecraft.entity.mob.Monster;
-import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.TntMinecartEntity;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.world.ServerWorld;
-
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.damagesource.FallLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.sheep.Sheep;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.minecart.MinecartTNT;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -37,38 +36,38 @@ public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDea
         if (!Lockout.isLockoutRunning(lockout)) {
             return;
         }
-        if (entity instanceof PlayerEntity player && !lockout.isLockoutPlayer(player)) {
+        if (entity instanceof Player player && !lockout.isLockoutPlayer(player)) {
             return;
         }
 
-        boolean playerDied = entity instanceof PlayerEntity;
+        boolean playerDied = entity instanceof Player;
         boolean mobDied = !playerDied;
-        boolean killedByPlayer = entity.getPrimeAdversary() instanceof PlayerEntity;
+        boolean killedByPlayer = entity.getKillCredit() instanceof Player;
 
         if (playerDied) {
-            LockoutTeam team = lockout.getPlayerTeam(entity.getUuid());
+            LockoutTeam team = lockout.getPlayerTeam(entity.getUUID());
 
             lockout.deaths.putIfAbsent(team, 0);
             lockout.deaths.merge(team, 1, Integer::sum);
         }
         if (mobDied && killedByPlayer) {
-            PlayerEntity killer = (PlayerEntity) entity.getPrimeAdversary();
-            if (lockout.isLockoutPlayer(killer.getUuid())) {
-                LockoutTeam team = lockout.getPlayerTeam(killer.getUuid());
+            Player killer = (Player) entity.getKillCredit();
+            if (lockout.isLockoutPlayer(killer.getUUID())) {
+                LockoutTeam team = lockout.getPlayerTeam(killer.getUUID());
                 lockout.mobsKilled.putIfAbsent(team, 0);
                 lockout.mobsKilled.merge(team, 1, Integer::sum);
             }
         }
 
         if (playerDied && killedByPlayer) {
-            PlayerEntity player = (PlayerEntity) entity;
-            PlayerEntity killer = (PlayerEntity) entity.getPrimeAdversary();
+            Player player = (Player) entity;
+            Player killer = (Player) entity.getKillCredit();
 
             // Ensure it's not a self-kill and they're on different teams
-            if (!Objects.equals(player, killer) && !Objects.equals(lockout.getPlayerTeam(killer.getUuid()), lockout.getPlayerTeam(player.getUuid()))) {
+            if (!Objects.equals(player, killer) && !Objects.equals(lockout.getPlayerTeam(killer.getUUID()), lockout.getPlayerTeam(player.getUUID()))) {
                 // Increment kill count for this killer
-                lockout.playerKills.putIfAbsent(killer.getUuid(), 0);
-                lockout.playerKills.merge(killer.getUuid(), 1, Integer::sum);
+                lockout.playerKills.putIfAbsent(killer.getUUID(), 0);
+                lockout.playerKills.merge(killer.getUUID(), 1, Integer::sum);
             }
         }
 
@@ -77,11 +76,11 @@ public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDea
 
             // Track player kills for HaveMostPlayerKillsGoal regardless of goal completion
             if (playerDied && killedByPlayer && goal instanceof HaveMostPlayerKillsGoal) {
-                PlayerEntity player = (PlayerEntity) entity;
-                PlayerEntity killer = (PlayerEntity) entity.getPrimeAdversary();
+                Player player = (Player) entity;
+                Player killer = (Player) entity.getKillCredit();
 
                 // Ensure it's not a self-kill and they're on different teams
-                if (!Objects.equals(player, killer) && !Objects.equals(lockout.getPlayerTeam(killer.getUuid()), lockout.getPlayerTeam(player.getUuid()))) {
+                if (!Objects.equals(player, killer) && !Objects.equals(lockout.getPlayerTeam(killer.getUUID()), lockout.getPlayerTeam(player.getUUID()))) {
                     lockout.recalculatePlayerKillsGoal(goal);
                 }
             }
@@ -89,30 +88,30 @@ public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDea
             if (goal.isCompleted()) continue;
 
             if (mobDied && killedByPlayer) {
-                PlayerEntity killer = (PlayerEntity) entity.getPrimeAdversary();
+                Player killer = (Player) entity.getKillCredit();
 
                 if (goal instanceof KillMobGoal killMobGoal) {
                     if (killMobGoal.getEntity().equals(entity.getType())) {
                         boolean allow = true;
                         if (goal instanceof KillSnowGolemInNetherGoal)  {
-                            allow = killer.getEntityWorld().getRegistryKey() == ServerWorld.NETHER;
+                            allow = killer.level().dimension() == ServerLevel.NETHER;
                         }
                         if (goal instanceof KillBreezeWithWindChargeGoal) {
-                            allow = source.isOf(DamageTypes.WIND_CHARGE);
+                            allow = source.is(DamageTypes.WIND_CHARGE);
                         }
                         if (goal instanceof KillBlazeWithSnowballGoal) {
                             // Only snowballs count for damage to blazes in this damage type
-                            allow = source.isOf(DamageTypes.THROWN);
+                            allow = source.is(DamageTypes.THROWN);
                         }
                         if (goal instanceof KillColoredSheepGoal killColoredSheepGoal) {
-                            allow = ((SheepEntity) entity).getColor() == killColoredSheepGoal.getDyeColor();
+                            allow = ((Sheep) entity).getColor() == killColoredSheepGoal.getDyeColor();
                         }
                         if (allow) {
                             lockout.completeGoal(goal, killer);
                         }
                     }
                 }
-                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(killer.getUuid());
+                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(killer.getUUID());
 
                 if (goal instanceof KillAllSpecificMobsGoal killAllSpecificMobsGoal) {
                     if (killAllSpecificMobsGoal.getEntityTypes().contains(entity.getType())) {
@@ -128,7 +127,7 @@ public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDea
                     }
                 }
                 if (goal instanceof KillUniqueHostileMobsGoal killUniqueHostileMobsGoal) {
-                    if (entity instanceof Monster) {
+                    if (entity instanceof Enemy) {
                         lockout.killedHostileTypes.computeIfAbsent(team, t -> new LinkedHashSet<>());
                         lockout.killedHostileTypes.get(team).add(entity.getType());
 
@@ -163,8 +162,8 @@ public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDea
                 }
             }
             if (playerDied) {
-                PlayerEntity player = (PlayerEntity) entity;
-                LockoutTeam team = lockout.getPlayerTeam(player.getUuid());
+                Player player = (Player) entity;
+                LockoutTeam team = lockout.getPlayerTeam(player.getUUID());
 
                 if (goal instanceof OpponentDiesGoal) {
                     lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " died.");
@@ -173,20 +172,20 @@ public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDea
                     lockout.completeMultiOpponentGoal(goal, team, team.getDisplayName() + " died 3 times.");
                 }
                 if (goal instanceof DieToDamageTypeGoal dieToDamageTypeGoal) {
-                    for (RegistryKey<DamageType> key : dieToDamageTypeGoal.getDamageRegistryKeys()) {
-                        if (source.getTypeRegistryEntry().matchesKey(key)) {
+                    for (ResourceKey<DamageType> key : dieToDamageTypeGoal.getDamageRegistryKeys()) {
+                        if (source.typeHolder().is(key)) {
                             lockout.completeGoal(goal, player);
                         }
                     }
                 }
                 if (goal instanceof DieToEntityGoal dieToEntityGoal) {
-                    if (source.getAttacker() != null && source.getAttacker().getType() == dieToEntityGoal.getEntityType()) {
+                    if (source.getEntity() != null && source.getEntity().getType() == dieToEntityGoal.getEntityType()) {
                         lockout.completeGoal(goal, player);
                     }
                 }
                 if (goal instanceof DieToFallingOffVinesGoal) {
-                    if (source.getTypeRegistryEntry().matchesKey(DamageTypes.FALL)) {
-                        FallLocation fallLocation = FallLocation.fromEntity(player);
+                    if (source.typeHolder().is(DamageTypes.FALL)) {
+                        FallLocation fallLocation = FallLocation.getCurrentFallLocation(player);
                         if (fallLocation != null) {
                             if (List.of(FallLocation.VINES, FallLocation.TWISTING_VINES, FallLocation.WEEPING_VINES).contains(fallLocation)) {
                                 lockout.completeGoal(goal, player);
@@ -195,21 +194,21 @@ public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDea
                     }
                 }
                 if (goal instanceof DieToTNTMinecartGoal) {
-                    if (source.getSource() instanceof TntMinecartEntity) {
+                    if (source.getDirectEntity() instanceof MinecartTNT) {
                         lockout.completeGoal(goal, player);
                     }
                 }
 
                 if (goal instanceof DieByDrowningGoal) {
-                    if (source.isOf(DamageTypes.DROWN)) {
+                    if (source.is(DamageTypes.DROWN)) {
                         lockout.completeGoal(goal, player);
                     }
                 }
 
                 if (goal instanceof KillOtherTeamPlayer && killedByPlayer) {
-                    PlayerEntity killer = (PlayerEntity) entity.getPrimeAdversary();
+                    Player killer = (Player) entity.getKillCredit();
 
-                    if (!Objects.equals(player, killer) && !Objects.equals(lockout.getPlayerTeam(killer.getUuid()), lockout.getPlayerTeam(player.getUuid()))) {
+                    if (!Objects.equals(player, killer) && !Objects.equals(lockout.getPlayerTeam(killer.getUUID()), lockout.getPlayerTeam(player.getUUID()))) {
                         lockout.completeGoal(goal, killer);
                     }
                 }

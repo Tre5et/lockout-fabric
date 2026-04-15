@@ -4,32 +4,32 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.goals.misc.MapBannerWaypointGoal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.util.ActionResult;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(FilledMapItem.class)
+@Mixin(MapItem.class)
 public class FilledMapItemMixin {
 
-    @Inject(method = "useOnBlock", at = @At("RETURN"))
-    public void onUseOnBlock(ItemUsageContext context, CallbackInfoReturnable<ActionResult> cir) {
-        if (cir.getReturnValue() != ActionResult.SUCCESS) return;
-        PlayerEntity player = context.getPlayer();
+    @Inject(method = "useOn", at = @At("RETURN"))
+    public void onUseOnBlock(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
+        if (cir.getReturnValue() != InteractionResult.SUCCESS) return;
+        Player player = context.getPlayer();
         if (player == null) return;
-        if (context.getWorld().isClient()) return;
+        if (context.getLevel().isClientSide()) return;
 
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
 
-        BlockState blockState = context.getWorld().getBlockState(context.getBlockPos());
-        if (blockState.isIn(BlockTags.BANNERS)) {
+        BlockState blockState = context.getLevel().getBlockState(context.getClickedPos());
+        if (blockState.is(BlockTags.BANNERS)) {
             for (Goal goal : lockout.getBoard().getGoals()) {
                 if (goal == null) continue;
                 if (goal.isCompleted()) continue;
