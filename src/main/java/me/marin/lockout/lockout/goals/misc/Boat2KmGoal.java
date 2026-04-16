@@ -8,7 +8,7 @@ import me.marin.lockout.lockout.texture.CustomTextureRenderer;
 import me.marin.lockout.server.LockoutServer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -34,9 +34,9 @@ public class Boat2KmGoal extends Goal implements CustomTextureRenderer, HasToolt
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
-        context.renderItem(ITEM_STACK, x, y);
-        context.renderItemDecorations(Minecraft.getInstance().font,  ITEM_STACK, x, y, "2km");
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
+        context.item(ITEM_STACK, x, y);
+        context.itemDecorations(Minecraft.getInstance().font,  ITEM_STACK, x, y, "2km");
         return true;
     }
 

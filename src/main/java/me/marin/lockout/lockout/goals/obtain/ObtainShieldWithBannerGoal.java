@@ -4,7 +4,7 @@ import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.interfaces.ObtainItemsGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import me.marin.lockout.mixin.server.PlayerInventoryAccessor;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -54,7 +54,7 @@ public class ObtainShieldWithBannerGoal extends ObtainItemsGoal implements Textu
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         return TextureProvider.super.renderTexture(context, x, y, tick);
     }
 }

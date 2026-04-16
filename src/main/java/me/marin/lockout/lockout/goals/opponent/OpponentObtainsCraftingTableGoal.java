@@ -3,7 +3,7 @@ package me.marin.lockout.lockout.goals.opponent;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.interfaces.OpponentObtainsItemGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -39,7 +39,7 @@ public class OpponentObtainsCraftingTableGoal extends OpponentObtainsItemGoal im
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         return TextureProvider.super.renderTexture(context, x, y, tick);
     }
 }

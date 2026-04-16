@@ -8,7 +8,7 @@ import me.marin.lockout.lockout.texture.CustomTextureRenderer;
 import me.marin.lockout.server.LockoutServer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
@@ -82,9 +82,9 @@ public class KillAllRaidMobsGoal extends KillAllSpecificMobsGoal implements Cust
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
-        context.renderItemDecorations(Minecraft.getInstance().font, DISPLAY_ITEM_STACK, x, y);
+        context.itemDecorations(Minecraft.getInstance().font, DISPLAY_ITEM_STACK, x, y);
         return true;
     }
 

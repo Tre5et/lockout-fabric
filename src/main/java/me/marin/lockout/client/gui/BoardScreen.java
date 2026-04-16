@@ -6,7 +6,7 @@ import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.lockout.Goal;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
@@ -19,12 +19,12 @@ public class BoardScreen extends AbstractContainerScreen<BoardScreenHandler> {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (!Lockout.exists(LockoutClient.lockout)) {
             this.onClose();
             return;
         }
-        this.renderBackground(context, mouseX, mouseY, delta);
+        this.extractBackground(context, mouseX, mouseY, delta);
         Font textRenderer = Minecraft.getInstance().font;
 
         Utility.drawCenterBingoBoard(context, textRenderer, mouseX, mouseY);
@@ -35,7 +35,7 @@ public class BoardScreen extends AbstractContainerScreen<BoardScreenHandler> {
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 
     }
 

@@ -32,7 +32,7 @@ public abstract class PlayerAdvancementTrackerMixin {
     @Shadow
     private ServerPlayer player;
 
-    @Redirect(method = "method_53637", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V") )
+    @Redirect(method = "lambda$award$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V") )
     public void onBroadcastInChat(PlayerList instance, Component message, boolean overlay) {
         Lockout lockout = LockoutServer.lockout;
 

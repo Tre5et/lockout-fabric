@@ -7,6 +7,7 @@ import me.marin.lockout.server.LockoutServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.GlowInkSacItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class GlowInkSacItemMixin {
 
     @Inject(method="tryApplyToSign", at = @At("RETURN"))
-    public void useOnSign(Level world, SignBlockEntity signBlockEntity, boolean front, Player player, CallbackInfoReturnable<Boolean> cir) {
+    public void useOnSign(Level world, SignBlockEntity signBlockEntity, boolean front, ItemStack item, Player player, CallbackInfoReturnable<Boolean> cir) {
         if (player.level().isClientSide()) return;
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;

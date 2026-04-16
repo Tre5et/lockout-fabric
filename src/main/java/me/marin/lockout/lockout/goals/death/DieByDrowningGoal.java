@@ -3,7 +3,7 @@ package me.marin.lockout.lockout.goals.death;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.texture.CustomTextureRenderer;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +28,7 @@ public class DieByDrowningGoal extends Goal implements CustomTextureRenderer {
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         context.blitSprite(RenderPipelines.GUI_TEXTURED, BUBBLE_TEXTURE, x, y, 16, 16);
         context.blit(RenderPipelines.GUI_TEXTURED, OVERLAY_TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
         return true;

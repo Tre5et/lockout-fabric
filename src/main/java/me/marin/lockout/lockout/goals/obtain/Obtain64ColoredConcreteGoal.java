@@ -4,7 +4,7 @@ import me.marin.lockout.lockout.goals.util.GoalDataConstants;
 import me.marin.lockout.lockout.interfaces.ObtainAllItemsGoal;
 import me.marin.lockout.lockout.interfaces.RequiresAmount;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -66,9 +66,9 @@ public class Obtain64ColoredConcreteGoal extends ObtainAllItemsGoal implements R
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         super.renderTexture(context, x, y, tick);
-        context.renderItemDecorations(Minecraft.getInstance().font, ITEM_STACK, x, y);
+        context.itemDecorations(Minecraft.getInstance().font, ITEM_STACK, x, y);
         return true;
     }
 

@@ -3,7 +3,7 @@ package me.marin.lockout.lockout.goals.death;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.interfaces.DieToDamageTypeGoal;
 import me.marin.lockout.lockout.texture.CycleTexturesProvider;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.damagesource.DamageType;
@@ -32,7 +32,7 @@ public class DieToIntentionalGameDesignGoal extends DieToDamageTypeGoal implemen
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         return CycleTexturesProvider.super.renderTexture(context, x, y, tick);
     }
     private static final List<Identifier> TEXTURES = List.of(

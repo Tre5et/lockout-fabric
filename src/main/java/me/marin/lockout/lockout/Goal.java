@@ -6,7 +6,7 @@ import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.lockout.goals.util.GoalDataConstants;
 import me.marin.lockout.lockout.texture.CustomTextureRenderer;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 import java.util.Objects;
 
@@ -41,15 +41,15 @@ public abstract class Goal {
         return isCompleted;
     }
 
-    public final void render(GuiGraphics context, Font textRenderer, int x, int y) {
+    public final void render(GuiGraphicsExtractor context, Font textRenderer, int x, int y) {
         boolean success = false;
         if (this instanceof CustomTextureRenderer customTextureRenderer) {
             success = customTextureRenderer.renderTexture(context, x, y, LockoutClient.CURRENT_TICK);
         }
         if (!success) {
             // TODO: handle null
-            context.renderItem(this.getTextureItemStack(), x, y);
-            context.renderItemDecorations(textRenderer, this.getTextureItemStack(), x, y);
+            context.item(this.getTextureItemStack(), x, y);
+            context.itemDecorations(textRenderer, this.getTextureItemStack(), x, y);
         }
     }
 

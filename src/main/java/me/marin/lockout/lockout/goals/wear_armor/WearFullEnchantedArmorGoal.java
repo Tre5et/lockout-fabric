@@ -3,7 +3,7 @@ package me.marin.lockout.lockout.goals.wear_armor;
 import me.marin.lockout.Lockout;
 import me.marin.lockout.lockout.interfaces.WearArmorGoal;
 import me.marin.lockout.mixin.server.PlayerInventoryAccessor;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
@@ -56,7 +56,7 @@ public class WearFullEnchantedArmorGoal extends WearArmorGoal {
     private int lastTickArmorChanged = -1;
     private Item armorPiece;
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         List<Item> itemType = ITEMS.get(tick % 240 / 60);
 
         int armorChange = tick / 60;
@@ -68,7 +68,7 @@ public class WearFullEnchantedArmorGoal extends WearArmorGoal {
         ItemStack stack = armorPiece.getDefaultInstance();
         stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 
-        context.renderItem(stack, x, y);
+        context.item(stack, x, y);
         return true;
     }
 

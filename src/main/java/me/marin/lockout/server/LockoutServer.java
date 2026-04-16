@@ -13,7 +13,7 @@ import me.marin.lockout.network.LockoutVersionPayload;
 import me.marin.lockout.network.StartLockoutPayload;
 import me.marin.lockout.network.UpdateTooltipPayload;
 import me.marin.lockout.server.handlers.*;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -131,7 +131,7 @@ public class LockoutServer {
 
         ServerPlayerEvents.AFTER_RESPAWN.register(new AfterRespawnEventHandler());
 
-        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(new AfterPlayerChangeWorldEventHandler());
+        ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register(new AfterPlayerChangeWorldEventHandler());
 
         ServerPlayConnectionEvents.JOIN.register(new PlayerJoinEventHandler());
 
@@ -375,7 +375,7 @@ public class LockoutServer {
                 for (UUID playerUuid : allLockoutPlayers) {
                     ServerPlayer player = playerManager.getPlayer(playerUuid);
                     if (player != null) {
-                        player.displayClientMessage(Component.literal(errorMessage).withStyle(ChatFormatting.RED), false);
+                        player.sendOverlayMessage(Component.literal(errorMessage).withStyle(ChatFormatting.RED));
                     }
                 }
                 return; // Abort lockout start
@@ -417,7 +417,7 @@ public class LockoutServer {
             }
         }
 
-        world.setDayTime(0);
+        world.clockManager().setTotalTicks(world.dimensionType().defaultClock().orElseThrow(), 0);
 
         // Unfreeze ticks when lockout/blackout game starts
         var unfreezeCommand = "tick unfreeze";

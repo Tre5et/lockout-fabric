@@ -6,7 +6,7 @@ import me.marin.lockout.lockout.interfaces.KillSpecificMobsGoal;
 import me.marin.lockout.lockout.texture.CycleTexturesProvider;
 import me.marin.lockout.server.LockoutServer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -73,9 +73,9 @@ public class Kill20ArthropodMobsGoal extends KillSpecificMobsGoal implements Cyc
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         CycleTexturesProvider.super.renderTexture(context, x, y, tick);
-        context.renderItemDecorations(Minecraft.getInstance().font, ITEM_STACK, x, y);
+        context.itemDecorations(Minecraft.getInstance().font, ITEM_STACK, x, y);
         return true;
     }
 

@@ -1,0 +1,15 @@
+{
+  "pack": {
+    "description": "lockout_fabric",
+    "min_format": [101, 1],
+    "max_format": [101, 1]
+  },
+  "filter": {
+    "block": [
+      {
+        "namespace": "minecraft",
+        "path": "tags/villager_trade/cartographer/level_[23]"
+      }
+    ]
+  }
+}

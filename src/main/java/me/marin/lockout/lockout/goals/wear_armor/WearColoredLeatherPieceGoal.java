@@ -3,7 +3,7 @@ package me.marin.lockout.lockout.goals.wear_armor;
 import me.marin.lockout.lockout.goals.util.GoalDataConstants;
 import me.marin.lockout.lockout.interfaces.WearArmorPieceGoal;
 import me.marin.lockout.mixin.server.PlayerInventoryAccessor;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
@@ -52,7 +52,7 @@ public class WearColoredLeatherPieceGoal extends WearArmorPieceGoal {
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         return false;
     }
 

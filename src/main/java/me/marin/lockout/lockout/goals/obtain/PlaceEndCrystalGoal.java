@@ -3,7 +3,7 @@ package me.marin.lockout.lockout.goals.obtain;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.texture.TextureProvider;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
@@ -31,7 +31,7 @@ public class PlaceEndCrystalGoal extends Goal implements TextureProvider {
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         return TextureProvider.super.renderTexture(context, x, y, tick);
     }
 }

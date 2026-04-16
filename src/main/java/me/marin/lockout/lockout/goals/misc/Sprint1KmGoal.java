@@ -10,7 +10,7 @@ import me.marin.lockout.lockout.texture.CustomTextureRenderer;
 import me.marin.lockout.server.LockoutServer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
@@ -39,9 +39,9 @@ public class Sprint1KmGoal extends Goal implements CustomTextureRenderer, HasToo
 
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/sprint_1km.png");
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
-        context.renderItemDecorations(Minecraft.getInstance().font,  ITEM_STACK, x, y, "1km");
+        context.itemDecorations(Minecraft.getInstance().font,  ITEM_STACK, x, y, "1km");
         return true;
     }
 

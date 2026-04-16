@@ -8,7 +8,7 @@ import me.marin.lockout.lockout.interfaces.HasTooltipInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -26,7 +26,7 @@ public class Utility {
 
     public static int FF000000 = 0xFF000000;
 
-    public static void drawBingoBoard(GuiGraphics context) {
+    public static void drawBingoBoard(GuiGraphicsExtractor context) {
         LockoutConfig.BoardPosition boardPosition = LockoutConfig.getInstance().boardPosition;
 
         // Don't render board if F3 is open with left-side board.
@@ -77,10 +77,10 @@ public class Utility {
             pointsList.add(team.getColor() + "" + team.getPoints() + ChatFormatting.RESET);
         }
 
-        context.drawString(textRenderer, String.join(ChatFormatting.RESET + "" + ChatFormatting.GRAY + "-", pointsList), x, y, FF000000, true);
+        context.text(textRenderer, String.join(ChatFormatting.RESET + "" + ChatFormatting.GRAY + "-", pointsList), x, y, FF000000, true);
 
         String timer = Utility.ticksToTimer(lockout.getTicks());
-        context.drawString(textRenderer, ChatFormatting.WHITE + timer, boardRightEdgeX - textRenderer.width(timer) - 4, y, FF000000, true);
+        context.text(textRenderer, ChatFormatting.WHITE + timer, boardRightEdgeX - textRenderer.width(timer) - 4, y, FF000000, true);
 
         List<String> formattedNames = new ArrayList<>();
         int maxWidth = 0;
@@ -97,7 +97,7 @@ public class Utility {
                 context.fill(context.guiWidth() - maxWidth - 3 - 1,  y - 2, context.guiWidth() - 1, y + formattedNames.size() * textRenderer.lineHeight + 1, 0x80_00_00_00);
 
                 for (String formattedName : formattedNames) {
-                    context.drawString(textRenderer, formattedName, context.guiWidth() - textRenderer.width(formattedName) - 2, y, FF000000, true);
+                    context.text(textRenderer, formattedName, context.guiWidth() - textRenderer.width(formattedName) - 2, y, FF000000, true);
                     y += textRenderer.lineHeight;
                 }
             }
@@ -105,7 +105,7 @@ public class Utility {
                 context.fill(1,  y - 2, 4 + maxWidth, y + formattedNames.size() * textRenderer.lineHeight + 1, 0x80_00_00_00);
 
                 for (String formattedName : formattedNames) {
-                    context.drawString(textRenderer, formattedName, 3, y, FF000000, true);
+                    context.text(textRenderer, formattedName, 3, y, FF000000, true);
                     y += textRenderer.lineHeight;
                 }
             }
@@ -113,7 +113,7 @@ public class Utility {
 
     }
 
-    public static void drawCenterBingoBoard(GuiGraphics context, Font textRenderer, int mouseX, int mouseY) {
+    public static void drawCenterBingoBoard(GuiGraphicsExtractor context, Font textRenderer, int mouseX, int mouseY) {
         int width = context.guiWidth();
         int height = context.guiHeight();
 
@@ -173,12 +173,12 @@ public class Utility {
         return Optional.empty();
     }
 
-    public static Goal getBoardHoveredGoal(GuiGraphics context, int mouseX, int mouseY) {
+    public static Goal getBoardHoveredGoal(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         Optional<Integer> hoveredIdx = getBoardHoveredIndex(LockoutClient.lockout.getBoard().size(), context.guiWidth(), context.guiHeight(), mouseX, mouseY);
         return hoveredIdx.map(integer -> LockoutClient.lockout.getBoard().getGoals().get(integer)).orElse(null);
     }
 
-    public static void drawGoalInformation(GuiGraphics context, Font textRenderer, Goal goal, int mouseX, int mouseY) {
+    public static void drawGoalInformation(GuiGraphicsExtractor context, Font textRenderer, Goal goal, int mouseX, int mouseY) {
         List<FormattedCharSequence> tooltip = new ArrayList<>();
         tooltip.add(Component.nullToEmpty(((goal instanceof HasTooltipInfo) ? ChatFormatting.UNDERLINE : "") + goal.getGoalName()).getVisualOrderText());
         if (goal instanceof HasTooltipInfo) {
@@ -193,13 +193,13 @@ public class Utility {
     }
 
     /**
-     * Code from {@link GuiGraphics#renderItemCount(Font, ItemStack, int, int, String)}, but without ItemStack argument requirement
+     * Code from {@link GuiGraphicsExtractor#itemCount(Font, ItemStack, int, int, String)} (Font, ItemStack, int, int, String)}, but without ItemStack argument requirement
      */
-    public static void drawStackCount(GuiGraphics context, int x, int y, String count) {
+    public static void drawStackCount(GuiGraphicsExtractor context, int x, int y, String count) {
         Font textRenderer = Minecraft.getInstance().font;
         context.pose().pushMatrix();
         context.pose().translate(0.0F, 0.0F);
-        context.drawString(textRenderer, count, x + 19 - 2 - textRenderer.width(count), y + 6 + 3, -1, true);
+        context.text(textRenderer, count, x + 19 - 2 - textRenderer.width(count), y + 6 + 3, -1, true);
         context.pose().popMatrix();
     }
 

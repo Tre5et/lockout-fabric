@@ -2,7 +2,7 @@ package me.marin.lockout.lockout.goals.obtain;
 
 import me.marin.lockout.Utility;
 import me.marin.lockout.lockout.interfaces.ObtainSomeOfTheItemsGoal;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import java.util.List;
@@ -52,7 +52,7 @@ public class Obtain6UniqueFlowersGoal extends ObtainSomeOfTheItemsGoal {
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         super.renderTexture(context, x, y, tick);
         Utility.drawStackCount(context, x, y, String.valueOf(getAmount()));
         return true;

@@ -23,8 +23,8 @@ import java.util.ArrayList;
 @Mixin(ArmorStand.class)
 public class ArmorStandMixin {
 
-    @Inject(method = "interactAt", at = @At("RETURN"))
-    public void onInteractAt(Player player, Vec3 hitPos, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+    @Inject(method = "interact", at = @At("RETURN"))
+    public void onInteract(Player player, InteractionHand hand, Vec3 location, CallbackInfoReturnable<InteractionResult> cir) {
         if (player.level().isClientSide()) return;
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;

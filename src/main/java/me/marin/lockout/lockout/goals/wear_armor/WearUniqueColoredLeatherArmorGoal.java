@@ -3,7 +3,7 @@ package me.marin.lockout.lockout.goals.wear_armor;
 import me.marin.lockout.Lockout;
 import me.marin.lockout.lockout.interfaces.WearArmorGoal;
 import me.marin.lockout.mixin.server.PlayerInventoryAccessor;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
@@ -60,7 +60,7 @@ public class WearUniqueColoredLeatherArmorGoal extends WearArmorGoal {
     private int lastTickColorChanged = -1;
     private int color = 0;
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         int mod = tick % (60 * getItemsToDisplay().size());
         ItemStack itemStack = getItemsToDisplay().get(mod / 60).getDefaultInstance();
 
@@ -71,7 +71,7 @@ public class WearUniqueColoredLeatherArmorGoal extends WearArmorGoal {
         }
 
         itemStack.set(DataComponents.DYED_COLOR, new DyedItemColor(color));
-        context.renderItem(itemStack, x, y);
+        context.item(itemStack, x, y);
         return true;
     }
 

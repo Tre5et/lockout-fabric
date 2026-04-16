@@ -8,7 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractScrollArea;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -43,7 +43,7 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
     private List<GoalEntry> visibleGoals;
 
     public BoardBuilderSearchWidget(int x, int y, int width, int height, Component text) {
-        super(x, y, width, height, text);
+        super(x, y, width, height, text, defaultSettings(1));
         for (String id : GoalRegistry.INSTANCE.getRegisteredGoals()) {
             registeredGoals.putIfAbsent(id, new GoalEntry(id));
         }
@@ -70,7 +70,7 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         this.rowWidth = getWidth() - MARGIN_X * 2;
         this.left = getX() + MARGIN_X;
         this.top = getY();
@@ -82,12 +82,12 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
 
         int y = 4;
         for (GoalEntry goalEntry : visibleGoals) {
-            goalEntry.renderContent(context, getX() + MARGIN_X, getY() + y - (int)scrollAmount() - 3, Objects.equals(goalEntry, hovered), delta);
+            goalEntry.extractContent(context, getX() + MARGIN_X, getY() + y - (int)scrollAmount() - 3, Objects.equals(goalEntry, hovered), delta);
             y += 18;
         }
 
         context.disableScissor();
-        this.renderScrollbar(context, this.right, this.top);
+        this.extractScrollbar(context, this.right, this.top);
     }
 
     protected final GoalEntry getEntryAtPosition(double x, double y) {
@@ -145,11 +145,11 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
         }
 
         @Override
-        public void renderContent(GuiGraphics context, int x, int y, boolean hovered, float tickDelta) {
+        public void extractContent(GuiGraphicsExtractor context, int x, int y, boolean hovered, float tickDelta) {
             Font textRenderer = Minecraft.getInstance().font;
 
             goal.render(context, textRenderer, x, y);
-            context.drawString(textRenderer, displayName, x + 18, y + 5, Color.WHITE.getRGB());
+            context.text(textRenderer, displayName, x + 18, y + 5, Color.WHITE.getRGB());
             if (hovered) {
                 // Draw border manually since drawBorder method doesn't exist
                 context.fill(x - 1, y - 1, x + 18 + textRenderer.width(displayName) + 1, y, Color.LIGHT_GRAY.getRGB());

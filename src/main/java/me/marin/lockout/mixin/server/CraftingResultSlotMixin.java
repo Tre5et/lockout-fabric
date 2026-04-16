@@ -68,9 +68,9 @@ public class CraftingResultSlotMixin {
                     ));
                 }
                 if (crafts.size() % 5 == 0) {
-                    player.displayClientMessage(Component.nullToEmpty(ChatFormatting.GRAY + "" + ChatFormatting.ITALIC + "You have crafted " + crafts.size() + " unique items."), false);
+                    player.sendSystemMessage(Component.nullToEmpty(ChatFormatting.GRAY + "" + ChatFormatting.ITALIC + "You have crafted " + crafts.size() + " unique items."));
                 }
-                player.displayClientMessage(Component.nullToEmpty("Unique crafts: " + crafts.size()), true);
+                player.sendOverlayMessage(Component.nullToEmpty("Unique crafts: " + crafts.size()));
 
                 lockout.recalculateUniqueCraftsGoal(goal);
             }

@@ -3,7 +3,7 @@ package me.marin.lockout.lockout.goals.misc;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.texture.CustomTextureRenderer;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -29,9 +29,9 @@ public class UseBrushOnSuspiciousBlock extends Goal implements CustomTextureRend
     private static final List<ItemStack> SUSPICIOUS_BLOCKS = List.of(Items.SUSPICIOUS_GRAVEL.getDefaultInstance(), Items.SUSPICIOUS_SAND.getDefaultInstance());
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/overlay/brush_overlay.png");
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         int mod = tick % (60 * SUSPICIOUS_BLOCKS.size());
-        context.renderItem(SUSPICIOUS_BLOCKS.get(mod / 60), x, y);
+        context.item(SUSPICIOUS_BLOCKS.get(mod / 60), x, y);
         context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
         return true;
     }

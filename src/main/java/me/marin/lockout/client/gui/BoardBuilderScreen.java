@@ -12,7 +12,7 @@ import me.marin.lockout.lockout.texture.CustomTextureRenderer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.StringWidget;
@@ -249,7 +249,7 @@ public class BoardBuilderScreen extends Screen {
                         .withHoverEvent(new HoverEvent.ShowText(Component.nullToEmpty("Click to open boards directory.")))
                         .applyFormat(ChatFormatting.WHITE)
         );
-        Minecraft.getInstance().player.displayClientMessage(Component.literal("Saved custom board as " + boardName + BoardBuilderIO.FILE_EXTENSION + "!\n").withStyle(ChatFormatting.GREEN).append(openBoardFile).append(" ").append(openBoardsDirectory), false);
+        Minecraft.getInstance().player.sendSystemMessage(Component.literal("Saved custom board as " + boardName + BoardBuilderIO.FILE_EXTENSION + "!\n").withStyle(ChatFormatting.GREEN).append(openBoardFile).append(" ").append(openBoardsDirectory));
         onClose();
     }
 
@@ -266,9 +266,9 @@ public class BoardBuilderScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         //this.renderBackground(context, mouseX, mouseY, delta);
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
 
         drawCenterBoard(context, mouseX, mouseY);
 
@@ -358,7 +358,7 @@ public class BoardBuilderScreen extends Screen {
         return super.keyPressed(input);
     }
 
-    public void drawCenterBoard(GuiGraphics context, int mouseX, int mouseY) {
+    public void drawCenterBoard(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         Font textRenderer = Minecraft.getInstance().font;
 
         int size = BoardBuilderData.INSTANCE.size();
@@ -387,8 +387,8 @@ public class BoardBuilderScreen extends Screen {
                         success = customTextureRenderer.renderTexture(context, x, y, LockoutClient.CURRENT_TICK);
                     }
                     if (!success) {
-                        context.renderItem(goal.getTextureItemStack(), x, y);
-                        context.renderItemDecorations(textRenderer, goal.getTextureItemStack(), x, y);
+                        context.item(goal.getTextureItemStack(), x, y);
+                        context.itemDecorations(textRenderer, goal.getTextureItemStack(), x, y);
                     }
                 }
 
@@ -416,7 +416,7 @@ public class BoardBuilderScreen extends Screen {
         }
     }
 
-    private static void drawBorder(GuiGraphics context, int x, int y, int width, int height, int color) {
+    private static void drawBorder(GuiGraphicsExtractor context, int x, int y, int width, int height, int color) {
         context.fill(x, y, x + width, y + 1, color);
         context.fill(x, y + height - 1, x + width, y + height, color);
         context.fill(x, y + 1, x + 1, y + height - 1, color);

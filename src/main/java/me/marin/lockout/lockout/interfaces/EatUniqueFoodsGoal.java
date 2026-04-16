@@ -7,7 +7,7 @@ import me.marin.lockout.lockout.texture.CustomTextureRenderer;
 import me.marin.lockout.server.LockoutServer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -36,9 +36,9 @@ public abstract class EatUniqueFoodsGoal extends Goal implements RequiresAmount,
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
-        context.renderItemDecorations(Minecraft.getInstance().font, DISPLAY_ITEM_STACK, x, y);
+        context.itemDecorations(Minecraft.getInstance().font, DISPLAY_ITEM_STACK, x, y);
         return true;
     }
 
@@ -54,7 +54,7 @@ public abstract class EatUniqueFoodsGoal extends Goal implements RequiresAmount,
 
         tooltip.add(" ");
         tooltip.add("Unique Food types: " + foods.size() + "/" + getAmount());
-        tooltip.addAll(HasTooltipInfo.commaSeparatedList(foods.stream().map(Item::getName).map(Component::getString).toList()));
+        tooltip.addAll(HasTooltipInfo.commaSeparatedList(foods.stream().map(Item::toString).toList()));
         tooltip.add(" ");
 
         return tooltip;

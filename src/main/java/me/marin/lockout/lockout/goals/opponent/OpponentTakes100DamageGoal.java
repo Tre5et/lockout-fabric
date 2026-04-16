@@ -5,7 +5,7 @@ import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.interfaces.OpponentGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -38,9 +38,9 @@ public class OpponentTakes100DamageGoal extends Goal implements TextureProvider,
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
-        context.renderItemDecorations(Minecraft.getInstance().font, DISPLAY_ITEM_STACK, x, y, "100");
+        context.itemDecorations(Minecraft.getInstance().font, DISPLAY_ITEM_STACK, x, y, "100");
         return true;
     }
 

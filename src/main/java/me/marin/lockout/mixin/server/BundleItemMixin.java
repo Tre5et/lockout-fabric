@@ -47,7 +47,7 @@ public class BundleItemMixin {
         BundleContents bcc = stack.get(DataComponents.BUNDLE_CONTENTS);
 
         // Check if bundle is completely full (no space left)
-        if (bcc.weight().compareTo(Fraction.ONE) < 0) {
+        if (bcc.weight().getOrThrow().compareTo(Fraction.ONE) < 0) {
             return;
         }
 

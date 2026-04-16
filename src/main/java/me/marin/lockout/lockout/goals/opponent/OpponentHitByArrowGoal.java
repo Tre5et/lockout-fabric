@@ -4,7 +4,7 @@ import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.interfaces.OpponentGoal;
 import me.marin.lockout.lockout.texture.CustomTextureRenderer;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -31,7 +31,7 @@ public class OpponentHitByArrowGoal extends Goal implements OpponentGoal, Custom
     }
 
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
         context.blit(RenderPipelines.GUI_TEXTURED, ITEM_TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
         context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 16, 16, 16, 16);
         return true;

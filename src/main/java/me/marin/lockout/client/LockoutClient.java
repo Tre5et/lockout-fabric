@@ -8,10 +8,10 @@ import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.goals.util.GoalDataConstants;
 import me.marin.lockout.network.*;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
@@ -161,8 +161,8 @@ public class LockoutClient implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             {
-                var commandNode = ClientCommandManager.literal("BoardPosition").build();
-                var positionNode = ClientCommandManager.argument("board position", BoardPositionArgumentType.newInstance()).executes((context) -> {
+                var commandNode = ClientCommands.literal("BoardPosition").build();
+                var positionNode = ClientCommands.argument("board position", BoardPositionArgumentType.newInstance()).executes((context) -> {
                     String position = context.getArgument("board position", String.class);
 
                     LockoutConfig.BoardPosition boardPosition = LockoutConfig.BoardPosition.match(position);
@@ -182,7 +182,7 @@ public class LockoutClient implements ClientModInitializer {
                 commandNode.addChild(positionNode);
             }
             {
-                var commandNode = ClientCommandManager.literal("BoardBuilder").executes((context) -> {
+                var commandNode = ClientCommands.literal("BoardBuilder").executes((context) -> {
                     Minecraft client = Minecraft.getInstance();
                     client.schedule(() -> {
                         if (client.player != null) {
@@ -193,7 +193,7 @@ public class LockoutClient implements ClientModInitializer {
                     return 1;
                 }).build();
 
-                var boardNameNode = ClientCommandManager.argument("board name", CustomBoardFileArgumentType.newInstance()).executes((context) -> {
+                var boardNameNode = ClientCommands.argument("board name", CustomBoardFileArgumentType.newInstance()).executes((context) -> {
                     String boardName = context.getArgument("board name", String.class);
 
                     JSONBoard jsonBoard;
@@ -228,14 +228,14 @@ public class LockoutClient implements ClientModInitializer {
                 dispatcher.getRoot().addChild(commandNode);
             }
             {
-                var commandNode = ClientCommandManager.literal("SetCustomBoard").requires(ccs -> {
+                var commandNode = ClientCommands.literal("SetCustomBoard").requires(ccs -> {
                     if (Minecraft.getInstance().isLocalServer()) {
                         return true;
                     }
                     return Permissions.check(ccs, PLACEHOLDER_PERM_STRING, LevelBasedPermissionSet.GAMEMASTER.level());
                 }).build();
 
-                var boardNameNode = ClientCommandManager.argument("board name", CustomBoardFileArgumentType.newInstance()).executes((context) -> {
+                var boardNameNode = ClientCommands.argument("board name", CustomBoardFileArgumentType.newInstance()).executes((context) -> {
                     String boardName = context.getArgument("board name", String.class);
 
                     JSONBoard jsonBoard;
@@ -274,7 +274,7 @@ public class LockoutClient implements ClientModInitializer {
             ClientPlayNetworking.send(new LockoutVersionPayload(LockoutInitializer.MOD_VERSION.getFriendlyString()));
         });
         
-        keyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        keyBinding = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.lockout.open_board", // The translation key of the keybinding's name
                 InputConstants.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
                 GLFW.GLFW_KEY_B, // The keycode of the key

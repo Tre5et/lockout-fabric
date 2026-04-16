@@ -6,7 +6,7 @@ import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.client.LockoutClient;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.contextualbar.ContextualBarRenderer;
 import net.minecraft.client.gui.contextualbar.LocatorBarRenderer;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -39,10 +39,10 @@ public abstract class LocatorBarMixin implements ContextualBarRenderer {
     @Shadow @Final private static Identifier LOCATOR_BAR_ARROW_DOWN;
 
     @Redirect(
-            method = "render",
+            method = "extractRenderState",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/waypoints/ClientWaypointManager;forEachWaypoint(Lnet/minecraft/world/entity/Entity;Ljava/util/function/Consumer;)V")
     )
-    private void lockout$renderHeads(ClientWaypointManager instance, Entity entity, Consumer<TrackedWaypoint> originalAction, GuiGraphics context, DeltaTracker tickCounter) {
+    private void lockout$renderHeads(ClientWaypointManager instance, Entity entity, Consumer<TrackedWaypoint> originalAction, GuiGraphicsExtractor context, DeltaTracker tickCounter) {
         Level world = entity.level();
         int centerY = top(this.minecraft.getWindow());
         PartialTickSupplier entityTickProgress = e -> tickCounter.getGameTimeDeltaPartialTick(!world.tickRateManager().isEntityFrozen(e));

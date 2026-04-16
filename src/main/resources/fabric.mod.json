@@ -8,7 +8,7 @@
   "contact": {},
   "license": "All-Rights-Reserved",
   "environment": "*",
-  "accessWidener": "lockout.accesswidener",
+  "accessWidener": "lockout.classtweaker",
   "entrypoints": {
     "client": [
       "me.marin.lockout.client.LockoutClient"
@@ -25,7 +25,7 @@
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",
-    "fabric": "*",
+    "fabric-api": "*",
     "minecraft": "${minecraft_version}"
   }
 }

@@ -7,7 +7,7 @@ import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.interfaces.MostStatGoal;
 import me.marin.lockout.lockout.texture.CustomTextureRenderer;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -35,8 +35,8 @@ public class HaveMostDiamondBlocksGoal extends Goal implements CustomTextureRend
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/overlay/up_overlay.png");
     
     @Override
-    public boolean renderTexture(GuiGraphics context, int x, int y, int tick) {
-        context.renderItem(ITEM_STACK, x, y);
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
+        context.item(ITEM_STACK, x, y);
         context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0,0, 16, 16, 16, 16);
         return true;
     }
