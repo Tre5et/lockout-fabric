@@ -19,7 +19,9 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.arrow.Arrow;
+import net.minecraft.world.entity.projectile.arrow.ThrownTrident;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEgg;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,15 +49,19 @@ public abstract class PlayerMixin {
 
             if (goal instanceof OpponentHitBySnowballGoal) {
                 if (entity instanceof Snowball snowballEntity) {
-                    if (snowballEntity.getOwner() instanceof Player shooter && !Objects.equals(player, shooter)) {
-                        lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " hit by " + shooter.getName().getString() + " with a Snowball.");
+                    if (snowballEntity.getOwner() instanceof Entity shooter) {
+                        lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " was hit by " + shooter.getName().getString() + " with a Snowball.");
+                    } else {
+                        lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " was hit with a Snowball.");
                     }
                 }
             }
             if (goal instanceof OpponentHitByEggGoal) {
                 if (entity instanceof ThrownEgg snowballEntity) {
-                    if (snowballEntity.getOwner() instanceof Player shooter && !Objects.equals(player, shooter)) {
-                        lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " hit by " + shooter.getName().getString() + " with an Egg.");
+                    if (snowballEntity.getOwner() instanceof Entity shooter) {
+                        lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " was hit by " + shooter.getName().getString() + " with an Egg.");
+                    } else {
+                        lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " was hit with an Egg.");
                     }
                 }
             }
@@ -103,9 +109,11 @@ public abstract class PlayerMixin {
                 }
             }
             if (goal instanceof OpponentHitByArrowGoal) {
-                if (source.getDirectEntity() instanceof Arrow arrowEntity) {
-                    if (arrowEntity.getOwner() instanceof Player shooter && !Objects.equals(player, shooter)) {
-                        lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " hit by " + shooter.getName().getString() + " with an Arrow.");
+                if (source.getDirectEntity() instanceof AbstractArrow arrowEntity && !(arrowEntity instanceof ThrownTrident)) {
+                    if (arrowEntity.getOwner() instanceof Entity shooter) {
+                        lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " was hit by " + shooter.getName().getString() + " with an Arrow.");
+                    } else {
+                        lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " was hit with an Arrow.");
                     }
                 }
             }
