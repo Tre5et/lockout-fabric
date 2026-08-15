@@ -37,6 +37,7 @@
     "server.PlayerAdvancementTrackerMixin",
     "server.PlayerInventoryAccessor",
     "server.PlayerMixin",
+    "server.PotentSulfurBlockEntityMixin",
     "server.PotionContentsComponentMixin",
     "server.RaidMixin",
     "server.ServerPlayerEntityMixin",

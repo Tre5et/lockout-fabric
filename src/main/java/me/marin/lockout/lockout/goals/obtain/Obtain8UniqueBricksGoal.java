@@ -36,7 +36,9 @@ public class Obtain8UniqueBricksGoal extends ObtainSomeOfTheItemsGoal {
         Items.CRACKED_POLISHED_BLACKSTONE_BRICKS,
         Items.PRISMARINE_BRICKS,
         Items.RESIN_BRICKS,
-        Items.CHISELED_RESIN_BRICKS
+        Items.CHISELED_RESIN_BRICKS,
+        Items.SULFUR_BRICKS,
+        Items.CINNABAR_BRICKS
     );
 
     public Obtain8UniqueBricksGoal(String id, String data) {

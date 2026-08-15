@@ -169,6 +169,10 @@ public class DefaultGoalRegister {
                 .biomeRequirement(BiomeRequirements.anyOf(WARM_OCEAN, DEEP_LUKEWARM_OCEAN, LUKEWARM_OCEAN, LUSH_CAVES, MANGROVE_SWAMP))
                 .build()
         );
+        INSTANCE.register(GoalType.OBTAIN_SULFUR_CUBE_BUCKET, ObtainBucketOfSulfurCubeGoal.class, new GoalRequirements.Builder()
+                .biomeRequirement(BiomeRequirements.single(SULFUR_CAVES))
+                .build()
+        );
         INSTANCE.register(GoalType.OBTAIN_BOOKSHELF, ObtainBookshelfGoal.class);
         INSTANCE.register(GoalType.OBTAIN_MOSSY_STONE_BRICK_WALL, ObtainMossyStoneBrickWallGoal.class);
         INSTANCE.register(GoalType.OBTAIN_FLOWERING_AZALEA, ObtainFloweringAzaleaGoal.class);
@@ -395,6 +399,10 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.DEAL_400_DAMAGE, Deal400DamageGoal.class);
         INSTANCE.register(GoalType.SPRINT_1_KM, Sprint1KmGoal.class);
         INSTANCE.register(GoalType.BOAT_2_KM, Boat2KmGoal.class);
+        INSTANCE.register(GoalType.GET_LAUNCHED_BY_GEYSER, GetLaunchedByGeyserGoal.class, new GoalRequirements.Builder()
+                .biomeRequirement(BiomeRequirements.single(SULFUR_CAVES))
+                .build()
+        );
         INSTANCE.register(GoalType.GET_HIRED_HELP_ADVANCEMENT, GetHiredHelpAdvancementGoal.class);
         INSTANCE.register(GoalType.GET_STAY_HYDRATED_ADVANCEMENT, GetStayHydratedAdvancementGoal.class);
         INSTANCE.register(GoalType.GET_WAX_ON_ADVANCEMENT, GetWaxOnAdvancementGoal.class);

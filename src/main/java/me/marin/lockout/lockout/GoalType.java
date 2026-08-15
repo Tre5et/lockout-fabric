@@ -62,6 +62,7 @@ public class GoalType {
     public static final String KILL_20_ARTHROPOD_MOBS = "KILL_20_ARTHROPOD_MOBS";
     public static final String OBTAIN_RED_NETHER_BRICK_STAIRS = "OBTAIN_RED_NETHER_BRICK_STAIRS";
     public static final String OBTAIN_TROPICAL_FISH_BUCKET = "OBTAIN_TROPICAL_FISH_BUCKET";
+    public static final String OBTAIN_SULFUR_CUBE_BUCKET = "OBTAIN_SULFUR_CUBE_BUCKET";
     public static final String OBTAIN_BOOKSHELF = "OBTAIN_BOOKSHELF";
     public static final String OBTAIN_MOSSY_STONE_BRICK_WALL = "OBTAIN_MOSSY_STONE_BRICK_WALL";
     public static final String OBTAIN_FLOWERING_AZALEA = "OBTAIN_FLOWERING_AZALEA";
@@ -227,6 +228,7 @@ public class GoalType {
     public static final String DEAL_400_DAMAGE = "DEAL_400_DAMAGE";
     public static final String SPRINT_1_KM = "SPRINT_1_KM";
     public static final String BOAT_2_KM = "BOAT_2_KM";
+    public static final String GET_LAUNCHED_BY_GEYSER = "GET_LAUNCHED_BY_GEYSER";
     public static final String PUT_BANNER_ON_SHIELD = "PUT_BANNER_ON_SHIELD";
     public static final String HAVE_MORE_UNIQUE_CRAFTS = "HAVE_MORE_UNIQUE_CRAFTS";
     public static final String HAVE_MOST_PLAYER_KILLS = "HAVE_MOST_PLAYER_KILLS";
