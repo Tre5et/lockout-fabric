@@ -91,7 +91,7 @@ public class LockoutClient implements ClientModInitializer {
             Minecraft client = context.client();
             client.execute(() -> {
                 if (client.player != null && !previouslyStarted) {
-                    client.setScreen(new BoardScreen(BOARD_SCREEN_HANDLER.create(0, client.player.getInventory()), client.player.getInventory(), Component.empty()));
+                    client.gui.setScreen(new BoardScreen(BOARD_SCREEN_HANDLER.create(0, client.player.getInventory()), client.player.getInventory(), Component.empty()));
                 }
             });
         });
@@ -101,8 +101,8 @@ public class LockoutClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(StartLockoutPayload.ID, (payload, context) -> {
             lockout.setStarted(true);
             context.client().execute(() -> {
-                if (Minecraft.getInstance().screen != null) {
-                    Minecraft.getInstance().screen.onClose();
+                if (Minecraft.getInstance().gui.screen() != null) {
+                    Minecraft.getInstance().gui.screen().onClose();
                 }
             });
         });
@@ -186,7 +186,7 @@ public class LockoutClient implements ClientModInitializer {
                     Minecraft client = Minecraft.getInstance();
                     client.schedule(() -> {
                         if (client.player != null) {
-                            client.setScreen(new BoardBuilderScreen());
+                            client.gui.setScreen(new BoardBuilderScreen());
                         }
                     });
 
@@ -217,7 +217,7 @@ public class LockoutClient implements ClientModInitializer {
                     client.schedule(() -> {
                         if (client.player != null) {
                             BoardBuilderData.INSTANCE.setBoard(boardName, size, goals);
-                            client.setScreen(new BoardBuilderScreen());
+                            client.gui.setScreen(new BoardBuilderScreen());
                         }
                     });
 
@@ -289,18 +289,18 @@ public class LockoutClient implements ClientModInitializer {
                 wasPressed = true;
             }
             if (wasPressed) {
-                if (client.screen != null || client.player == null) {
+                if (client.gui.screen() != null || client.player == null) {
                     return;
                 }
 
                 // If the game hasn't started, open board builder instead
                 if (!Lockout.exists(lockout)) {
-                    client.setScreen(new BoardBuilderScreen());
+                    client.gui.setScreen(new BoardBuilderScreen());
                     return;
                 }
 
                 // Open GUI
-                client.setScreen(new BoardScreen(BOARD_SCREEN_HANDLER.create(0, client.player.getInventory()), client.player.getInventory(), Component.empty()));
+                client.gui.setScreen(new BoardScreen(BOARD_SCREEN_HANDLER.create(0, client.player.getInventory()), client.player.getInventory(), Component.empty()));
             }
         });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {

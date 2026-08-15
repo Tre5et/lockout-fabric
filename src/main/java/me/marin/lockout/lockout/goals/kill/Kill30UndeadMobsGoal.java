@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -36,23 +37,23 @@ public class Kill30UndeadMobsGoal extends KillSpecificMobsGoal implements CycleT
     zombie horse, zombie villager, zombified piglin, bogged, parched, zombie nautilus, camel husk
     */
     private static final List<EntityType<?>> UNDEAD_MOBS = List.of(
-            EntityType.DROWNED,
-            EntityType.HUSK,
-            EntityType.PHANTOM,
-            EntityType.SKELETON,
-            EntityType.SKELETON_HORSE,
-            EntityType.STRAY,
-            EntityType.WITHER,
-            EntityType.WITHER_SKELETON,
-            EntityType.ZOGLIN,
-            EntityType.ZOMBIE,
-            EntityType.ZOMBIE_HORSE,
-            EntityType.ZOMBIE_VILLAGER,
-            EntityType.ZOMBIFIED_PIGLIN,
-            EntityType.BOGGED,
-            EntityType.PARCHED,
-            EntityType.ZOMBIE_NAUTILUS,
-            EntityType.CAMEL_HUSK
+            EntityTypes.DROWNED,
+            EntityTypes.HUSK,
+            EntityTypes.PHANTOM,
+            EntityTypes.SKELETON,
+            EntityTypes.SKELETON_HORSE,
+            EntityTypes.STRAY,
+            EntityTypes.WITHER,
+            EntityTypes.WITHER_SKELETON,
+            EntityTypes.ZOGLIN,
+            EntityTypes.ZOMBIE,
+            EntityTypes.ZOMBIE_HORSE,
+            EntityTypes.ZOMBIE_VILLAGER,
+            EntityTypes.ZOMBIFIED_PIGLIN,
+            EntityTypes.BOGGED,
+            EntityTypes.PARCHED,
+            EntityTypes.ZOMBIE_NAUTILUS,
+            EntityTypes.CAMEL_HUSK
     );
     public Kill30UndeadMobsGoal(String id, String data) {
         super(id, data);

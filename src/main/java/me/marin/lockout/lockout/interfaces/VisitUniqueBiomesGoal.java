@@ -59,7 +59,7 @@ public abstract class VisitUniqueBiomesGoal extends Goal implements RequiresAmou
         tooltip.add(" ");
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
             var biomes = LockoutServer.lockout.visitedBiomes.getOrDefault(team, new LinkedHashSet<>());
-            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + biomes.size() + "/" + getAmount());
+            tooltip.add(team.getChatFormatting() + team.getDisplayName() + ChatFormatting.RESET + ": " + biomes.size() + "/" + getAmount());
         }
         tooltip.add(" ");
 

@@ -5,6 +5,7 @@ import me.marin.lockout.lockout.interfaces.RideEntityGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
 
 public class RideNautilusGoal extends RideEntityGoal implements TextureProvider {
@@ -15,7 +16,7 @@ public class RideNautilusGoal extends RideEntityGoal implements TextureProvider 
 
     @Override
     public EntityType<?> getEntityType() {
-        return EntityType.NAUTILUS;
+        return EntityTypes.NAUTILUS;
     }
 
     @Override

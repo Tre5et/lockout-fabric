@@ -31,7 +31,7 @@ public interface MostStatGoal extends HasTooltipInfo {
 
         tooltip.add(" ");
         for (LockoutTeam t : lockout.getTeams()) {
-            tooltip.add(t.getColor() + t.getDisplayName() + ChatFormatting.RESET + ": " + getStat(t));
+            tooltip.add(t.getChatFormatting() + t.getDisplayName() + ChatFormatting.RESET + ": " + getStat(t));
         }
         tooltip.add(" ");
 

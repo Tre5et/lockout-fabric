@@ -6,7 +6,7 @@ import net.minecraft.world.item.Items;
 
 public class ConstructCopperGolemGoal extends Goal {
 
-    private static final ItemStack ITEM_STACK = Items.COPPER_CHEST.getDefaultInstance();
+    private static final ItemStack ITEM_STACK = Items.COPPER_CHEST.weathering().unaffected().getDefaultInstance();
 
     public ConstructCopperGolemGoal(String id, String data) {
         super(id, data);

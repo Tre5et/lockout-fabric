@@ -5,6 +5,7 @@ import me.marin.lockout.lockout.interfaces.BreedAnimalGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 
 public class BreedHoglinGoal extends BreedAnimalGoal implements TextureProvider {
 
@@ -19,7 +20,7 @@ public class BreedHoglinGoal extends BreedAnimalGoal implements TextureProvider 
 
     @Override
     public EntityType<?> getAnimal() {
-        return EntityType.HOGLIN;
+        return EntityTypes.HOGLIN;
     }
 
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/breed/breed_hoglin.png");

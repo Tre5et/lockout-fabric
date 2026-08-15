@@ -8,10 +8,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.TeamColor;
 
 import static me.marin.lockout.server.LockoutServer.lockout;
 
@@ -23,7 +25,7 @@ public class AllowChatMessageEventHandler implements ServerMessageEvents.AllowCh
             String m = "[Team Chat] " + ChatFormatting.RESET + "<" + sender.getName().getString() + "> " + message.decoratedContent().getString();
             if (Lockout.isLockoutRunning(lockout)) {
                 LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(sender.getUUID());
-                team.sendMessage(team.getColor() + m);
+                team.sendMessage(team.getChatFormatting() + m);
             } else {
                 PlayerTeam team = sender.getTeam();
                 if (team == null) {
@@ -33,7 +35,7 @@ public class AllowChatMessageEventHandler implements ServerMessageEvents.AllowCh
                 PlayerList pm = server.getPlayerList();
 
                 team.getPlayers().stream().filter(p -> pm.getPlayerByName(p) != null).map(pm::getPlayerByName).forEach(p ->{
-                    p.sendSystemMessage(Component.literal(team.getColor() + m));
+                    p.sendSystemMessage(Component.literal(m).withColor(team.getColor().orElse(TeamColor.WHITE).textColor()));
                 });
             }
             return false;

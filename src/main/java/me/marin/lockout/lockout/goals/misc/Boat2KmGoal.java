@@ -65,7 +65,7 @@ public class Boat2KmGoal extends Goal implements CustomTextureRenderer, HasToolt
             for (UUID playerId : ((LockoutTeamServer) team).getPlayerIds()) {
                 maxDistance = Math.max(maxDistance, LockoutServer.lockout.distanceBoated.getOrDefault(playerId, 0));
             }
-            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + Math.min(2000, maxDistance / 100) + "/2000m");
+            tooltip.add(team.getChatFormatting() + team.getDisplayName() + ChatFormatting.RESET + ": " + Math.min(2000, maxDistance / 100) + "/2000m");
         }
         tooltip.add(" ");
 

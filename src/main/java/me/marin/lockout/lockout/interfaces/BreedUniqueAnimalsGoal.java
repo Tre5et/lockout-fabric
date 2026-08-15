@@ -52,7 +52,7 @@ public abstract class BreedUniqueAnimalsGoal extends Goal implements RequiresAmo
         tooltip.add(" ");
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
             var animals = LockoutServer.lockout.bredAnimalTypes.getOrDefault(team, new LinkedHashSet<>());
-            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + animals.size() + "/" + getAmount());
+            tooltip.add(team.getChatFormatting() + team.getDisplayName() + ChatFormatting.RESET + ": " + animals.size() + "/" + getAmount());
         }
         tooltip.add(" ");
 

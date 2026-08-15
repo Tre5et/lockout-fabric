@@ -46,22 +46,22 @@ public class Obtain64ColoredWoolGoal extends ObtainAllItemsGoal implements Requi
     public static Item getWoolColor(String colorString) {
         return switch (colorString) {
             default -> null;
-            case "white" -> Items.WHITE_WOOL;
-            case "orange" -> Items.ORANGE_WOOL;
-            case "magenta" -> Items.MAGENTA_WOOL;
-            case "light_blue" -> Items.LIGHT_BLUE_WOOL;
-            case "yellow" -> Items.YELLOW_WOOL;
-            case "lime" -> Items.LIME_WOOL;
-            case "pink" -> Items.PINK_WOOL;
-            case "gray" -> Items.GRAY_WOOL;
-            case "light_gray" -> Items.LIGHT_GRAY_WOOL;
-            case "cyan" -> Items.CYAN_WOOL;
-            case "purple" -> Items.PURPLE_WOOL;
-            case "blue" -> Items.BLUE_WOOL;
-            case "brown" -> Items.BROWN_WOOL;
-            case "green" -> Items.GREEN_WOOL;
-            case "red" -> Items.RED_WOOL;
-            case "black" -> Items.BLACK_WOOL;
+            case "white" -> Items.WOOL.white();
+            case "orange" -> Items.WOOL.orange();
+            case "magenta" -> Items.WOOL.magenta();
+            case "light_blue" -> Items.WOOL.lightBlue();
+            case "yellow" -> Items.WOOL.yellow();
+            case "lime" -> Items.WOOL.lime();
+            case "pink" -> Items.WOOL.pink();
+            case "gray" -> Items.WOOL.gray();
+            case "light_gray" -> Items.WOOL.lightGray();
+            case "cyan" -> Items.WOOL.cyan();
+            case "purple" -> Items.WOOL.purple();
+            case "blue" -> Items.WOOL.blue();
+            case "brown" -> Items.WOOL.brown();
+            case "green" -> Items.WOOL.green();
+            case "red" -> Items.WOOL.red();
+            case "black" -> Items.WOOL.black();
         };
     }
 

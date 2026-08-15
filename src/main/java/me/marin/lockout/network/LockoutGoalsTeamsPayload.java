@@ -6,6 +6,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.scores.TeamColor;
 import oshi.util.tuples.Pair;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public record LockoutGoalsTeamsPayload(List<LockoutTeam> teams, List<Pair<Pair<S
             List<LockoutTeam> teams = new ArrayList<>(teamsSize);
             for (int i = 0; i < teamsSize; i++) {
                 int teamSize = buf.readInt();
-                ChatFormatting color = ChatFormatting.getByName(buf.readUtf());
+                TeamColor color = TeamColor.byName(buf.readUtf());
                 List<String> playerNames = new ArrayList<>();
                 List<UUID> playerIds = new ArrayList<>();
                 for (int j = 0; j < teamSize; j++) {
@@ -54,7 +55,7 @@ public record LockoutGoalsTeamsPayload(List<LockoutTeam> teams, List<Pair<Pair<S
             buf.writeInt(teams.size());
             for (LockoutTeam team : payload.teams()) {
                 buf.writeInt(team.getPlayerNames().size());
-                buf.writeUtf(team.getColor().getName());
+                buf.writeUtf(team.getColor().getSerializedName());
                 for (int i = 0; i < team.getPlayerNames().size(); i++) {
                     buf.writeUtf(team.getPlayerNames().get(i));
                     buf.writeUUID(team.getPlayerIds().get(i));

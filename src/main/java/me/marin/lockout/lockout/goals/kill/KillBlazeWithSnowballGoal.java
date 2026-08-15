@@ -5,6 +5,7 @@ import me.marin.lockout.lockout.interfaces.KillMobGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
 
 public class KillBlazeWithSnowballGoal extends KillMobGoal implements TextureProvider {
@@ -32,6 +33,6 @@ public class KillBlazeWithSnowballGoal extends KillMobGoal implements TexturePro
 
     @Override
     public EntityType<?> getEntity() {
-        return EntityType.BLAZE;
+        return EntityTypes.BLAZE;
     }
 }

@@ -35,7 +35,7 @@ public abstract class KillUniqueHostileMobsGoal extends Goal implements Requires
         tooltip.add(" ");
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
             var hostiles = LockoutServer.lockout.killedHostileTypes.getOrDefault(team, new LinkedHashSet<>());
-            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + hostiles.size() + "/" + getAmount());
+            tooltip.add(team.getChatFormatting() + team.getDisplayName() + ChatFormatting.RESET + ": " + hostiles.size() + "/" + getAmount());
         }
         tooltip.add(" ");
 

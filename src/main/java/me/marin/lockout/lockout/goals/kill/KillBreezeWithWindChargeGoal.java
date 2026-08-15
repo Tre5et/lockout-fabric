@@ -5,6 +5,7 @@ import me.marin.lockout.lockout.interfaces.KillMobGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
 
 public class KillBreezeWithWindChargeGoal extends KillMobGoal implements TextureProvider {
@@ -15,7 +16,7 @@ public class KillBreezeWithWindChargeGoal extends KillMobGoal implements Texture
 
     @Override
     public EntityType<?> getEntity() {
-        return EntityType.BREEZE;
+        return EntityTypes.BREEZE;
     }
 
     @Override

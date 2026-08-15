@@ -7,13 +7,15 @@ import me.marin.lockout.client.LockoutClient;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.contextualbar.ContextualBarRenderer;
-import net.minecraft.client.gui.contextualbar.LocatorBarRenderer;
+import net.minecraft.client.gui.contextualbar.ContextualBar;
+import net.minecraft.client.gui.contextualbar.LocatorBar;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.WaypointStyle;
 import net.minecraft.client.waypoints.ClientWaypointManager;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ColorRGBA;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.PlayerSkin;
@@ -30,8 +32,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.util.function.Consumer;
 import java.util.UUID;
 
-@Mixin(LocatorBarRenderer.class)
-public abstract class LocatorBarMixin implements ContextualBarRenderer {
+@Mixin(LocatorBar.class)
+public abstract class LocatorBarMixin implements ContextualBar {
 
     @Shadow @Final private Minecraft minecraft;
 
@@ -53,7 +55,7 @@ public abstract class LocatorBarMixin implements ContextualBarRenderer {
                 return;
             }
 
-            double yaw = waypoint.yawAngleToCamera(world, (TrackedWaypoint.Camera) this.minecraft.gameRenderer.getMainCamera(), entityTickProgress);
+            double yaw = waypoint.yawAngleToCamera(world, (TrackedWaypoint.Camera) this.minecraft.gameRenderer.mainCamera(), entityTickProgress);
             if (yaw <= -60.0 || yaw > 60.0) {
                 return;
             }
@@ -77,7 +79,7 @@ public abstract class LocatorBarMixin implements ContextualBarRenderer {
                     LockoutTeam team = LockoutClient.lockout != null ? LockoutClient.lockout.getPlayerTeam(uuid) : null;
                     int teamColor = -1;
                     if (team != null) {
-                        Integer val = team.getColor().getColor();
+                        Integer val = team.getColor().textColor().getValue();
                         if (val != null) teamColor = val | 0xFF000000;
                     }
 
@@ -103,7 +105,7 @@ public abstract class LocatorBarMixin implements ContextualBarRenderer {
 
             if (!renderedHead) {
                 // Fallback to original sprite rendering
-                WaypointStyle style = this.minecraft.getWaypointStyles().get(config.style);
+                WaypointStyle style = this.minecraft.gui.hud.getWaypointStyles().get(config.style);
                 float dist = Mth.sqrt((float) waypoint.distanceSquared(entity));
                 Identifier identifier = style.sprite(dist);
                 int color = config.color.orElseGet(() -> 0xFFFFFF);

@@ -6,6 +6,7 @@ import me.marin.lockout.lockout.interfaces.KillMobGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +29,7 @@ public class KillColoredSheepGoal extends KillMobGoal implements TextureProvider
 
     @Override
     public EntityType<?> getEntity() {
-        return EntityType.SHEEP;
+        return EntityTypes.SHEEP;
     }
 
     public DyeColor getDyeColor() {

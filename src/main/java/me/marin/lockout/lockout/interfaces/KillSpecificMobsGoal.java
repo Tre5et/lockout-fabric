@@ -22,7 +22,7 @@ public abstract class KillSpecificMobsGoal extends Goal implements RequiresAmoun
 
         tooltip.add(" ");
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
-            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + getTrackerMap().getOrDefault(team, 0) + "/" + getAmount());
+            tooltip.add(team.getChatFormatting() + team.getDisplayName() + ChatFormatting.RESET + ": " + getTrackerMap().getOrDefault(team, 0) + "/" + getAmount());
         }
         tooltip.add(" ");
 

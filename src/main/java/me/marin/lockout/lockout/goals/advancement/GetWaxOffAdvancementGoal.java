@@ -9,7 +9,7 @@ import java.util.List;
 
 public class GetWaxOffAdvancementGoal extends AdvancementGoal {
 
-    private static final Item ITEM = Items.EXPOSED_COPPER;
+    private static final Item ITEM = Items.COPPER_BLOCK.waxed().exposed();
 
     public GetWaxOffAdvancementGoal(String id, String data) {
         super(id, data);

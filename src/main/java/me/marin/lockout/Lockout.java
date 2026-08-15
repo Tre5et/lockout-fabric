@@ -21,6 +21,7 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.scores.TeamColor;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +33,7 @@ public class Lockout {
 
     private static final Logger logger = LogManager.getLogger("Lockout");
     public static final Random random = new Random();
-    public static final int[] COLOR_ORDERS = new int[]{12, 9, 10, 14, 6, 13, 11, 5, 3, 2, 15, 4, 7, 1, 8, 0};
+    public static final TeamColor[] COLOR_ORDERS = new TeamColor[]{TeamColor.RED, TeamColor.BLUE, TeamColor.GREEN, TeamColor.YELLOW, TeamColor.GOLD, TeamColor.LIGHT_PURPLE, TeamColor.AQUA, TeamColor.DARK_PURPLE, TeamColor.DARK_AQUA, TeamColor.DARK_GREEN, TeamColor.WHITE, TeamColor.DARK_RED, TeamColor.GRAY, TeamColor.DARK_BLUE, TeamColor.DARK_GRAY, TeamColor.BLACK};
 
     public final Map<LockoutTeam, LinkedHashSet<EntityType<?>>> bredAnimalTypes = new HashMap<>();
     public final Map<LockoutTeam, LinkedHashSet<EntityType<?>>> killedHostileTypes = new HashMap<>();

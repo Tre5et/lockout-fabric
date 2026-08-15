@@ -21,7 +21,7 @@ import java.util.List;
 
 public class Kill100MobsGoal extends Goal implements TextureProvider, CustomTextureRenderer, HasTooltipInfo, RequiresAmount {
 
-    private final static ItemStack DISPLAY_ITEM_STACK = Items.RED_DYE.getDefaultInstance();
+    private final static ItemStack DISPLAY_ITEM_STACK = Items.DYE.red().getDefaultInstance();
     static {
         DISPLAY_ITEM_STACK.setCount(64);
     }
@@ -69,7 +69,7 @@ public class Kill100MobsGoal extends Goal implements TextureProvider, CustomText
 
         tooltip.add(" ");
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
-            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + LockoutServer.lockout.mobsKilled.getOrDefault(team, 0) + "/" + getAmount());
+            tooltip.add(team.getChatFormatting() + team.getDisplayName() + ChatFormatting.RESET + ": " + LockoutServer.lockout.mobsKilled.getOrDefault(team, 0) + "/" + getAmount());
         }
         tooltip.add(" ");
 

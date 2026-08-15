@@ -70,7 +70,7 @@ public class Sprint1KmGoal extends Goal implements CustomTextureRenderer, HasToo
             for (UUID playerId : ((LockoutTeamServer) team).getPlayerIds()) {
                 maxDistance = Math.max(maxDistance, LockoutServer.lockout.distanceSprinted.getOrDefault(playerId, 0));
             }
-            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + Math.min(1000, maxDistance / 100) + "/1000m");
+            tooltip.add(team.getChatFormatting() + team.getDisplayName() + ChatFormatting.RESET + ": " + Math.min(1000, maxDistance / 100) + "/1000m");
         }
         tooltip.add(" ");
 

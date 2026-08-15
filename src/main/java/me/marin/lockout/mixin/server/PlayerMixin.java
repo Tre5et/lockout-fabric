@@ -197,7 +197,7 @@ public abstract class PlayerMixin {
     }
 
     @Inject(method = "blockUsingItem", at = @At(value = "TAIL"))
-    public void onTakeShieldHit(ServerLevel world, LivingEntity attacker, CallbackInfo ci) {
+    public void onTakeShieldHit(ServerLevel world, LivingEntity attacker, DamageSource source, float damage, CallbackInfo ci) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
         Player player = (Player) (Object) this;

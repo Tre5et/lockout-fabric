@@ -6,6 +6,7 @@ import me.marin.lockout.lockout.goals.misc.PlacePaintingGoal;
 import me.marin.lockout.server.LockoutServer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HangingEntityItem;
@@ -26,7 +27,7 @@ public class DecorationItemMixin {
     public void onUseOnBlock(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
         if (context.getLevel().isClientSide()) return;
         if (cir.getReturnValue() != InteractionResult.SUCCESS) return;
-        if (this.type != EntityType.PAINTING) return;
+        if (this.type != EntityTypes.PAINTING) return;
 
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;

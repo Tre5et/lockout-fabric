@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Wolf.class)
 public class WolfEntityMixin {
 
-    @Inject(method = "mobInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/wolf/Wolf;setBodyArmorItem(Lnet/minecraft/world/item/ItemStack;)V", ordinal = 0))
+    @Inject(method = "mobInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/wolf/Wolf;setItemSlotAndDropWhenKilled(Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;)V", ordinal = 0))
     public void onEquipArmor(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         if (player.level().isClientSide()) return;
 

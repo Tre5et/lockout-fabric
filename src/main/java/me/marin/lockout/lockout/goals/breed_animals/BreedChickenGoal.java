@@ -4,7 +4,9 @@ import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.interfaces.BreedAnimalGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 
 public class BreedChickenGoal extends BreedAnimalGoal implements TextureProvider {
 
@@ -19,7 +21,7 @@ public class BreedChickenGoal extends BreedAnimalGoal implements TextureProvider
 
     @Override
     public EntityType<?> getAnimal() {
-        return EntityType.CHICKEN;
+        return EntityTypes.CHICKEN;
     }
 
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/breed/breed_chicken.png");

@@ -21,6 +21,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import java.util.HashSet;
@@ -99,10 +100,9 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
 
                 if (goal instanceof RideEntityGoal rideEntityGoal && player.isPassenger()) {
                     EntityType<?> vehicle = player.getVehicle().getType();
-
-                    if (Objects.equals(vehicle, rideEntityGoal.getEntityType()) || (rideEntityGoal.getEntityType() == EntityType.NAUTILUS && vehicle == EntityType.ZOMBIE_NAUTILUS)) {
+                    if (Objects.equals(vehicle, rideEntityGoal.getEntityType()) || (rideEntityGoal.getEntityType() == EntityTypes.NAUTILUS && vehicle == EntityTypes.ZOMBIE_NAUTILUS)) {
                         boolean allow = true;
-                        if (Objects.equals(vehicle, EntityType.PIG)) {
+                        if (Objects.equals(vehicle, EntityTypes.PIG)) {
                             boolean hasCarrotOnAStick = false;
                             var handItem = player.getInventory().getSelectedItem();
                             if (handItem.getItem().equals(Items.CARROT_ON_A_STICK)) {

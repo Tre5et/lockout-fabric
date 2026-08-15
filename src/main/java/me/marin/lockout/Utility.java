@@ -11,6 +11,8 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.FormattedCharSequence;
@@ -24,13 +26,13 @@ import static me.marin.lockout.LockoutConfig.BoardPosition.LEFT;
 
 public class Utility {
 
-    public static int FF000000 = 0xFF000000;
+    public static int NEUTRAL = 0xFF000000;
 
     public static void drawBingoBoard(GuiGraphicsExtractor context) {
         LockoutConfig.BoardPosition boardPosition = LockoutConfig.getInstance().boardPosition;
 
         // Don't render board if F3 is open with left-side board.
-        if (boardPosition == LockoutConfig.BoardPosition.LEFT && Minecraft.getInstance().gui.getDebugOverlay().showDebugScreen()) {
+        if (boardPosition == LockoutConfig.BoardPosition.LEFT && Minecraft.getInstance().gui.hud.getDebugOverlay().showDebugScreen()) {
             return;
         }
 
@@ -59,7 +61,7 @@ public class Utility {
                 Goal goal = board.getGoals().get(j + board.size() * i);
                 if (goal != null) {
                     if (goal.isCompleted()) {
-                        context.fill(x, y, x + 16, y + 16, FF000000 | goal.getCompletedTeam().getColor().getColor());
+                        context.fill(x, y, x + 16, y + 16, NEUTRAL | goal.getCompletedTeam().getColor().textColor().getValue());
                     }
 
                     goal.render(context, textRenderer, x, y);
@@ -72,21 +74,28 @@ public class Utility {
         }
         x += 2;
         y += 1;
-        List<String> pointsList = new ArrayList<>();
+        MutableComponent formattedPoints = Component.empty();
         for (LockoutTeam team : lockout.getTeams()) {
-            pointsList.add(team.getColor() + "" + team.getPoints() + ChatFormatting.RESET);
+            if(!formattedPoints.equals(Component.empty())) {
+                formattedPoints.append(
+                        Component.literal("-").withColor(TextColor.WHITE)
+                );
+            }
+            formattedPoints.append(
+                    Component.literal(String.valueOf(team.getPoints())).withColor(team.getColor().textColor())
+            );
         }
 
-        context.text(textRenderer, String.join(ChatFormatting.RESET + "" + ChatFormatting.GRAY + "-", pointsList), x, y, FF000000, true);
+        if(formattedPoints != null) context.text(textRenderer, formattedPoints, x, y, NEUTRAL, true);
 
-        String timer = Utility.ticksToTimer(lockout.getTicks());
-        context.text(textRenderer, ChatFormatting.WHITE + timer, boardRightEdgeX - textRenderer.width(timer) - 4, y, FF000000, true);
+        Component timer = Component.literal(Utility.ticksToTimer(lockout.getTicks())).withColor(TextColor.WHITE);
+        context.text(textRenderer, timer, boardRightEdgeX - textRenderer.width(timer) - 4, y, NEUTRAL, true);
 
-        List<String> formattedNames = new ArrayList<>();
+        List<Component> formattedNames = new ArrayList<>();
         int maxWidth = 0;
         for (LockoutTeam team : lockout.getTeams()) {
             for (String playerName : team.getPlayerNames()) {
-                formattedNames.add(team.getColor() + playerName);
+                formattedNames.add(Component.literal(playerName).withColor(team.getColor().textColor()));
                 maxWidth = Math.max(maxWidth, textRenderer.width(playerName));
             }
         }
@@ -96,16 +105,16 @@ public class Utility {
             case RIGHT -> {
                 context.fill(context.guiWidth() - maxWidth - 3 - 1,  y - 2, context.guiWidth() - 1, y + formattedNames.size() * textRenderer.lineHeight + 1, 0x80_00_00_00);
 
-                for (String formattedName : formattedNames) {
-                    context.text(textRenderer, formattedName, context.guiWidth() - textRenderer.width(formattedName) - 2, y, FF000000, true);
+                for (Component formattedName : formattedNames) {
+                    context.text(textRenderer, formattedName, context.guiWidth() - textRenderer.width(formattedName) - 2, y, NEUTRAL, true);
                     y += textRenderer.lineHeight;
                 }
             }
             case LEFT -> {
                 context.fill(1,  y - 2, 4 + maxWidth, y + formattedNames.size() * textRenderer.lineHeight + 1, 0x80_00_00_00);
 
-                for (String formattedName : formattedNames) {
-                    context.text(textRenderer, formattedName, 3, y, FF000000, true);
+                for (Component formattedName : formattedNames) {
+                    context.text(textRenderer, formattedName, 3, y, NEUTRAL, true);
                     y += textRenderer.lineHeight;
                 }
             }
@@ -138,7 +147,7 @@ public class Utility {
                 Goal goal = board.getGoals().get(j + board.size() * i);
                 if (goal != null) {
                     if (goal.isCompleted()) {
-                        context.fill(x, y, x + 16, y + 16, (0xFF << 24) | goal.getCompletedTeam().getColor().getColor());
+                        context.fill(x, y, x + 16, y + 16, (0xFF << 24) | goal.getCompletedTeam().getColor().textColor().getValue());
                     }
 
                     goal.render(context, textRenderer, x, y);

@@ -105,7 +105,7 @@ public class WearCarvedPumpkinFor5MinutesGoal extends WearArmorPieceGoal impleme
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
             for (UUID uuid : ((LockoutTeamServer) team).getPlayerIds()) {
                 long timeWorn = Math.min(FIVE_MINUTES_TICKS, LockoutServer.lockout.pumpkinWearTime.getOrDefault(uuid, 0L));
-                tooltip.add(team.getColor() + ((LockoutTeamServer) team).getPlayerName(uuid) + ChatFormatting.RESET + ": " + Utility.ticksToTimer(timeWorn));
+                tooltip.add(team.getChatFormatting() + ((LockoutTeamServer) team).getPlayerName(uuid) + ChatFormatting.RESET + ": " + Utility.ticksToTimer(timeWorn));
             }
         }
         tooltip.add(" ");

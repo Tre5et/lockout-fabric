@@ -5,6 +5,7 @@ import me.marin.lockout.lockout.interfaces.DieToEntityGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 
 public class DieToPolarBearGoal extends DieToEntityGoal implements TextureProvider {
 
@@ -19,7 +20,7 @@ public class DieToPolarBearGoal extends DieToEntityGoal implements TextureProvid
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.POLAR_BEAR;
+        return EntityTypes.POLAR_BEAR;
     }
 
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/death/die_to_polar_bear.png");

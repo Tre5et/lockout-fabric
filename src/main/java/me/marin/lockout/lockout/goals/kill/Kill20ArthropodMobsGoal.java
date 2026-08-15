@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -31,11 +32,11 @@ public class Kill20ArthropodMobsGoal extends KillSpecificMobsGoal implements Cyc
     );
     // arthropods: bee, cave spider, spider, endermite, silverfish
     private static final List<EntityType<?>> ARTHROPOD_MOBS = List.of(
-            EntityType.BEE,
-            EntityType.CAVE_SPIDER,
-            EntityType.SPIDER,
-            EntityType.ENDERMITE,
-            EntityType.SILVERFISH
+            EntityTypes.BEE,
+            EntityTypes.CAVE_SPIDER,
+            EntityTypes.SPIDER,
+            EntityTypes.ENDERMITE,
+            EntityTypes.SILVERFISH
     );
 
     public Kill20ArthropodMobsGoal(String id, String data) {

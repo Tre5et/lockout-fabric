@@ -53,7 +53,7 @@ public abstract class GetUniqueAdvancementsGoal extends Goal implements Requires
         tooltip.add(" ");
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
             var advancements = getTrackerMap().getOrDefault(team, new LinkedHashSet<>());
-            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + advancements.size() + "/" + getAmount());
+            tooltip.add(team.getChatFormatting() + team.getDisplayName() + ChatFormatting.RESET + ": " + advancements.size() + "/" + getAmount());
         }
         tooltip.add(" ");
 

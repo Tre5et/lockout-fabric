@@ -49,6 +49,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.TeamColor;
 import oshi.util.tuples.Pair;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 
@@ -458,9 +459,9 @@ public class LockoutServer {
      * @param player The player whose waypoint color should be updated
      * @param teamColor The team's color formatting
      */
-    public static void updatePlayerWaypointColor(ServerPlayer player, ChatFormatting teamColor) {
+    public static void updatePlayerWaypointColor(ServerPlayer player, TeamColor teamColor) {
         try {
-            Integer colorValue = teamColor.getColor();
+            Integer colorValue = teamColor.textColor().getValue();
             if (colorValue == null) {
                 return; // Skip if color has no RGB value
             }
@@ -561,7 +562,7 @@ public class LockoutServer {
                     }
                     playerNames.add(playerManager.getPlayerByName(player).getName().getString());
                 }
-                teams.add(new LockoutTeamServer(playerNames, ChatFormatting.getById(Lockout.COLOR_ORDERS[0]), server));
+                teams.add(new LockoutTeamServer(playerNames, Lockout.COLOR_ORDERS[0], server));
 
             } else {
                 if (players.length < 2) {
@@ -579,7 +580,7 @@ public class LockoutServer {
                         context.getSource().sendFailure(Component.literal("Player " + player + " is invalid."));
                         return 0;
                     }
-                    teams.add(new LockoutTeamServer(List.of(playerManager.getPlayerByName(player).getName().getString()), ChatFormatting.getById(Lockout.COLOR_ORDERS[i]), server));
+                    teams.add(new LockoutTeamServer(List.of(playerManager.getPlayerByName(player).getName().getString()), Lockout.COLOR_ORDERS[i], server));
                 }
             }
 
@@ -631,14 +632,14 @@ public class LockoutServer {
                         context.getSource().sendFailure(Component.literal("Team " + team.getName() + " doesn't have any players."));
                         return 0;
                     }
-                    ChatFormatting teamColor = team.getColor();
-                    if (teamColor.getColor() == null || teamHasColor(teams, teamColor)) {
+                    Optional<TeamColor> teamColor = team.getColor();
+                    if (teamColor.isEmpty() || teamHasColor(teams, teamColor.get())) {
                         // Select an available color.
                         boolean found = false;
-                        for (int colorOrder : Lockout.COLOR_ORDERS) {
-                            if (!teamHasColor(teams, ChatFormatting.getById(colorOrder))) {
+                        for (TeamColor colorOrder : Lockout.COLOR_ORDERS) {
+                            if (!teamHasColor(teams, colorOrder)) {
                                 found = true;
-                                team.setColor(ChatFormatting.getById(colorOrder));
+                                team.setColor(Optional.of(colorOrder));
                                 break;
                             }
                         }
@@ -651,7 +652,7 @@ public class LockoutServer {
                     for (String playerName : team.getPlayers()) {
                         actualPlayerNames.add(playerManager.getPlayerByName(playerName).getName().getString());
                     }
-                    teams.add(new LockoutTeamServer(new ArrayList<>(actualPlayerNames), team.getColor(), server));
+                    teams.add(new LockoutTeamServer(new ArrayList<>(actualPlayerNames), team.getColor().orElse(TeamColor.BLACK), server));
                 }
             } catch (Exception ignored) {}
         }
@@ -663,7 +664,7 @@ public class LockoutServer {
         return 1;
     }
 
-    private static boolean teamHasColor(List<LockoutTeamServer> teams, ChatFormatting color) {
+    private static boolean teamHasColor(List<LockoutTeamServer> teams, TeamColor color) {
         for (LockoutTeam lockoutTeam : teams) {
             if (lockoutTeam.getColor() == color) {
                 return true;

@@ -4,7 +4,7 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.goals.status_effect.RemoveStatusEffectUsingMilkGoal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.advancements.criterion.ConsumeItemTrigger;
+import net.minecraft.advancements.triggers.ConsumeItemTrigger;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ConsumeItemTrigger.class)
-public class ConsumeItemCriterionMixin {
+public class ConsumeItemTriggerMixin {
     @Inject(method="trigger", at = @At("HEAD"))
     public void trigger(ServerPlayer player, ItemStack stack, CallbackInfo ci) {
         Lockout lockout = LockoutServer.lockout;

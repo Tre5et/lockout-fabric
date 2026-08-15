@@ -5,6 +5,7 @@ import me.marin.lockout.lockout.interfaces.TameAnimalGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
 
 public class TameWolfGoal extends TameAnimalGoal implements TextureProvider {
@@ -31,6 +32,6 @@ public class TameWolfGoal extends TameAnimalGoal implements TextureProvider {
 
     @Override
     public EntityType<?> getAnimal() {
-        return EntityType.WOLF;
+        return EntityTypes.WOLF;
     }
 }

@@ -25,7 +25,7 @@ public interface OpponentGoal extends HasTooltipInfo {
 
         if (!notMet.isEmpty()) {
             tooltip.add("Have not met the condition:");
-            tooltip.addAll(HasTooltipInfo.commaSeparatedList(notMet.stream().map(t -> t.getColor() + t.getDisplayName() + ChatFormatting.RESET).toList()));
+            tooltip.addAll(HasTooltipInfo.commaSeparatedList(notMet.stream().map(t -> t.getChatFormatting() + t.getDisplayName() + ChatFormatting.RESET).toList()));
         }
 
         return tooltip;
@@ -48,7 +48,7 @@ public interface OpponentGoal extends HasTooltipInfo {
         if (notMet.isEmpty()) {
             tooltip.add(ChatFormatting.GRAY + " " + ChatFormatting.ITALIC + "None");
         } else {
-            tooltip.addAll(HasTooltipInfo.commaSeparatedList(notMet.stream().map(t -> t.getColor() + t.getDisplayName() + ChatFormatting.RESET).toList()));
+            tooltip.addAll(HasTooltipInfo.commaSeparatedList(notMet.stream().map(t -> t.getChatFormatting() + t.getDisplayName() + ChatFormatting.RESET).toList()));
         }
 
         tooltip.add("Teams that HAVE met the condition:");
@@ -59,7 +59,7 @@ public interface OpponentGoal extends HasTooltipInfo {
         if (met.isEmpty()) {
             tooltip.add(ChatFormatting.GRAY + " " + ChatFormatting.ITALIC + "None");
         } else {
-            tooltip.addAll(HasTooltipInfo.commaSeparatedList(met.stream().map(t -> t.getColor() + t.getDisplayName() + ChatFormatting.RESET).toList()));
+            tooltip.addAll(HasTooltipInfo.commaSeparatedList(met.stream().map(t -> t.getChatFormatting() + t.getDisplayName() + ChatFormatting.RESET).toList()));
         }
         tooltip.add(" ");
 

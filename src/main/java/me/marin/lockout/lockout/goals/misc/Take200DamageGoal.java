@@ -20,7 +20,7 @@ import java.util.List;
 
 public class Take200DamageGoal extends Goal implements TextureProvider, CustomTextureRenderer, HasTooltipInfo {
 
-    private final static ItemStack DISPLAY_ITEM_STACK = Items.RED_DYE.getDefaultInstance();
+    private final static ItemStack DISPLAY_ITEM_STACK = Items.DYE.red().getDefaultInstance();
     static {
         DISPLAY_ITEM_STACK.setCount(64);
     }
@@ -70,7 +70,7 @@ public class Take200DamageGoal extends Goal implements TextureProvider, CustomTe
         tooltip.add(" ");
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
             double damage = LockoutServer.lockout.damageTaken.getOrDefault(team, 0.0);
-            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + Math.min(400, (int) damage) + "/200");
+            tooltip.add(team.getChatFormatting() + team.getDisplayName() + ChatFormatting.RESET + ": " + Math.min(400, (int) damage) + "/200");
         }
         tooltip.add(" ");
 

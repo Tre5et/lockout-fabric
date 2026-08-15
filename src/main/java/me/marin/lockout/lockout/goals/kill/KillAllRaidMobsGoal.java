@@ -12,6 +12,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -23,7 +24,7 @@ import java.util.Map;
 public class KillAllRaidMobsGoal extends KillAllSpecificMobsGoal implements CustomTextureRenderer {
 
     private static final ItemStack DISPLAY_ITEM_STACK = Items.VILLAGER_SPAWN_EGG.getDefaultInstance();
-    private static final List<EntityType<?>> MOBS = List.of(EntityType.PILLAGER, EntityType.VINDICATOR, EntityType.RAVAGER, EntityType.WITCH, EntityType.VEX, EntityType.EVOKER);
+    private static final List<EntityType<?>> MOBS = List.of(EntityTypes.PILLAGER, EntityTypes.VINDICATOR, EntityTypes.RAVAGER, EntityTypes.WITCH, EntityTypes.VEX, EntityTypes.EVOKER);
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/status_effect/bad_omen.png");
 
     static {
@@ -74,7 +75,7 @@ public class KillAllRaidMobsGoal extends KillAllSpecificMobsGoal implements Cust
         tooltip.add(" ");
         for (LockoutTeam team : LockoutServer.lockout.getTeams()) {
             var raidMobs = getTrackerMap().getOrDefault(team, new LinkedHashSet<>());
-            tooltip.add(team.getColor() + team.getDisplayName() + ChatFormatting.RESET + ": " + raidMobs.size() + "/" + MOBS.size());
+            tooltip.add(team.getChatFormatting() + team.getDisplayName() + ChatFormatting.RESET + ": " + raidMobs.size() + "/" + MOBS.size());
         }
         tooltip.add(" ");
 

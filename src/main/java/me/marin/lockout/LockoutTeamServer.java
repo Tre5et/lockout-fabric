@@ -11,6 +11,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.scores.TeamColor;
+
 import java.util.*;
 
 public class LockoutTeamServer extends LockoutTeam {
@@ -19,7 +21,7 @@ public class LockoutTeamServer extends LockoutTeam {
     @Getter
     private final MinecraftServer server;
 
-    public LockoutTeamServer(List<String> playerNames, ChatFormatting formattingColor, MinecraftServer server) {
+    public LockoutTeamServer(List<String> playerNames, TeamColor formattingColor, MinecraftServer server) {
         super(playerNames, new ArrayList<>(), formattingColor);
         this.server = server;
 

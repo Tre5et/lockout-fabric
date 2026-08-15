@@ -5,6 +5,7 @@ import me.marin.lockout.lockout.interfaces.KillMobGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
 
 public class KillElderGuardianGoal extends KillMobGoal implements TextureProvider {
@@ -31,6 +32,6 @@ public class KillElderGuardianGoal extends KillMobGoal implements TextureProvide
 
     @Override
     public EntityType<?> getEntity() {
-        return EntityType.ELDER_GUARDIAN;
+        return EntityTypes.ELDER_GUARDIAN;
     }
 }

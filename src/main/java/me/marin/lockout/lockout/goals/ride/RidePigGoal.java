@@ -2,6 +2,7 @@ package me.marin.lockout.lockout.goals.ride;
 
 import me.marin.lockout.lockout.interfaces.RideEntityGoal;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -14,7 +15,7 @@ public class RidePigGoal extends RideEntityGoal {
 
     @Override
     public EntityType<?> getEntityType() {
-        return EntityType.PIG;
+        return EntityTypes.PIG;
     }
 
     @Override

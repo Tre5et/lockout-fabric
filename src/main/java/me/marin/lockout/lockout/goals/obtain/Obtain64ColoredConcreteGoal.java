@@ -46,22 +46,22 @@ public class Obtain64ColoredConcreteGoal extends ObtainAllItemsGoal implements R
     public static Item getConcreteColor(String colorString) {
         return switch (colorString) {
             default -> null;
-            case "white" -> Items.WHITE_CONCRETE;
-            case "orange" -> Items.ORANGE_CONCRETE;
-            case "magenta" -> Items.MAGENTA_CONCRETE;
-            case "light_blue" -> Items.LIGHT_BLUE_CONCRETE;
-            case "yellow" -> Items.YELLOW_CONCRETE;
-            case "lime" -> Items.LIME_CONCRETE;
-            case "pink" -> Items.PINK_CONCRETE;
-            case "gray" -> Items.GRAY_CONCRETE;
-            case "light_gray" -> Items.LIGHT_GRAY_CONCRETE;
-            case "cyan" -> Items.CYAN_CONCRETE;
-            case "purple" -> Items.PURPLE_CONCRETE;
-            case "blue" -> Items.BLUE_CONCRETE;
-            case "brown" -> Items.BROWN_CONCRETE;
-            case "green" -> Items.GREEN_CONCRETE;
-            case "red" -> Items.RED_CONCRETE;
-            case "black" -> Items.BLACK_CONCRETE;
+            case "white" -> Items.CONCRETE.white();
+            case "orange" -> Items.CONCRETE.orange();
+            case "magenta" -> Items.CONCRETE.magenta();
+            case "light_blue" -> Items.CONCRETE.lightBlue();
+            case "yellow" -> Items.CONCRETE.yellow();
+            case "lime" -> Items.CONCRETE.lime();
+            case "pink" -> Items.CONCRETE.pink();
+            case "gray" -> Items.CONCRETE.gray();
+            case "light_gray" -> Items.CONCRETE.lightGray();
+            case "cyan" -> Items.CONCRETE.cyan();
+            case "purple" -> Items.CONCRETE.purple();
+            case "blue" -> Items.CONCRETE.blue();
+            case "brown" -> Items.CONCRETE.brown();
+            case "green" -> Items.CONCRETE.green();
+            case "red" -> Items.CONCRETE.red();
+            case "black" -> Items.CONCRETE.black();
         };
     }
 
