@@ -4,6 +4,7 @@
   "package": "me.marin.lockout.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
+    "server.AgeableMobMixin",
     "server.AnvilScreenHandlerMixin",
     "server.ArmorStandMixin",
     "server.BlockMixin",

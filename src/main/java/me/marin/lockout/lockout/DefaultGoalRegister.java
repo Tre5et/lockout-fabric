@@ -125,6 +125,7 @@ public class DefaultGoalRegister {
                 .biomeRequirement(BiomeRequirements.anyOf(SWAMP, MANGROVE_SWAMP))
                 .build()
         );
+        INSTANCE.register(GoalType.FEED_GOLDEN_DANDELION, FeedGoldenDandelionGoal.class);
         INSTANCE.register(GoalType.KILL_WITCH, KillWitchGoal.class, new GoalRequirements.Builder()
                 .structures(List.of(SWAMP_HUT))
                 .build()
