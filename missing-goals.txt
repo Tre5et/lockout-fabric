@@ -1,0 +1,95 @@
++All other opponents ... (13) (5 disabled)
++Boat 2km
+Break any Armor Piece
+Breed Armadillos
+Breed Camels
++Charge a Respawn Anchor
+Compost 3/5/7 Unique Foods
++Craft the most unique Items
+Craft 20/50/100 Unique Items
+Die by falling in the Void
+Die to Pufferfish
+Die to Warden
+~Distract a Piglin with Gold -> Obtain "Oh Shiny" Advancement
+Duplicate Allay
+Duplicate any Armor Trim
++Eat Chorus Fruit
+Eat every type of Soup
++Enter a Trial Chamber
+Fill a Decorated Pot
++Fill a Shelf
++Find a Bastion (disabled)
++Find a Fortress (disabled)
++Find an End City (disabled)
++Find Badlands Biome
++Find Ice Spikes Biome
++Find Mushroom Biome
+~Get 10/20/30 Advancements -> Obtain 10/20/30 Advancements
++Get any Spyglass Advancement -> Obtain any Spyglass Advancement
++Get launched by a Geyser
++Get Levitation (disabled)
++Have tem most ... (6) (1 disabled)
++Kill another team's player
++Kill Blaze using Snowball
+Kill Bogged
++Kill Ghast
+Kill Husk
+Kill Pillager using a Crossbow
++Kill Slime
+Kill Warden
+Leash 4/6/8 unique Mobs at once
+Leash an Iron Golem
++Mark a Banner on Map
+Mine 3 types of Ice
+~Mine Mob Spawner -> Mine a Spawner (Mob / Trial)
+Name a Ghast Dinnerbone
+Name a Sheep 'jeb_'
+Obtain "Mob Kabob" Advancement
+Obtain "Stay Hydrated" Advancement
+Obtain "Wax On" Advancement
+Obtain 2 Unique Armor Trims
+~Obtain 4 unique Horse Armors -> Obtain 3 types of Horse Armor
+Obtain 3 Unique Banner Patterns
++Obtain 4 Unique Pressure Plates
++Obtain 8 Unique Bricks
+~Obtain 64 Arrows -> Obtain 32 Arrows
+~Obtain a Dead Bush -> Obtain Dead Bush
+Obtain a stack of any item
++Obtain all dyes
++Obtain Anchient Debris
++Obtain any Nautilus Armor
+Obtain Block of Resin
+Obtain Bone Block
++Obtain Bucket of Sulfur Cube
++Obtain Calibrated Skulk Sensor (disabled)
+Obtain Copper Chest
++Obtain Dragon Egg
+Obtain Dried Kelp Block
+Obtain Emerald Block
++Obtain End Rod
+Obtain every type of Furnace
+Obtain every type of Torch
+~Obtain Experience Bottle -> Obtain Bottle o' Enchanting
+Obtain Gilded Blackstone
+Obtain Lodestone
+Obtain Netherrite Scrap
++Obtain Observer
+Obtain Pottery Sherd
+Obtain Smooth Basalt
+Obtain Suspicious Sand/Gravel
++Obtain Tinted Glass
++Obtain Wither Skeleton Skull (disabled)
+Place a Hanging Sign
+~Place End Crystal -> Explode End Crystal
++Ride a Horse
++Ride a Nautilus
++Ride Pig with Carrot on a Stick -> Use Carrot on a Stick to boost a Pig
+~Scrape wax off of Copper Block -> Obtain "Wax Off" Advancement
+Spy on 10/20 Unique Mobs
+Spy on Iron Golem
+Spy on Piglin Brute
++Use a Compass on a Lodestone
+~Use Jukebox to play a Music Disc -> Play a Music Disk in Jukebox
++Visit 10/15/20 Unique Biomes
+Wear Full Armor with different materials
++Wear Full Leather Armor
