@@ -108,6 +108,8 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.BREED_4_UNIQUE_ANIMALS, Breed4UniqueAnimalsGoal.class);
         INSTANCE.register(GoalType.BREED_6_UNIQUE_ANIMALS, Breed6UniqueAnimalsGoal.class);
         INSTANCE.register(GoalType.BREED_8_UNIQUE_ANIMALS, Breed8UniqueAnimalsGoal.class);
+        INSTANCE.register(GoalType.BREED_ARMADILLO, BreedArmadillosGoal.class);
+        INSTANCE.register(GoalType.BREED_CAMEL, BreedCamelsGoal.class);
         INSTANCE.register(GoalType.BREED_CHICKEN, BreedChickenGoal.class);
         INSTANCE.register(GoalType.BREED_COW, BreedCowsGoal.class);
         INSTANCE.register(GoalType.BREED_HOGLIN, BreedHoglinGoal.class);

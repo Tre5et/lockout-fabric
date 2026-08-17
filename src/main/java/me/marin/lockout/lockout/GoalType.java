@@ -34,6 +34,8 @@ public class GoalType {
     public static final String BREED_COW = "BREED_COW";
     public static final String BREED_PIG = "BREED_PIG";
     public static final String BREED_SHEEP = "BREED_SHEEP";
+    public static final String BREED_ARMADILLO = "BREED_ARMADILLO";
+    public static final String BREED_CAMEL = "BREED_CAMEL";
     public static final String BREED_CHICKEN = "BREED_CHICKEN";
     public static final String BREED_RABBIT = "BREED_RABBIT";
     public static final String BREED_HOGLIN = "BREED_HOGLIN";

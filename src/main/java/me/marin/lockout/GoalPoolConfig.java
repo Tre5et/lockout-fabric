@@ -207,8 +207,8 @@ public class GoalPoolConfig {
         // Breeding
         categories.put("Breeding", List.of(
                 BREED_4_UNIQUE_ANIMALS, BREED_6_UNIQUE_ANIMALS, BREED_8_UNIQUE_ANIMALS,
-                BREED_CHICKEN, BREED_COW, BREED_PIG, BREED_SHEEP, BREED_RABBIT, BREED_HOGLIN, 
-                BREED_FOX, BREED_GOAT, BREED_STRIDER, BREED_FROGS
+                BREED_ARMADILLO, BREED_CAMEL, BREED_CHICKEN, BREED_COW, BREED_PIG, BREED_SHEEP,
+                BREED_RABBIT, BREED_HOGLIN, BREED_FOX, BREED_GOAT, BREED_STRIDER, BREED_FROGS
         ));
         
         // Killing

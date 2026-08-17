@@ -1,8 +1,8 @@
 +All other opponents ... (13) (5 disabled)
 +Boat 2km
-Break any Armor Piece
-Breed Armadillos
-Breed Camels
+=Break any Armor Piece
+=Breed Armadillos
+=Breed Camels
 +Charge a Respawn Anchor
 Compost 3/5/7 Unique Foods
 +Craft the most unique Items
