@@ -11,6 +11,8 @@ import me.marin.lockout.lockout.goals.advancement.unique.Get30UniqueAdvancements
 import me.marin.lockout.lockout.goals.biome.VisitBadlandsBiomeGoal;
 import me.marin.lockout.lockout.goals.biome.VisitIceSpikesBiomeGoal;
 import me.marin.lockout.lockout.goals.biome.VisitMushroomBiomeGoal;
+import me.marin.lockout.lockout.goals.break_item.BreakArmorGoal;
+import me.marin.lockout.lockout.goals.break_item.BreakToolGoal;
 import me.marin.lockout.lockout.goals.breed_animals.*;
 import me.marin.lockout.lockout.goals.brewing.*;
 import me.marin.lockout.lockout.goals.consume.*;
@@ -472,6 +474,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.OBTAIN_CALIBRATED_SCULK_SENSOR, ObtainCalibratedSculkSensorGoal.class, GoalRequirements.DEEP_DARK_BIOME);
 
         INSTANCE.register(GoalType.BREAK_TOOL, BreakToolGoal.class);
+        INSTANCE.register(GoalType.BREAK_ARMOR, BreakArmorGoal.class);
         INSTANCE.register(GoalType.MAP_BANNER_WAYPOINT, MapBannerWaypointGoal.class);
         INSTANCE.register(GoalType.OBTAIN_5_UNIQUE_PRESSURE_PLATES, Obtain5UniquePressurePlatesGoal.class);
         INSTANCE.register(GoalType.OBTAIN_8_UNIQUE_BRICKS, Obtain8UniqueBricksGoal.class);

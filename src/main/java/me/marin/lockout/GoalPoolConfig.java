@@ -177,7 +177,7 @@ public class GoalPoolConfig {
         
         // Tools
         categories.put("Tools", List.of(
-                BREAK_TOOL,
+                BREAK_TOOL, BREAK_ARMOR,
                 OBTAIN_WOODEN_TOOLS, OBTAIN_STONE_TOOLS, OBTAIN_IRON_TOOLS, OBTAIN_GOLDEN_TOOLS, 
                 OBTAIN_DIAMOND_TOOLS, OBTAIN_COPPER_TOOLS
         ));

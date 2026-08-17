@@ -271,6 +271,7 @@ public class GoalType {
     public static final String OBTAIN_CALIBRATED_SCULK_SENSOR = "OBTAIN_CALIBRATED_SCULK_SENSOR";
     public static final String OBTAIN_SMOOTH_QUARTZ_STAIRS = "OBTAIN_SMOOTH_QUARTZ_STAIRS";
     public static final String BREAK_TOOL = "BREAK_TOOL";
+    public static final String BREAK_ARMOR = "BREAK_ARMOR";
     public static final String MAP_BANNER_WAYPOINT = "MAP_BANNER_WAYPOINT";
     public static final String OBTAIN_SEA_LANTERN = "OBTAIN_SEA_LANTERN";
     public static final String OBTAIN_5_UNIQUE_PRESSURE_PLATES = "OBTAIN_5_UNIQUE_PRESSURE_PLATES";

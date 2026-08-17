@@ -4,21 +4,19 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutTeamServer;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.goals.misc.Deal400DamageGoal;
+import me.marin.lockout.lockout.interfaces.BreakItemsGoal;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import me.marin.lockout.lockout.goals.misc.BreakToolGoal;
 
 @Mixin(LivingEntity.class)
 public class LivingEntityMixin {
@@ -56,15 +54,12 @@ public class LivingEntityMixin {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
 
-        ItemStack stack = item.getDefaultInstance();
+        for (Goal goal : lockout.getBoard().getGoals()) {
+            if (goal == null) continue;
+            if (goal.isCompleted()) continue;
 
-        // Check if it's a tool (has TOOL component or is damageable)
-        if (stack.has(DataComponents.TOOL) || stack.getMaxDamage() > 0) {
-            for (Goal goal : lockout.getBoard().getGoals()) {
-                if (goal == null) continue;
-                if (goal.isCompleted()) continue;
-
-                if (goal instanceof BreakToolGoal) {
+            if (goal instanceof BreakItemsGoal) {
+                if(((BreakItemsGoal)goal).satisfiedBy(item)) {
                     lockout.completeGoal(goal, player);
                 }
             }
