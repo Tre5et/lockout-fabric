@@ -19,6 +19,9 @@ public class Constants {
 
     public static final Identifier CUSTOM_BOARD_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "set_custom_board");
 
+    public static final Identifier REQUEST_HINT_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "request_hint");
+    public static final Identifier HINT_RESULT_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "hint_result");
+
     public static final Identifier BOARD_SCREEN_ID = Identifier.fromNamespaceAndPath(NAMESPACE, "board");
 
     public static final Identifier BOARD_FILE_ARGUMENT_TYPE = Identifier.fromNamespaceAndPath(NAMESPACE, "board_file");

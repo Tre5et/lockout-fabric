@@ -30,6 +30,7 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<T> {
                 "Obtain " + getName(option),
                 tooltipInfo,
                 getTextureRenderer(option),
+                getHints(null),
                 new Pair<>(getId(), serializeOption(option)),
                 i -> satisfiedBy(i, option)
         );

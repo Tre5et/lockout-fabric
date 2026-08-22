@@ -1,6 +1,5 @@
 package me.marin.lockout.lockout.texture;
 
-import me.marin.lockout.lockout.Goal;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public interface CustomTextureRenderer {

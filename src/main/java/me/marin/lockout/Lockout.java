@@ -451,6 +451,7 @@ public class Lockout {
                 }).toList(),
                 isRunning);
     }
+
     public void updateTooltips(Goal goal) {
         if (goal.getTooltipInfo() != null) {
             for (LockoutTeam team : teams) {

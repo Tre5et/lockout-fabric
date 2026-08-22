@@ -3,6 +3,7 @@ package me.marin.lockout.lockout.goal;
 import lombok.Getter;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.client.LockoutClient;
+import me.marin.lockout.lockout.goal.hint.GoalHint;
 import me.marin.lockout.lockout.goal.tooltip.TooltipInfo;
 import me.marin.lockout.lockout.texture.TextureRenderer;
 import net.minecraft.client.gui.Font;
@@ -26,14 +27,18 @@ public abstract class Goal {
     private LockoutTeam completedTeam;
     private final TextureRenderer textureRenderer;
     @Getter
+    private final List<GoalHint> hints;
+
+    @Getter
     // TODO: improve build data serialization
     private final Pair<String, String> buildData;
 
-    public Goal(String id, String name, TooltipInfo tooltipInfo, TextureRenderer textureRenderer, Pair<String, String> buildData) {
+    public Goal(String id, String name, TooltipInfo tooltipInfo, TextureRenderer textureRenderer, List<GoalHint> hints, Pair<String, String> buildData) {
         this.id = id;
         this.name = name;
         this.tooltipInfo = tooltipInfo;
         this.textureRenderer = textureRenderer;
+        this.hints = hints;
         this.buildData = buildData;
     }
 

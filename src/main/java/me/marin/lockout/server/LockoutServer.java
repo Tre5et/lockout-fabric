@@ -9,9 +9,12 @@ import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
+import me.marin.lockout.lockout.goal.hint.GoalHintResult;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.network.CustomBoardPayload;
+import me.marin.lockout.network.HintResultPayload;
 import me.marin.lockout.network.LockoutVersionPayload;
+import me.marin.lockout.network.RequestHintPayload;
 import me.marin.lockout.network.StartLockoutPayload;
 import me.marin.lockout.network.UpdateTooltipPayload;
 import me.marin.lockout.server.handlers.*;
@@ -179,6 +182,7 @@ public class LockoutServer {
                         ServerPlayNetworking.send(player, new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getTooltip(team, player))));
                     }
                 }
+                team.sendStoredHints(player);
                 player.setGameMode(GameType.SURVIVAL);
             } else {
                 for (Goal goal : lockout.getBoard().getGoals()) {
@@ -220,6 +224,38 @@ public class LockoutServer {
                 } catch (IllegalGoalConstructionException e) {
                     player.sendSystemMessage(Component.literal(e.getMessage()));
                 }
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(RequestHintPayload.ID, (payload, context) -> {
+            ServerPlayer player = context.player();
+
+            if (!Lockout.isLockoutRunning(lockout)) return;
+            if (!lockout.isLockoutPlayer(player.getUUID())) return;
+
+            Goal goal = lockout.getBoard().getGoals().stream()
+                    .filter(g -> g.getId().equals(payload.goalId()))
+                    .findFirst()
+                    .orElse(null);
+            if (goal == null) return;
+
+            int hintIndex = payload.hintIndex();
+            if (hintIndex < 0 || hintIndex >= goal.getHints().size()) return;
+
+            GoalHintResult result = goal.getHints().get(hintIndex).resolve(server, player);
+            HintResultPayload resultPayload = new HintResultPayload(payload.goalId(), hintIndex, result.getMessage(), result.isSuccess());
+
+            if (result.isSuccess()) {
+                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
+                team.storeHintResult(payload.goalId(), hintIndex, result.getMessage());
+                for (UUID memberId : team.getPlayerIds()) {
+                    ServerPlayer teamMember = server.getPlayerList().getPlayer(memberId);
+                    if (teamMember != null) {
+                        ServerPlayNetworking.send(teamMember, resultPayload);
+                    }
+                }
+            } else {
+                ServerPlayNetworking.send(player, resultPayload);
             }
         });
     }

@@ -14,5 +14,8 @@ public class Networking {
 
         PayloadTypeRegistry.serverboundPlay().register(CustomBoardPayload.ID, CustomBoardPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(LockoutVersionPayload.ID, LockoutVersionPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(RequestHintPayload.ID, RequestHintPayload.CODEC);
+
+        PayloadTypeRegistry.clientboundPlay().register(HintResultPayload.ID, HintResultPayload.CODEC);
     }
 }

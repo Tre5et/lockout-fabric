@@ -1,13 +1,16 @@
 package me.marin.lockout.lockout.goal.requirements;
 
+import me.marin.lockout.lockout.goal.hint.GoalHint;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class GoalRequirements {
     @SafeVarargs
@@ -16,18 +19,28 @@ public class GoalRequirements {
     }
 
     @SafeVarargs
-    public static GoalRequirement.AnyBiome anyBiome(ResourceKey<Biome>... biomes) {
-        return new GoalRequirement.AnyBiome(Arrays.stream(biomes).toList());
+    public static GoalRequirement<Object> anyBiome(String name, ResourceKey<Biome>... biomes) {
+        return new GoalRequirement.AnyBiome(Arrays.stream(biomes).toList())
+                .withHint(new GoalHint.Biomes(name, List.of(Level.OVERWORLD), Arrays.stream(biomes).toList()));
+    }
+
+    public static GoalRequirement<Object> biome(ResourceKey<Biome> biome) {
+        return anyBiome(biome.identifier().getPath(), biome);
     }
 
     @SafeVarargs
-    public static GoalRequirement.AllStructures allStructures(ResourceKey<Structure>... biomes) {
-        return new GoalRequirement.AllStructures(Arrays.stream(biomes).toList());
+    public static GoalRequirement.AllStructures allStructures(ResourceKey<Structure>... structures) {
+        return new GoalRequirement.AllStructures(Arrays.stream(structures).toList());
     }
 
     @SafeVarargs
-    public static GoalRequirement.AnyStructure anyStructure(ResourceKey<Structure>... biomes) {
-        return new GoalRequirement.AnyStructure(Arrays.stream(biomes).toList());
+    public static GoalRequirement<Object> anyStructure(String name, ResourceKey<Structure>... structures) {
+        return new GoalRequirement.AnyStructure(Arrays.stream(structures).toList())
+                .withHint(new GoalHint.Structures(name, List.of(Level.OVERWORLD), Arrays.stream(structures).toList()));
+    }
+
+    public static GoalRequirement<Object> structure(ResourceKey<Structure> structure) {
+        return anyStructure(structure.identifier().getPath(), structure);
     }
 
     public static GoalRequirement.TeamCountMin minTeams(int count) {
@@ -42,20 +55,20 @@ public class GoalRequirements {
         return minTeams(min).and(maxTeams(max));
     }
 
-    public static final GoalRequirement.AnyStructure VILLAGE = anyStructure(
-            BuiltinStructures.VILLAGE_PLAINS, BuiltinStructures.VILLAGE_DESERT, BuiltinStructures.VILLAGE_SAVANNA, BuiltinStructures.VILLAGE_SNOWY, BuiltinStructures.VILLAGE_TAIGA
+    public static final GoalRequirement<Object> VILLAGE = anyStructure(
+            "Village", BuiltinStructures.VILLAGE_PLAINS, BuiltinStructures.VILLAGE_DESERT, BuiltinStructures.VILLAGE_SAVANNA, BuiltinStructures.VILLAGE_SNOWY, BuiltinStructures.VILLAGE_TAIGA
     );
 
-    public static final GoalRequirement.AnyBiome JUNGLE = anyBiome(
-            Biomes.JUNGLE, Biomes.BAMBOO_JUNGLE, Biomes.SPARSE_JUNGLE
+    public static final GoalRequirement<Object> JUNGLE = anyBiome(
+            "Jungle", Biomes.JUNGLE, Biomes.BAMBOO_JUNGLE, Biomes.SPARSE_JUNGLE
     );
 
-    public static final GoalRequirement.AnyBiome DESERT_LIKE = anyBiome(
-            Biomes.DESERT, Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS
+    public static final GoalRequirement<Object> DESERT_LIKE = anyBiome(
+            "Desert-like Biome", Biomes.DESERT, Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS
     );
 
-    public static final GoalRequirement.AnyBiome SNOWY = anyBiome(
-            Biomes.SNOWY_PLAINS, Biomes.ICE_SPIKES, Biomes.SNOWY_TAIGA, Biomes.GROVE, Biomes.SNOWY_SLOPES, Biomes.FROZEN_PEAKS,
+    public static final GoalRequirement<Object> SNOWY = anyBiome(
+            "Snowy Biome", Biomes.SNOWY_PLAINS, Biomes.ICE_SPIKES, Biomes.SNOWY_TAIGA, Biomes.GROVE, Biomes.SNOWY_SLOPES, Biomes.FROZEN_PEAKS,
             Biomes.FROZEN_RIVER, Biomes.SNOWY_BEACH, Biomes.FROZEN_OCEAN, Biomes.DEEP_FROZEN_OCEAN
     );
 

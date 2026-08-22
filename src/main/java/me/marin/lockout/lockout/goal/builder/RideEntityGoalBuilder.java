@@ -37,6 +37,7 @@ public class RideEntityGoalBuilder extends GoalBuilder<Void> {
                 "Ride " + (List.of('a','e','i','o','u').contains(name.charAt(0)) ? "an " : "a ") + name,
                 tooltipInfo,
                 GenericTextureRenderer.texture(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/ride_" + name.toLowerCase() + ".png")),
+                getHints(null),
                 new Pair<>(getId(), null),
                 entityTypes::contains
         );

@@ -5,6 +5,7 @@ import lombok.Setter;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
+import me.marin.lockout.lockout.goal.hint.GoalHint;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
@@ -27,6 +28,7 @@ public abstract class GoalBuilder<T> {
     protected TooltipInfo tooltipInfo = null;
     @Getter
     protected final List<GoalGroup> groups = new ArrayList<>();
+    protected final List<GoalHint> hints = new ArrayList<>();
     @Getter
     @Setter
     protected boolean enabled = true;
@@ -85,6 +87,14 @@ public abstract class GoalBuilder<T> {
         return optionGenerator().serialize(option);
     }
 
+    public List<GoalHint> getHints(T option) {
+        List<GoalHint> hints = new ArrayList<>(this.hints);
+        for(GoalRequirement<? super T> requirement : requirements) {
+            hints.addAll(requirement.getHints(option));
+        }
+        return hints;
+    }
+
     public GoalBuilder<T> require(GoalRequirement<? super T> requirements) {
         getRequirements().add(requirements);
         return this;
@@ -102,6 +112,11 @@ public abstract class GoalBuilder<T> {
 
     public GoalBuilder<T> defaultEnabled(boolean defaultEnabled) {
         setEnabled(defaultEnabled);
+        return this;
+    }
+
+    public GoalBuilder<T> hint(GoalHint... hint) {
+        hints.addAll(Arrays.stream(hint).toList());
         return this;
     }
 }

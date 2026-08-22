@@ -1,6 +1,7 @@
 package me.marin.lockout.lockout.goal.requirements;
 
 import lombok.Getter;
+import me.marin.lockout.lockout.goal.hint.GoalHint;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -12,12 +13,23 @@ import java.util.List;
 public abstract class GoalRequirement<T> {
     @Getter
     private final GoalRequirementContextInitializer initializer;
+    @Getter
+    private final List<GoalHint> hints = new ArrayList<>();
 
     public GoalRequirement(GoalRequirementContextInitializer initializer) {
         this.initializer = initializer;
     }
 
     public abstract boolean optionSatisfiedBy(GoalRequirementContext context, T option);
+
+    public List<GoalHint> getHints(T option) {
+        return hints;
+    }
+
+    public GoalRequirement<T> withHint(GoalHint... hint) {
+        hints.addAll(Arrays.stream(hint).toList());
+        return this;
+    }
 
     @SafeVarargs
     public final <N extends T> LimitedToOptions<N> forOptions(N... options) {
@@ -130,10 +142,15 @@ public abstract class GoalRequirement<T> {
             this.requirement = requirement;
         }
 
-
         @Override
         public boolean optionSatisfiedBy(GoalRequirementContext context, T option) {
             return !options.contains(option) || requirement.optionSatisfiedBy(context, option);
+        }
+
+        @Override
+        public List<GoalHint> getHints(T option) {
+            if(options.contains(option)) return super.getHints(option);
+            return List.of();
         }
     }
 
@@ -171,6 +188,7 @@ public abstract class GoalRequirement<T> {
         public Combinatorial(List<GoalRequirement<? super T>> requirements) {
             super(new GoalRequirementContextInitializer.Combined(requirements.stream().map(GoalRequirement::getInitializer).toList()));
             this.requirements = requirements;
+            getHints().addAll(requirements.stream().flatMap(r -> r.getHints().stream()).toList());
         }
     }
 

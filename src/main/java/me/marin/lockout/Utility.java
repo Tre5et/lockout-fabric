@@ -4,6 +4,7 @@ import me.marin.lockout.client.LockoutBoard;
 import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.client.gui.BoardBuilderScreen;
 import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.lockout.goal.hint.GoalHint;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -18,6 +19,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static me.marin.lockout.Constants.*;
@@ -194,6 +196,26 @@ public class Utility {
                 tooltip.add(Component.nullToEmpty(t).getVisualOrderText());
             }
         }
+
+        // Add hint prompts / results
+        List<GoalHint> hints = goal.getHints();
+        if (!hints.isEmpty() && LockoutClient.amIPlayingLockout) {
+            tooltip.add(Component.empty().getVisualOrderText());
+            tooltip.add(Component.nullToEmpty("" + ChatFormatting.GRAY + ChatFormatting.UNDERLINE + ChatFormatting.ITALIC + "Hints:").getVisualOrderText());
+
+            Map<Integer, String> hintResults = LockoutClient.goalHintResults.get(goal.getId());
+            Map<Integer, String> hintErrors = LockoutClient.goalHintErrors.get(goal.getId());
+            for (int i = 0; i < hints.size(); i++) {
+                if (hintResults != null && hintResults.containsKey(i)) {
+                    tooltip.add(Component.nullToEmpty(ChatFormatting.AQUA + hintResults.get(i)).getVisualOrderText());
+                } else if (hintErrors != null && hintErrors.containsKey(i)) {
+                    tooltip.add(Component.nullToEmpty(ChatFormatting.RED + hints.get(i).getName() + ": " + hintErrors.get(i)).getVisualOrderText());
+                } else {
+                    tooltip.add(Component.nullToEmpty(ChatFormatting.GRAY + hints.get(i).getName() + ": Press " + (i + 1)).getVisualOrderText());
+                }
+            }
+        }
+
         context.setTooltipForNextFrame(textRenderer, tooltip, mouseX, mouseY);
     }
 

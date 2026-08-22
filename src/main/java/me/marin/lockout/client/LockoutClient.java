@@ -46,6 +46,10 @@ public class LockoutClient implements ClientModInitializer {
     private static KeyMapping keyBinding;
     public static int CURRENT_TICK = 0;
     public static final Map<String, String> goalTooltipMap = new HashMap<>();
+    /** goalId -> hintIndex -> result message; persists until disconnect */
+    public static final Map<String, Map<Integer, String>> goalHintResults = new HashMap<>();
+    /** goalId -> hintIndex -> error message; cleared when the BoardScreen closes */
+    public static final Map<String, Map<Integer, String>> goalHintErrors = new HashMap<>();
 
     public static KeyMapping getBoardKeybinding() {
         return keyBinding;
@@ -86,6 +90,9 @@ public class LockoutClient implements ClientModInitializer {
             lockout.setRunning(payload.isRunning());
             lockout.setStarted(previouslyStarted);
             lockout.setTicks(previousTicks);
+
+            goalHintResults.clear();
+            goalHintErrors.clear();
 
             List<Goal> goalList = lockout.getBoard().getGoals();
             for (int i = 0; i < goalList.size(); i++) {
@@ -139,6 +146,13 @@ public class LockoutClient implements ClientModInitializer {
 
 
             });
+        });
+        ClientPlayNetworking.registerGlobalReceiver(HintResultPayload.ID, (payload, context) -> {
+            if (payload.success()) {
+                goalHintResults.computeIfAbsent(payload.goalId(), k -> new HashMap<>()).put(payload.hintIndex(), payload.message());
+            } else {
+                goalHintErrors.computeIfAbsent(payload.goalId(), k -> new HashMap<>()).put(payload.hintIndex(), payload.message());
+            }
         });
         ClientPlayNetworking.registerGlobalReceiver(EndLockoutPayload.ID, (payload, context) -> {
             lockout.setRunning(false);
@@ -333,6 +347,8 @@ public class LockoutClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
             lockout = null;
             goalTooltipMap.clear();
+            goalHintResults.clear();
+            goalHintErrors.clear();
         }));
 
         MenuScreens.register(BOARD_SCREEN_HANDLER, BoardScreen::new);

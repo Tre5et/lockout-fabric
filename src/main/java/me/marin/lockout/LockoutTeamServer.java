@@ -2,6 +2,7 @@ package me.marin.lockout;
 
 import lombok.Getter;
 import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.network.HintResultPayload;
 import me.marin.lockout.network.UpdateTooltipPayload;
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -18,6 +19,8 @@ public class LockoutTeamServer extends LockoutTeam {
     private final Map<UUID, String> playerNameMap = new HashMap<>();
     @Getter
     private final MinecraftServer server;
+    /** Stores successfully resolved hint results: goalId -> hintIndex -> message */
+    private final Map<String, Map<Integer, String>> resolvedHints = new HashMap<>();
 
     public LockoutTeamServer(List<String> playerNames, TeamColor formattingColor, MinecraftServer server) {
         super(playerNames, new ArrayList<>(), formattingColor);
@@ -69,6 +72,16 @@ public class LockoutTeamServer extends LockoutTeam {
         for (ServerPlayer spectator : Utility.getSpectators(LockoutServer.lockout, server)) {
             ServerPlayNetworking.send(spectator, payload);
         }
+    }
+
+    public void storeHintResult(String goalId, int hintIndex, String message) {
+        resolvedHints.computeIfAbsent(goalId, k -> new HashMap<>()).put(hintIndex, message);
+    }
+
+    public void sendStoredHints(ServerPlayer player) {
+        resolvedHints.forEach((goalId, hints) ->
+                hints.forEach((hintIndex, message) ->
+                        ServerPlayNetworking.send(player, new HintResultPayload(goalId, hintIndex, message, true))));
     }
 
 }
