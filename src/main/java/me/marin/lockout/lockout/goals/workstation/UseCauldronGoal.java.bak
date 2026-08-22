@@ -1,0 +1,40 @@
+package me.marin.lockout.lockout.goals.workstation;
+
+import me.marin.lockout.Constants;
+import me.marin.lockout.lockout.interfaces.IncrementStatGoal;
+import me.marin.lockout.lockout.texture.TextureProvider;
+import net.minecraft.resources.Identifier;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import java.util.List;
+
+public class UseCauldronGoal extends IncrementStatGoal implements TextureProvider {
+
+    public UseCauldronGoal(String id, String data) {
+        super(id, data);
+    }
+
+    private static final List<Identifier> STATS = List.of(Stats.CLEAN_ARMOR, Stats.CLEAN_BANNER, Stats.CLEAN_SHULKER_BOX);
+    @Override
+    public List<Identifier> getStats() {
+        return STATS;
+    }
+
+    @Override
+    public String getGoalName() {
+        return "Use Cauldron to wash something";
+    }
+
+    private static final ItemStack ITEM_STACK = Items.ENCHANTING_TABLE.getDefaultInstance();
+    @Override
+    public ItemStack getTextureItemStack() {
+        return ITEM_STACK;
+    }
+
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/use_cauldron.png");
+    @Override
+    public Identifier getTextureIdentifier() {
+        return TEXTURE;
+    }
+}

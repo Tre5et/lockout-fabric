@@ -1,0 +1,53 @@
+package me.marin.lockout.lockout.goals.obtain;
+
+import me.marin.lockout.Utility;
+import me.marin.lockout.lockout.interfaces.ObtainSomeOfTheItemsGoal;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import java.util.List;
+
+public class Obtain6UniqueBucketsGoal extends ObtainSomeOfTheItemsGoal {
+
+    private static final List<Item> ITEMS = List.of(
+            Items.BUCKET,
+            Items.WATER_BUCKET,
+            Items.COD_BUCKET,
+            Items.SALMON_BUCKET,
+            Items.LAVA_BUCKET,
+            Items.MILK_BUCKET,
+            Items.TROPICAL_FISH_BUCKET,
+            Items.PUFFERFISH_BUCKET,
+            Items.AXOLOTL_BUCKET,
+            Items.POWDER_SNOW_BUCKET,
+            Items.TADPOLE_BUCKET,
+            Items.SULFUR_CUBE_BUCKET
+    );
+
+    public Obtain6UniqueBucketsGoal(String id, String data) {
+        super(id, data);
+    }
+
+    @Override
+    public int getAmount() {
+        return 6;
+    }
+
+    @Override
+    public List<Item> getItems() {
+        return ITEMS;
+    }
+
+    @Override
+    public String getGoalName() {
+        return "Obtain 6 Unique Buckets";
+    }
+
+    @Override
+    public boolean renderTexture(GuiGraphicsExtractor context, int x, int y, int tick) {
+        super.renderTexture(context, x, y, tick);
+        Utility.drawStackCount(context, x, y, String.valueOf(getAmount()));
+        return true;
+    }
+
+}
