@@ -3,6 +3,7 @@ package me.marin.lockout.lockout.goal.builder;
 import com.google.gson.reflect.TypeToken;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import me.marin.lockout.lockout.texture.ItemTextureRenderer;
 import me.marin.lockout.lockout.texture.TextureRenderer;
 import net.minecraft.world.entity.player.Inventory;
@@ -20,6 +21,7 @@ public class ObtainColoredItemGoalBuilder extends ObtainItemGoalBuilder<DyeColor
         this.names = names;
         this.items = items;
         this.count = count;
+        require(GoalRequirements.COLORS);
     }
 
     @Override

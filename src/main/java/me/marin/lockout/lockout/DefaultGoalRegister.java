@@ -1,12 +1,12 @@
 package me.marin.lockout.lockout;
 
-import me.marin.lockout.generator.BiomeRequirements;
-import me.marin.lockout.generator.GoalRequirements;
 import me.marin.lockout.lockout.goal.builder.ObtainAllItemGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.ObtainColoredItemGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.ObtainSomeItemsGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.RideEntityGoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.group.GoalGroups;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
 import oshi.util.tuples.Pair;
@@ -23,7 +23,7 @@ public class DefaultGoalRegister {
                 .defaultEnabled(false)
         );
         INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAIN, Items.SULFUR_CUBE_BUCKET)
-                .require(new GoalRequirements.Builder().biomeRequirement(BiomeRequirements.single(SULFUR_CAVES)).build())
+                .require(GoalRequirements.anyBiome(SULFUR_CAVES))
         );
         INSTANCE.register(RideEntityGoalBuilder.simple(GoalCategory.RIDE, EntityTypes.HORSE));
         INSTANCE.register(RideEntityGoalBuilder.simple(GoalCategory.RIDE, EntityTypes.STRIDER));
@@ -31,7 +31,9 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAIN, Items.BELL)
                 .require(GoalRequirements.VILLAGE)
         );
-        INSTANCE.register(ObtainAllItemGoalBuilder.withCounts(GoalCategory.OBTAIN, new Pair<>(Items.IRON_INGOT, 24)));
+        INSTANCE.register(ObtainAllItemGoalBuilder.withCounts(GoalCategory.OBTAIN, new Pair<>(Items.IRON_INGOT, 24))
+                .group(GoalGroups.IRON_HEAVY)
+        );
         INSTANCE.register(ObtainColoredItemGoalBuilder.simple("COLORED_CONCRETE", GoalCategory.OBTAIN, Items.CONCRETE));
         INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAIN, Items.COD, Items.SALMON));
 

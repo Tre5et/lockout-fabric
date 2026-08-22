@@ -17,11 +17,13 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ListGoalOptionGenerator<T> implements GoalOptionGenerator<T> {
     private final List<T> entries;
@@ -33,8 +35,12 @@ public class ListGoalOptionGenerator<T> implements GoalOptionGenerator<T> {
     }
 
     @Override
-    public T generate() {
-        return entries.get(RANDOM.nextInt(0, entries.size()));
+    public Optional<T> generate(Function<T, Boolean> allowOption) {
+        List<T> shuffled = new ArrayList<>(entries);
+        Collections.shuffle(shuffled, RANDOM);
+        return shuffled.stream()
+                .filter(allowOption::apply)
+                .findFirst();
     }
 
     @Override
@@ -145,7 +151,7 @@ public class ListGoalOptionGenerator<T> implements GoalOptionGenerator<T> {
         }
 
         @Override
-        public boolean mouseClicked(MouseButtonEvent click, boolean consumed) {
+        public boolean mouseClicked(@NonNull MouseButtonEvent click, boolean consumed) {
             if (hovered != null) {
                 update.accept(hovered);
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
@@ -155,6 +161,6 @@ public class ListGoalOptionGenerator<T> implements GoalOptionGenerator<T> {
         }
 
         @Override
-        protected void updateWidgetNarration(NarrationElementOutput output) {}
+        protected void updateWidgetNarration(@NonNull NarrationElementOutput output) {}
     }
 }

@@ -2,15 +2,18 @@ package me.marin.lockout.lockout.goal.builder;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.marin.lockout.generator.GoalRequirements;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.lockout.goal.tooltip.TooltipInfo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class GoalBuilder<T> {
     @Getter
@@ -18,8 +21,7 @@ public abstract class GoalBuilder<T> {
     @Getter
     protected final GoalCategory category;
     @Getter
-    @Setter
-    protected GoalRequirements requirements = null;
+    protected List<GoalRequirement<? super T>> requirements = new ArrayList<>();
     @Getter
     @Setter
     protected TooltipInfo tooltipInfo = null;
@@ -38,11 +40,16 @@ public abstract class GoalBuilder<T> {
 
     public abstract Goal build(T option);
 
-    public Goal buildArbitrary() {
+    public Optional<Goal> buildGenerated(GoalRequirementContext context) {
         if(optionGenerator() == null) {
-            return build(null);
+            if(requirements.stream().allMatch(r -> r.optionSatisfiedBy(context, null))) {
+                return Optional.of(build(null));
+            }
+            return Optional.empty();
         }
-        return build(optionGenerator().generate());
+        Optional<T> option = optionGenerator().generate((o) -> requirements.stream()
+                .allMatch(r -> r.optionSatisfiedBy(context, o)));
+        return option.map(this::build);
     }
 
     public List<Goal> buildExamples() {
@@ -54,6 +61,7 @@ public abstract class GoalBuilder<T> {
                 .toList();
     }
 
+    @SuppressWarnings("unchecked")
     public Goal buildGeneric(Object option) throws IllegalGoalConstructionException {
         if(option == null) return build(null);
         try {
@@ -77,8 +85,8 @@ public abstract class GoalBuilder<T> {
         return optionGenerator().serialize(option);
     }
 
-    public GoalBuilder<T> require(GoalRequirements requirements) {
-        setRequirements(requirements);
+    public GoalBuilder<T> require(GoalRequirement<? super T> requirements) {
+        getRequirements().add(requirements);
         return this;
     }
 
@@ -87,8 +95,8 @@ public abstract class GoalBuilder<T> {
         return this;
     }
 
-    public GoalBuilder<T> group(GoalGroup group) {
-        getGroups().add(group);
+    public GoalBuilder<T> group(GoalGroup... groups) {
+        getGroups().addAll(Arrays.stream(groups).toList());
         return this;
     }
 

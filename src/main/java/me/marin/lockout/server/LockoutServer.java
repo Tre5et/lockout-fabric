@@ -9,6 +9,7 @@ import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.network.CustomBoardPayload;
 import me.marin.lockout.network.LockoutVersionPayload;
 import me.marin.lockout.network.StartLockoutPayload;
@@ -24,16 +25,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.GameProfileArgument;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.commands.AdvancementCommands;
-import net.minecraft.server.commands.LocateCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
@@ -41,8 +38,6 @@ import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -85,9 +80,7 @@ public class LockoutServer {
     }
 
     public static final int LOCATE_SEARCH = 750;
-    public static final Map<ResourceKey<Biome>, LocateData> BIOME_LOCATE_DATA = new HashMap<>();
-    public static final Map<ResourceKey<Structure>, LocateData> STRUCTURE_LOCATE_DATA = new HashMap<>();
-    public static final List<DyeColor> AVAILABLE_DYE_COLORS = new ArrayList<>();
+    public static GoalRequirementContext CONTEXT = GoalRequirementContext.EMPTY;
 
     private static int lockoutStartTime;
     private static int boardSize;
@@ -109,11 +102,6 @@ public class LockoutServer {
         compassHandler = null;
         gameStartRunnables.clear();
         waitingForVersionPacketPlayersMap.clear();
-
-        // Ideally, rejoining a world gets detected here, and this data doesn't get wiped
-        BIOME_LOCATE_DATA.clear();
-        STRUCTURE_LOCATE_DATA.clear();
-        AVAILABLE_DYE_COLORS.clear();
 
         LockoutConfig.load(); // reload config every time the server starts
         GoalPoolConfig.load(); // reload goal pool config every time the server starts
@@ -236,59 +224,6 @@ public class LockoutServer {
         });
     }
 
-    public static LocateData locateBiome(MinecraftServer server, ResourceKey<Biome> biome) {
-        if (BIOME_LOCATE_DATA.containsKey(biome)) return BIOME_LOCATE_DATA.get(biome);
-
-        var spawnPoint = server.overworld().getRespawnData();
-        var currentPos = spawnPoint.pos();
-
-        var pair = server.overworld().findClosestBiome3d(
-                biomeRegistryEntry -> biomeRegistryEntry.is(biome),
-                currentPos,
-                LOCATE_SEARCH,
-                32,
-                64);
-
-        LocateData data= new LocateData(false,0);
-        if (pair != null) {
-            int distance = Mth.floor(LocateCommand.dist(currentPos.getX(), currentPos.getZ(), pair.getFirst().getX(), pair.getFirst().getZ()));
-            if (distance < LOCATE_SEARCH) {
-                data = new LocateData(true, distance);
-            }
-        }
-        BIOME_LOCATE_DATA.put(biome, data);
-
-        return data;
-    }
-
-    public static LocateData locateStructure(MinecraftServer server, ResourceKey<Structure> structure) {
-        if (STRUCTURE_LOCATE_DATA.containsKey(structure)) return STRUCTURE_LOCATE_DATA.get(structure);
-
-        var spawnPoint = server.overworld().getRespawnData();
-        var currentPos = spawnPoint.pos();
-
-        Registry<Structure> registry = server.overworld().registryAccess().lookupOrThrow(Registries.STRUCTURE);
-        HolderSet<Structure> structureList = HolderSet.direct(registry.getOrThrow(structure));
-
-        var pair = server.overworld().getChunkSource().getGenerator().findNearestMapStructure(
-                server.overworld(),
-                structureList,
-                currentPos,
-                LOCATE_SEARCH,
-                false);
-
-        LocateData data = new LocateData(false, 0);
-        if (pair != null) {
-            int distance = Mth.floor(LocateCommand.dist(currentPos.getX(), currentPos.getZ(), pair.getFirst().getX(), pair.getFirst().getZ()));
-            if (distance < LOCATE_SEARCH) {
-                data = new LocateData(true, distance);
-            }
-        }
-        STRUCTURE_LOCATE_DATA.put(structure, data);
-
-        return data;
-    }
-
     public static int lockoutCommandLogic(CommandContext<CommandSourceStack> context) {
         List<LockoutTeamServer> teams = new ArrayList<>();
 
@@ -359,7 +294,11 @@ public class LockoutServer {
         // Generate & set board
         LockoutBoard lockoutBoard;
         if (CUSTOM_BOARD == null) {
-            BoardGenerator boardGenerator = new BoardGenerator(GoalRegistry.INSTANCE.getRegisteredGoals(), teams, BIOME_LOCATE_DATA, STRUCTURE_LOCATE_DATA);
+            BoardGenerator boardGenerator = new BoardGenerator(GoalRegistry.INSTANCE.getRegisteredGoals(), new GoalRequirementContext(
+                    CONTEXT.biomes(),
+                    CONTEXT.structures(),
+                    teams
+            ));
             lockoutBoard = boardGenerator.generateBoard(boardSize);
             
             // Check if board generation failed due to insufficient goals
@@ -766,7 +705,7 @@ public class LockoutServer {
 
     public static int getNearbyStructures(CommandContext<CommandSourceStack> context) {
         List<String> found = new ArrayList<>();
-        for (Map.Entry<ResourceKey<Structure>, LocateData> entry : STRUCTURE_LOCATE_DATA.entrySet()) {
+        for (Map.Entry<ResourceKey<Structure>, LocateData> entry : CONTEXT.structures().entrySet()) {
             if (entry.getValue().wasLocated()) {
                 found.add(entry.getKey().identifier().getPath());
             }
@@ -778,7 +717,7 @@ public class LockoutServer {
 
     public static int getNearbyBiomes(CommandContext<CommandSourceStack> context) {
         List<String> found = new ArrayList<>();
-        for (Map.Entry<ResourceKey<Biome>, LocateData> entry : BIOME_LOCATE_DATA.entrySet()) {
+        for (Map.Entry<ResourceKey<Biome>, LocateData> entry : CONTEXT.biomes().entrySet()) {
             if (entry.getValue().wasLocated()) {
                 found.add(entry.getKey().identifier().getPath());
             }

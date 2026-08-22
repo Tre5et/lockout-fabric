@@ -1,17 +1,13 @@
 package me.marin.lockout.server.handlers;
 
 import me.marin.lockout.Lockout;
-import me.marin.lockout.generator.GoalRequirements;
 import me.marin.lockout.lockout.GoalRegistry;
-import me.marin.lockout.lockout.goal.builder.GoalBuilder;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirementContextInitializer;
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.levelgen.structure.Structure;
 
 import static me.marin.lockout.server.LockoutServer.*;
 
@@ -24,43 +20,13 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
             LockoutServer.server = server;
             long start = System.currentTimeMillis();
 
-            // TODO: handle this via goal requirements
-            AVAILABLE_DYE_COLORS.add(DyeColor.BLACK);
-            AVAILABLE_DYE_COLORS.add(DyeColor.WHITE);
-            AVAILABLE_DYE_COLORS.add(DyeColor.GRAY);
-            AVAILABLE_DYE_COLORS.add(DyeColor.LIGHT_GRAY);
-            AVAILABLE_DYE_COLORS.add(DyeColor.BLUE);
-            AVAILABLE_DYE_COLORS.add(DyeColor.LIGHT_BLUE);
-            AVAILABLE_DYE_COLORS.add(DyeColor.ORANGE);
-            AVAILABLE_DYE_COLORS.add(DyeColor.RED);
-            AVAILABLE_DYE_COLORS.add(DyeColor.YELLOW);
-            AVAILABLE_DYE_COLORS.add(DyeColor.MAGENTA);
-            AVAILABLE_DYE_COLORS.add(DyeColor.PINK);
-            AVAILABLE_DYE_COLORS.add(DyeColor.PURPLE);
+            GoalRequirementContext context = new GoalRequirementContextInitializer.Combined(
+                    GoalRegistry.INSTANCE.getRegisteredGoals().stream()
+                            .flatMap(g -> g.getRequirements().stream().map(GoalRequirement::getInitializer))
+                            .toList()
+            ).initialize(server);
 
-            boolean hasCactus = locateBiome(server, Biomes.DESERT).wasLocated();
-            hasCactus |= locateBiome(server, Biomes.BADLANDS).wasLocated();
-            hasCactus |= locateBiome(server, Biomes.ERODED_BADLANDS).wasLocated();
-            hasCactus |= locateBiome(server, Biomes.WOODED_BADLANDS).wasLocated();
-            if (hasCactus) {
-                AVAILABLE_DYE_COLORS.add(DyeColor.GREEN);
-                AVAILABLE_DYE_COLORS.add(DyeColor.LIME);
-                AVAILABLE_DYE_COLORS.add(DyeColor.CYAN);
-            } else {
-                if (locateBiome(server, Biomes.WARM_OCEAN).wasLocated()) {
-                    AVAILABLE_DYE_COLORS.add(DyeColor.LIME);
-                }
-            }
-
-            boolean hasCocoaBeans;
-            hasCocoaBeans  = locateBiome(server, Biomes.JUNGLE).wasLocated();
-            hasCocoaBeans |= locateBiome(server, Biomes.BAMBOO_JUNGLE).wasLocated();
-            hasCocoaBeans |= locateBiome(server, Biomes.JUNGLE).wasLocated();
-            if (hasCocoaBeans) {
-                AVAILABLE_DYE_COLORS.add(DyeColor.BROWN);
-            }
-
-            for (GoalBuilder<?> goal : GoalRegistry.INSTANCE.getRegisteredGoals()) {
+/*            for (GoalBuilder<?> goal : GoalRegistry.INSTANCE.getRegisteredGoals()) {
                 GoalRequirements goalRequirements = goal.getRequirements();
                 if (goalRequirements == null) continue;
 
@@ -77,10 +43,12 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
                 for (ResourceKey<Structure> structure : goalRequirements.getRequiredStructures()) {
                     locateStructure(server, structure);
                 }
-            }
+            }*/
             long end = System.currentTimeMillis();
-            Lockout.log("Located " + BIOME_LOCATE_DATA.size() + " biomes and " + STRUCTURE_LOCATE_DATA.size() + " structures in " + String.format("%.2f", ((end-start)/1000.0)) + "s!");
-            
+            Lockout.log("Located " + context.biomes().size() + " biomes and " + context.structures().size() + " structures in " + String.format("%.2f", ((end-start)/1000.0)) + "s!");
+
+            CONTEXT = context;
+
             // Freeze ticks until lockout/blackout game starts
             var freezeCommand = "tick freeze";
             var parseResults = server.getCommands().getDispatcher().parse(freezeCommand, server.createCommandSourceStack());

@@ -8,14 +8,16 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public interface GoalOptionGenerator<T> {
     Random RANDOM = new Random();
     Gson GSON = new GsonBuilder().create();
 
-    T generate();
+    Optional<T> generate(Function<T, Boolean> allowOption);
     List<T> examples();
     String serialize(T option);
     T deserialize(String serialized) throws IllegalGoalConstructionException;
