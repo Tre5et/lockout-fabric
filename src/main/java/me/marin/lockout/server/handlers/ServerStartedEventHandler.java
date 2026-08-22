@@ -1,7 +1,9 @@
 package me.marin.lockout.server.handlers;
 
 import me.marin.lockout.Lockout;
+import me.marin.lockout.lockout.DefaultGoalRegister;
 import me.marin.lockout.lockout.GoalRegistry;
+import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContextInitializer;
@@ -16,6 +18,10 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
     @Override
     public void onServerStarted(MinecraftServer server) {
         server.execute(() -> {
+            Lockout.log("Registering all goals");
+            DefaultGoalRegister.registerGoals();
+            GoalPoolConfig.load();
+
             Lockout.log("Locating all required Structures and Biomes");
             LockoutServer.server = server;
             long start = System.currentTimeMillis();

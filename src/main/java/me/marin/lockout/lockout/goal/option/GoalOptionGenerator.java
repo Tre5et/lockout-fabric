@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
 
@@ -23,9 +25,10 @@ public interface GoalOptionGenerator<T> {
     T deserialize(String serialized) throws IllegalGoalConstructionException;
     int getPreferredRenderWidth();
     int getPreferredRenderHeight();
+    @Environment(EnvType.CLIENT)
     AbstractWidget getWidget(int x, int y, int width, int height, Font font, Consumer<T> update);
 
     static <T> ListGoalOptionGenerator<T> list(List<T> entries, TypeToken<T> typeToken) {
-        return new ListGoalOptionGenerator<>(entries, typeToken);
+        return new ListGoalOptionGenerator<>("Select a color:", entries, typeToken);
     }
 }

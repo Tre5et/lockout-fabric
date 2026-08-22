@@ -120,7 +120,7 @@ public class GoalPoolConfig {
             
             yaml.append("# ").append(category).append("\n");
             for (GoalBuilder<?> goal : goals) {
-                yaml.append(goal).append(": ").append(goal.isEnabled()).append("\n");
+                yaml.append(goal.getId()).append(": ").append(goal.isEnabled()).append("\n");
             }
             yaml.append("\n");
         }

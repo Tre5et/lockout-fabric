@@ -2,6 +2,7 @@ package me.marin.lockout.client;
 
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.*;
+import me.marin.lockout.lockout.DefaultGoalRegister;
 import me.marin.lockout.client.gui.*;
 import me.marin.lockout.json.JSONBoard;
 import me.marin.lockout.lockout.GoalRegistry;
@@ -67,6 +68,8 @@ public class LockoutClient implements ClientModInitializer {
         Registry.register(BuiltInRegistries.MENU, Constants.BOARD_SCREEN_ID, BOARD_SCREEN_HANDLER);
 
         ClientPlayNetworking.registerGlobalReceiver(LockoutGoalsTeamsPayload.ID, (payload, context) -> {
+            // Ensure goals are registered at packet handling time, when item stacks are available client-side.
+            DefaultGoalRegister.registerGoals();
             List<LockoutTeam> teams = payload.teams();
 
             LockoutClient.amIPlayingLockout = teams.stream().map(LockoutTeam::getPlayerNames)
@@ -341,6 +344,7 @@ public class LockoutClient implements ClientModInitializer {
             }
         });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            DefaultGoalRegister.registerGoals();
             LockoutConfig.load(); // reload config every time player joins world
             GoalPoolConfig.load(); // reload goal pool config every time player joins world
         });

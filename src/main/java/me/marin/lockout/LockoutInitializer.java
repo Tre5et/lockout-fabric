@@ -4,8 +4,6 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import me.marin.lockout.lockout.DefaultGoalRegister;
-import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.network.CustomBoardPayload;
 import me.marin.lockout.network.Networking;
 import me.marin.lockout.server.LockoutServer;
@@ -14,7 +12,6 @@ import me.marin.lockout.util.TeamSuggestionProvider;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
@@ -22,7 +19,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
@@ -54,11 +50,6 @@ public class LockoutInitializer implements ModInitializer {
 
         LockoutConfig.load();
         Networking.registerPayloads();
-
-        ServerLifecycleEvents.SERVER_STARTED.register((MinecraftServer server) -> {
-            DefaultGoalRegister.registerGoals();
-            GoalPoolConfig.load();
-        });
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             {

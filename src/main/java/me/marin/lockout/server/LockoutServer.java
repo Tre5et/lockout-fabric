@@ -175,14 +175,14 @@ public class LockoutServer {
 
             if (!Lockout.isLockoutRunning(lockout)) return;
 
+            LockoutTeamServer team = null;
             if (lockout.isLockoutPlayer(player.getUUID())) {
-                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
+                team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
                 for (Goal goal : lockout.getBoard().getGoals()) {
                     if (goal.getTooltipInfo() != null) {
                         ServerPlayNetworking.send(player, new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getTooltip(team, player))));
                     }
                 }
-                team.sendStoredHints(player);
                 player.setGameMode(GameType.SURVIVAL);
             } else {
                 for (Goal goal : lockout.getBoard().getGoals()) {
@@ -198,6 +198,9 @@ public class LockoutServer {
             ServerPlayNetworking.send(player, lockout.getUpdateTimerPacket());
             if (lockout.hasStarted()) {
                 ServerPlayNetworking.send(player, StartLockoutPayload.INSTANCE);
+            }
+            if (team != null) {
+                team.sendStoredHints(player);
             }
         });
 

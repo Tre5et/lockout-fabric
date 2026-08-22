@@ -15,8 +15,12 @@ import static me.marin.lockout.lockout.GoalRegistry.INSTANCE;
 import static net.minecraft.world.level.biome.Biomes.*;
 
 public class DefaultGoalRegister {
+    private static boolean goalsRegistered = false;
 
-    public static void registerGoals() {
+    public static synchronized void registerGoals() {
+        if (goalsRegistered) {
+            return;
+        }
         INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", "all Wooden Tools", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_COLORED_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));
         INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAINING_ITEMS, Items.WITHER_SKELETON_SKULL)
@@ -454,6 +458,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.MAP_BANNER_WAYPOINT, MapBannerWaypointGoal.class);
         INSTANCE.register(GoalType.OBTAIN_5_UNIQUE_PRESSURE_PLATES, Obtain5UniquePressurePlatesGoal.class);
         INSTANCE.register(GoalType.OBTAIN_8_UNIQUE_BRICKS, Obtain8UniqueBricksGoal.class);*/
+        goalsRegistered = true;
     }
 
 }

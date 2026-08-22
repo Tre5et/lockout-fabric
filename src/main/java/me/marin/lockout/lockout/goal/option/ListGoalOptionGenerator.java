@@ -4,6 +4,8 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -26,10 +28,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ListGoalOptionGenerator<T> implements GoalOptionGenerator<T> {
+    private final String title;
     private final List<T> entries;
     private final TypeToken<T> typeToken;
 
-    public ListGoalOptionGenerator(List<T> entries, TypeToken<T> typeToken) {
+    public ListGoalOptionGenerator(String title, List<T> entries, TypeToken<T> typeToken) {
+        this.title = title;
         this.entries = entries;
         this.typeToken = typeToken;
     }
@@ -73,10 +77,12 @@ public class ListGoalOptionGenerator<T> implements GoalOptionGenerator<T> {
     }
 
     @Override
+    @Environment(EnvType.CLIENT)
     public AbstractWidget getWidget(int x, int y, int width, int height, Font font, Consumer<T> update) {
-        return new Widget(x, y, width, height, Component.literal("Color:"), update);
+        return new Widget(x, y, width, height, Component.literal(title), update);
     }
 
+    @Environment(EnvType.CLIENT)
     public class Widget extends AbstractScrollArea {
         private static final int TITLE_HEIGHT = 14;
         private static final int ITEM_HEIGHT = 18;
@@ -101,7 +107,7 @@ public class ListGoalOptionGenerator<T> implements GoalOptionGenerator<T> {
         protected void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
             Font textRenderer = Minecraft.getInstance().font;
 
-            context.text(textRenderer, FormattedCharSequence.forward("Select a color:", TITLE_STYLE), getX(), getY() - TITLE_HEIGHT + MARGIN_Y, 0xFF000000);
+            context.text(textRenderer, FormattedCharSequence.forward(title, TITLE_STYLE), getX(), getY() - TITLE_HEIGHT + MARGIN_Y, 0xFF000000);
 
             hovered = this.isMouseOver(mouseX, mouseY) ? this.getEntryAtPosition(mouseX, mouseY) : null;
             context.enableScissor(this.getX() - 1, this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight());
