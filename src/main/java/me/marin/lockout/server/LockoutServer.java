@@ -5,20 +5,18 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.marin.lockout.*;
 import me.marin.lockout.client.LockoutBoard;
 import me.marin.lockout.generator.BoardGenerator;
-import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.GoalRegistry;
-import me.marin.lockout.lockout.interfaces.HasTooltipInfo;
+import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
+import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.network.CustomBoardPayload;
 import me.marin.lockout.network.LockoutVersionPayload;
 import me.marin.lockout.network.StartLockoutPayload;
 import me.marin.lockout.network.UpdateTooltipPayload;
 import me.marin.lockout.server.handlers.*;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -50,7 +48,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.TeamColor;
-import oshi.util.tuples.Pair;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 
 import java.util.*;
@@ -132,7 +129,7 @@ public class LockoutServer {
 
         ServerPlayerEvents.AFTER_RESPAWN.register(new AfterRespawnEventHandler());
 
-        ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register(new AfterPlayerChangeWorldEventHandler());
+        //ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register(new AfterPlayerChangeWorldEventHandler());
 
         ServerPlayConnectionEvents.JOIN.register(new PlayerJoinEventHandler());
 
@@ -160,9 +157,9 @@ public class LockoutServer {
             });
         });
 
-        ServerLivingEntityEvents.AFTER_DEATH.register(new AfterDeathEventHandler());
+/*        ServerLivingEntityEvents.AFTER_DEATH.register(new AfterDeathEventHandler());
 
-        UseBlockCallback.EVENT.register(new UseBlockEventHandler());
+        UseBlockCallback.EVENT.register(new UseBlockEventHandler());*/
 
         ServerLifecycleEvents.SERVER_STARTED.register(new ServerStartedEventHandler());
 
@@ -190,15 +187,15 @@ public class LockoutServer {
             if (lockout.isLockoutPlayer(player.getUUID())) {
                 LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
                 for (Goal goal : lockout.getBoard().getGoals()) {
-                    if (goal instanceof HasTooltipInfo hasTooltipInfo) {
-                        ServerPlayNetworking.send(player, new UpdateTooltipPayload(goal.getId(), String.join("\n", hasTooltipInfo.getTooltip(team, player))));
+                    if (goal.getTooltipInfo() != null) {
+                        ServerPlayNetworking.send(player, new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getTooltip(team, player))));
                     }
                 }
                 player.setGameMode(GameType.SURVIVAL);
             } else {
                 for (Goal goal : lockout.getBoard().getGoals()) {
-                    if (goal instanceof HasTooltipInfo hasTooltipInfo) {
-                        ServerPlayNetworking.send(player, new UpdateTooltipPayload(goal.getId(), String.join("\n", hasTooltipInfo.getSpectatorTooltip())));
+                    if (goal.getTooltipInfo() != null) {
+                        ServerPlayNetworking.send(player, new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getSpectatorTooltip())));
                     }
                 }
                 player.setGameMode(GameType.SPECTATOR);
@@ -228,18 +225,13 @@ public class LockoutServer {
                 player.sendSystemMessage(Component.literal("Removed custom board."));
             } else {
                 // validate board
-                List<String> invalidGoals = new ArrayList<>();
-                for (Pair<String, String> goal : payload.boardOrClear().get()) {
-                    if (!GoalRegistry.INSTANCE.isGoalValid(goal.getA(), goal.getB())) {
-                        invalidGoals.add(" - '" + goal.getA() + "'" + ("null".equals(goal.getB()) ? "" : (" with data: '" + goal.getB() + "'")));
-                    }
+                try {
+                    List<Goal> goals = GoalRegistry.INSTANCE.constructGoals(payload.boardOrClear().get());
+                    CUSTOM_BOARD = new LockoutBoard(goals);
+                    player.sendSystemMessage(Component.literal("Set custom board."));
+                } catch (IllegalGoalConstructionException e) {
+                    player.sendSystemMessage(Component.literal(e.getMessage()));
                 }
-                if (!invalidGoals.isEmpty()) {
-                    player.sendSystemMessage(Component.literal("Invalid board. Could not create goals:\n" + String.join("\n", invalidGoals)));
-                    return;
-                }
-                CUSTOM_BOARD = new LockoutBoard(payload.boardOrClear().get());
-                player.sendSystemMessage(Component.literal("Set custom board."));
             }
         });
     }
@@ -367,7 +359,7 @@ public class LockoutServer {
         // Generate & set board
         LockoutBoard lockoutBoard;
         if (CUSTOM_BOARD == null) {
-            BoardGenerator boardGenerator = new BoardGenerator(GoalRegistry.INSTANCE.getRegisteredGoals(), teams, AVAILABLE_DYE_COLORS, BIOME_LOCATE_DATA, STRUCTURE_LOCATE_DATA);
+            BoardGenerator boardGenerator = new BoardGenerator(GoalRegistry.INSTANCE.getRegisteredGoals(), teams, BIOME_LOCATE_DATA, STRUCTURE_LOCATE_DATA);
             lockoutBoard = boardGenerator.generateBoard(boardSize);
             
             // Check if board generation failed due to insufficient goals
@@ -394,15 +386,15 @@ public class LockoutServer {
 
         compassHandler = new CompassItemHandler(allLockoutPlayers, playerManager);
 
-        List<Goal> tooltipGoals = new ArrayList<>(lockout.getBoard().getGoals()).stream().filter(g -> g instanceof HasTooltipInfo).toList();
+        List<Goal> tooltipGoals = new ArrayList<>(lockout.getBoard().getGoals()).stream().filter(g -> g.getTooltipInfo() != null).toList();
         for (Goal goal : tooltipGoals) {
             // Update teams tooltip
             for (LockoutTeam team : lockout.getTeams()) {
-                ((LockoutTeamServer) team).sendTooltipUpdate((Goal & HasTooltipInfo) goal, false);
+                ((LockoutTeamServer) team).sendTooltipUpdate(goal, false);
             }
             // Update spectator tooltip
             if (!allSpectatorPlayers.isEmpty()) {
-                var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", ((HasTooltipInfo) goal).getSpectatorTooltip()));
+                var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getSpectatorTooltip()));
                 for (UUID spectator : allSpectatorPlayers) {
                     ServerPlayNetworking.send(playerManager.getPlayer(spectator), payload);
                 }
@@ -723,7 +715,7 @@ public class LockoutServer {
             }
             Goal goal = lockout.getBoard().getGoals().get(idx - 1);
 
-            context.getSource().sendSystemMessage(Component.nullToEmpty("Gave " + playerConfig.name() + " goal \"" + goal.getGoalName() + "\"."));
+            context.getSource().sendSystemMessage(Component.nullToEmpty("Gave " + playerConfig.name() + " goal \"" + goal.getName() + "\"."));
             lockout.updateGoalCompletion(goal, playerConfig.id());
             return 1;
         } catch (RuntimeException e) {

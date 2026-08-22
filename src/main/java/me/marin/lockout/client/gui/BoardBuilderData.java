@@ -3,9 +3,7 @@ package me.marin.lockout.client.gui;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.GoalRegistry;
-import oshi.util.tuples.Pair;
+import me.marin.lockout.lockout.goal.Goal;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -123,20 +121,13 @@ public class BoardBuilderData {
         goals.set(modifyingIdx, goal);
     }
 
-    public void setBoard(String title, int size, List<Pair<String, String>> goals) {
+    public void setBoard(String title, int size, List<Goal> goals) {
         this.title = title;
         this.size = size;
         this.modifyingIdx = null;
 
         this.goals.clear();
-
-        for (Pair<String, String> pair : goals) {
-            Goal goal = null;
-            if (GoalRegistry.INSTANCE.isGoalValid(pair.getA(), pair.getB())) {
-                goal = GoalRegistry.INSTANCE.newGoal(pair.getA(), pair.getB());
-            }
-            this.goals.add(goal);
-        }
+        this.goals.addAll(goals);
     }
 
 }

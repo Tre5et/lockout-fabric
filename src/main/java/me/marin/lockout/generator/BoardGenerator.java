@@ -1,33 +1,29 @@
 package me.marin.lockout.generator;
 
 import me.marin.lockout.LocateData;
-import me.marin.lockout.GoalPoolConfig;
 import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutTeamServer;
 import me.marin.lockout.client.LockoutBoard;
-import me.marin.lockout.lockout.GoalRegistry;
-import me.marin.lockout.lockout.goals.util.GoalDataConstants;
+import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import oshi.util.tuples.Pair;
 
 import java.util.*;
 
 public class BoardGenerator {
 
-    private final List<String> registeredGoals;
+    private final List<GoalBuilder<?>> registeredGoals;
     private final List<LockoutTeamServer> teams;
-    private final List<DyeColor> attainableDyes;
     private final Map<ResourceKey<Biome>, LocateData> biomes;
     private final Map<ResourceKey<Structure>, LocateData> structures;
     private final int maxRecursionDepth = 100;
 
-    public BoardGenerator(List<String> registeredGoals, List<LockoutTeamServer> teams, List<DyeColor> attainableDyes, Map<ResourceKey<Biome>, LocateData> biomes, Map<ResourceKey<Structure>, LocateData> structures) {
+    public BoardGenerator(List<GoalBuilder<?>> registeredGoals, List<LockoutTeamServer> teams, Map<ResourceKey<Biome>, LocateData> biomes, Map<ResourceKey<Structure>, LocateData> structures) {
         this.registeredGoals = registeredGoals;
         this.teams = teams;
-        this.attainableDyes = attainableDyes;
         this.biomes = biomes;
         this.structures = structures;
     }
@@ -45,23 +41,23 @@ public class BoardGenerator {
 
         Collections.shuffle(registeredGoals);
 
-        List<Pair<String, String>> goals = new ArrayList<>();
-        List<String> goalTypes = new ArrayList<>();
+        List<GoalBuilder<?>> goalBuilders = new ArrayList<>();
 
-        ListIterator<String> it = registeredGoals.listIterator();
-        while (goals.size() < size * size && it.hasNext()) {
-            String goal = it.next();
+        ListIterator<GoalBuilder<?>> it = registeredGoals.listIterator();
+        while (goalBuilders.size() < size * size && it.hasNext()) {
+            GoalBuilder<?> goal = it.next();
 
-            if (!GoalGroup.canAdd(goal, goalTypes)) {
+            // Always check enable state first - this applies to ALL goals
+            if (!goal.isEnabled()) {
                 continue;
             }
 
-            // Always check GoalPoolConfig first - this applies to ALL goals
-            if (!GoalPoolConfig.getInstance().isGoalEnabled(goal)) {
+            if (!goal.getGroups().stream().allMatch(g -> g.canAdd(goal, goalBuilders))) {
+                // Group does not permit this goal to be added.
                 continue;
             }
 
-            GoalRequirements goalRequirements = GoalRegistry.INSTANCE.getGoalGenerator(goal);
+            GoalRequirements goalRequirements = goal.getRequirements();
             if (goalRequirements != null) {
                 if (!goalRequirements.isTeamsSizeOk(teams.size())) {
                     continue;
@@ -71,17 +67,19 @@ public class BoardGenerator {
                 }
             }
 
-            Optional<GoalDataGenerator> gen = GoalRegistry.INSTANCE.getDataGenerator(goal);
-            String data = gen.map(g -> g.generateData(attainableDyes)).orElse(GoalDataConstants.DATA_NONE);
-
-            goals.add(new Pair<>(goal, data));
-            goalTypes.add(goal);
+            goalBuilders.add(goal);
         }
 
         // If we didn't get enough goals, try again with a new shuffle
-        if (goals.size() < size * size) {
-            Lockout.log("Board generation attempt " + (recursionDepth + 1) + ": only got " + goals.size() + " goals, need " + (size * size));
+        if (goalBuilders.size() < size * size) {
+            Lockout.log("Board generation attempt " + (recursionDepth + 1) + ": only got " + goalBuilders.size() + " goals, need " + (size * size));
             return generateBoard(size, recursionDepth + 1);
+        }
+
+        // Construct the goals with ramdom options
+        List<Goal> goals = new ArrayList<>();
+        for(GoalBuilder<?> goal : goalBuilders) {
+            goals.add(goal.buildArbitrary());
         }
 
         // Shuffle the board again. Some goals will always be after some other goals (GoalGroup#requirePredecessor),

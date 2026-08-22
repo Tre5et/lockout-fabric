@@ -1,12 +1,10 @@
 package me.marin.lockout;
 
 import lombok.Getter;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.interfaces.HasTooltipInfo;
+import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.network.UpdateTooltipPayload;
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -52,10 +50,10 @@ public class LockoutTeamServer extends LockoutTeam {
         sendTooltipUpdate(goal, true);
     }
     public void sendTooltipUpdate(Goal goal, boolean updateSpectators) {
-        if (!(goal instanceof HasTooltipInfo tooltipGoal)) return;
+        if (goal.getTooltipInfo() == null) return;
         for (UUID playerId : getPlayerIds()) {
             ServerPlayer player = server.getPlayerList().getPlayer(playerId);
-            var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", tooltipGoal.getTooltip(this, player)));
+            var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getTooltip(this, player)));
             if (player != null) {
                 ServerPlayNetworking.send(player, payload);
             }
@@ -66,8 +64,8 @@ public class LockoutTeamServer extends LockoutTeam {
         }
     }
     private void sendTooltipPacketSpectators(Goal goal) {
-        if (!(goal instanceof HasTooltipInfo tooltipGoal)) return;
-        var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", tooltipGoal.getSpectatorTooltip()));
+        if (goal.getTooltipInfo() == null) return;
+        var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getSpectatorTooltip()));
         for (ServerPlayer spectator : Utility.getSpectators(LockoutServer.lockout, server)) {
             ServerPlayNetworking.send(spectator, payload);
         }

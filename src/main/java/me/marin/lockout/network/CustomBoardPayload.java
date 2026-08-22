@@ -19,7 +19,11 @@ public record CustomBoardPayload(Optional<List<Pair<String, String>>> boardOrCle
                 var board = boardOrClear.get();
                 for (var goal : board) {
                     buf.writeUtf(goal.getA());
-                    buf.writeUtf(goal.getB());
+                    if(goal.getB() != null) {
+                        buf.writeUtf(goal.getB());
+                    } else {
+                        buf.writeUtf("null");
+                    }
                 }
             },
             (buf) -> {

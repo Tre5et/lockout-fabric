@@ -1,69 +1,41 @@
 package me.marin.lockout.lockout;
 
-import me.marin.lockout.Lockout;
-import me.marin.lockout.generator.GoalDataGenerator;
 import me.marin.lockout.generator.BiomeRequirements;
 import me.marin.lockout.generator.GoalRequirements;
-import me.marin.lockout.lockout.goals.advancement.*;
-import me.marin.lockout.lockout.goals.advancement.unique.Get10UniqueAdvancementsGoal;
-import me.marin.lockout.lockout.goals.advancement.unique.Get20UniqueAdvancementsGoal;
-import me.marin.lockout.lockout.goals.advancement.unique.Get30UniqueAdvancementsGoal;
-import me.marin.lockout.lockout.goals.biome.VisitBadlandsBiomeGoal;
-import me.marin.lockout.lockout.goals.biome.VisitIceSpikesBiomeGoal;
-import me.marin.lockout.lockout.goals.biome.VisitMushroomBiomeGoal;
-import me.marin.lockout.lockout.goals.break_item.BreakArmorGoal;
-import me.marin.lockout.lockout.goals.break_item.BreakToolGoal;
-import me.marin.lockout.lockout.goals.breed_animals.*;
-import me.marin.lockout.lockout.goals.brewing.*;
-import me.marin.lockout.lockout.goals.consume.*;
-import me.marin.lockout.lockout.goals.consume.unique.*;
-import me.marin.lockout.lockout.goals.death.*;
-import me.marin.lockout.lockout.goals.dimension.EnterEndGoal;
-import me.marin.lockout.lockout.goals.dimension.EnterNetherGoal;
-import me.marin.lockout.lockout.goals.experience.ReachXPLevel15Goal;
-import me.marin.lockout.lockout.goals.experience.ReachXPLevel30Goal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostPlayerKillsGoal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostAdvancementsGoal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostUniqueCraftsGoal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostXPLevelsGoal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostHoppersGoal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostLeaflitterGoal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostDiamondBlocksGoal;
-import me.marin.lockout.lockout.goals.kill.*;
-import me.marin.lockout.lockout.goals.kill.unique.Kill10UniqueHostileMobsGoal;
-import me.marin.lockout.lockout.goals.kill.unique.Kill13UniqueHostileMobsGoal;
-import me.marin.lockout.lockout.goals.kill.unique.Kill15UniqueHostileMobsGoal;
-import me.marin.lockout.lockout.goals.kill.unique.Kill7UniqueHostileMobsGoal;
-import me.marin.lockout.lockout.goals.mine.*;
-import me.marin.lockout.lockout.goals.misc.*;
-import me.marin.lockout.lockout.goals.obtain.*;
-import me.marin.lockout.lockout.goals.opponent.*;
-import me.marin.lockout.lockout.goals.ride.RideHorseGoal;
-import me.marin.lockout.lockout.goals.ride.RideNautilusGoal;
-import me.marin.lockout.lockout.goals.ride.RideMinecartGoal;
-import me.marin.lockout.lockout.goals.ride.RidePigGoal;
-import me.marin.lockout.lockout.goals.visit.*;
-import me.marin.lockout.lockout.goals.status_effect.*;
-import me.marin.lockout.lockout.goals.status_effect.unique.Get3StatusEffectsGoal;
-import me.marin.lockout.lockout.goals.status_effect.unique.Get4StatusEffectsGoal;
-import me.marin.lockout.lockout.goals.status_effect.unique.Get6StatusEffectsGoal;
-import me.marin.lockout.lockout.goals.tame_animal.TameCatGoal;
-import me.marin.lockout.lockout.goals.tame_animal.TameHorseGoal;
-import me.marin.lockout.lockout.goals.tame_animal.TameParrotGoal;
-import me.marin.lockout.lockout.goals.tame_animal.TameWolfGoal;
-import me.marin.lockout.lockout.goals.util.GoalDataConstants;
-import me.marin.lockout.lockout.goals.wear_armor.*;
-import me.marin.lockout.lockout.goals.workstation.*;
-import net.minecraft.world.item.DyeColor;
-import java.util.List;
+import me.marin.lockout.lockout.goal.builder.ObtainAllItemGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.ObtainColoredItemGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.ObtainSomeItemsGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.RideEntityGoalBuilder;
+import me.marin.lockout.lockout.goal.config.GoalCategory;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.Items;
+import oshi.util.tuples.Pair;
 
 import static me.marin.lockout.lockout.GoalRegistry.INSTANCE;
 import static net.minecraft.world.level.biome.Biomes.*;
-import static net.minecraft.world.level.levelgen.structure.BuiltinStructures.*;
 
 public class DefaultGoalRegister {
 
     public static void registerGoals() {
+        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", "all Wooden Tools", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR));
+        INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_COLORED_WOOL", GoalCategory.OBTAIN, Items.WOOL, 64));
+        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAIN, Items.WITHER_SKELETON_SKULL)
+                .defaultEnabled(false)
+        );
+        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAIN, Items.SULFUR_CUBE_BUCKET)
+                .require(new GoalRequirements.Builder().biomeRequirement(BiomeRequirements.single(SULFUR_CAVES)).build())
+        );
+        INSTANCE.register(RideEntityGoalBuilder.simple(GoalCategory.RIDE, EntityTypes.HORSE));
+        INSTANCE.register(RideEntityGoalBuilder.simple(GoalCategory.RIDE, EntityTypes.STRIDER));
+        INSTANCE.register(ObtainSomeItemsGoalBuilder.multiple("4_UNIQUE_SEEDS", "4 unique Seeds", 4, GoalCategory.OBTAIN, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.TORCHFLOWER_SEEDS));
+        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAIN, Items.BELL)
+                .require(GoalRequirements.VILLAGE)
+        );
+        INSTANCE.register(ObtainAllItemGoalBuilder.withCounts(GoalCategory.OBTAIN, new Pair<>(Items.IRON_INGOT, 24)));
+        INSTANCE.register(ObtainColoredItemGoalBuilder.simple("COLORED_CONCRETE", GoalCategory.OBTAIN, Items.CONCRETE));
+        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAIN, Items.COD, Items.SALMON));
+
+        /*
         INSTANCE.register(GoalType.OBTAIN_WOODEN_TOOLS, ObtainWoodenToolsGoal.class);
         INSTANCE.register(GoalType.OBTAIN_STONE_TOOLS, ObtainStoneToolsGoal.class);
         INSTANCE.register(GoalType.OBTAIN_IRON_TOOLS, ObtainIronToolsGoal.class);
@@ -407,12 +379,12 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.GET_LAUNCHED_BY_GEYSER, GetLaunchedByGeyserGoal.class, new GoalRequirements.Builder()
                 .biomeRequirement(BiomeRequirements.single(SULFUR_CAVES))
                 .build()
-        );
+        );ADVANCEMENT, GetWaxOffAdvancementGoal.class);
+        INSTANCE.register(GoalType.GET_COUNTRY
         INSTANCE.register(GoalType.GET_HIRED_HELP_ADVANCEMENT, GetHiredHelpAdvancementGoal.class);
         INSTANCE.register(GoalType.GET_STAY_HYDRATED_ADVANCEMENT, GetStayHydratedAdvancementGoal.class);
         INSTANCE.register(GoalType.GET_WAX_ON_ADVANCEMENT, GetWaxOnAdvancementGoal.class);
-        INSTANCE.register(GoalType.GET_WAX_OFF_ADVANCEMENT, GetWaxOffAdvancementGoal.class);
-        INSTANCE.register(GoalType.GET_COUNTRY_LODE_TAKE_ME_HOME_ADVANCEMENT, GetCountryLodeTakeMeHomeAdvancementGoal.class);
+        INSTANCE.register(GoalType.GET_WAX_OFF__LODE_TAKE_ME_HOME_ADVANCEMENT, GetCountryLodeTakeMeHomeAdvancementGoal.class);
         INSTANCE.register(GoalType.PUT_BANNER_ON_SHIELD, ObtainShieldWithBannerGoal.class);
         INSTANCE.register(GoalType.HAVE_MORE_UNIQUE_CRAFTS, HaveMostUniqueCraftsGoal.class, GoalRequirements.TEAMS_GOAL);
         INSTANCE.register(GoalType.HAVE_MOST_PLAYER_KILLS, HaveMostPlayerKillsGoal.class, GoalRequirements.TEAMS_GOAL);
@@ -439,7 +411,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.LIGHT_CANDLE, LightCandleGoal.class);
         INSTANCE.register(GoalType.WEAR_FULL_ENCHANTED_ARMOR, WearFullEnchantedArmorGoal.class);
         INSTANCE.register(GoalType.PUT_WOLF_ARMOR_ON_WOLF, PutWolfArmorOnWolfGoal.class, new GoalRequirements.Builder()
-                .biomeRequirement(BiomeRequirements.anyOf(SAVANNA, SAVANNA_PLATEAU, WINDSWEPT_SAVANNA, BADLANDS, ERODED_BADLANDS, WOODED_BADLANDS)) /* armadillo spawn biomes */
+                .biomeRequirement(BiomeRequirements.anyOf(SAVANNA, SAVANNA_PLATEAU, WINDSWEPT_SAVANNA, BADLANDS, ERODED_BADLANDS, WOODED_BADLANDS)) *//* armadillo spawn biomes *//*
                 .build());
         INSTANCE.register(GoalType.KILL_BREEZE_USING_WIND_CHARGE, KillBreezeWithWindChargeGoal.class, new GoalRequirements.Builder()
                 .structures(List.of(TRIAL_CHAMBERS))
@@ -479,7 +451,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(GoalType.BREAK_ARMOR, BreakArmorGoal.class);
         INSTANCE.register(GoalType.MAP_BANNER_WAYPOINT, MapBannerWaypointGoal.class);
         INSTANCE.register(GoalType.OBTAIN_5_UNIQUE_PRESSURE_PLATES, Obtain5UniquePressurePlatesGoal.class);
-        INSTANCE.register(GoalType.OBTAIN_8_UNIQUE_BRICKS, Obtain8UniqueBricksGoal.class);
+        INSTANCE.register(GoalType.OBTAIN_8_UNIQUE_BRICKS, Obtain8UniqueBricksGoal.class);*/
     }
 
 }

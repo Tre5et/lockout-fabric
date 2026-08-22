@@ -2,30 +2,16 @@ package me.marin.lockout.server.handlers;
 
 import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutRunnable;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostXPLevelsGoal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostHoppersGoal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostLeaflitterGoal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostDiamondBlocksGoal;
-import me.marin.lockout.lockout.goals.misc.EmptyHungerBarGoal;
-import me.marin.lockout.lockout.goals.misc.ReachBedrockGoal;
-import me.marin.lockout.lockout.goals.misc.ReachHeightLimitGoal;
-import me.marin.lockout.lockout.goals.misc.ReachNetherRoofGoal;
-import me.marin.lockout.lockout.goals.opponent.OpponentTouchesWaterGoal;
-import me.marin.lockout.lockout.interfaces.ObtainItemsGoal;
-import me.marin.lockout.lockout.interfaces.OpponentObtainsItemGoal;
-import me.marin.lockout.lockout.interfaces.RideEntityGoal;
+import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.lockout.goal.ObtainItemGoal;
+import me.marin.lockout.lockout.goal.RideEntityGoal;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
+
 import java.util.HashSet;
-import java.util.Objects;
 
 import static me.marin.lockout.server.LockoutServer.gameStartRunnables;
 import static me.marin.lockout.server.LockoutServer.lockout;
@@ -48,7 +34,7 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
         for (Goal goal : lockout.getBoard().getGoals()) {
             if (goal == null) continue;
 
-            if (goal instanceof HaveMostXPLevelsGoal) {
+            /*if (goal instanceof HaveMostXPLevelsGoal) {
                 for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                     lockout.levels.put(player.getUUID(), player.isDeadOrDying() ? 0 : player.experienceLevel);
                 }
@@ -83,24 +69,27 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
                     lockout.playerDiamondBlockCounts.put(player.getUUID(), diamondBlockCount);
                 }
                 lockout.recalculateDiamondBlocksGoal(goal);
-            }
+            }*/
 
             if (goal.isCompleted()) continue;
 
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                if (goal instanceof ObtainItemsGoal obtainItemsGoal) {
+                if (goal instanceof ObtainItemGoal obtainItemsGoal) {
                     if (obtainItemsGoal.satisfiedBy(player.getInventory())) {
-                        if (goal instanceof OpponentObtainsItemGoal opponentObtainsItemGoal) {
+/*                        if (goal instanceof OpponentObtainsItemGoal opponentObtainsItemGoal) {
                             lockout.completeMultiOpponentGoal(goal, player, opponentObtainsItemGoal.getMessage(player));
-                        } else {
+                        } else {*/
                             lockout.completeGoal(goal, player);
-                        }
+/*                        }*/
                     }
                 }
 
                 if (goal instanceof RideEntityGoal rideEntityGoal && player.isPassenger()) {
                     EntityType<?> vehicle = player.getVehicle().getType();
-                    if (Objects.equals(vehicle, rideEntityGoal.getEntityType()) || (rideEntityGoal.getEntityType() == EntityTypes.NAUTILUS && vehicle == EntityTypes.ZOMBIE_NAUTILUS)) {
+                    if(rideEntityGoal.satisfiedBy(vehicle)) {
+                        lockout.completeGoal(goal, player);
+                    }
+/*                    if (Objects.equals(vehicle, rideEntityGoal.getEntityType()) || (rideEntityGoal.getEntityType() == EntityTypes.NAUTILUS && vehicle == EntityTypes.ZOMBIE_NAUTILUS)) {
                         boolean allow = true;
                         if (Objects.equals(vehicle, EntityTypes.PIG)) {
                             boolean hasCarrotOnAStick = false;
@@ -113,9 +102,9 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
                         if (allow) {
                             lockout.completeGoal(goal, player);
                         }
-                    }
+                    }*/
                 }
-                if (goal instanceof EmptyHungerBarGoal) {
+/*                if (goal instanceof EmptyHungerBarGoal) {
                     if (player.getFoodData().getFoodLevel() == 0) {
                         lockout.completeGoal(goal, player);
                     }
@@ -139,7 +128,7 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
                     if (Objects.equals(player.level().getBlockState(player.blockPosition()).getBlock(), Blocks.WATER)) {
                         lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " touched water.");
                     }
-                }
+                }*/
             }
         }
 

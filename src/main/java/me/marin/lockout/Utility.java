@@ -3,8 +3,7 @@ package me.marin.lockout;
 import me.marin.lockout.client.LockoutBoard;
 import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.client.gui.BoardBuilderScreen;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.interfaces.HasTooltipInfo;
+import me.marin.lockout.lockout.goal.Goal;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -189,13 +188,10 @@ public class Utility {
 
     public static void drawGoalInformation(GuiGraphicsExtractor context, Font textRenderer, Goal goal, int mouseX, int mouseY) {
         List<FormattedCharSequence> tooltip = new ArrayList<>();
-        tooltip.add(Component.nullToEmpty(((goal instanceof HasTooltipInfo) ? ChatFormatting.UNDERLINE : "") + goal.getGoalName()).getVisualOrderText());
-        if (goal instanceof HasTooltipInfo) {
-            String s = LockoutClient.goalTooltipMap.get(goal.getId());
-            if (s != null) {
-                for (String t : s.split("\n")) {
-                    tooltip.add(Component.nullToEmpty(t).getVisualOrderText());
-                }
+        tooltip.add(Component.nullToEmpty((goal.getTooltipInfo() != null ? ChatFormatting.UNDERLINE : "") + goal.getName()).getVisualOrderText());
+        if (goal.getTooltipInfo() != null && LockoutClient.goalTooltipMap.containsKey(goal.getId())) {
+            for (String t : LockoutClient.goalTooltipMap.get(goal.getId()).split("\n")) {
+                tooltip.add(Component.nullToEmpty(t).getVisualOrderText());
             }
         }
         context.setTooltipForNextFrame(textRenderer, tooltip, mouseX, mouseY);

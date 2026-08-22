@@ -3,13 +3,11 @@ package me.marin.lockout;
 import lombok.Getter;
 import lombok.Setter;
 import me.marin.lockout.client.LockoutBoard;
-import me.marin.lockout.lockout.Goal;
+import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.network.CompleteTaskPayload;
 import me.marin.lockout.network.EndLockoutPayload;
 import me.marin.lockout.network.LockoutGoalsTeamsPayload;
 import me.marin.lockout.network.UpdateTimerPayload;
-import me.marin.lockout.lockout.goals.have_more.*;
-import me.marin.lockout.lockout.interfaces.HasTooltipInfo;
 import me.marin.lockout.network.UpdateTooltipPayload;
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -139,14 +137,14 @@ public class Lockout {
         if (team == null) return;
 
         if (team instanceof LockoutTeamServer teamServer) {
-            completeGoal(goal, teamServer, teamServer.getPlayerName(playerId) + " completed " + goal.getGoalName() + ".");
+            completeGoal(goal, teamServer, teamServer.getPlayerName(playerId) + " completed " + goal.getName() + ".");
         } else {
             // Client side or other team type - should normally not happen on client but let's be safe
-            completeGoal(goal, team, "Someone completed " + goal.getGoalName() + ".");
+            completeGoal(goal, team, "Someone completed " + goal.getName() + ".");
         }
     }
     public void completeGoal(Goal goal, LockoutTeam team) {
-        completeGoal(goal, team, team.getDisplayName() + " completed " + goal.getGoalName() + ".");
+        completeGoal(goal, team, team.getDisplayName() + " completed " + goal.getName() + ".");
     }
     public void completeGoal(Goal goal, LockoutTeam team, String message) {
         if (goal.isCompleted()) return;
@@ -444,18 +442,24 @@ public class Lockout {
 
     public LockoutGoalsTeamsPayload getTeamsGoalsPacket() {
         return new LockoutGoalsTeamsPayload(teams.stream().map(team -> (LockoutTeam) team).toList(),
-                board.getGoals().stream().map(goal -> new Pair<>(new Pair<>(goal.getId(), goal.getData()), teams.indexOf(goal.getCompletedTeam()))).toList(),
+                board.getGoals().stream().map(goal -> {
+                    String option = "null";
+                    if(goal.getBuildData().getB() != null) {
+                        option = goal.getBuildData().getB();
+                    }
+                    return new Pair<>(new Pair<>(goal.getBuildData().getA(), option), teams.indexOf(goal.getCompletedTeam()));
+                }).toList(),
                 isRunning);
     }
     public void updateTooltips(Goal goal) {
-        if (goal instanceof HasTooltipInfo tooltipGoal) {
+        if (goal.getTooltipInfo() != null) {
             for (LockoutTeam team : teams) {
                 if (team instanceof LockoutTeamServer teamServer) {
                     teamServer.sendTooltipUpdate(goal);
                 }
             }
             // Update spectators
-            List<String> spectatorTooltip = tooltipGoal.getSpectatorTooltip();
+            List<String> spectatorTooltip = goal.getSpectatorTooltip();
             var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", spectatorTooltip));
             for (ServerPlayer spectator : Utility.getSpectators(this, LockoutServer.server)) {
                 ServerPlayNetworking.send(spectator, payload);
@@ -664,7 +668,7 @@ public class Lockout {
         }
 
         // Recalculate "Most X" goals
-        for (Goal goal : board.getGoals()) {
+/*        for (Goal goal : board.getGoals()) {
             if (goal == null) continue;
             if (goal instanceof HaveMostXPLevelsGoal) recalculateXPGoal(goal);
             if (goal instanceof HaveMostUniqueCraftsGoal) recalculateUniqueCraftsGoal(goal);
@@ -673,7 +677,7 @@ public class Lockout {
             if (goal instanceof HaveMostHoppersGoal) recalculateHoppersGoal(goal);
             if (goal instanceof HaveMostLeaflitterGoal) recalculateLeaflitterGoal(goal);
             if (goal instanceof HaveMostDiamondBlocksGoal) recalculateDiamondBlocksGoal(goal);
-        }
+        }*/
 
         // Check if only 1 team remains and declare them winner if appropriate
         if (getNonForfeitedTeamsCount() == 1) {

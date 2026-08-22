@@ -4,8 +4,10 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.*;
 import me.marin.lockout.client.gui.*;
 import me.marin.lockout.json.JSONBoard;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.goals.util.GoalDataConstants;
+import me.marin.lockout.lockout.GoalRegistry;
+import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
+import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.network.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
@@ -31,10 +33,7 @@ import org.lwjgl.glfw.GLFW;
 import oshi.util.tuples.Pair;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static me.marin.lockout.Constants.*;
 
@@ -74,7 +73,16 @@ public class LockoutClient implements ClientModInitializer {
             boolean previouslyStarted = lockout != null && lockout.hasStarted();
             long previousTicks = lockout != null ? lockout.getTicks() : 0;
 
-            lockout = new Lockout(new LockoutBoard(payload.goals().stream().map(Pair::getA).toList()), teams);
+            Minecraft client = context.client();
+            try {
+                List<Goal> goals = GoalRegistry.INSTANCE.constructGoals(payload.goals().stream().map(Pair::getA).toList());
+                lockout = new Lockout(new LockoutBoard(goals), teams);
+            } catch (IllegalGoalConstructionException e) {
+                if(client.player != null) client.player.sendSystemMessage(Component.literal(e.getMessage()));
+                Lockout.log(e.getMessage());
+                return;
+            }
+
             lockout.setRunning(payload.isRunning());
             lockout.setStarted(previouslyStarted);
             lockout.setTicks(previousTicks);
@@ -88,7 +96,6 @@ public class LockoutClient implements ClientModInitializer {
                 }
             }
 
-            Minecraft client = context.client();
             client.execute(() -> {
                 if (client.player != null && !previouslyStarted) {
                     client.gui.setScreen(new BoardScreen(BOARD_SCREEN_HANDLER.create(0, client.player.getInventory()), client.player.getInventory(), Component.empty()));
@@ -210,8 +217,24 @@ public class LockoutClient implements ClientModInitializer {
                         return 0;
                     }
 
+                    List<Goal> goals = new ArrayList<>();
+                    for(JSONBoard.JSONGoal goal : jsonBoard.goals) {
+                        if(!GoalRegistry.INSTANCE.isRegistered(goal.id)) {
+                            context.getSource().sendError(Component.literal("Goal id " + goal.id + " is not registered."));
+                            return 0;
+                        }
+                        try {
+                            goals.add(GoalRegistry.INSTANCE.get(goal.id).buildFromSerializedData(goal.data));
+                        } catch (IllegalGoalConstructionException e) {
+                            context.getSource().sendError(Component.literal("Failed to construct goal " + goal.id + ": " + e.getMessage()));
+                            return 0;
+                        }
+                    }
+
+/*
                     List<Pair<String, String>> goals = jsonBoard.goals.stream()
                             .map(goal -> new Pair<>(goal.id, goal.data != null ? goal.data : GoalDataConstants.DATA_NONE)).toList();
+*/
 
                     Minecraft client = Minecraft.getInstance();
                     client.schedule(() -> {
@@ -253,7 +276,7 @@ public class LockoutClient implements ClientModInitializer {
                     }
 
                     ClientPlayNetworking.send(new CustomBoardPayload(Optional.of(jsonBoard.goals.stream()
-                            .map(goal -> new Pair<>(goal.id, goal.data != null ? goal.data : GoalDataConstants.DATA_NONE)).toList())));
+                            .map(goal -> new Pair<>(goal.id, goal.data)).toList())));
                     return 1;
                 }).build();
 

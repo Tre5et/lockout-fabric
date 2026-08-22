@@ -3,12 +3,12 @@ package me.marin.lockout.client.gui;
 import me.marin.lockout.Lockout;
 import me.marin.lockout.Utility;
 import me.marin.lockout.client.LockoutClient;
-import me.marin.lockout.generator.GoalDataGenerator;
 import me.marin.lockout.json.JSONBoard;
-import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.GoalRegistry;
-import me.marin.lockout.lockout.goals.util.GoalDataConstants;
-import me.marin.lockout.lockout.texture.CustomTextureRenderer;
+import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
+import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
+import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -27,6 +27,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
+import oshi.util.tuples.Pair;
+
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -134,9 +136,72 @@ public class BoardBuilderScreen extends Screen {
             }
             this.addRenderableWidget(searchTextField);
         }
-        if (displayEditData) {
+        if (displayEditData && BoardBuilderData.INSTANCE.getModifyingIdx() != null) {
             Goal goal = BoardBuilderData.INSTANCE.getModifyingGoal();
-            var generators = GoalRegistry.INSTANCE.getDataGenerator(goal.getId()).get().getGenerators();
+            GoalBuilder<?> builder = GoalRegistry.INSTANCE.get(goal.getBuildData().getA());
+            if(builder.optionGenerator() == null) {
+                displayEditData = false;
+            } else {
+                GoalOptionGenerator<?> generator = builder.optionGenerator();
+                int width = Math.max(generator.getPreferredRenderWidth(), 60);
+                int height = Math.min(generator.getPreferredRenderHeight(), this.height - 66);
+                int x = this.width - width;
+                int y = centerY - 30 - (height / 2);
+                this.addRenderableWidget(generator.getWidget(x, y, width, height, textRenderer, (o) -> {
+                    try {
+                        BoardBuilderData.INSTANCE.setGoal(builder.buildGeneric(o));
+                    } catch (IllegalGoalConstructionException e) {
+                        Lockout.log("Failed to update goal " + builder.getId() + " with option " + o + ": " + e.getMessage());
+                    }
+                }));
+
+                closeEditDataButton = Button.builder(Component.literal("Close"), (b) -> {
+                    closeEditData();
+                }).width(50).pos(x, y + height + 6).build();
+                this.addRenderableWidget(closeEditDataButton);
+
+/*                int errorY = y + 25;
+                saveDataButton = Button.builder(Component.nullToEmpty("Save"), (b) -> {
+                    StringBuilder sb = new StringBuilder();
+                    boolean isOk = true;
+                    String wrongDataGenerator = null;
+                    for (int i = 0; i < generators.size(); i++) {
+                        if (i > 0) sb.append(GoalDataConstants.DATA_SEPARATOR);
+                        GoalDataGenerator.Generator<?> generator = generators.get(i);
+                        if (!generator.verify(dataList.get(i))) {
+                            isOk = false;
+                            wrongDataGenerator = generator.getGeneratorName();
+                            break;
+                        }
+                        sb.append(dataList.get(i));
+                    }
+                    if (editDataErrorTextWidget != null) {
+                        this.removeWidget(editDataErrorTextWidget);
+                        this.editDataErrorTextWidget = null;
+                    }
+                    if (!isOk) {
+                        String s = "Invalid '" + wrongDataGenerator + "'.";
+                        editDataErrorTextWidget = new StringWidget(Component.literal(s).withStyle(ChatFormatting.RED), textRenderer);
+                        editDataErrorTextWidget.setPosition(x + 75 - textRenderer.width(s) / 2, errorY);
+                        this.addRenderableWidget(editDataErrorTextWidget);
+                        return;
+                    }
+
+                    if(generator.getCurrent() == null) {
+                        String s = "Invalid value.";
+                        editDataErrorTextWidget = new StringWidget(Component.literal(s).withStyle(ChatFormatting.RED), textRenderer);
+                        editDataErrorTextWidget.setPosition(x + 75 - textRenderer.width(s) / 2, errorY);
+                        this.addRenderableWidget(editDataErrorTextWidget);
+                        return;
+                    }
+                    BoardBuilderData.INSTANCE.setGoal(builder.buildFromCurrent());
+                    closeEditData();
+                }).width(50)
+                        .pos(closeEditDataButton.getX() + closeEditDataButton.getWidth() + 5, closeEditDataButton.getY())
+                        .build();
+                this.addRenderableWidget(saveDataButton);*/
+            }
+            /*var generators = GoalRegistry.INSTANCE.getDataGenerator(goal.getId()).get().getGenerators();
             List<String> dataList = new ArrayList<>(List.of(goal.getData().split(GoalDataConstants.DATA_SEPARATOR)));
             int x = centerX + 100 - CENTER_OFFSET;
             int y = centerY - (18 + generators.size() * 45) / 2;
@@ -194,7 +259,7 @@ public class BoardBuilderScreen extends Screen {
                 BoardBuilderData.INSTANCE.setGoal(GoalRegistry.INSTANCE.newGoal(goal.getId(), sb.toString()));
                 closeEditData();
             }).width(50).pos(closeEditDataButton.getX() + closeEditDataButton.getWidth() + 5, closeEditDataButton.getY()).build();
-            this.addRenderableWidget(saveDataButton);
+            this.addRenderableWidget(saveDataButton);*/
         }
 
     }
@@ -210,10 +275,9 @@ public class BoardBuilderScreen extends Screen {
             }
 
             JSONBoard.JSONGoal jsonGoal = new JSONBoard.JSONGoal();
-            jsonGoal.id = goal.getId();
-            if (goal.hasData()) {
-                jsonGoal.data = goal.getData();
-            }
+            Pair<String, String> data = goal.getBuildData();
+            jsonGoal.id = data.getA();
+            jsonGoal.data = data.getB();
             goalList.add(jsonGoal);
         }
         jsonBoard.goals = goalList;
@@ -284,7 +348,7 @@ public class BoardBuilderScreen extends Screen {
         Optional<Integer> hoveredIdx = Utility.getBoardHoveredIndex(BoardBuilderData.INSTANCE.size(), width, height, (int) click.x(), (int) click.y());
         if ((click.button() == 0 || click.button() == 1) && hoveredIdx.isPresent()) {
             Goal goal = BoardBuilderData.INSTANCE.getGoals().get(hoveredIdx.get());
-            if (click.button() == 1 && goal != null && goal.hasData()) {
+            if (click.button() == 1 && goal != null && goal.getBuildData().getB() != null) {
                 openEditData(hoveredIdx.get());
             } else {
                 openSearch(hoveredIdx.get());
@@ -382,14 +446,15 @@ public class BoardBuilderScreen extends Screen {
                 int idx = j + size * i;
                 Goal goal = BoardBuilderData.INSTANCE.getGoals().get(idx);
                 if (goal != null) {
-                    boolean success = false;
+                    goal.render(context, textRenderer, x, y);
+/*                    boolean success = false;
                     if (goal instanceof CustomTextureRenderer customTextureRenderer) {
                         success = customTextureRenderer.renderTexture(context, x, y, LockoutClient.CURRENT_TICK);
                     }
                     if (!success) {
                         context.item(goal.getTextureItemStack(), x, y);
                         context.itemDecorations(textRenderer, goal.getTextureItemStack(), x, y);
-                    }
+                    }*/
                 }
 
                 if (hoveredIdx.isPresent() && hoveredIdx.get() == idx) {
@@ -401,8 +466,8 @@ public class BoardBuilderScreen extends Screen {
                 if (hoveredIdx.isPresent() && hoveredIdx.get() == idx) {
                     if (goal != null) {
                         List<FormattedCharSequence> tooltip = new ArrayList<>();
-                        tooltip.add(Component.nullToEmpty(goal.getGoalName()).getVisualOrderText());
-                        if (goal.hasData()) {
+                        tooltip.add(Component.nullToEmpty(goal.getName()).getVisualOrderText());
+                        if (goal.getBuildData().getB() != null) {
                             tooltip.add(Component.literal("Right-click to edit data.").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC).getVisualOrderText());
                         }
                         context.setTooltipForNextFrame(textRenderer, tooltip, mouseX, mouseY);

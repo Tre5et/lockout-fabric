@@ -1,9 +1,8 @@
 package me.marin.lockout.client.gui;
 
-import me.marin.lockout.generator.GoalDataGenerator;
-import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.GoalRegistry;
-import me.marin.lockout.lockout.goals.util.GoalDataConstants;
+import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -17,14 +16,12 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import org.jspecify.annotations.NonNull;
+
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
@@ -33,21 +30,21 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
     private static final int MARGIN_X = 3;
     private static final int MARGIN_Y = 3;
     private static final int ITEM_HEIGHT = 18;
-    private static final Map<String, GoalEntry> registeredGoals = new LinkedHashMap<>();
 
     private int rowWidth;
     private int left;
     private int right;
     private int top;
     private static GoalEntry hovered;
+    private final List<GoalEntry> registeredGoals;
     private List<GoalEntry> visibleGoals;
 
     public BoardBuilderSearchWidget(int x, int y, int width, int height, Component text) {
         super(x, y, width, height, text, defaultSettings(1));
-        for (String id : GoalRegistry.INSTANCE.getRegisteredGoals()) {
-            registeredGoals.putIfAbsent(id, new GoalEntry(id));
-        }
-        visibleGoals = new ArrayList<>(registeredGoals.values());
+        this.registeredGoals = GoalRegistry.INSTANCE.getRegisteredGoals().stream()
+                .map(GoalEntry::new)
+                .toList();
+        visibleGoals = new ArrayList<>(registeredGoals);
         searchUpdated(BoardBuilderData.INSTANCE.getSearch());
     }
 
@@ -98,20 +95,22 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
         int scrolledY = Mth.floor(y - (double)this.top) + (int)scrollAmount() - MARGIN_Y + 3;
         int idx = scrolledY / ITEM_HEIGHT;
         if (x < (this.right + MARGIN_X - 6) && x >= (double) left && x <= (double) right && idx >= 0 && scrolledY >= 0 && idx < visibleGoals.size()) {
-            return registeredGoals.get(visibleGoals.get(idx).goal.getId());
+            return visibleGoals.get(idx);
         }
         return null;
     }
 
     public void searchUpdated(String search) {
         setScrollAmount(0);
-        visibleGoals = new ArrayList<>(registeredGoals.values()).stream().filter(goalEntry -> goalEntry.displayName.toLowerCase().contains(search.toLowerCase())).collect(Collectors.toList());
+        visibleGoals = new ArrayList<>(registeredGoals).stream()
+                .filter(e -> e.matchesSearch(search))
+                .collect(Collectors.toList());
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean consumed) {
         if (hovered != null) {
-            BoardBuilderData.INSTANCE.setGoal(hovered.goal);
+            BoardBuilderData.INSTANCE.setGoal(hovered.getCurrentExampleGoal());
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
         }
         var bl = updateScrolling(click);
@@ -123,21 +122,28 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
 
     public static final class GoalEntry extends ObjectSelectionList.Entry<GoalEntry> {
 
-        private final Goal goal;
-        public final String displayName;
+        private final List<Goal> exampleGoals;
+        private final String goalNameSuffix;
+        private final List<String> goalNames;
 
-        public GoalEntry(String id) {
-            Optional<GoalDataGenerator> gen = GoalRegistry.INSTANCE.getDataGenerator(id);
-
-            // generate random data
-            String data = gen.map(g -> g.generateData(new ArrayList<>(GoalDataGenerator.ALL_DYES))).orElse(GoalDataConstants.DATA_NONE);
-            this.goal = GoalRegistry.INSTANCE.newGoal(id, data);
-
-            this.displayName = gen.isEmpty() ? goal.getGoalName() : "[*] " + Arrays.stream(goal.getId().replace("_", " ").toLowerCase().split(" "))
-                    .map(word -> word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1))
-                    .collect(Collectors.joining(" "));
+        public GoalEntry(GoalBuilder<?> goalBuilder) {
+            this.exampleGoals = goalBuilder.buildExamples();
+            this.goalNameSuffix = exampleGoals.size() > 1 ? " (+" + (exampleGoals.size() - 1) + ")" : "";
+            this.goalNames = exampleGoals.stream()
+                    .map(g -> g.getName() + goalNameSuffix)
+                    .toList();
         }
 
+        public Goal getCurrentExampleGoal() {
+            int seconds = Math.toIntExact(System.currentTimeMillis() / 1000);
+            int mod = (seconds / 3) % exampleGoals.size();
+            return exampleGoals.get(mod);
+        }
+
+        public boolean matchesSearch(String search) {
+            return goalNames.stream()
+                    .anyMatch(g -> g.toLowerCase().contains(search.toLowerCase()));
+        }
 
         @Override
         public Component getNarration() {
@@ -145,8 +151,11 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
         }
 
         @Override
-        public void extractContent(GuiGraphicsExtractor context, int x, int y, boolean hovered, float tickDelta) {
+        public void extractContent(@NonNull GuiGraphicsExtractor context, int x, int y, boolean hovered, float tickDelta) {
             Font textRenderer = Minecraft.getInstance().font;
+
+            Goal goal = getCurrentExampleGoal();
+            String displayName = goal.getName() + goalNameSuffix;
 
             goal.render(context, textRenderer, x, y);
             context.text(textRenderer, displayName, x + 18, y + 5, Color.WHITE.getRGB());

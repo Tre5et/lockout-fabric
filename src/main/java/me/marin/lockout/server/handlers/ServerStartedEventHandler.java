@@ -3,6 +3,7 @@ package me.marin.lockout.server.handlers;
 import me.marin.lockout.Lockout;
 import me.marin.lockout.generator.GoalRequirements;
 import me.marin.lockout.lockout.GoalRegistry;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.resources.ResourceKey;
@@ -23,6 +24,7 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
             LockoutServer.server = server;
             long start = System.currentTimeMillis();
 
+            // TODO: handle this via goal requirements
             AVAILABLE_DYE_COLORS.add(DyeColor.BLACK);
             AVAILABLE_DYE_COLORS.add(DyeColor.WHITE);
             AVAILABLE_DYE_COLORS.add(DyeColor.GRAY);
@@ -58,8 +60,8 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
                 AVAILABLE_DYE_COLORS.add(DyeColor.BROWN);
             }
 
-            for (String id : GoalRegistry.INSTANCE.getRegisteredGoals()) {
-                GoalRequirements goalRequirements = GoalRegistry.INSTANCE.getGoalGenerator(id);
+            for (GoalBuilder<?> goal : GoalRegistry.INSTANCE.getRegisteredGoals()) {
+                GoalRequirements goalRequirements = goal.getRequirements();
                 if (goalRequirements == null) continue;
 
                 java.util.Set<ResourceKey<Biome>> biomesToLocate = new java.util.HashSet<>(goalRequirements.getRequiredBiomes());

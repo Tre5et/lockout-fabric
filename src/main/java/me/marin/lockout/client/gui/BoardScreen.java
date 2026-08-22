@@ -3,7 +3,7 @@ package me.marin.lockout.client.gui;
 import me.marin.lockout.Lockout;
 import me.marin.lockout.Utility;
 import me.marin.lockout.client.LockoutClient;
-import me.marin.lockout.lockout.Goal;
+import me.marin.lockout.lockout.goal.Goal;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

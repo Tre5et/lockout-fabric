@@ -2,10 +2,7 @@ package me.marin.lockout.client;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.GoalRegistry;
-import me.marin.lockout.lockout.GoalType;
-import oshi.util.tuples.Pair;
+import me.marin.lockout.lockout.goal.Goal;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,20 +17,14 @@ public class LockoutBoard {
     @Getter
     private final int size;
 
-    private final List<Goal> goals = new ArrayList<>();
+    private final List<Goal> goals;
 
-    public LockoutBoard(List<Pair<String, String>> goals) {
+    public LockoutBoard(List<Goal> goals) {
         size = (int) Math.sqrt(goals.size());
         if (goals.size() != size * size || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE) {
             throw new IllegalArgumentException(String.format("Invalid number of goals (%d)", size));
         }
-        for (Pair<String, String> goal : goals) {
-            if (GoalType.NULL.equals(goal.getA())) {
-                this.goals.add(null);
-                continue;
-            }
-            this.goals.add(GoalRegistry.INSTANCE.newGoal(goal.getA(), goal.getB()));
-        }
+        this.goals = new ArrayList<>(goals);
     }
 
     public List<Goal> getGoals() {
