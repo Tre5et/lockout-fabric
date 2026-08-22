@@ -18,24 +18,24 @@ public class DefaultGoalRegister {
 
     public static void registerGoals() {
         INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", "all Wooden Tools", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR));
-        INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_COLORED_WOOL", GoalCategory.OBTAIN, Items.WOOL, 64));
-        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAIN, Items.WITHER_SKELETON_SKULL)
+        INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_COLORED_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));
+        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAINING_ITEMS, Items.WITHER_SKELETON_SKULL)
                 .defaultEnabled(false)
         );
-        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAIN, Items.SULFUR_CUBE_BUCKET)
-                .require(GoalRequirements.anyBiome(SULFUR_CAVES))
+        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAINING_ITEMS, Items.SULFUR_CUBE_BUCKET)
+                .require(GoalRequirements.anyBiome("Sulfur Caves", SULFUR_CAVES))
         );
-        INSTANCE.register(RideEntityGoalBuilder.simple(GoalCategory.RIDE, EntityTypes.HORSE));
-        INSTANCE.register(RideEntityGoalBuilder.simple(GoalCategory.RIDE, EntityTypes.STRIDER));
-        INSTANCE.register(ObtainSomeItemsGoalBuilder.multiple("4_UNIQUE_SEEDS", "4 unique Seeds", 4, GoalCategory.OBTAIN, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.TORCHFLOWER_SEEDS));
-        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAIN, Items.BELL)
+        INSTANCE.register(RideEntityGoalBuilder.simple(GoalCategory.RIDING, EntityTypes.HORSE));
+        INSTANCE.register(RideEntityGoalBuilder.simple(GoalCategory.RIDING, EntityTypes.STRIDER));
+        INSTANCE.register(ObtainSomeItemsGoalBuilder.multiple("4_UNIQUE_SEEDS", "4 unique Seeds", 4, GoalCategory.OBTAINING_ITEMS, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.TORCHFLOWER_SEEDS));
+        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAINING_ITEMS, Items.BELL)
                 .require(GoalRequirements.VILLAGE)
         );
-        INSTANCE.register(ObtainAllItemGoalBuilder.withCounts(GoalCategory.OBTAIN, new Pair<>(Items.IRON_INGOT, 24))
+        INSTANCE.register(ObtainAllItemGoalBuilder.withCounts(GoalCategory.OBTAINING_ITEMS, new Pair<>(Items.IRON_INGOT, 24))
                 .group(GoalGroups.IRON_HEAVY)
         );
-        INSTANCE.register(ObtainColoredItemGoalBuilder.simple("COLORED_CONCRETE", GoalCategory.OBTAIN, Items.CONCRETE));
-        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAIN, Items.COD, Items.SALMON));
+        INSTANCE.register(ObtainColoredItemGoalBuilder.simple("COLORED_CONCRETE", GoalCategory.OBTAINING_ITEMS, Items.CONCRETE));
+        INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAINING_ITEMS, Items.COD, Items.SALMON));
 
         /*
         INSTANCE.register(GoalType.OBTAIN_WOODEN_TOOLS, ObtainWoodenToolsGoal.class);
