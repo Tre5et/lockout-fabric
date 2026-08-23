@@ -5,7 +5,9 @@ import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.RideEntityGoal;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
-import me.marin.lockout.lockout.texture.GenericTextureRenderer;
+import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
@@ -16,13 +18,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class RideEntityGoalBuilder extends GoalBuilder<Void> {
-    protected final String name;
     protected final List<EntityType<?>> entityTypes;
 
-    public RideEntityGoalBuilder(String id, GoalCategory category, String name, List<EntityType<?>> entityTypes) {
+    public RideEntityGoalBuilder(String id, GoalCategory category, List<EntityType<?>> entityTypes) {
         super("RIDE_" + id, category);
-        this.name = name;
         this.entityTypes = entityTypes;
+    }
+
+    @Override
+    public NameExtractor defaultNameExtractor(Void option) {
+        return NameExtractor.simple(() -> "Ride " + entityTypes.stream()
+                .map(EntityType::toShortString)
+                .map(s -> Arrays.stream(s.split("_"))
+                        .map(p -> p.substring(0,1).toUpperCase() + p.substring(1).toLowerCase())
+                        .collect(Collectors.joining(" "))
+                )
+                .collect(Collectors.joining(" or "))
+        );
+    }
+
+    @Override
+    public TextureExtractor defaultTextureExtractor(Void option) {
+        return GenericTextureExtractor.texture(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/goals/ride/" + id.toLowerCase() + ".png"));
     }
 
     @Override
@@ -34,41 +51,29 @@ public class RideEntityGoalBuilder extends GoalBuilder<Void> {
     public Goal build(Void option) {
         return new RideEntityGoal(
                 id,
-                "Ride " + (List.of('a','e','i','o','u').contains(name.charAt(0)) ? "an " : "a ") + name,
-                tooltipInfo,
-                GenericTextureRenderer.texture(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/ride_" + name.toLowerCase() + ".png")),
+                getNameExtractor(option),
+                getTextureExtractor(option),
+                getTooltipInfo(option).orElse(null),
                 getHints(null),
                 new Pair<>(getId(), null),
                 entityTypes::contains
         );
     }
 
-    public static RideEntityGoalBuilder simple(String id, String name, GoalCategory category, EntityType<?>... entityTypes) {
-        Arrays.stream(entityTypes)
-                .map(BuiltInRegistries.ENTITY_TYPE::getKey)
-                .map(Identifier::getPath)
-                .toList();
-
+    public static RideEntityGoalBuilder simple(String id, GoalCategory category, EntityType<?>... entityTypes) {
         return new RideEntityGoalBuilder(
                 id,
                 category,
-                name,
                 Arrays.stream(entityTypes).toList()
         );
     }
 
     public static RideEntityGoalBuilder simple(GoalCategory category, EntityType<?>... entityTypes) {
-        List<String> names = Arrays.stream(entityTypes)
-                .map(BuiltInRegistries.ENTITY_TYPE::getKey)
-                .map(Identifier::getPath)
-                .toList();
         return simple(
-                names.stream()
+                Arrays.stream(entityTypes)
+                        .map(EntityType::toShortString)
                         .map(String::toUpperCase)
                         .collect(Collectors.joining("_OR_")),
-                names.stream()
-                    .map(n -> n.substring(0, 1).toUpperCase() + n.substring(1))
-                    .collect(Collectors.joining(" or ")),
                 category,
                 entityTypes
         );

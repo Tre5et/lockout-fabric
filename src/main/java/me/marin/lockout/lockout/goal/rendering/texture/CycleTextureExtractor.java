@@ -1,0 +1,50 @@
+package me.marin.lockout.lockout.goal.rendering.texture;
+
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
+import oshi.util.tuples.Pair;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class CycleTextureExtractor implements TextureExtractor {
+    private final List<? extends TextureExtractor> renderers;
+
+    private CycleTextureExtractor(List<? extends TextureExtractor> renderers) {
+        this.renderers = renderers;
+    }
+
+    @Override
+    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int tick) {
+        int mod = tick % (60 * renderers.size());
+        renderers.get(mod / 60).extract(extractor, font, x, y, tick);
+
+    }
+
+    public static CycleTextureExtractor item(List<Item> items) {
+        return new CycleTextureExtractor(
+                items.stream()
+                        .map(ItemTextureExtractor::item)
+                        .toList()
+        );
+    }
+
+    public static CycleTextureExtractor itemStack(List<Pair<Item, Integer>> items) {
+        return new CycleTextureExtractor(
+                items.stream()
+                        .map(e -> ItemTextureExtractor.stack(e.getA(), e.getB()))
+                        .toList()
+        );
+    }
+
+    public static CycleTextureExtractor texture(Identifier... textures) {
+        return new CycleTextureExtractor(
+                Arrays.stream(textures)
+                        .map(GenericTextureExtractor::texture)
+                        .toList()
+        );
+    }
+
+}

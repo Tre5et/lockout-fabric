@@ -2,13 +2,11 @@ package me.marin.lockout.client;
 
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.*;
-import me.marin.lockout.lockout.DefaultGoalRegister;
 import me.marin.lockout.client.gui.*;
 import me.marin.lockout.json.JSONBoard;
 import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
-import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.network.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
@@ -69,7 +67,6 @@ public class LockoutClient implements ClientModInitializer {
 
         ClientPlayNetworking.registerGlobalReceiver(LockoutGoalsTeamsPayload.ID, (payload, context) -> {
             // Ensure goals are registered at packet handling time, when item stacks are available client-side.
-            DefaultGoalRegister.registerGoals();
             List<LockoutTeam> teams = payload.teams();
 
             LockoutClient.amIPlayingLockout = teams.stream().map(LockoutTeam::getPlayerNames)
@@ -342,11 +339,6 @@ public class LockoutClient implements ClientModInitializer {
                 // Open GUI
                 client.gui.setScreen(new BoardScreen(BOARD_SCREEN_HANDLER.create(0, client.player.getInventory()), client.player.getInventory(), Component.empty()));
             }
-        });
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            DefaultGoalRegister.registerGoals();
-            LockoutConfig.load(); // reload config every time player joins world
-            GoalPoolConfig.load(); // reload goal pool config every time player joins world
         });
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
             lockout = null;

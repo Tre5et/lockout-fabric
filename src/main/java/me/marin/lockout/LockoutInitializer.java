@@ -4,6 +4,8 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import me.marin.lockout.lockout.DefaultGoalRegister;
+import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.network.CustomBoardPayload;
 import me.marin.lockout.network.Networking;
 import me.marin.lockout.server.LockoutServer;
@@ -31,6 +33,7 @@ import net.minecraft.world.level.storage.loot.functions.EnchantRandomlyFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -50,6 +53,8 @@ public class LockoutInitializer implements ModInitializer {
 
         LockoutConfig.load();
         Networking.registerPayloads();
+        DefaultGoalRegister.registerGoals();
+        GoalPoolConfig.load();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             {

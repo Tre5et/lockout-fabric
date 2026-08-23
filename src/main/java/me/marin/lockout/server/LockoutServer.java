@@ -693,7 +693,7 @@ public class LockoutServer {
             }
             Goal goal = lockout.getBoard().getGoals().get(idx - 1);
 
-            context.getSource().sendSystemMessage(Component.nullToEmpty("Gave " + playerConfig.name() + " goal \"" + goal.getName() + "\"."));
+            context.getSource().sendSystemMessage(Component.nullToEmpty("Gave " + playerConfig.name() + " goal \"" + goal.getNameExtractor() + "\"."));
             lockout.updateGoalCompletion(goal, playerConfig.id());
             return 1;
         } catch (RuntimeException e) {

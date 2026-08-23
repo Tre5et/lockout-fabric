@@ -130,7 +130,7 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
             this.exampleGoals = goalBuilder.buildExamples();
             this.goalNameSuffix = exampleGoals.size() > 1 ? " (+" + (exampleGoals.size() - 1) + ")" : "";
             this.goalNames = exampleGoals.stream()
-                    .map(g -> g.getName() + goalNameSuffix)
+                    .map(g -> g.extractName().toString() + goalNameSuffix)
                     .toList();
         }
 
@@ -155,9 +155,9 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
             Font textRenderer = Minecraft.getInstance().font;
 
             Goal goal = getCurrentExampleGoal();
-            String displayName = goal.getName() + goalNameSuffix;
+            String displayName = goal.extractName().getString() + goalNameSuffix;
 
-            goal.render(context, textRenderer, x, y);
+            goal.extractTexture(context, textRenderer, x, y);
             context.text(textRenderer, displayName, x + 18, y + 5, Color.WHITE.getRGB());
             if (hovered) {
                 // Draw border manually since drawBorder method doesn't exist

@@ -137,14 +137,14 @@ public class Lockout {
         if (team == null) return;
 
         if (team instanceof LockoutTeamServer teamServer) {
-            completeGoal(goal, teamServer, teamServer.getPlayerName(playerId) + " completed " + goal.getName() + ".");
+            completeGoal(goal, teamServer, teamServer.getPlayerName(playerId) + " completed " + goal.getNameExtractor() + ".");
         } else {
             // Client side or other team type - should normally not happen on client but let's be safe
-            completeGoal(goal, team, "Someone completed " + goal.getName() + ".");
+            completeGoal(goal, team, "Someone completed " + goal.getNameExtractor() + ".");
         }
     }
     public void completeGoal(Goal goal, LockoutTeam team) {
-        completeGoal(goal, team, team.getDisplayName() + " completed " + goal.getName() + ".");
+        completeGoal(goal, team, team.getDisplayName() + " completed " + goal.getNameExtractor() + ".");
     }
     public void completeGoal(Goal goal, LockoutTeam team, String message) {
         if (goal.isCompleted()) return;

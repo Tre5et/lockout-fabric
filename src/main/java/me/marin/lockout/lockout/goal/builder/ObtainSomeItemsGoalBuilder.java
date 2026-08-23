@@ -2,42 +2,45 @@ package me.marin.lockout.lockout.goal.builder;
 
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
-import me.marin.lockout.lockout.texture.ItemTextureRenderer;
-import me.marin.lockout.lockout.texture.TextureRenderer;
+import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import oshi.util.tuples.Pair;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ObtainSomeItemsGoalBuilder extends ObtainItemGoalBuilder<Void> {
-    protected final String name;
     protected final int number;
     protected final List<Pair<Item, Integer>> items;
 
-    public ObtainSomeItemsGoalBuilder(String id, String name, int number, GoalCategory category, List<Pair<Item, Integer>> items) {
+    public ObtainSomeItemsGoalBuilder(String id, int number, GoalCategory category, List<Pair<Item, Integer>> items) {
         super(id, category);
-        this.name = name;
         this.number = number;
         this.items = items;
     }
 
     @Override
-    String getInstanceId(Void option) {
-        return id;
+    public NameExtractor defaultNameExtractor(Void option) {
+        if(number > 1) {
+            return NameExtractor.simple(() -> "Obtain " + number + " of " + items.stream()
+                    .map(e -> (e.getB() > 1 ? e.getB() + " " : "") + ObtainItemGoalBuilder.getItemName(e.getA()))
+                    .collect(Collectors.joining(" or "))
+            );
+        } else {
+            return NameExtractor.simple(() -> "Obtain " + items.stream()
+                    .map(e -> (e.getB() > 1 ? e.getB() + " " : "") + ObtainItemGoalBuilder.getItemName(e.getA()))
+                    .collect(Collectors.joining(" or "))
+            );
+        }
     }
 
     @Override
-    String getName(Void option) {
-        return name;
-    }
-
-    @Override
-    TextureRenderer getTextureRenderer(Void option) {
-        return ItemTextureRenderer.cycleStacks(items);
+    public TextureExtractor defaultTextureExtractor(Void option) {
+        return ItemTextureExtractor.cycleStacks(items);
     }
 
     @Override
@@ -53,10 +56,9 @@ public class ObtainSomeItemsGoalBuilder extends ObtainItemGoalBuilder<Void> {
                 .count() >= number;
     }
 
-    public static ObtainSomeItemsGoalBuilder multiple(String id, String name, int number, GoalCategory category, Item... items) {
+    public static ObtainSomeItemsGoalBuilder multiple(String id, int number, GoalCategory category, Item... items) {
         return new ObtainSomeItemsGoalBuilder(
                 id,
-                name,
                 number,
                 category,
                 Arrays.stream(items).map(i -> new Pair<>(i, 1)).toList()
@@ -64,23 +66,18 @@ public class ObtainSomeItemsGoalBuilder extends ObtainItemGoalBuilder<Void> {
     }
 
     public static ObtainSomeItemsGoalBuilder multiple(int number, GoalCategory category, Item... items) {
-        List<String> names = Arrays.stream(items)
-                .map(ObtainItemGoalBuilder::getItemName)
-                .toList();
         return multiple(
-                (number == 1 ? "" : number + "_OF_") + names.stream()
-                        .map(String::toUpperCase)
-                        .map(s -> s.replace(" ", "_"))
+                (number == 1 ? "" : number + "_OF_") + Arrays.stream(items)
+                        .map(ObtainItemGoalBuilder::getItemId)
                         .collect(Collectors.joining("_OR_")),
-                (number == 1 ? "" : number + " of ") + String.join(" or ", names),
                 number,
                 category,
                 items
         );
     }
 
-    public static ObtainSomeItemsGoalBuilder oneOf(String id, String name, GoalCategory category, Item... items) {
-        return multiple(id, name, 1, category, items);
+    public static ObtainSomeItemsGoalBuilder oneOf(String id, GoalCategory category, Item... items) {
+        return multiple(id, 1, category, items);
     }
 
     public static ObtainSomeItemsGoalBuilder oneOf(GoalCategory category, Item... items) {
@@ -88,10 +85,9 @@ public class ObtainSomeItemsGoalBuilder extends ObtainItemGoalBuilder<Void> {
     }
 
     @SafeVarargs
-    public static ObtainSomeItemsGoalBuilder multipleWithCounts(String id, String name, int number, GoalCategory category, Pair<Item, Integer>... items) {
+    public static ObtainSomeItemsGoalBuilder multipleWithCounts(String id, int number, GoalCategory category, Pair<Item, Integer>... items) {
         return new ObtainSomeItemsGoalBuilder(
                 id,
-                name,
                 number,
                 category,
                 Arrays.stream(items).toList()
@@ -100,20 +96,10 @@ public class ObtainSomeItemsGoalBuilder extends ObtainItemGoalBuilder<Void> {
 
     @SafeVarargs
     public static ObtainSomeItemsGoalBuilder multipleWithCounts(int number, GoalCategory category, Pair<Item, Integer>... items) {
-        List<Map.Entry<String, Integer>> names = Arrays.stream(items)
-                .map(i -> Map.entry(
-                        ObtainItemGoalBuilder.getItemName(i.getA()),
-                        i.getB()
-                    )
-                )
-                .toList();
         return multipleWithCounts(
-                (number == 1 ? "" : number + "_OF_") + names.stream()
-                        .map(i -> i.getValue() + "_" + i.getKey().toUpperCase().replace(" ", "_"))
+                (number == 1 ? "" : number + "_OF_") + Arrays.stream(items)
+                        .map(i -> (i.getB() > 1 ? i.getB() + "_" : "") + getItemId(i.getA()))
                         .collect(Collectors.joining("_OR_")),
-                (number == 1 ? "" : number + " of ") + names.stream()
-                        .map(i -> i.getValue() + " " + i.getKey())
-                        .collect(Collectors.joining(" or ")),
                 number,
                 category,
                 items
@@ -121,8 +107,8 @@ public class ObtainSomeItemsGoalBuilder extends ObtainItemGoalBuilder<Void> {
     }
 
     @SafeVarargs
-    public static ObtainSomeItemsGoalBuilder oneOfWithCounts(String id, String name, GoalCategory category, Pair<Item, Integer>... items) {
-        return multipleWithCounts(id, name, 1, category, items);
+    public static ObtainSomeItemsGoalBuilder oneOfWithCounts(String id, GoalCategory category, Pair<Item, Integer>... items) {
+        return multipleWithCounts(id, 1, category, items);
     }
 
     @SafeVarargs

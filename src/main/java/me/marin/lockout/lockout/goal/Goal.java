@@ -4,10 +4,12 @@ import lombok.Getter;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.lockout.goal.hint.GoalHint;
+import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.tooltip.TooltipInfo;
-import me.marin.lockout.lockout.texture.TextureRenderer;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import oshi.util.tuples.Pair;
 
@@ -18,14 +20,15 @@ public abstract class Goal {
     @Getter
     private final String id;
     @Getter
-    private final String name;
+    private final NameExtractor nameExtractor;
+    @Getter
+    private final TextureExtractor textureExtractor;
     @Getter
     private final TooltipInfo tooltipInfo;
     @Getter
     private boolean isCompleted = false;
     @Getter
     private LockoutTeam completedTeam;
-    private final TextureRenderer textureRenderer;
     @Getter
     private final List<GoalHint> hints;
 
@@ -33,11 +36,11 @@ public abstract class Goal {
     // TODO: improve build data serialization
     private final Pair<String, String> buildData;
 
-    public Goal(String id, String name, TooltipInfo tooltipInfo, TextureRenderer textureRenderer, List<GoalHint> hints, Pair<String, String> buildData) {
+    public Goal(String id, NameExtractor nameExtractor, TextureExtractor textureExtractor, TooltipInfo tooltipInfo, List<GoalHint> hints, Pair<String, String> buildData) {
         this.id = id;
-        this.name = name;
+        this.nameExtractor = nameExtractor;
+        this.textureExtractor = textureExtractor;
         this.tooltipInfo = tooltipInfo;
-        this.textureRenderer = textureRenderer;
         this.hints = hints;
         this.buildData = buildData;
     }
@@ -47,8 +50,12 @@ public abstract class Goal {
         this.completedTeam = team;
     }
 
-    public final void render(GuiGraphicsExtractor extractor, Font font, int x, int y) {
-        textureRenderer.renderTexture(extractor, font, x, y, LockoutClient.CURRENT_TICK);
+    public final Component extractName() {
+        return nameExtractor.extract();
+    }
+
+    public final void extractTexture(GuiGraphicsExtractor extractor, Font font, int x, int y) {
+        textureExtractor.extract(extractor, font, x, y, LockoutClient.CURRENT_TICK);
     }
 
     public final List<String> getTooltip(LockoutTeam team, Player player) {

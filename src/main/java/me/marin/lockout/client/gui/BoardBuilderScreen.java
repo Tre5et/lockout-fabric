@@ -446,7 +446,7 @@ public class BoardBuilderScreen extends Screen {
                 int idx = j + size * i;
                 Goal goal = BoardBuilderData.INSTANCE.getGoals().get(idx);
                 if (goal != null) {
-                    goal.render(context, textRenderer, x, y);
+                    goal.extractTexture(context, textRenderer, x, y);
 /*                    boolean success = false;
                     if (goal instanceof CustomTextureRenderer customTextureRenderer) {
                         success = customTextureRenderer.renderTexture(context, x, y, LockoutClient.CURRENT_TICK);
@@ -466,7 +466,7 @@ public class BoardBuilderScreen extends Screen {
                 if (hoveredIdx.isPresent() && hoveredIdx.get() == idx) {
                     if (goal != null) {
                         List<FormattedCharSequence> tooltip = new ArrayList<>();
-                        tooltip.add(Component.nullToEmpty(goal.getName()).getVisualOrderText());
+                        tooltip.add(goal.extractName().getVisualOrderText());
                         if (goal.getBuildData().getB() != null) {
                             tooltip.add(Component.literal("Right-click to edit data.").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC).getVisualOrderText());
                         }

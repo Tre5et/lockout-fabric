@@ -3,22 +3,21 @@ package me.marin.lockout.lockout.goal.builder;
 import com.google.gson.reflect.TypeToken;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
+import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
-import me.marin.lockout.lockout.texture.ItemTextureRenderer;
-import me.marin.lockout.lockout.texture.TextureRenderer;
+import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.ColorCollection;
 
 public class ObtainColoredItemGoalBuilder extends ObtainItemGoalBuilder<DyeColor> {
-    protected final ColorCollection<String> names;
     protected final ColorCollection<Item> items;
     protected final int count;
 
-    protected ObtainColoredItemGoalBuilder(String id, ColorCollection<String> names, GoalCategory category, ColorCollection<Item> items, int count) {
-        super("ALL_COLORED_" + id, category);
-        this.names = names;
+    protected ObtainColoredItemGoalBuilder(String id, GoalCategory category, ColorCollection<Item> items, int count) {
+        super("COLORED_" + id, category);
         this.items = items;
         this.count = count;
         require(GoalRequirements.COLORS);
@@ -30,18 +29,18 @@ public class ObtainColoredItemGoalBuilder extends ObtainItemGoalBuilder<DyeColor
     }
 
     @Override
-    String getInstanceId(DyeColor option) {
+    public String defaultId(DyeColor option) {
         return id + "_" + option.getName().toUpperCase();
     }
 
     @Override
-    String getName(DyeColor option) {
-        return names.pick(option);
+    public NameExtractor defaultNameExtractor(DyeColor option) {
+        return NameExtractor.simple(() -> "Obtain " + (count > 1 ? count + " " : "")  + getItemName(items.pick(option)));
     }
 
     @Override
-    TextureRenderer getTextureRenderer(DyeColor option) {
-        return ItemTextureRenderer.stack(items.pick(option), count);
+    public TextureExtractor defaultTextureExtractor(DyeColor option) {
+        return ItemTextureExtractor.stack(items.pick(option), count);
     }
 
     @Override
@@ -49,17 +48,8 @@ public class ObtainColoredItemGoalBuilder extends ObtainItemGoalBuilder<DyeColor
         return inventory.countItem(items.pick(option)) >= count;
     }
 
-    public static ObtainColoredItemGoalBuilder withCount(String id, ColorCollection<String> names, GoalCategory category, ColorCollection<Item> items, int count) {
-        return new ObtainColoredItemGoalBuilder(id, names, category, items, count);
-    }
-
     public static ObtainColoredItemGoalBuilder withCount(String id, GoalCategory category, ColorCollection<Item> items, int count) {
-        ColorCollection<String> names = items.map(i -> (count > 1 ? count + " " : "") + getItemName(i));
-        return withCount(id, names, category, items, count);
-    }
-
-    public static ObtainColoredItemGoalBuilder simple(String id, ColorCollection<String> names, GoalCategory category, ColorCollection<Item> items) {
-        return withCount(id, names, category, items, 1);
+        return new ObtainColoredItemGoalBuilder(id, category, items, count);
     }
 
     public static ObtainColoredItemGoalBuilder simple(String id, GoalCategory category, ColorCollection<Item> items) {

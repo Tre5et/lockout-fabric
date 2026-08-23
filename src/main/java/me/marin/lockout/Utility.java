@@ -65,7 +65,7 @@ public class Utility {
                         context.fill(x, y, x + 16, y + 16, NEUTRAL | goal.getCompletedTeam().getColor().textColor().getValue());
                     }
 
-                    goal.render(context, textRenderer, x, y);
+                    goal.extractTexture(context, textRenderer, x, y);
 
                 }
                 x += GUI_SLOT_SIZE;
@@ -151,7 +151,7 @@ public class Utility {
                         context.fill(x, y, x + 16, y + 16, (0xFF << 24) | goal.getCompletedTeam().getColor().textColor().getValue());
                     }
 
-                    goal.render(context, textRenderer, x, y);
+                    goal.extractTexture(context, textRenderer, x, y);
 
                     if (goal == hoveredGoal) {
                         context.fill(x, y, x + 16, y + 16, GUI_CENTER_HOVERED_COLOR);
@@ -190,7 +190,10 @@ public class Utility {
 
     public static void drawGoalInformation(GuiGraphicsExtractor context, Font textRenderer, Goal goal, int mouseX, int mouseY) {
         List<FormattedCharSequence> tooltip = new ArrayList<>();
-        tooltip.add(Component.nullToEmpty((goal.getTooltipInfo() != null ? ChatFormatting.UNDERLINE : "") + goal.getName()).getVisualOrderText());
+        tooltip.add(FormattedCharSequence.composite(
+                Component.nullToEmpty((goal.getTooltipInfo() != null ? ChatFormatting.UNDERLINE.toString() : "")).getVisualOrderText(),
+                goal.extractName().getVisualOrderText()
+        ));
         if (goal.getTooltipInfo() != null && LockoutClient.goalTooltipMap.containsKey(goal.getId())) {
             for (String t : LockoutClient.goalTooltipMap.get(goal.getId()).split("\n")) {
                 tooltip.add(Component.nullToEmpty(t).getVisualOrderText());

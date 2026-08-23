@@ -6,10 +6,16 @@ import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.GoalHint;
+import me.marin.lockout.lockout.goal.id.IdProvider;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
+import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
+import me.marin.lockout.lockout.goal.rendering.name.NameExtractorProvider;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.lockout.goal.tooltip.TooltipInfo;
+import me.marin.lockout.lockout.goal.tooltip.TooltipInfoProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,9 +29,10 @@ public abstract class GoalBuilder<T> {
     protected final GoalCategory category;
     @Getter
     protected List<GoalRequirement<? super T>> requirements = new ArrayList<>();
-    @Getter
-    @Setter
-    protected TooltipInfo tooltipInfo = null;
+    private IdProvider<T> customIdProvider = null;
+    private NameExtractorProvider<T> customNameExtractorProvider = null;
+    private TextureExtractorProvider<T> cutomTextureExtractorProvider = null;
+    private TooltipInfoProvider<T> customTooltipInfoProvider = null;
     @Getter
     protected final List<GoalGroup> groups = new ArrayList<>();
     protected final List<GoalHint> hints = new ArrayList<>();
@@ -36,6 +43,18 @@ public abstract class GoalBuilder<T> {
     public GoalBuilder(String id, GoalCategory category) {
         this.id = id;
         this.category = category;
+    }
+
+    public String defaultId(T option) {
+        return id;
+    }
+
+    public abstract NameExtractor defaultNameExtractor(T option);
+
+    public abstract TextureExtractor defaultTextureExtractor(T option);
+
+    public TooltipInfo defaultTooltipInfo(T option) {
+        return null;
     }
 
     public abstract GoalOptionGenerator<T> optionGenerator();
@@ -87,6 +106,26 @@ public abstract class GoalBuilder<T> {
         return optionGenerator().serialize(option);
     }
 
+    public String getId(T option) {
+        if(customIdProvider != null) return customIdProvider.get(option);
+        return defaultId(option);
+    }
+
+    public NameExtractor getNameExtractor(T option) {
+        if(customNameExtractorProvider != null) return customNameExtractorProvider.get(option);
+        return defaultNameExtractor(option);
+    }
+
+    public TextureExtractor getTextureExtractor(T option) {
+        if(cutomTextureExtractorProvider != null) return cutomTextureExtractorProvider.get(option);
+        return defaultTextureExtractor(option);
+    }
+
+    public Optional<TooltipInfo> getTooltipInfo(T option) {
+        if(customTooltipInfoProvider != null) return Optional.ofNullable(customTooltipInfoProvider.get(option));
+        return Optional.ofNullable(defaultTooltipInfo(option));
+    }
+
     public List<GoalHint> getHints(T option) {
         List<GoalHint> hints = new ArrayList<>(this.hints);
         for(GoalRequirement<? super T> requirement : requirements) {
@@ -100,9 +139,40 @@ public abstract class GoalBuilder<T> {
         return this;
     }
 
-    public GoalBuilder<T> tooltip(TooltipInfo tooltipInfo) {
-        setTooltipInfo(tooltipInfo);
+    public GoalBuilder<T> customId(IdProvider<T> idProvider) {
+        this.customIdProvider = idProvider;
         return this;
+    }
+
+    public GoalBuilder<T> customId(String id) {
+        return customId(_ -> id);
+    }
+
+    public GoalBuilder<T> customNameExtractor(NameExtractorProvider<T> nameExtractorProvider) {
+        this.customNameExtractorProvider = nameExtractorProvider;
+        return this;
+    }
+
+    public GoalBuilder<T> customNameExtractor(NameExtractor extractor) {
+        return customNameExtractor(_ -> extractor);
+    }
+
+    public GoalBuilder<T> customTextureExtractor(TextureExtractorProvider<T> textureExtractorProvider) {
+        this.cutomTextureExtractorProvider = textureExtractorProvider;
+        return this;
+    }
+
+    public GoalBuilder<T> customTextureExtractor(TextureExtractor extractor) {
+        return customTextureExtractor(_ -> extractor);
+    }
+
+    public GoalBuilder<T> customTooltip(TooltipInfoProvider<T> tooltipInfoProvider) {
+        this.customTooltipInfoProvider = tooltipInfoProvider;
+        return this;
+    }
+
+    public GoalBuilder<T> customTooltip(TooltipInfo info) {
+        return customTooltip(_ -> info);
     }
 
     public GoalBuilder<T> group(GoalGroup... groups) {

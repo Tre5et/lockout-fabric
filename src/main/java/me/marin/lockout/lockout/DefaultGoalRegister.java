@@ -6,6 +6,7 @@ import me.marin.lockout.lockout.goal.builder.ObtainSomeItemsGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.RideEntityGoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroups;
+import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
@@ -21,8 +22,9 @@ public class DefaultGoalRegister {
         if (goalsRegistered) {
             return;
         }
-        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", "all Wooden Tools", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR));
-        INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_COLORED_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));
+        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
+                .customNameExtractor(NameExtractor.simple("Obtain all Wooden Tolls")));
+        INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));
         INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAINING_ITEMS, Items.WITHER_SKELETON_SKULL)
                 .defaultEnabled(false)
         );
@@ -30,8 +32,12 @@ public class DefaultGoalRegister {
                 .require(GoalRequirements.anyBiome("Sulfur Caves", SULFUR_CAVES))
         );
         INSTANCE.register(RideEntityGoalBuilder.simple(GoalCategory.RIDING, EntityTypes.HORSE));
-        INSTANCE.register(RideEntityGoalBuilder.simple(GoalCategory.RIDING, EntityTypes.STRIDER));
-        INSTANCE.register(ObtainSomeItemsGoalBuilder.multiple("4_UNIQUE_SEEDS", "4 unique Seeds", 4, GoalCategory.OBTAINING_ITEMS, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.TORCHFLOWER_SEEDS));
+        INSTANCE.register(RideEntityGoalBuilder.simple(GoalCategory.RIDING, EntityTypes.STRIDER)
+                .customNameExtractor(NameExtractor.simple("Ride a Strider with custom name"))
+        );
+        INSTANCE.register(ObtainSomeItemsGoalBuilder.multiple("4_UNIQUE_SEEDS", 4, GoalCategory.OBTAINING_ITEMS, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.TORCHFLOWER_SEEDS)
+                .customNameExtractor(NameExtractor.simple("Obtain 4 unique Seeds"))
+        );
         INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAINING_ITEMS, Items.BELL)
                 .require(GoalRequirements.VILLAGE)
         );
