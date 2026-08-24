@@ -151,7 +151,7 @@ public class BoardBuilderScreen extends Screen {
                     try {
                         BoardBuilderData.INSTANCE.setGoal(builder.buildGeneric(o));
                     } catch (IllegalGoalConstructionException e) {
-                        Lockout.log("Failed to update goal " + builder.getId() + " with option " + o + ": " + e.getMessage());
+                        Lockout.log("Failed to update goal " + builder + " with option " + o + ": " + e.getMessage());
                     }
                 }));
 

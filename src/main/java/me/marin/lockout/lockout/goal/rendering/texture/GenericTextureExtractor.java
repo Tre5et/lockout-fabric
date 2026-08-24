@@ -13,8 +13,8 @@ public class GenericTextureExtractor implements TextureExtractor {
     }
 
     @Override
-    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int tick) {
-        extractor.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, 0, 0, 16, 16, 16, 16);
+    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, int tick) {
+        extractor.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, 0, 0, width, height, width, height);
     }
 
     public static GenericTextureExtractor texture(Identifier texture) {

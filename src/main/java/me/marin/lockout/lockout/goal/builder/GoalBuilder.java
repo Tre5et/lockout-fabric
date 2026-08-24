@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 
 public abstract class GoalBuilder<T> {
-    @Getter
     protected final String id;
     @Getter
     protected final GoalCategory category;
@@ -104,6 +103,10 @@ public abstract class GoalBuilder<T> {
             return null;
         }
         return optionGenerator().serialize(option);
+    }
+
+    public String getStaticId() {
+        return id;
     }
 
     public String getId(T option) {
@@ -188,5 +191,10 @@ public abstract class GoalBuilder<T> {
     public GoalBuilder<T> hint(GoalHint... hint) {
         hints.addAll(Arrays.stream(hint).toList());
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return getStaticId();
     }
 }

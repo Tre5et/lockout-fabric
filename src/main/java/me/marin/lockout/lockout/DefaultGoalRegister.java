@@ -1,13 +1,11 @@
 package me.marin.lockout.lockout;
 
-import me.marin.lockout.lockout.goal.builder.ObtainAllItemGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.ObtainColoredItemGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.ObtainSomeItemsGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.RideEntityGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.*;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroups;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
 import oshi.util.tuples.Pair;
@@ -46,6 +44,11 @@ public class DefaultGoalRegister {
         );
         INSTANCE.register(ObtainColoredItemGoalBuilder.simple("COLORED_CONCRETE", GoalCategory.OBTAINING_ITEMS, Items.CONCRETE));
         INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAINING_ITEMS, Items.COD, Items.SALMON));
+        INSTANCE.register(AdvancementGoalBuilder.any(GoalCategory.ADVANCEMENTS, Identifier.withDefaultNamespace("adventure/bullseye")));
+        INSTANCE.register(AdvancementGoalBuilder.any("ANY_SPYGLASS", GoalCategory.ADVANCEMENTS, Identifier.withDefaultNamespace("adventure/spyglass_at_parrot"), Identifier.withDefaultNamespace("adventure/spyglass_at_ghast"), Identifier.withDefaultNamespace("adventure/spyglass_at_dragon"))
+                .customNameExtractor(NameExtractor.simple("Obtain any Spyglass Advancement"))
+        );
+
 
         /*
         INSTANCE.register(GoalType.OBTAIN_WOODEN_TOOLS, ObtainWoodenToolsGoal.class);

@@ -4,6 +4,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.joml.Matrix3x2f;
 import oshi.util.tuples.Pair;
 
 import java.util.List;
@@ -16,9 +17,13 @@ public class ItemTextureExtractor implements TextureExtractor {
     }
 
     @Override
-    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int tick) {
-        extractor.item(item, x, y);
-        extractor.itemDecorations(font, item, x, y);
+    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, int tick) {
+            Matrix3x2f matrix = new Matrix3x2f();
+            extractor.pose().get(matrix);
+            extractor.pose().scaleAround(width/16f, height/16f, x, y);
+            extractor.fakeItem(item, x, y);
+            extractor.itemDecorations(font, item, x, y);
+            extractor.pose().set(matrix);
     }
 
     public static ItemTextureExtractor item(Item item) {

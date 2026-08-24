@@ -59,7 +59,7 @@ public class GoalPoolConfig {
                     boolean configUpdated = false;
                     
                     for (GoalBuilder<?> goal : allGoals) {
-                        Object value = yamlData.get(goal.getId());
+                        Object value = yamlData.get(goal.getStaticId());
                         if (value instanceof Boolean) {
                             boolean enabled = (Boolean) value;
                             goal.setEnabled(enabled);
@@ -120,7 +120,7 @@ public class GoalPoolConfig {
             
             yaml.append("# ").append(category).append("\n");
             for (GoalBuilder<?> goal : goals) {
-                yaml.append(goal.getId()).append(": ").append(goal.isEnabled()).append("\n");
+                yaml.append(goal.getStaticId()).append(": ").append(goal.isEnabled()).append("\n");
             }
             yaml.append("\n");
         }

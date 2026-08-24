@@ -34,8 +34,8 @@
     "server.GrindstoneScreenHandlerOutputSlotMixin",
     "server.ItemFrameEntityMixin",
     "server.ItemMixin",
-    "server.LivingEntityMixin",
-    "server.PlayerAdvancementTrackerMixin",
+    "server.LivingEntityMixin",*/
+    "server.PlayerAdvancementTrackerMixin"/*,
     "server.PlayerInventoryAccessor",
     "server.PlayerMixin",
     "server.PotentSulfurBlockEntityMixin",

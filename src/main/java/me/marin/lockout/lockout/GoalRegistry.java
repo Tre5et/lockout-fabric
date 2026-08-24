@@ -20,12 +20,12 @@ public class GoalRegistry {
     private GoalRegistry() {}
 
     public String register(GoalBuilder<?> goalBuilder) {
-        if (registry.containsKey(goalBuilder.getId())) {
-            Lockout.log("Goal with id " + goalBuilder.getId() + " has already been registered.");
+        if (registry.containsKey(goalBuilder.getStaticId())) {
+            Lockout.log("Goal with id " + goalBuilder + " has already been registered.");
             return null;
         }
-        registry.put(goalBuilder.getId(), goalBuilder);
-        return goalBuilder.getId();
+        registry.put(goalBuilder.getStaticId(), goalBuilder);
+        return goalBuilder.getStaticId();
     }
 
     public boolean isRegistered(String id) {

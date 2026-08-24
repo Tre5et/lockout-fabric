@@ -2,11 +2,8 @@ package me.marin.lockout.mixin.server;
 
 import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutTeamServer;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.interfaces.AdvancementGoal;
-import me.marin.lockout.lockout.interfaces.GetUniqueAdvancementsGoal;
-import me.marin.lockout.lockout.interfaces.VisitBiomeGoal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostAdvancementsGoal;
+import me.marin.lockout.lockout.goal.AdvancementGoal;
+import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.server.LockoutServer;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.DisplayInfo;
@@ -60,19 +57,20 @@ public abstract class PlayerAdvancementTrackerMixin {
             if (goal == null) continue;
 
             // Track player advancements for HaveMostAdvancementsGoal regardless of goal completion
-            if (goal instanceof HaveMostAdvancementsGoal) {
+            /*if (goal instanceof HaveMostAdvancementsGoal) {
                 if (advancementDisplay.isPresent() && advancementDisplay.get().shouldAnnounceChat()) {
                     lockout.recalculateAdvancementsGoal(goal);
                 }
-            }
+            }*/
 
             if (goal.isCompleted()) continue;
 
             if (goal instanceof AdvancementGoal advancementGoal) {
-                if (advancementGoal.getAdvancements().contains(advancement.id())) {
+                if (advancementGoal.satisfiedBy(advancement)) {
                     lockout.completeGoal(goal, player);
                 }
             }
+            /*
             if (goal instanceof GetUniqueAdvancementsGoal getUniqueAdvancementsGoal) {
                 if (advancementDisplay.isPresent()) {
                     getUniqueAdvancementsGoal.getTrackerMap().putIfAbsent(team, new LinkedHashSet<>());
@@ -86,6 +84,7 @@ public abstract class PlayerAdvancementTrackerMixin {
                     }
                 }
             }
+            */
         }
     }
 
@@ -102,7 +101,7 @@ public abstract class PlayerAdvancementTrackerMixin {
             if (goal == null) continue;
             if (goal.isCompleted()) continue;
 
-            if (goal instanceof VisitBiomeGoal visitBiomeGoal) {
+            /*if (goal instanceof VisitBiomeGoal visitBiomeGoal) {
                 if (visitBiomeGoal.getBiomes().contains(biomeId)) {
                     lockout.completeGoal(goal, player);
                 }
@@ -119,7 +118,7 @@ public abstract class PlayerAdvancementTrackerMixin {
                 if (size >= visitUniqueBiomesGoal.getAmount()) {
                     lockout.completeGoal(goal, team);
                 }
-            }
+            }*/
         }
 
     }

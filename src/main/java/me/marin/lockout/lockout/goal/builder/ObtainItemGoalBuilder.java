@@ -26,7 +26,7 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<T> {
                 getTextureExtractor(option),
                 getTooltipInfo(option).orElse(null),
                 getHints(null),
-                new Pair<>(getId(), serializeOption(option)),
+                new Pair<>(getStaticId(), serializeOption(option)),
                 i -> satisfiedBy(i, option)
         );
     }

@@ -125,6 +125,7 @@ public class Lockout {
         ticks++;
     }
 
+    // TODO: Rework payload messages
     public void completeGoal(Goal goal, Player player) {
         completeGoal(goal, player.getUUID());
     }

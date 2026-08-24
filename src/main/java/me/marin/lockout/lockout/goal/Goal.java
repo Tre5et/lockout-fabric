@@ -55,7 +55,7 @@ public abstract class Goal {
     }
 
     public final void extractTexture(GuiGraphicsExtractor extractor, Font font, int x, int y) {
-        textureExtractor.extract(extractor, font, x, y, LockoutClient.CURRENT_TICK);
+        textureExtractor.extract(extractor, font, x, y, 16, 16, LockoutClient.CURRENT_TICK);
     }
 
     public final List<String> getTooltip(LockoutTeam team, Player player) {

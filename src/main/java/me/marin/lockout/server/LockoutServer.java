@@ -11,6 +11,7 @@ import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.lockout.goal.hint.GoalHintResult;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
+import me.marin.lockout.network.AllAdvancementsPayload;
 import me.marin.lockout.network.CustomBoardPayload;
 import me.marin.lockout.network.HintResultPayload;
 import me.marin.lockout.network.LockoutVersionPayload;
@@ -18,6 +19,7 @@ import me.marin.lockout.network.RequestHintPayload;
 import me.marin.lockout.network.StartLockoutPayload;
 import me.marin.lockout.network.UpdateTooltipPayload;
 import me.marin.lockout.server.handlers.*;
+import net.minecraft.advancements.AdvancementHolder;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -172,6 +174,8 @@ public class LockoutServer {
                 player.connection.disconnect(Component.nullToEmpty("Wrong Lockout version: v" + version + ".\nServer is using Lockout v" + LockoutInitializer.MOD_VERSION.getFriendlyString() + "."));
                 return;
             }
+
+            sendAllAdvancements(player);
 
             if (!Lockout.isLockoutRunning(lockout)) return;
 
@@ -716,6 +720,15 @@ public class LockoutServer {
         boardSize = size;
         context.getSource().sendSystemMessage(Component.nullToEmpty("Updated board size to " + size + "."));
         return 1;
+    }
+
+    private static void sendAllAdvancements(ServerPlayer player) {
+        if (server == null) return;
+
+        List<AdvancementHolder> advancements = server.getAdvancements().getAllAdvancements().stream()
+                .sorted(Comparator.comparing(holder -> holder.id().toString()))
+                .toList();
+        ServerPlayNetworking.send(player, new AllAdvancementsPayload(advancements));
     }
 
     public static int setGiveCompasses(CommandContext<CommandSourceStack> context) {

@@ -8,7 +8,6 @@ import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import oshi.util.tuples.Pair;
@@ -55,7 +54,7 @@ public class RideEntityGoalBuilder extends GoalBuilder<Void> {
                 getTextureExtractor(option),
                 getTooltipInfo(option).orElse(null),
                 getHints(null),
-                new Pair<>(getId(), null),
+                new Pair<>(getStaticId(), null),
                 entityTypes::contains
         );
     }

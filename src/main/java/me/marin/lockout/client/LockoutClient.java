@@ -16,6 +16,8 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -44,6 +46,7 @@ public class LockoutClient implements ClientModInitializer {
     public static boolean amIPlayingLockout = false;
     private static KeyMapping keyBinding;
     public static int CURRENT_TICK = 0;
+    public static final Map<Identifier, Advancement> allAdvancements = new HashMap<>();
     public static final Map<String, String> goalTooltipMap = new HashMap<>();
     /** goalId -> hintIndex -> result message; persists until disconnect */
     public static final Map<String, Map<Integer, String>> goalHintResults = new HashMap<>();
@@ -52,6 +55,10 @@ public class LockoutClient implements ClientModInitializer {
 
     public static KeyMapping getBoardKeybinding() {
         return keyBinding;
+    }
+
+    public static Map<Identifier, Advancement> getAllAdvancements() {
+        return Map.copyOf(allAdvancements);
     }
 
     public static final MenuType<BoardScreenHandler> BOARD_SCREEN_HANDLER;
@@ -65,6 +72,13 @@ public class LockoutClient implements ClientModInitializer {
     public void onInitializeClient() {
         Registry.register(BuiltInRegistries.MENU, Constants.BOARD_SCREEN_ID, BOARD_SCREEN_HANDLER);
 
+        ClientPlayNetworking.registerGlobalReceiver(AllAdvancementsPayload.ID, (payload, context) ->
+                context.client().execute(() -> {
+                    allAdvancements.clear();
+                    for(AdvancementHolder holder : payload.advancements()) {
+                        allAdvancements.put(holder.id(), holder.value());
+                    }
+                }));
         ClientPlayNetworking.registerGlobalReceiver(LockoutGoalsTeamsPayload.ID, (payload, context) -> {
             // Ensure goals are registered at packet handling time, when item stacks are available client-side.
             List<LockoutTeam> teams = payload.teams();
@@ -342,6 +356,7 @@ public class LockoutClient implements ClientModInitializer {
         });
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
             lockout = null;
+            allAdvancements.clear();
             goalTooltipMap.clear();
             goalHintResults.clear();
             goalHintErrors.clear();

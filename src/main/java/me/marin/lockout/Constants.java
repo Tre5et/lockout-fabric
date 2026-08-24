@@ -16,6 +16,7 @@ public class Constants {
     public static final Identifier END_LOCKOUT_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "end_lockout");
     public static final Identifier UPDATE_TIMER_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "update_timer");
     public static final Identifier LOCKOUT_VERSION_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "lockout_version");
+    public static final Identifier ALL_ADVANCEMENTS_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "all_advancements");
 
     public static final Identifier CUSTOM_BOARD_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "set_custom_board");
 

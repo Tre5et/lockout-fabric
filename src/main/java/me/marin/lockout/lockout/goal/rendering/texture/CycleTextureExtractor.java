@@ -12,14 +12,14 @@ import java.util.List;
 public class CycleTextureExtractor implements TextureExtractor {
     private final List<? extends TextureExtractor> renderers;
 
-    private CycleTextureExtractor(List<? extends TextureExtractor> renderers) {
+    public CycleTextureExtractor(List<? extends TextureExtractor> renderers) {
         this.renderers = renderers;
     }
 
     @Override
-    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int tick) {
+    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, int tick) {
         int mod = tick % (60 * renderers.size());
-        renderers.get(mod / 60).extract(extractor, font, x, y, tick);
+        renderers.get(mod / 60).extract(extractor, font, x, y, width, height, tick);
 
     }
 
