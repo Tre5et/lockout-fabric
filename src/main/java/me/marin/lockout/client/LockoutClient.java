@@ -94,7 +94,7 @@ public class LockoutClient implements ClientModInitializer {
 
             Minecraft client = context.client();
             try {
-                List<Goal> goals = GoalRegistry.INSTANCE.constructGoals(payload.goals().stream().map(Pair::getA).toList());
+                List<Goal<?>> goals = GoalRegistry.INSTANCE.constructGoals(payload.goals().stream().map(Pair::getA).toList());
                 lockout = new Lockout(new LockoutBoard(goals), teams);
             } catch (IllegalGoalConstructionException e) {
                 if(client.player != null) client.player.sendSystemMessage(Component.literal(e.getMessage()));
@@ -109,7 +109,7 @@ public class LockoutClient implements ClientModInitializer {
             goalHintResults.clear();
             goalHintErrors.clear();
 
-            List<Goal> goalList = lockout.getBoard().getGoals();
+            List<Goal<?>> goalList = lockout.getBoard().getGoals();
             for (int i = 0; i < goalList.size(); i++) {
                 if (completedByTeam[i] != -1) {
                     LockoutTeam team = lockout.getTeams().get(completedByTeam[i]);
@@ -138,14 +138,14 @@ public class LockoutClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(CompleteTaskPayload.ID, (payload, context) -> {
             Minecraft client = context.client();
             client.execute(() -> {
-                Optional<Goal> goalFinder = lockout.getBoard().getGoals().stream().filter(g -> g.getId().equals(payload.goal())).findFirst();
+                Optional<Goal<?>> goalFinder = lockout.getBoard().getGoals().stream().filter(g -> g.getId().equals(payload.goal())).findFirst();
                 if(goalFinder.isEmpty()) {
                     client.gui.hud.getChat().addClientSystemMessage(Component.literal(ChatFormatting.RED + "Received completion for unknown goal: " + payload.goal()));
                     return;
                 }
-                Goal goal = goalFinder.get();
+                Goal<?> goal = goalFinder.get();
                 if (goal.isCompleted() || payload.teamIndex() == -1) {
-                    lockout.clearGoalCompletion(goal, false);
+                    goal.setCompleted(false, null);
                 }
                 if (payload.teamIndex() != -1) {
                     LockoutTeam team = lockout.getTeams().get(payload.teamIndex());

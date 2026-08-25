@@ -17,9 +17,9 @@ public class LockoutBoard {
     @Getter
     private final int size;
 
-    private final List<Goal> goals;
+    private final List<Goal<?>> goals;
 
-    public LockoutBoard(List<Goal> goals) {
+    public LockoutBoard(List<Goal<?>> goals) {
         size = (int) Math.sqrt(goals.size());
         if (goals.size() != size * size || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE) {
             throw new IllegalArgumentException(String.format("Invalid number of goals (%d)", size));
@@ -27,7 +27,7 @@ public class LockoutBoard {
         this.goals = new ArrayList<>(goals);
     }
 
-    public List<Goal> getGoals() {
+    public List<Goal<?>> getGoals() {
         return Collections.unmodifiableList(goals);
     }
 

@@ -1,6 +1,7 @@
 package me.marin.lockout.lockout;
 
 import me.marin.lockout.Lockout;
+import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import oshi.util.tuples.Pair;
@@ -44,8 +45,8 @@ public class GoalRegistry {
         return Collections.unmodifiableMap(registry);
     }
 
-    public List<me.marin.lockout.lockout.goal.Goal> constructGoals(List<Pair<String, String>> goalData) throws IllegalGoalConstructionException {
-        List<me.marin.lockout.lockout.goal.Goal> goals = new ArrayList<>();
+    public List<Goal<?>> constructGoals(List<Pair<String, String>> goalData) throws IllegalGoalConstructionException {
+        List<Goal<?>> goals = new ArrayList<>();
         List<Pair<Pair<String, String>, Exception>> invalidGoals = new ArrayList<>();
         for(Pair<String, String> goal : goalData) {
             if(!isRegistered(goal.getA())) {

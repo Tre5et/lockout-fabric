@@ -4,14 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import me.marin.lockout.client.LockoutBoard;
 import me.marin.lockout.lockout.goal.Goal;
-import me.marin.lockout.network.CompleteTaskPayload;
 import me.marin.lockout.network.EndLockoutPayload;
-import me.marin.lockout.network.GoalProgressPayload;
 import me.marin.lockout.network.LockoutGoalsTeamsPayload;
 import me.marin.lockout.network.UpdateTimerPayload;
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -81,6 +78,8 @@ public class Lockout {
     @Getter
     private final List<? extends LockoutTeam> teams;
     private boolean hasStarted = false;
+    @Getter
+    @Setter
     private boolean isRunning = true;
 
     /**
@@ -125,136 +124,7 @@ public class Lockout {
         ticks++;
     }
 
-    // TODO: Rework payload messages
-    public void completeGoal(Goal goal, Player player) {
-        completeGoal(goal, player.getUUID());
-    }
-    public void completeGoal(Goal goal, UUID playerId) {
-        if (goal.isCompleted()) return;
-        if (!isLockoutPlayer(playerId)) return;
-        if (!hasStarted()) return;
-
-        LockoutTeam team = getPlayerTeam(playerId);
-        if (team == null) return;
-
-        if (team instanceof LockoutTeamServer teamServer) {
-            completeGoal(goal, teamServer, teamServer.getPlayerName(playerId));
-        } else {
-            // Client side or other team type - should normally not happen on client but let's be safe
-            completeGoal(goal, team, null);
-        }
-    }
-    public void completeGoal(Goal goal, LockoutTeam team) {
-        completeGoal(goal, team, team.getDisplayName());
-    }
-    public void completeGoal(Goal goal, LockoutTeam team, String completedName) {
-        if (goal.isCompleted()) return;
-        if (!hasStarted()) return;
-
-        team.addPoint();
-        goal.setCompleted(true, team);
-
-        sendGoalCompletedPacket(goal, team, completedName);
-        evaluateWinnerAndEndGame(team);
-    }
-
-    /**
-     * Completes an opponent goal when all other teams have met the condition.
-     * Supports 2+ teams. For 2-team games, behaves the same as complete1v1Goal.
-     *
-     * @param goal The opponent goal to track
-     * @param teamThatMetCondition The team that just met the goal condition
-     * @param message The message to display when the goal is completed
-     */
-    public void completeMultiOpponentGoal(Goal goal, LockoutTeam teamThatMetCondition) {
-        if (goal.isCompleted()) return;
-        if (!hasStarted()) return;
-
-        // Track that this team has met the condition
-        opponentGoalProgress.putIfAbsent(goal, new HashSet<>());
-        opponentGoalProgress.get(goal).add(teamThatMetCondition);
-
-        //updateTooltips(goal);
-
-        // Check if all other teams (excluding the potential winner) have met the condition
-        int teamsSize = teams.size();
-        int teamsThatMetCondition = opponentGoalProgress.get(goal).size();
-
-        // If all opponents have met the condition, complete the goal for the remaining team(s)
-        if (teamsThatMetCondition >= teamsSize - 1) {
-            // Find the team(s) that haven't met the condition - they win
-            List<LockoutTeam> winningTeams = new ArrayList<>();
-            for (LockoutTeam team : teams) {
-                if (!opponentGoalProgress.get(goal).contains(team)) {
-                    winningTeams.add(team);
-                }
-            }
-
-            // Should be exactly one winning team (or multiple in a tie scenario)
-            if (winningTeams.isEmpty()) {
-                // Edge case: all teams met condition simultaneously, shouldn't happen normally
-                return;
-            }
-
-            // Complete the goal for the first winning team (in case of multiple, pick one)
-            LockoutTeam winnerTeam = winningTeams.get(0);
-            goal.setCompleted(true, winnerTeam);
-            winnerTeam.addPoint();
-
-            sendGoalCompletedPacket(goal, winnerTeam, winnerTeam.getDisplayName());
-            evaluateWinnerAndEndGame(winnerTeam);
-        }
-    }
-
-    /**
-     * Convenience method for completeMultiOpponentGoal that accepts a PlayerEntity.
-     */
-    public void completeMultiOpponentGoal(Goal goal, Player player) {
-        completeMultiOpponentGoal(goal, getPlayerTeam(player.getUUID()));
-    }
-
-    /**
-     * Convenience method for completeMultiOpponentGoal that accepts a UUID.
-     */
-    public void completeMultiOpponentGoal(Goal goal, UUID playerId) {
-        if (!isLockoutPlayer(playerId)) return;
-        completeMultiOpponentGoal(goal, getPlayerTeam(playerId));
-    }
-
-    public void updateGoalCompletion(Goal goal, UUID playerId) {
-        if (goal.isCompleted()) {
-            clearGoalCompletion(goal, false);
-        }
-        completeGoal(goal, playerId);
-    }
-
-    public void clearGoalCompletion(Goal goal, boolean sendPacket) {
-        if (!goal.isCompleted()) return;
-
-        goal.getCompletedTeam().takePoint();
-        goal.setCompleted(false, null);
-
-        if (sendPacket) {
-            var payload = new CompleteTaskPayload(goal.getId(), -1, null, false);
-            for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
-                ServerPlayNetworking.send(serverPlayer, payload);
-            }
-        }
-    }
-
-    private void sendGoalCompletedPacket(Goal goal, LockoutTeam team, String completedName) {
-        sendGoalCompletedPacket(goal, team, completedName, true);
-    }
-
-
-    private void sendGoalCompletedPacket(Goal goal, LockoutTeam team, String completedName, boolean announce) {
-        var payload = new CompleteTaskPayload(goal.getId(), teams.indexOf(team), completedName, announce);
-        for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
-            ServerPlayNetworking.send(serverPlayer, payload);
-        }
-    }
-
-    private void evaluateWinnerAndEndGame(LockoutTeam team) {
+    public void evaluateWinnerAndEndGame(LockoutTeam team) {
         PlayerList playerManager = LockoutServer.server.getPlayerList();
 
         List<LockoutTeam> winners = new ArrayList<>();
@@ -282,10 +152,6 @@ public class Lockout {
 
     public boolean hasStarted() {
         return hasStarted;
-    }
-
-    public boolean isRunning() {
-        return isRunning;
     }
 
     public void setStarted(boolean hasStarted) {
@@ -349,12 +215,6 @@ public class Lockout {
         return (int) board.getGoals().stream().filter(goal -> !goal.isCompleted()).count();
     }
 
-    public void setRunning(boolean running) {
-        isRunning = running;
-    }
-
-
-
     private static String getWinnerTeamsString(List<? extends LockoutTeam> teams) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < teams.size(); i++) {
@@ -387,171 +247,6 @@ public class Lockout {
                 isRunning);
     }
 
-    public void broadcastProgress(Goal goal, String serialized) {
-        var payload = new GoalProgressPayload(goal.getId(), serialized);
-        for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
-            ServerPlayNetworking.send(serverPlayer, payload);
-        }
-    }
-
-/*    public void updateTooltips(Goal goal) {
-        if (goal.getTooltipInfo() != null) {
-            for (LockoutTeam team : teams) {
-                if (team instanceof LockoutTeamServer teamServer) {
-                    teamServer.sendTooltipUpdate(goal);
-                }
-            }
-            // Update spectators
-            List<String> spectatorTooltip = goal.getSpectatorTooltip();
-            var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", spectatorTooltip));
-            for (ServerPlayer spectator : Utility.getSpectators(this, LockoutServer.server)) {
-                ServerPlayNetworking.send(spectator, payload);
-            }
-        }
-    }*/
-
-
-
-
-    public void recalculateXPGoal(Goal goal) {
-        List<UUID> largestLevelPlayers = new ArrayList<>();
-        int largestLevel = 0;
-
-        for (UUID uuid : levels.keySet()) {
-            if (!isLockoutPlayer(uuid)) continue;
-            if (levels.get(uuid) == largestLevel) {
-                largestLevelPlayers.add(uuid);
-                continue;
-            }
-            if (levels.get(uuid) > largestLevel) {
-                largestLevelPlayers.clear();
-                largestLevelPlayers.add(uuid);
-                largestLevel = levels.get(uuid);
-            }
-        }
-
-        if (largestLevel == 0) {
-            if (this.mostLevelsPlayer != null) {
-                this.mostLevelsPlayer = null;
-                this.mostLevels = 0;
-                clearGoalCompletion(goal, true);
-            }
-        } else if (!largestLevelPlayers.contains(mostLevelsPlayer)) {
-            this.mostLevelsPlayer = largestLevelPlayers.get(0);
-            this.mostLevels = largestLevel;
-            updateGoalCompletion(goal, largestLevelPlayers.get(0));
-        } else {
-            this.mostLevels = largestLevel;
-        }
-
-        //updateTooltips(goal);
-    }
-
-    public void recalculateUniqueCraftsGoal(Goal goal) {
-        List<UUID> largestCraftPlayers = new ArrayList<>();
-        int largestCraftCount = 0;
-
-        for (UUID uuid : uniqueCrafts.keySet()) {
-            if (!isLockoutPlayer(uuid)) continue;
-            int count = uniqueCrafts.get(uuid).size();
-            if (count == largestCraftCount) {
-                largestCraftPlayers.add(uuid);
-                continue;
-            }
-            if (count > largestCraftCount) {
-                largestCraftPlayers.clear();
-                largestCraftPlayers.add(uuid);
-                largestCraftCount = count;
-            }
-        }
-
-        if (largestCraftCount == 0) {
-            if (this.mostUniqueCraftsPlayer != null) {
-                this.mostUniqueCraftsPlayer = null;
-                this.mostUniqueCrafts = 0;
-                clearGoalCompletion(goal, true);
-            }
-        } else if (!largestCraftPlayers.contains(mostUniqueCraftsPlayer)) {
-            this.mostUniqueCraftsPlayer = largestCraftPlayers.get(0);
-            this.mostUniqueCrafts = largestCraftCount;
-            updateGoalCompletion(goal, largestCraftPlayers.get(0));
-        } else {
-            this.mostUniqueCrafts = largestCraftCount;
-        }
-
-        //updateTooltips(goal);
-    }
-
-    public void recalculatePlayerKillsGoal(Goal goal) {
-        List<UUID> largestKillPlayers = new ArrayList<>();
-        int largestKillCount = 0;
-
-        for (UUID uuid : playerKills.keySet()) {
-            if (!isLockoutPlayer(uuid)) continue;
-            int count = playerKills.get(uuid);
-            if (count == largestKillCount) {
-                largestKillPlayers.add(uuid);
-                continue;
-            }
-            if (count > largestKillCount) {
-                largestKillPlayers.clear();
-                largestKillPlayers.add(uuid);
-                largestKillCount = count;
-            }
-        }
-
-        if (largestKillCount == 0) {
-            if (this.mostPlayerKillsPlayer != null) {
-                this.mostPlayerKillsPlayer = null;
-                this.mostPlayerKills = 0;
-                clearGoalCompletion(goal, true);
-            }
-        } else if (!largestKillPlayers.contains(mostPlayerKillsPlayer)) {
-            this.mostPlayerKillsPlayer = largestKillPlayers.get(0);
-            this.mostPlayerKills = largestKillCount;
-            updateGoalCompletion(goal, largestKillPlayers.get(0));
-        } else {
-            this.mostPlayerKills = largestKillCount;
-        }
-
-        //updateTooltips(goal);
-    }
-
-    public void recalculateAdvancementsGoal(Goal goal) {
-        List<UUID> largestAdvancementPlayers = new ArrayList<>();
-        int largestAdvancementCount = 0;
-
-        for (UUID uuid : playerAdvancements.keySet()) {
-            if (!isLockoutPlayer(uuid)) continue;
-            int count = playerAdvancements.get(uuid);
-            if (count == largestAdvancementCount) {
-                largestAdvancementPlayers.add(uuid);
-                continue;
-            }
-            if (count > largestAdvancementCount) {
-                largestAdvancementPlayers.clear();
-                largestAdvancementPlayers.add(uuid);
-                largestAdvancementCount = count;
-            }
-        }
-
-        if (largestAdvancementCount == 0) {
-            if (this.mostAdvancementsPlayer != null) {
-                this.mostAdvancementsPlayer = null;
-                this.mostAdvancements = 0;
-                clearGoalCompletion(goal, true);
-            }
-        } else if (!largestAdvancementPlayers.contains(mostAdvancementsPlayer)) {
-            this.mostAdvancementsPlayer = largestAdvancementPlayers.get(0);
-            this.mostAdvancements = largestAdvancementCount;
-            updateGoalCompletion(goal, largestAdvancementPlayers.get(0));
-        } else {
-            this.mostAdvancements = largestAdvancementCount;
-        }
-
-        //updateTooltips(goal);
-    }
-
     public void forfeitTeam(LockoutTeam team) {
         // Mark as forfeited
         team.setForfeited(true);
@@ -565,19 +260,19 @@ public class Lockout {
         }
         
         // Update opponent goal progress
-        for (Goal goal : opponentGoalProgress.keySet()) {
+        for (Goal<?> goal : opponentGoalProgress.keySet()) {
             Set<LockoutTeam> progress = opponentGoalProgress.get(goal);
             progress.remove(team);
         }
 
         // Re-evaluate multi-opponent goals
-        for (Goal goal : new ArrayList<>(opponentGoalProgress.keySet())) {
+        for (Goal<?> goal : new ArrayList<>(opponentGoalProgress.keySet())) {
             if (goal.isCompleted()) continue;
             
             Set<LockoutTeam> teamsMetCondition = opponentGoalProgress.get(goal);
             int activeTeamsCount = getNonForfeitedTeamsCount();
             int count = teamsMetCondition.size();
-
+/*
             // Same logic as completeMultiOpponentGoal
             if (count >= activeTeamsCount - 1 && activeTeamsCount > 1) {
                 List<LockoutTeam> winningTeams = getNonForfeitedTeams().stream()
@@ -605,9 +300,10 @@ public class Lockout {
                     spectator.sendSystemMessage(Component.literal(completionMessage));
                 }
 
+                goal.complete(winnerTeam);
                 sendGoalCompletedPacket(goal, winnerTeam, null, false);
                 evaluateWinnerAndEndGame(winnerTeam);
-            }
+            }*/
         }
 
         // Recalculate "Most X" goals
@@ -647,108 +343,6 @@ public class Lockout {
 
     public int getNonForfeitedTeamsCount() {
         return (int) teams.stream().filter(t -> !t.isForfeited()).count();
-    }
-
-    public void recalculateHoppersGoal(Goal goal) {
-        List<UUID> largestHopperPlayers = new ArrayList<>();
-        int largestHopperCount = 0;
-
-        for (UUID uuid : playerHopperCounts.keySet()) {
-            if (!isLockoutPlayer(uuid)) continue;
-            int count = playerHopperCounts.get(uuid);
-            if (count == largestHopperCount) {
-                largestHopperPlayers.add(uuid);
-                continue;
-            }
-            if (count > largestHopperCount) {
-                largestHopperPlayers.clear();
-                largestHopperPlayers.add(uuid);
-                largestHopperCount = count;
-            }
-        }
-
-        if (largestHopperCount == 0) {
-            if (this.mostHoppersPlayer != null) {
-                this.mostHoppersPlayer = null;
-                clearGoalCompletion(goal, true);
-            }
-            return;
-        }
-
-        if (!largestHopperPlayers.contains(mostHoppersPlayer)) {
-            this.mostHoppersPlayer = largestHopperPlayers.get(0);
-            updateGoalCompletion(goal, largestHopperPlayers.get(0));
-        }
-
-        //updateTooltips(goal);
-    }
-
-    public void recalculateLeaflitterGoal(Goal goal) {
-        List<UUID> largestLeaflitterPlayers = new ArrayList<>();
-        int largestLeaflitterCount = 0;
-
-        for (UUID uuid : playerLeaflitterCounts.keySet()) {
-            if (!isLockoutPlayer(uuid)) continue;
-            int count = playerLeaflitterCounts.get(uuid);
-            if (count == largestLeaflitterCount) {
-                largestLeaflitterPlayers.add(uuid);
-                continue;
-            }
-            if (count > largestLeaflitterCount) {
-                largestLeaflitterPlayers.clear();
-                largestLeaflitterPlayers.add(uuid);
-                largestLeaflitterCount = count;
-            }
-        }
-
-        if (largestLeaflitterCount == 0) {
-            if (this.mostLeaflitterPlayer != null) {
-                this.mostLeaflitterPlayer = null;
-                clearGoalCompletion(goal, true);
-            }
-            return;
-        }
-
-        if (!largestLeaflitterPlayers.contains(mostLeaflitterPlayer)) {
-            this.mostLeaflitterPlayer = largestLeaflitterPlayers.get(0);
-            updateGoalCompletion(goal, largestLeaflitterPlayers.get(0));
-        }
-
-        //updateTooltips(goal);
-    }
-
-    public void recalculateDiamondBlocksGoal(Goal goal) {
-        List<UUID> largestDiamondBlockPlayers = new ArrayList<>();
-        int largestDiamondBlockCount = 0;
-
-        for (UUID uuid : playerDiamondBlockCounts.keySet()) {
-            if (!isLockoutPlayer(uuid)) continue;
-            int count = playerDiamondBlockCounts.get(uuid);
-            if (count == largestDiamondBlockCount) {
-                largestDiamondBlockPlayers.add(uuid);
-                continue;
-            }
-            if (count > largestDiamondBlockCount) {
-                largestDiamondBlockPlayers.clear();
-                largestDiamondBlockPlayers.add(uuid);
-                largestDiamondBlockCount = count;
-            }
-        }
-
-        if (largestDiamondBlockCount == 0) {
-            if (this.mostDiamondBlocksPlayer != null) {
-                this.mostDiamondBlocksPlayer = null;
-                clearGoalCompletion(goal, true);
-            }
-            return;
-        }
-
-        if (!largestDiamondBlockPlayers.contains(mostDiamondBlocksPlayer)) {
-            this.mostDiamondBlocksPlayer = largestDiamondBlockPlayers.get(0);
-            updateGoalCompletion(goal, largestDiamondBlockPlayers.get(0));
-        }
-
-        //updateTooltips(goal);
     }
 
 }

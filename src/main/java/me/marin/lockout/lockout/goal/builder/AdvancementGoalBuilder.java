@@ -61,7 +61,7 @@ public class AdvancementGoalBuilder extends GoalBuilder<Void> {
     }
 
     @Override
-    public Goal build(Void option) {
+    public Goal<?> build(Void option) {
         return new AdvancementGoal(
                 getId(option),
                 getNameExtractor(option),

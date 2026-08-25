@@ -19,7 +19,7 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<T> {
     abstract boolean satisfiedBy(Inventory inventory, T option);
 
     @Override
-    public Goal build(T option) {
+    public Goal<?> build(T option) {
         return new ObtainItemGoal(
                 getId(option),
                 getNameExtractor(option),

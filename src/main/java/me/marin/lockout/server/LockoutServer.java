@@ -216,7 +216,7 @@ public class LockoutServer {
             } else {
                 // validate board
                 try {
-                    List<Goal> goals = GoalRegistry.INSTANCE.constructGoals(payload.boardOrClear().get());
+                    List<Goal<?>> goals = GoalRegistry.INSTANCE.constructGoals(payload.boardOrClear().get());
                     CUSTOM_BOARD = new LockoutBoard(goals);
                     player.sendSystemMessage(Component.literal("Set custom board."));
                 } catch (IllegalGoalConstructionException e) {
@@ -231,7 +231,7 @@ public class LockoutServer {
             if (!Lockout.isLockoutRunning(lockout)) return;
             if (!lockout.isLockoutPlayer(player.getUUID())) return;
 
-            Goal goal = lockout.getBoard().getGoals().stream()
+            Goal<?> goal = lockout.getBoard().getGoals().stream()
                     .filter(g -> g.getId().equals(payload.goalId()))
                     .findFirst()
                     .orElse(null);
@@ -686,10 +686,10 @@ public class LockoutServer {
                 context.getSource().sendFailure(Component.literal("Goal number does not exist on the board."));
                 return 0;
             }
-            Goal goal = lockout.getBoard().getGoals().get(idx - 1);
+            Goal<?> goal = lockout.getBoard().getGoals().get(idx - 1);
 
-            context.getSource().sendSystemMessage(Component.nullToEmpty("Gave " + playerConfig.name() + " goal \"" + goal.getNameExtractor() + "\"."));
-            lockout.updateGoalCompletion(goal, playerConfig.id());
+            context.getSource().sendSystemMessage(Component.nullToEmpty("Granted a goal to " + playerConfig.name() + "."));
+            goal.complete(server.getPlayerList().getPlayer(playerConfig.id()), true);
             return 1;
         } catch (RuntimeException e) {
             Lockout.error(e);

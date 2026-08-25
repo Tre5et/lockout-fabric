@@ -7,6 +7,7 @@ import me.marin.lockout.lockout.goal.progress.GoalProgressTracker;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.network.GoalProgressPayload;
+import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public abstract class ProgressingGoal<D,T,R,P extends GoalProgressTracker<T,R>> extends Goal {
+public abstract class ProgressingGoal<D,T,R,P extends GoalProgressTracker<T,R>> extends Goal<D> {
     private final P progressTracker;
     private final Predicate<R> satisfiedPredicate;
 
@@ -27,17 +28,23 @@ public abstract class ProgressingGoal<D,T,R,P extends GoalProgressTracker<T,R>> 
         this.satisfiedPredicate = satisfiedPredicate;
     }
 
-    public boolean satisfiedBy(Player player, D data, Lockout lockout) {
-        Optional<? extends LockoutTeam> team = lockout.getTeams().stream()
+    @Override
+    public void updateWith(D data, ServerPlayer player) {
+        Optional<? extends LockoutTeam> team = LockoutServer.lockout.getTeams().stream()
                 .filter(t -> t.containsPlayer(player.getUUID()))
                 .findAny();
-        if(team.isEmpty()) return false;
-        int index = lockout.getTeams().indexOf(team.get());
+        if(team.isEmpty()) return;
+        int index = LockoutServer.lockout.getTeams().indexOf(team.get());
         T updateData = getUpdateData(data, progressTracker.get(index));
-        if(updateData == null) return false;
+        if(updateData == null) return;
         progressTracker.update(index, updateData);
-        lockout.broadcastProgress(this, progressTracker.serialize());
-        return satisfiedPredicate.test(progressTracker.get(index));
+        var payload = new GoalProgressPayload(getId(), progressTracker.serialize());
+        for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
+            ServerPlayNetworking.send(serverPlayer, payload);
+        }
+        if(satisfiedPredicate.test(progressTracker.get(index))) {
+            complete(player, true);
+        }
     }
 
     @Override

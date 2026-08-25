@@ -122,7 +122,7 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
 
     public static final class GoalEntry extends ObjectSelectionList.Entry<GoalEntry> {
 
-        private final List<Goal> exampleGoals;
+        private final List<Goal<?>> exampleGoals;
         private final String goalNameSuffix;
         private final List<String> goalNames;
 

@@ -33,7 +33,7 @@ public class BoardGenerator {
         Collections.shuffle(registeredGoals);
 
         List<GoalBuilder<?>> goalBuilders = new ArrayList<>();
-        List<Goal> goals = new ArrayList<>();
+        List<Goal<?>> goals = new ArrayList<>();
 
         ListIterator<GoalBuilder<?>> it = registeredGoals.listIterator();
         while (goals.size() < size * size && it.hasNext()) {
@@ -59,7 +59,7 @@ public class BoardGenerator {
                 }
             }*/
 
-            Optional<Goal> constructed = goal.buildGenerated(context);
+            Optional<Goal<?>> constructed = goal.buildGenerated(context);
             if(constructed.isPresent()) {
                 goalBuilders.add(goal);
                 goals.add(constructed.get());

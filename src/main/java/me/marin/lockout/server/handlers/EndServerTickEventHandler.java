@@ -75,20 +75,12 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
 
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 if (goal instanceof ObtainItemGoal obtainItemsGoal) {
-                    if (obtainItemsGoal.satisfiedBy(player.getInventory())) {
-/*                        if (goal instanceof OpponentObtainsItemGoal opponentObtainsItemGoal) {
-                            lockout.completeMultiOpponentGoal(goal, player, opponentObtainsItemGoal.getMessage(player));
-                        } else {*/
-                            lockout.completeGoal(goal, player);
-/*                        }*/
-                    }
+                    obtainItemsGoal.updateWith(player.getInventory(), player);
                 }
 
                 if (goal instanceof RideEntityGoal rideEntityGoal && player.isPassenger()) {
                     EntityType<?> vehicle = player.getVehicle().getType();
-                    if(rideEntityGoal.satisfiedBy(vehicle)) {
-                        lockout.completeGoal(goal, player);
-                    }
+                    rideEntityGoal.updateWith(vehicle, player);
 /*                    if (Objects.equals(vehicle, rideEntityGoal.getEntityType()) || (rideEntityGoal.getEntityType() == EntityTypes.NAUTILUS && vehicle == EntityTypes.ZOMBIE_NAUTILUS)) {
                         boolean allow = true;
                         if (Objects.equals(vehicle, EntityTypes.PIG)) {

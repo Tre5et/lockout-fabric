@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public abstract class GoalBuilder<T> {
     protected final String id;
@@ -51,9 +52,9 @@ public abstract class GoalBuilder<T> {
 
     public abstract GoalOptionGenerator<T> optionGenerator();
 
-    public abstract Goal build(T option);
+    public abstract Goal<?> build(T option);
 
-    public Optional<Goal> buildGenerated(GoalRequirementContext context) {
+    public Optional<Goal<?>> buildGenerated(GoalRequirementContext context) {
         if(optionGenerator() == null) {
             if(requirements.stream().allMatch(r -> r.optionSatisfiedBy(context, null))) {
                 return Optional.of(build(null));
@@ -65,17 +66,17 @@ public abstract class GoalBuilder<T> {
         return option.map(this::build);
     }
 
-    public List<Goal> buildExamples() {
+    public List<Goal<?>> buildExamples() {
         if(optionGenerator() == null) {
             return List.of(build(null));
         }
         return optionGenerator().examples().stream()
                 .map(this::build)
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
     }
 
     @SuppressWarnings("unchecked")
-    public Goal buildGeneric(Object option) throws IllegalGoalConstructionException {
+    public Goal<?> buildGeneric(Object option) throws IllegalGoalConstructionException {
         if(option == null) return build(null);
         try {
             return build((T)option);
@@ -84,7 +85,7 @@ public abstract class GoalBuilder<T> {
         }
     }
 
-    public Goal buildFromSerializedData(String option) throws IllegalGoalConstructionException {
+    public Goal<?> buildFromSerializedData(String option) throws IllegalGoalConstructionException {
         if(optionGenerator() == null) {
             return build(null);
         }

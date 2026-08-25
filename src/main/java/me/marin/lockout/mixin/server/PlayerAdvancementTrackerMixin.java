@@ -65,14 +65,10 @@ public abstract class PlayerAdvancementTrackerMixin {
             if (goal.isCompleted()) continue;
 
             if (goal instanceof AdvancementGoal advancementGoal) {
-                if (advancementGoal.satisfiedBy(advancement)) {
-                    lockout.completeGoal(goal, player);
-                }
+                advancementGoal.updateWith(advancement, player);
             }
             if(goal instanceof AdvancementCountingGoal advancementCountingGoal) {
-                if (advancementCountingGoal.satisfiedBy(player, advancement, LockoutServer.lockout)) {
-                    lockout.completeGoal(goal, player);
-                }
+                advancementCountingGoal.updateWith(advancement, player);
             }
             /*
             if (goal instanceof GetUniqueAdvancementsGoal getUniqueAdvancementsGoal) {

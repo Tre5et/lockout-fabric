@@ -7,6 +7,9 @@ import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.lockout.goal.hint.GoalHint;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import me.marin.lockout.network.CompleteTaskPayload;
+import me.marin.lockout.server.LockoutServer;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
@@ -16,8 +19,9 @@ import oshi.util.tuples.Pair;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
-public abstract class Goal {
+public abstract class Goal<T> {
     @Getter
     private final String id;
     @Getter
@@ -68,11 +72,35 @@ public abstract class Goal {
 
     public void sendProgress(ServerPlayer player) {}
 
+    public abstract void updateWith(T data, ServerPlayer player);
+
+    public void complete(ServerPlayer player, boolean announce) {
+        CompleteTaskPayload payload;
+        if(player == null) {
+            setCompleted(false, null);
+            payload = new CompleteTaskPayload(getId(), -1, null, false);
+        } else {
+            Optional<? extends LockoutTeam> team = LockoutServer.lockout.getTeams().stream()
+                    .filter(t -> t.getPlayerIds().stream().anyMatch(i -> i.equals(player.getUUID())))
+                    .findAny();
+            if(team.isEmpty()) return;
+            setCompleted(true, team.get());
+            int teamIndex = LockoutServer.lockout.getTeams().indexOf(team.get());
+            payload = new CompleteTaskPayload(getId(), teamIndex, player.getName().getString(), announce);
+            LockoutServer.lockout.evaluateWinnerAndEndGame(team.get());
+        }
+
+        for(ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
+            ServerPlayNetworking.send(serverPlayer, payload);
+        }
+
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Goal goal = (Goal) o;
+        Goal<?> goal = (Goal<?>) o;
         return id.equals(goal.id);
     }
 

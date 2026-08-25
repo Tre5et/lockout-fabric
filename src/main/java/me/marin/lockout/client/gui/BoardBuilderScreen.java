@@ -137,7 +137,7 @@ public class BoardBuilderScreen extends Screen {
             this.addRenderableWidget(searchTextField);
         }
         if (displayEditData && BoardBuilderData.INSTANCE.getModifyingIdx() != null) {
-            Goal goal = BoardBuilderData.INSTANCE.getModifyingGoal();
+            Goal<?> goal = BoardBuilderData.INSTANCE.getModifyingGoal();
             GoalBuilder<?> builder = GoalRegistry.INSTANCE.get(goal.getBuildData().getA());
             if(builder.optionGenerator() == null) {
                 displayEditData = false;

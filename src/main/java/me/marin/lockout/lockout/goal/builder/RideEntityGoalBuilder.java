@@ -47,7 +47,7 @@ public class RideEntityGoalBuilder extends GoalBuilder<Void> {
     }
 
     @Override
-    public Goal build(Void option) {
+    public Goal<?> build(Void option) {
         return new RideEntityGoal(
                 id,
                 getNameExtractor(option),
