@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
+import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.KeyMapping;
@@ -43,11 +44,10 @@ import com.mojang.blaze3d.platform.InputConstants;
 public class LockoutClient implements ClientModInitializer {
 
     public static Lockout lockout;
-    public static boolean amIPlayingLockout = false;
+    public static LockoutTeam playerTeam = null;
     private static KeyMapping keyBinding;
     public static int CURRENT_TICK = 0;
     public static final Map<Identifier, Advancement> allAdvancements = new HashMap<>();
-    public static final Map<String, String> goalTooltipMap = new HashMap<>();
     /** goalId -> hintIndex -> result message; persists until disconnect */
     public static final Map<String, Map<Integer, String>> goalHintResults = new HashMap<>();
     /** goalId -> hintIndex -> error message; cleared when the BoardScreen closes */
@@ -83,8 +83,9 @@ public class LockoutClient implements ClientModInitializer {
             // Ensure goals are registered at packet handling time, when item stacks are available client-side.
             List<LockoutTeam> teams = payload.teams();
 
-            LockoutClient.amIPlayingLockout = teams.stream().map(LockoutTeam::getPlayerNames)
-                    .anyMatch(players -> players.stream().anyMatch(player -> player.equals(Minecraft.getInstance().getUser().getName())));
+            LockoutClient.playerTeam = teams.stream()
+                    .filter(t -> t.getPlayerIds().stream().anyMatch(id -> id.equals(Minecraft.getInstance().player.getUUID())))
+                    .findAny().orElse(null);
 
             int[] completedByTeam = payload.goals().stream().mapToInt(Pair::getB).toArray();
 
@@ -123,9 +124,6 @@ public class LockoutClient implements ClientModInitializer {
                 }
             });
         });
-        ClientPlayNetworking.registerGlobalReceiver(UpdateTooltipPayload.ID, (payload, context) -> {
-            goalTooltipMap.put(payload.goal(), payload.tooltip());
-        });
         ClientPlayNetworking.registerGlobalReceiver(StartLockoutPayload.ID, (payload, context) -> {
             lockout.setStarted(true);
             context.client().execute(() -> {
@@ -140,7 +138,12 @@ public class LockoutClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(CompleteTaskPayload.ID, (payload, context) -> {
             Minecraft client = context.client();
             client.execute(() -> {
-                Goal goal = lockout.getBoard().getGoals().stream().filter(g -> g.getId().equals(payload.goal())).findFirst().get();
+                Optional<Goal> goalFinder = lockout.getBoard().getGoals().stream().filter(g -> g.getId().equals(payload.goal())).findFirst();
+                if(goalFinder.isEmpty()) {
+                    client.gui.hud.getChat().addClientSystemMessage(Component.literal(ChatFormatting.RED + "Received completion for unknown goal: " + payload.goal()));
+                    return;
+                }
+                Goal goal = goalFinder.get();
                 if (goal.isCompleted() || payload.teamIndex() == -1) {
                     lockout.clearGoalCompletion(goal, false);
                 }
@@ -149,7 +152,7 @@ public class LockoutClient implements ClientModInitializer {
                     team.addPoint();
                     goal.setCompleted(true, lockout.getTeams().get(payload.teamIndex()));
 
-                    if (client.player != null && amIPlayingLockout) {
+                    if (client.player != null && playerTeam != null) {
                         if (team.getPlayerNames().contains(client.player.getName().getString())) {
                             client.player.playSound(SoundEvents.NOTE_BLOCK_CHIME.value(), 2f, 1f);
                         } else {
@@ -157,8 +160,11 @@ public class LockoutClient implements ClientModInitializer {
                         }
                     }
                 }
-
-
+                if(payload.announce()) {
+                    client.gui.hud.getChat().addClientSystemMessage(
+                            Component.literal(ChatFormatting.GREEN + (payload.completedName() == null ? "Someone" : payload.completedName()) + " completed " + goal.extractName().getString() + ".")
+                    );
+                }
             });
         });
         ClientPlayNetworking.registerGlobalReceiver(HintResultPayload.ID, (payload, context) -> {
@@ -167,6 +173,13 @@ public class LockoutClient implements ClientModInitializer {
             } else {
                 goalHintErrors.computeIfAbsent(payload.goalId(), k -> new HashMap<>()).put(payload.hintIndex(), payload.message());
             }
+        });
+        ClientPlayNetworking.registerGlobalReceiver(GoalProgressPayload.ID, (payload, context) -> {
+            if (lockout == null) return;
+            lockout.getBoard().getGoals().stream()
+                    .filter(g -> g.getId().equals(payload.goalId()))
+                    .findFirst()
+                    .ifPresent(g -> g.setProgress(payload.progress()));
         });
         ClientPlayNetworking.registerGlobalReceiver(EndLockoutPayload.ID, (payload, context) -> {
             lockout.setRunning(false);
@@ -357,7 +370,6 @@ public class LockoutClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
             lockout = null;
             allAdvancements.clear();
-            goalTooltipMap.clear();
             goalHintResults.clear();
             goalHintErrors.clear();
         }));

@@ -14,8 +14,6 @@ import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
-import me.marin.lockout.lockout.goal.tooltip.TooltipInfo;
-import me.marin.lockout.lockout.goal.tooltip.TooltipInfoProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +29,6 @@ public abstract class GoalBuilder<T> {
     private IdProvider<T> customIdProvider = null;
     private NameExtractorProvider<T> customNameExtractorProvider = null;
     private TextureExtractorProvider<T> cutomTextureExtractorProvider = null;
-    private TooltipInfoProvider<T> customTooltipInfoProvider = null;
     @Getter
     protected final List<GoalGroup> groups = new ArrayList<>();
     protected final List<GoalHint> hints = new ArrayList<>();
@@ -51,10 +48,6 @@ public abstract class GoalBuilder<T> {
     public abstract NameExtractor defaultNameExtractor(T option);
 
     public abstract TextureExtractor defaultTextureExtractor(T option);
-
-    public TooltipInfo defaultTooltipInfo(T option) {
-        return null;
-    }
 
     public abstract GoalOptionGenerator<T> optionGenerator();
 
@@ -124,11 +117,6 @@ public abstract class GoalBuilder<T> {
         return defaultTextureExtractor(option);
     }
 
-    public Optional<TooltipInfo> getTooltipInfo(T option) {
-        if(customTooltipInfoProvider != null) return Optional.ofNullable(customTooltipInfoProvider.get(option));
-        return Optional.ofNullable(defaultTooltipInfo(option));
-    }
-
     public List<GoalHint> getHints(T option) {
         List<GoalHint> hints = new ArrayList<>(this.hints);
         for(GoalRequirement<? super T> requirement : requirements) {
@@ -167,15 +155,6 @@ public abstract class GoalBuilder<T> {
 
     public GoalBuilder<T> customTextureExtractor(TextureExtractor extractor) {
         return customTextureExtractor(_ -> extractor);
-    }
-
-    public GoalBuilder<T> customTooltip(TooltipInfoProvider<T> tooltipInfoProvider) {
-        this.customTooltipInfoProvider = tooltipInfoProvider;
-        return this;
-    }
-
-    public GoalBuilder<T> customTooltip(TooltipInfo info) {
-        return customTooltip(_ -> info);
     }
 
     public GoalBuilder<T> group(GoalGroup... groups) {

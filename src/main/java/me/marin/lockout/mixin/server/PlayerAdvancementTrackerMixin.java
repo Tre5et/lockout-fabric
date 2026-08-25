@@ -2,6 +2,7 @@ package me.marin.lockout.mixin.server;
 
 import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutTeamServer;
+import me.marin.lockout.lockout.goal.AdvancementCountingGoal;
 import me.marin.lockout.lockout.goal.AdvancementGoal;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.server.LockoutServer;
@@ -19,8 +20,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Optional;
 
 @Mixin(PlayerAdvancements.class)
@@ -67,6 +66,11 @@ public abstract class PlayerAdvancementTrackerMixin {
 
             if (goal instanceof AdvancementGoal advancementGoal) {
                 if (advancementGoal.satisfiedBy(advancement)) {
+                    lockout.completeGoal(goal, player);
+                }
+            }
+            if(goal instanceof AdvancementCountingGoal advancementCountingGoal) {
+                if (advancementCountingGoal.satisfiedBy(player, advancement, LockoutServer.lockout)) {
                     lockout.completeGoal(goal, player);
                 }
             }

@@ -35,7 +35,7 @@ public class BoardScreen extends AbstractContainerScreen<BoardScreenHandler> {
         Utility.drawCenterBingoBoard(context, textRenderer, mouseX, mouseY);
         hoveredGoal = Utility.getBoardHoveredGoal(context, mouseX, mouseY);
         if (hoveredGoal != null) {
-            Utility.drawGoalInformation(context, textRenderer, hoveredGoal, mouseX, mouseY);
+            Utility.drawGoalInformation(context, textRenderer, hoveredGoal, mouseX, mouseY, minecraft);
         }
     }
 

@@ -188,21 +188,25 @@ public class Utility {
         return hoveredIdx.map(integer -> LockoutClient.lockout.getBoard().getGoals().get(integer)).orElse(null);
     }
 
-    public static void drawGoalInformation(GuiGraphicsExtractor context, Font textRenderer, Goal goal, int mouseX, int mouseY) {
+    public static void drawGoalInformation(GuiGraphicsExtractor context, Font textRenderer, Goal goal, int mouseX, int mouseY, Minecraft minecraft) {
         List<FormattedCharSequence> tooltip = new ArrayList<>();
-        tooltip.add(FormattedCharSequence.composite(
-                Component.nullToEmpty((goal.getTooltipInfo() != null ? ChatFormatting.UNDERLINE.toString() : "")).getVisualOrderText(),
-                goal.extractName().getVisualOrderText()
-        ));
-        if (goal.getTooltipInfo() != null && LockoutClient.goalTooltipMap.containsKey(goal.getId())) {
-            for (String t : LockoutClient.goalTooltipMap.get(goal.getId()).split("\n")) {
-                tooltip.add(Component.nullToEmpty(t).getVisualOrderText());
+        tooltip.add(goal.extractName().getVisualOrderText());
+        List<Component> tooltips;
+        if (LockoutClient.playerTeam != null) {
+            tooltips = goal.getTooltip(LockoutClient.playerTeam, minecraft.player, LockoutClient.lockout);
+        } else {
+            tooltips = goal.getSpectatorTooltip(LockoutClient.lockout);
+        }
+        if(!tooltips.isEmpty()) {
+            tooltip.add(Component.empty().getVisualOrderText());
+            for(Component c : tooltips) {
+                tooltip.add(c.copy().withColor(TextColor.GRAY).getVisualOrderText());
             }
         }
 
         // Add hint prompts / results
         List<GoalHint> hints = goal.getHints();
-        if (!hints.isEmpty() && LockoutClient.amIPlayingLockout) {
+        if (!hints.isEmpty() && LockoutClient.playerTeam != null) {
             tooltip.add(Component.empty().getVisualOrderText());
             tooltip.add(Component.nullToEmpty("" + ChatFormatting.GRAY + ChatFormatting.UNDERLINE + ChatFormatting.ITALIC + "Hints:").getVisualOrderText());
 

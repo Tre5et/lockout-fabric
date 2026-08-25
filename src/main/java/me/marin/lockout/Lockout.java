@@ -6,9 +6,9 @@ import me.marin.lockout.client.LockoutBoard;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.network.CompleteTaskPayload;
 import me.marin.lockout.network.EndLockoutPayload;
+import me.marin.lockout.network.GoalProgressPayload;
 import me.marin.lockout.network.LockoutGoalsTeamsPayload;
 import me.marin.lockout.network.UpdateTimerPayload;
-import me.marin.lockout.network.UpdateTooltipPayload;
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
@@ -138,72 +138,24 @@ public class Lockout {
         if (team == null) return;
 
         if (team instanceof LockoutTeamServer teamServer) {
-            completeGoal(goal, teamServer, teamServer.getPlayerName(playerId) + " completed " + goal.getNameExtractor() + ".");
+            completeGoal(goal, teamServer, teamServer.getPlayerName(playerId));
         } else {
             // Client side or other team type - should normally not happen on client but let's be safe
-            completeGoal(goal, team, "Someone completed " + goal.getNameExtractor() + ".");
+            completeGoal(goal, team, null);
         }
     }
     public void completeGoal(Goal goal, LockoutTeam team) {
-        completeGoal(goal, team, team.getDisplayName() + " completed " + goal.getNameExtractor() + ".");
+        completeGoal(goal, team, team.getDisplayName());
     }
-    public void completeGoal(Goal goal, LockoutTeam team, String message) {
+    public void completeGoal(Goal goal, LockoutTeam team, String completedName) {
         if (goal.isCompleted()) return;
         if (!hasStarted()) return;
 
         team.addPoint();
         goal.setCompleted(true, team);
 
-        for (LockoutTeam lockoutTeam : teams) {
-            if (!(lockoutTeam instanceof LockoutTeamServer lockoutTeamServer)) continue;
-            if (Objects.equals(lockoutTeamServer, team)) {
-                lockoutTeamServer.sendMessage(ChatFormatting.GREEN + message);
-            } else {
-                lockoutTeamServer.sendMessage(ChatFormatting.RED + message);
-            }
-        }
-        for (ServerPlayer spectator : Utility.getSpectators(this, LockoutServer.server)) {
-            spectator.sendSystemMessage(Component.literal(message));
-        }
-
-        sendGoalCompletedPacket(goal, team);
+        sendGoalCompletedPacket(goal, team, completedName);
         evaluateWinnerAndEndGame(team);
-    }
-
-    public void complete1v1Goal(Goal goal, Player player, boolean isWinner, String message) {
-        complete1v1Goal(goal, player.getUUID(), isWinner, message);
-    }
-    public void complete1v1Goal(Goal goal, UUID playerId, boolean isWinner, String message) {
-        if (goal.isCompleted()) return;
-        if (!isLockoutPlayer(playerId)) return;
-        if (!hasStarted()) return;
-
-        LockoutTeam team = getPlayerTeam(playerId);
-        if (team == null) return;
-
-        complete1v1Goal(goal, team, isWinner, message);
-    }
-    public void complete1v1Goal(Goal goal, LockoutTeam team, boolean isWinner, String message) {
-        if (goal.isCompleted()) return;
-        if (!hasStarted()) return;
-
-        LockoutTeam opponentTeam = getOpponentTeam(team);
-
-        LockoutTeam winnerTeam = isWinner ? team : opponentTeam;
-        LockoutTeam loserTeam  = isWinner ? opponentTeam : team;
-
-        goal.setCompleted(true, winnerTeam);
-        winnerTeam.addPoint();
-
-        if (winnerTeam instanceof LockoutTeamServer winnerServer) winnerServer.sendMessage(ChatFormatting.GREEN + message);
-        if (loserTeam instanceof LockoutTeamServer loserServer) loserServer.sendMessage(ChatFormatting.RED + message);
-
-        for (ServerPlayer spectator : Utility.getSpectators(this, LockoutServer.server)) {
-            spectator.sendSystemMessage(Component.literal(message));
-        }
-
-        sendGoalCompletedPacket(goal, winnerTeam);
-        evaluateWinnerAndEndGame(winnerTeam);
     }
 
     /**
@@ -214,7 +166,7 @@ public class Lockout {
      * @param teamThatMetCondition The team that just met the goal condition
      * @param message The message to display when the goal is completed
      */
-    public void completeMultiOpponentGoal(Goal goal, LockoutTeam teamThatMetCondition, String message) {
+    public void completeMultiOpponentGoal(Goal goal, LockoutTeam teamThatMetCondition) {
         if (goal.isCompleted()) return;
         if (!hasStarted()) return;
 
@@ -222,7 +174,7 @@ public class Lockout {
         opponentGoalProgress.putIfAbsent(goal, new HashSet<>());
         opponentGoalProgress.get(goal).add(teamThatMetCondition);
 
-        updateTooltips(goal);
+        //updateTooltips(goal);
 
         // Check if all other teams (excluding the potential winner) have met the condition
         int teamsSize = teams.size();
@@ -249,30 +201,7 @@ public class Lockout {
             goal.setCompleted(true, winnerTeam);
             winnerTeam.addPoint();
 
-            // Create a clear completion message showing the winner
-            String completionMessage;
-            if (teams.size() == 2) {
-                // For 2 teams, use the trigger message as-is for backwards compatibility
-                completionMessage = message;
-            } else {
-                // For 3+ teams, make it clear who won
-                completionMessage = winnerTeam.getDisplayName() + " completed the goal! (" + message + ")";
-            }
-
-            // Send messages to all teams
-            for (LockoutTeam lockoutTeam : teams) {
-                if (!(lockoutTeam instanceof LockoutTeamServer lockoutTeamServer)) continue;
-                if (winningTeams.contains(lockoutTeamServer)) {
-                    lockoutTeamServer.sendMessage(ChatFormatting.GREEN + completionMessage);
-                } else {
-                    lockoutTeamServer.sendMessage(ChatFormatting.RED + completionMessage);
-                }
-            }
-            for (ServerPlayer spectator : Utility.getSpectators(this, LockoutServer.server)) {
-                spectator.sendSystemMessage(Component.literal(completionMessage));
-            }
-
-            sendGoalCompletedPacket(goal, winnerTeam);
+            sendGoalCompletedPacket(goal, winnerTeam, winnerTeam.getDisplayName());
             evaluateWinnerAndEndGame(winnerTeam);
         }
     }
@@ -280,16 +209,16 @@ public class Lockout {
     /**
      * Convenience method for completeMultiOpponentGoal that accepts a PlayerEntity.
      */
-    public void completeMultiOpponentGoal(Goal goal, Player player, String message) {
-        completeMultiOpponentGoal(goal, getPlayerTeam(player.getUUID()), message);
+    public void completeMultiOpponentGoal(Goal goal, Player player) {
+        completeMultiOpponentGoal(goal, getPlayerTeam(player.getUUID()));
     }
 
     /**
      * Convenience method for completeMultiOpponentGoal that accepts a UUID.
      */
-    public void completeMultiOpponentGoal(Goal goal, UUID playerId, String message) {
+    public void completeMultiOpponentGoal(Goal goal, UUID playerId) {
         if (!isLockoutPlayer(playerId)) return;
-        completeMultiOpponentGoal(goal, getPlayerTeam(playerId), message);
+        completeMultiOpponentGoal(goal, getPlayerTeam(playerId));
     }
 
     public void updateGoalCompletion(Goal goal, UUID playerId) {
@@ -306,15 +235,20 @@ public class Lockout {
         goal.setCompleted(false, null);
 
         if (sendPacket) {
-            var payload = new CompleteTaskPayload(goal.getId(), -1);
+            var payload = new CompleteTaskPayload(goal.getId(), -1, null, false);
             for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
                 ServerPlayNetworking.send(serverPlayer, payload);
             }
         }
     }
 
-    private void sendGoalCompletedPacket(Goal goal, LockoutTeam team) {
-        var payload = new CompleteTaskPayload(goal.getId(), teams.indexOf(team));
+    private void sendGoalCompletedPacket(Goal goal, LockoutTeam team, String completedName) {
+        sendGoalCompletedPacket(goal, team, completedName, true);
+    }
+
+
+    private void sendGoalCompletedPacket(Goal goal, LockoutTeam team, String completedName, boolean announce) {
+        var payload = new CompleteTaskPayload(goal.getId(), teams.indexOf(team), completedName, announce);
         for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
             ServerPlayNetworking.send(serverPlayer, payload);
         }
@@ -453,7 +387,14 @@ public class Lockout {
                 isRunning);
     }
 
-    public void updateTooltips(Goal goal) {
+    public void broadcastProgress(Goal goal, String serialized) {
+        var payload = new GoalProgressPayload(goal.getId(), serialized);
+        for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
+            ServerPlayNetworking.send(serverPlayer, payload);
+        }
+    }
+
+/*    public void updateTooltips(Goal goal) {
         if (goal.getTooltipInfo() != null) {
             for (LockoutTeam team : teams) {
                 if (team instanceof LockoutTeamServer teamServer) {
@@ -467,7 +408,7 @@ public class Lockout {
                 ServerPlayNetworking.send(spectator, payload);
             }
         }
-    }
+    }*/
 
 
 
@@ -503,7 +444,7 @@ public class Lockout {
             this.mostLevels = largestLevel;
         }
 
-        updateTooltips(goal);
+        //updateTooltips(goal);
     }
 
     public void recalculateUniqueCraftsGoal(Goal goal) {
@@ -538,7 +479,7 @@ public class Lockout {
             this.mostUniqueCrafts = largestCraftCount;
         }
 
-        updateTooltips(goal);
+        //updateTooltips(goal);
     }
 
     public void recalculatePlayerKillsGoal(Goal goal) {
@@ -573,7 +514,7 @@ public class Lockout {
             this.mostPlayerKills = largestKillCount;
         }
 
-        updateTooltips(goal);
+        //updateTooltips(goal);
     }
 
     public void recalculateAdvancementsGoal(Goal goal) {
@@ -608,7 +549,7 @@ public class Lockout {
             this.mostAdvancements = largestAdvancementCount;
         }
 
-        updateTooltips(goal);
+        //updateTooltips(goal);
     }
 
     public void forfeitTeam(LockoutTeam team) {
@@ -664,7 +605,7 @@ public class Lockout {
                     spectator.sendSystemMessage(Component.literal(completionMessage));
                 }
 
-                sendGoalCompletedPacket(goal, winnerTeam);
+                sendGoalCompletedPacket(goal, winnerTeam, null, false);
                 evaluateWinnerAndEndGame(winnerTeam);
             }
         }
@@ -739,7 +680,7 @@ public class Lockout {
             updateGoalCompletion(goal, largestHopperPlayers.get(0));
         }
 
-        updateTooltips(goal);
+        //updateTooltips(goal);
     }
 
     public void recalculateLeaflitterGoal(Goal goal) {
@@ -773,7 +714,7 @@ public class Lockout {
             updateGoalCompletion(goal, largestLeaflitterPlayers.get(0));
         }
 
-        updateTooltips(goal);
+        //updateTooltips(goal);
     }
 
     public void recalculateDiamondBlocksGoal(Goal goal) {
@@ -807,7 +748,7 @@ public class Lockout {
             updateGoalCompletion(goal, largestDiamondBlockPlayers.get(0));
         }
 
-        updateTooltips(goal);
+        //updateTooltips(goal);
     }
 
 }

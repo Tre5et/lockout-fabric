@@ -17,7 +17,6 @@ import me.marin.lockout.network.HintResultPayload;
 import me.marin.lockout.network.LockoutVersionPayload;
 import me.marin.lockout.network.RequestHintPayload;
 import me.marin.lockout.network.StartLockoutPayload;
-import me.marin.lockout.network.UpdateTooltipPayload;
 import me.marin.lockout.server.handlers.*;
 import net.minecraft.advancements.AdvancementHolder;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -181,25 +180,17 @@ public class LockoutServer {
 
             LockoutTeamServer team = null;
             if (lockout.isLockoutPlayer(player.getUUID())) {
-                team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
-                for (Goal goal : lockout.getBoard().getGoals()) {
-                    if (goal.getTooltipInfo() != null) {
-                        ServerPlayNetworking.send(player, new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getTooltip(team, player))));
-                    }
-                }
                 player.setGameMode(GameType.SURVIVAL);
             } else {
-                for (Goal goal : lockout.getBoard().getGoals()) {
-                    if (goal.getTooltipInfo() != null) {
-                        ServerPlayNetworking.send(player, new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getSpectatorTooltip())));
-                    }
-                }
                 player.setGameMode(GameType.SPECTATOR);
                 player.sendSystemMessage(Component.literal("You are spectating this match.").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             }
 
             ServerPlayNetworking.send(player, lockout.getTeamsGoalsPacket());
             ServerPlayNetworking.send(player, lockout.getUpdateTimerPacket());
+            for(Goal goal : lockout.getBoard().getGoals()) {
+                goal.sendProgress(player);
+            }
             if (lockout.hasStarted()) {
                 ServerPlayNetworking.send(player, StartLockoutPayload.INSTANCE);
             }
@@ -368,7 +359,7 @@ public class LockoutServer {
 
         compassHandler = new CompassItemHandler(allLockoutPlayers, playerManager);
 
-        List<Goal> tooltipGoals = new ArrayList<>(lockout.getBoard().getGoals()).stream().filter(g -> g.getTooltipInfo() != null).toList();
+/*        List<Goal> tooltipGoals = new ArrayList<>(lockout.getBoard().getGoals()).stream().filter(g -> g.getTooltipInfo() != null).toList();
         for (Goal goal : tooltipGoals) {
             // Update teams tooltip
             for (LockoutTeam team : lockout.getTeams()) {
@@ -381,7 +372,7 @@ public class LockoutServer {
                     ServerPlayNetworking.send(playerManager.getPlayer(spectator), payload);
                 }
             }
-        }
+        }*/
 
         for (ServerPlayer player : allServerPlayers) {
             ServerPlayNetworking.send(player, lockout.getTeamsGoalsPacket());

@@ -1,10 +1,7 @@
 package me.marin.lockout;
 
 import lombok.Getter;
-import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.network.HintResultPayload;
-import me.marin.lockout.network.UpdateTooltipPayload;
-import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -49,7 +46,7 @@ public class LockoutTeamServer extends LockoutTeam {
         }
     }
 
-    public void sendTooltipUpdate(Goal goal) {
+/*    public void sendTooltipUpdate(Goal goal) {
         sendTooltipUpdate(goal, true);
     }
     public void sendTooltipUpdate(Goal goal, boolean updateSpectators) {
@@ -65,14 +62,14 @@ public class LockoutTeamServer extends LockoutTeam {
         if (updateSpectators) {
             this.sendTooltipPacketSpectators(goal);
         }
-    }
-    private void sendTooltipPacketSpectators(Goal goal) {
+    }*/
+/*    private void sendTooltipPacketSpectators(Goal goal) {
         if (goal.getTooltipInfo() == null) return;
         var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getSpectatorTooltip()));
         for (ServerPlayer spectator : Utility.getSpectators(LockoutServer.lockout, server)) {
             ServerPlayNetworking.send(spectator, payload);
         }
-    }
+    }*/
 
     public void storeHintResult(String goalId, int hintIndex, String message) {
         resolvedHints.computeIfAbsent(goalId, k -> new HashMap<>()).put(hintIndex, message);

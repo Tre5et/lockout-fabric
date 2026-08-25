@@ -66,7 +66,6 @@ public class AdvancementGoalBuilder extends GoalBuilder<Void> {
                 getId(option),
                 getNameExtractor(option),
                 getTextureExtractor(option),
-                getTooltipInfo(option).orElse(null),
                 getHints(option),
                 new Pair<>(id, null),
                 a -> advancements.contains(a.id())
@@ -90,5 +89,13 @@ public class AdvancementGoalBuilder extends GoalBuilder<Void> {
                 category,
                 advancements
         );
+    }
+
+    public static AdvancementCountingGoalBuilder counting(String id, GoalCategory category, int target) {
+        return new AdvancementCountingGoalBuilder(id, category, target);
+    }
+
+    public static AdvancementCountingGoalBuilder counting(GoalCategory category, int target) {
+        return counting("ADVANCEMENT_" + target + "_UNIQUE", category, target);
     }
 }

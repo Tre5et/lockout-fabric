@@ -52,7 +52,6 @@ public class RideEntityGoalBuilder extends GoalBuilder<Void> {
                 id,
                 getNameExtractor(option),
                 getTextureExtractor(option),
-                getTooltipInfo(option).orElse(null),
                 getHints(null),
                 new Pair<>(getStaticId(), null),
                 entityTypes::contains

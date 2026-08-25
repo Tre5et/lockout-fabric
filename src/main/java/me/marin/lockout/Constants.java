@@ -11,7 +11,6 @@ public class Constants {
 
     public static final Identifier LOCKOUT_GOALS_TEAMS_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "lockout_goals_teams");
     public static final Identifier START_LOCKOUT_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "start_lockout");
-    public static final Identifier UPDATE_TOOLTIP = Identifier.fromNamespaceAndPath(NAMESPACE, "update_tooltip");
     public static final Identifier COMPLETE_TASK_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "complete_task");
     public static final Identifier END_LOCKOUT_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "end_lockout");
     public static final Identifier UPDATE_TIMER_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "update_timer");
@@ -22,6 +21,8 @@ public class Constants {
 
     public static final Identifier REQUEST_HINT_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "request_hint");
     public static final Identifier HINT_RESULT_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "hint_result");
+
+    public static final Identifier GOAL_PROGRESS_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "goal_progress");
 
     public static final Identifier BOARD_SCREEN_ID = Identifier.fromNamespaceAndPath(NAMESPACE, "board");
 
