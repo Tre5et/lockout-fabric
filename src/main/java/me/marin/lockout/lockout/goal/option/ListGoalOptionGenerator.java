@@ -78,7 +78,7 @@ public class ListGoalOptionGenerator<T> implements GoalOptionGenerator<T> {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public AbstractWidget getWidget(int x, int y, int width, int height, Font font, Consumer<T> update) {
+    public AbstractWidget getWidget(int x, int y, int width, int height, Font font, Consumer<T> update, T current) {
         return new Widget(x, y, width, height, Component.literal(title), update);
     }
 

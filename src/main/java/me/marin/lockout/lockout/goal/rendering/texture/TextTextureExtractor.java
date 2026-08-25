@@ -14,7 +14,7 @@ public class TextTextureExtractor implements TextureExtractor {
 
     @Override
     public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, int tick) {
-        float scale = (float)width / font.width(text.getVisualOrderText());
+        float scale = Math.min((float)width / font.width(text.getVisualOrderText()), (float)height / font.lineHeight);
 
         withScale(extractor, x+width/2, y+height/2, scale, () -> extractor.centeredText(font, text, x+width/2, y+height/2-font.lineHeight/2, 0xFF000000));
     }

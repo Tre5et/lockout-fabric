@@ -147,13 +147,17 @@ public class BoardBuilderScreen extends Screen {
                 int height = Math.min(generator.getPreferredRenderHeight(), this.height - 66);
                 int x = this.width - width;
                 int y = centerY - 30 - (height / 2);
-                this.addRenderableWidget(generator.getWidget(x, y, width, height, textRenderer, (o) -> {
-                    try {
-                        BoardBuilderData.INSTANCE.setGoal(builder.buildGeneric(o));
-                    } catch (IllegalGoalConstructionException e) {
-                        Lockout.log("Failed to update goal " + builder + " with option " + o + ": " + e.getMessage());
-                    }
-                }));
+                try {
+                    this.addRenderableWidget(generator.getWidgetUnsafe(x, y, width, height, textRenderer, (o) -> {
+                        try {
+                            BoardBuilderData.INSTANCE.setGoal(builder.buildGeneric(o));
+                        } catch (IllegalGoalConstructionException e) {
+                            Lockout.log("Failed to update goal " + builder + " with option " + o + ": " + e.getMessage());
+                        }
+                    }, goal.getBuildData().getB()));
+                } catch (IllegalGoalConstructionException e) {
+                    Lockout.log("Failed to render goal option selector for goal " + builder.getStaticId() + " with option" + goal.getBuildData().getB() + ": " + e.getMessage());
+                }
 
                 closeEditDataButton = Button.builder(Component.literal("Close"), (b) -> {
                     closeEditData();

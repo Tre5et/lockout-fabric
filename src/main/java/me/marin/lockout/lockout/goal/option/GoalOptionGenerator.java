@@ -26,7 +26,12 @@ public interface GoalOptionGenerator<T> {
     int getPreferredRenderWidth();
     int getPreferredRenderHeight();
     @Environment(EnvType.CLIENT)
-    AbstractWidget getWidget(int x, int y, int width, int height, Font font, Consumer<T> update);
+    AbstractWidget getWidget(int x, int y, int width, int height, Font font, Consumer<T> update, T current);
+
+
+    default AbstractWidget getWidgetUnsafe(int x, int y, int width, int height, Font font, Consumer<T> update, String current) throws IllegalGoalConstructionException {
+        return getWidget(x, y, width, height, font, update, deserialize(current));
+    }
 
     static <T> ListGoalOptionGenerator<T> list(List<T> entries, TypeToken<T> typeToken) {
         return new ListGoalOptionGenerator<>("Select a color:", entries, typeToken);

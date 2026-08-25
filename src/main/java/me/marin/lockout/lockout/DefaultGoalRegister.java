@@ -48,8 +48,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(AdvancementGoalBuilder.any("ANY_SPYGLASS", GoalCategory.ADVANCEMENTS, Identifier.withDefaultNamespace("adventure/spyglass_at_parrot"), Identifier.withDefaultNamespace("adventure/spyglass_at_ghast"), Identifier.withDefaultNamespace("adventure/spyglass_at_dragon"))
                 .customNameExtractor(NameExtractor.simple("Obtain any Spyglass Advancement"))
         );
-        INSTANCE.register(AdvancementGoalBuilder.counting(GoalCategory.ADVANCEMENTS, 20));
-        INSTANCE.register(AdvancementGoalBuilder.counting(GoalCategory.ADVANCEMENTS, 10));
+        INSTANCE.register(AdvancementGoalBuilder.counting("UNIQUE_ADVANCEMENTS", GoalCategory.ADVANCEMENTS, 3, 30));
 
         /*
         INSTANCE.register(GoalType.OBTAIN_WOODEN_TOOLS, ObtainWoodenToolsGoal.class);
