@@ -10,7 +10,6 @@ import me.marin.lockout.lockout.goal.rendering.texture.*;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
-import oshi.util.tuples.Pair;
 
 import java.util.Arrays;
 import java.util.List;
@@ -63,11 +62,7 @@ public class AdvancementGoalBuilder extends GoalBuilder<Void> {
     @Override
     public Goal<?> build(Void option) {
         return new AdvancementGoal(
-                getId(option),
-                getNameExtractor(option),
-                getTextureExtractor(option),
-                getHints(option),
-                new Pair<>(id, null),
+                getBuildParameters(option),
                 a -> advancements.contains(a.id())
         );
     }

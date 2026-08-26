@@ -2,17 +2,14 @@ package me.marin.lockout.lockout.goal;
 
 import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutTeam;
-import me.marin.lockout.lockout.goal.hint.GoalHint;
+import me.marin.lockout.lockout.goal.builder.GoalBuildParameters;
 import me.marin.lockout.lockout.goal.progress.GoalProgressTracker;
-import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
-import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.network.GoalProgressPayload;
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import oshi.util.tuples.Pair;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +19,8 @@ public abstract class ProgressingGoal<D,T,R,P extends GoalProgressTracker<T,R>> 
     private final P progressTracker;
     private final Predicate<R> satisfiedPredicate;
 
-    public ProgressingGoal(String id, NameExtractor nameExtractor, TextureExtractor textureExtractor, List<GoalHint> hints, Pair<String, String> buildData, P progressTracker, Predicate<R> satisfiedPredicate) {
-        super(id, nameExtractor, textureExtractor, hints, buildData);
+    public ProgressingGoal(GoalBuildParameters parameters, P progressTracker, Predicate<R> satisfiedPredicate) {
+        super(parameters);
         this.progressTracker = progressTracker;
         this.satisfiedPredicate = satisfiedPredicate;
     }

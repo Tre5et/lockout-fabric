@@ -10,7 +10,6 @@ import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
-import oshi.util.tuples.Pair;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,11 +48,7 @@ public class RideEntityGoalBuilder extends GoalBuilder<Void> {
     @Override
     public Goal<?> build(Void option) {
         return new RideEntityGoal(
-                id,
-                getNameExtractor(option),
-                getTextureExtractor(option),
-                getHints(null),
-                new Pair<>(getStaticId(), null),
+                getBuildParameters(option),
                 entityTypes::contains
         );
     }

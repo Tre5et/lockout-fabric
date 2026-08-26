@@ -14,6 +14,7 @@ import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
+import oshi.util.tuples.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,6 +104,16 @@ public abstract class GoalBuilder<T> {
         return id;
     }
 
+    public GoalBuildParameters getBuildParameters(T option) {
+        return new GoalBuildParameters(
+                getId(option),
+                getNameExtractor(option),
+                getTextureExtractor(option),
+                getHints(option),
+                getBuildData(option)
+        );
+    }
+
     public String getId(T option) {
         if(customIdProvider != null) return customIdProvider.get(option);
         return defaultId(option);
@@ -124,6 +135,13 @@ public abstract class GoalBuilder<T> {
             hints.addAll(requirement.getHints(option));
         }
         return hints;
+    }
+
+    public Pair<String, String> getBuildData(T option) {
+        if(option == null || optionGenerator() == null) {
+            return new Pair<>(getStaticId(), null);
+        }
+        return new Pair<>(getStaticId(), optionGenerator().serialize(option));
     }
 
     public GoalBuilder<T> require(GoalRequirement<? super T> requirements) {

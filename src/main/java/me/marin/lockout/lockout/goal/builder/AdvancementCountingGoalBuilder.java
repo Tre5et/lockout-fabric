@@ -11,7 +11,6 @@ import me.marin.lockout.lockout.goal.rendering.texture.StackingTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.resources.Identifier;
-import oshi.util.tuples.Pair;
 
 import java.util.List;
 
@@ -46,11 +45,7 @@ public class AdvancementCountingGoalBuilder extends GoalBuilder<Integer> {
     @Override
     public Goal<?> build(Integer option) {
         return new AdvancementCountingGoal(
-                getId(option),
-                getNameExtractor(option),
-                getTextureExtractor(option),
-                getHints(option),
-                new Pair<>(id, optionGenerator().serialize(option)),
+                getBuildParameters(option),
                 "Advancements Obtained",
                 option,
                 (_) -> 1

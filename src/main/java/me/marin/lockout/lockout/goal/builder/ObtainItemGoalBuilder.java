@@ -6,7 +6,6 @@ import me.marin.lockout.lockout.goal.config.GoalCategory;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
-import oshi.util.tuples.Pair;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -21,11 +20,7 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<T> {
     @Override
     public Goal<?> build(T option) {
         return new ObtainItemGoal(
-                getId(option),
-                getNameExtractor(option),
-                getTextureExtractor(option),
-                getHints(null),
-                new Pair<>(getStaticId(), serializeOption(option)),
+                getBuildParameters(option),
                 i -> satisfiedBy(i, option)
         );
     }
