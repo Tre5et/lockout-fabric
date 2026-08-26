@@ -7,6 +7,7 @@ import me.marin.lockout.lockout.goal.Goal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static me.marin.lockout.Constants.MAX_BOARD_SIZE;
@@ -20,7 +21,7 @@ public class BoardBuilderData {
 
     public static final BoardBuilderData INSTANCE = new BoardBuilderData();
 
-    private final List<Goal> goals;
+    private final List<Goal<?>> goals;
 
     @Getter @Setter
     private String title = "";
@@ -47,7 +48,7 @@ public class BoardBuilderData {
         modifyingIdx = null;
     }
 
-    public Goal getModifyingGoal() {
+    public Goal<?> getModifyingGoal() {
         return goals.get(modifyingIdx);
     }
 
@@ -113,21 +114,25 @@ public class BoardBuilderData {
     /**
      * @return unmodifiable view of goals list
      */
-    public List<Goal> getGoals() {
+    public List<Goal<?>> getGoals() {
         return Collections.unmodifiableList(goals);
     }
 
-    public void setGoal(Goal goal) {
+    public void setGoal(Goal<?> goal) {
         goals.set(modifyingIdx, goal);
     }
 
-    public void setBoard(String title, int size, List<Goal> goals) {
+    public void setBoard(String title, int size, List<Goal<?>> goals) {
         this.title = title;
         this.size = size;
         this.modifyingIdx = null;
 
         this.goals.clear();
         this.goals.addAll(goals);
+    }
+
+    public boolean isValid() {
+        return goals.size() == size*size && new HashSet<>(goals).size() == size*size;
     }
 
 }

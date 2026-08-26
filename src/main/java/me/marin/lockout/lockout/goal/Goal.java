@@ -160,18 +160,22 @@ public abstract class Goal<T> {
         try {
             goal = builder.buildFromSerializedData(option);
         } catch (IllegalGoalConstructionException e) {
-            throw new IOException("Failed to construct goal.");
+            throw new IOException("Failed to construct goal.", e);
         }
 
         JsonElement completed = goalData.get("completed");
-        if(completed == null || !completed.isJsonPrimitive() || !completed.getAsJsonPrimitive().isBoolean()) throw new IOException("Goal data does not contain valid completed state.");
-        LockoutTeam team = null;
-        JsonElement teamData = goalData.get("completedTeam");
-        if(teamData != null) {
-            if(!teamData.isJsonPrimitive() || !teamData.getAsJsonPrimitive().isNumber()) throw new IOException("Goal data does completedTeam is invalid.");
-            team = teams.get(teamData.getAsInt());
+        if(completed != null) {
+            if (!completed.isJsonPrimitive() || !completed.getAsJsonPrimitive().isBoolean())
+                throw new IOException("Goal data does not contain valid completed state.");
+            LockoutTeam team = null;
+            JsonElement teamData = goalData.get("completedTeam");
+            if (teamData != null) {
+                if (!teamData.isJsonPrimitive() || !teamData.getAsJsonPrimitive().isNumber())
+                    throw new IOException("Goal data does completedTeam is invalid.");
+                team = teams.get(teamData.getAsInt());
+            }
+            goal.setCompleted(completed.getAsBoolean(), team);
         }
-        goal.setCompleted(completed.getAsBoolean(), team);
 
         JsonElement progress = goalData.get("progress");
         if(progress != null) {

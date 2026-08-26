@@ -1,14 +1,14 @@
 package me.marin.lockout.client.gui;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import me.marin.lockout.json.JSONBoard;
+import com.google.gson.*;
+import me.marin.lockout.lockout.goal.Goal;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BoardBuilderIO {
@@ -28,11 +28,15 @@ public class BoardBuilderIO {
         }
     }
 
-    public void saveBoard(String name, JSONBoard goals) throws IOException {
+    public void saveBoard(String name, List<Goal<?>> goals) throws IOException {
         Path boardPath = DIRECTORY.resolve(name + FILE_EXTENSION);
         Files.createFile(boardPath);
+        JsonArray data = new JsonArray();
+        for(Goal<?> goal : goals) {
+            data.add(goal.serialize(List.of(), false));
+        }
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        String jsonString = gson.toJson(goals);
+        String jsonString = gson.toJson(data);
         Files.writeString(boardPath, jsonString);
     }
 
@@ -44,9 +48,14 @@ public class BoardBuilderIO {
         return DIRECTORY.resolve(name + FILE_EXTENSION);
     }
 
-    public JSONBoard readBoard(String name) throws IOException {
-        Gson gson = new Gson();
-        return gson.fromJson(Files.readString(getBoardPath(name)), JSONBoard.class);
+    public List<Goal<?>> readBoard(String name) throws IOException {
+        JsonElement read = JsonParser.parseString(Files.readString(getBoardPath(name)));
+        if(!read.isJsonArray()) throw new IOException("Saved board is not an array.");
+        List<Goal<?>> goals = new ArrayList<>();
+        for(JsonElement element : read.getAsJsonArray()) {
+            goals.add(Goal.deserialize(element, List.of()));
+        }
+        return goals;
     }
 
     /**

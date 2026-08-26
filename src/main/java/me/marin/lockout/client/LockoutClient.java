@@ -3,7 +3,6 @@ package me.marin.lockout.client;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.*;
 import me.marin.lockout.client.gui.*;
-import me.marin.lockout.json.JSONBoard;
 import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
@@ -244,32 +243,19 @@ public class LockoutClient implements ClientModInitializer {
                 var boardNameNode = ClientCommands.argument("board name", CustomBoardFileArgumentType.newInstance()).executes((context) -> {
                     String boardName = context.getArgument("board name", String.class);
 
-                    JSONBoard jsonBoard;
+                    List<Goal<?>> goals;
                     try {
-                        jsonBoard = BoardBuilderIO.INSTANCE.readBoard(boardName);
+                        goals = BoardBuilderIO.INSTANCE.readBoard(boardName);
                     } catch (IOException e) {
                         context.getSource().sendError(Component.literal("Error while trying to read board."));
+                        Lockout.error(e);
                         return 0;
                     }
 
-                    int size = (int) Math.sqrt(jsonBoard.goals.size());
-                    if (size * size != jsonBoard.goals.size() || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE) {
+                    int size = (int) Math.sqrt(goals.size());
+                    if (size * size != goals.size() || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE) {
                         context.getSource().sendError(Component.literal("Board doesn't have a valid number of goals!"));
                         return 0;
-                    }
-
-                    List<Goal> goals = new ArrayList<>();
-                    for(JSONBoard.JSONGoal goal : jsonBoard.goals) {
-                        if(!GoalRegistry.INSTANCE.isRegistered(goal.id)) {
-                            context.getSource().sendError(Component.literal("Goal id " + goal.id + " is not registered."));
-                            return 0;
-                        }
-                        try {
-                            goals.add(GoalRegistry.INSTANCE.get(goal.id).buildFromSerializedData(goal.data));
-                        } catch (IllegalGoalConstructionException e) {
-                            context.getSource().sendError(Component.literal("Failed to construct goal " + goal.id + ": " + e.getMessage()));
-                            return 0;
-                        }
                     }
 
 /*
@@ -302,22 +288,23 @@ public class LockoutClient implements ClientModInitializer {
                 var boardNameNode = ClientCommands.argument("board name", CustomBoardFileArgumentType.newInstance()).executes((context) -> {
                     String boardName = context.getArgument("board name", String.class);
 
-                    JSONBoard jsonBoard;
+                    List<Goal<?>> goals;
                     try {
-                        jsonBoard = BoardBuilderIO.INSTANCE.readBoard(boardName);
+                        goals = BoardBuilderIO.INSTANCE.readBoard(boardName);
                     } catch (IOException e) {
                         context.getSource().sendError(Component.literal("Error while trying to read board."));
+                        Lockout.error(e);
                         return 0;
                     }
 
-                    int size = (int) Math.sqrt(jsonBoard.goals.size());
-                    if (size * size != jsonBoard.goals.size() || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE) {
+                    int size = (int) Math.sqrt(goals.size());
+                    if (size * size != goals.size() || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE) {
                         context.getSource().sendError(Component.literal("Board doesn't have a valid number of goals!"));
                         return 0;
                     }
 
-                    ClientPlayNetworking.send(new CustomBoardPayload(Optional.of(jsonBoard.goals.stream()
-                            .map(goal -> new Pair<>(goal.id, goal.data)).toList())));
+                    ClientPlayNetworking.send(new CustomBoardPayload(Optional.of(goals.stream()
+                            .map(Goal::getBuildData).toList())));
                     return 1;
                 }).build();
 

@@ -1,9 +1,10 @@
 package me.marin.lockout.client.gui;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import me.marin.lockout.Lockout;
 import me.marin.lockout.Utility;
 import me.marin.lockout.client.LockoutClient;
-import me.marin.lockout.json.JSONBoard;
 import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
@@ -27,12 +28,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
-import oshi.util.tuples.Pair;
 
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -269,25 +268,8 @@ public class BoardBuilderScreen extends Screen {
     }
 
     private void saveGoals(int errorX, int errorY) {
-        List<Goal> goals = BoardBuilderData.INSTANCE.getGoals();
-        JSONBoard jsonBoard = new JSONBoard();
-        List<JSONBoard.JSONGoal> goalList = new ArrayList<>();
-        for (Goal goal : goals) {
-            if (goal == null) {
-                showError("The board is not full.", errorX, errorY);
-                return;
-            }
-
-            JSONBoard.JSONGoal jsonGoal = new JSONBoard.JSONGoal();
-            Pair<String, String> data = goal.getBuildData();
-            jsonGoal.id = data.getA();
-            jsonGoal.data = data.getB();
-            goalList.add(jsonGoal);
-        }
-        jsonBoard.goals = goalList;
-
-        if (new HashSet<>(goals).size() < goals.size()) {
-            showError("Some goals are duplicated, fix and try again.", errorX, errorY);
+        if(!BoardBuilderData.INSTANCE.isValid()) {
+            showError("Invalid board, fix and try again.", errorX, errorY);
             return;
         }
 
@@ -295,14 +277,18 @@ public class BoardBuilderScreen extends Screen {
         if (boardName.isBlank()) {
             boardName = "Custom Board";
         }
-
         try {
             boardName = BoardBuilderIO.INSTANCE.getSuitableName(boardName);
-            BoardBuilderIO.INSTANCE.saveBoard(boardName, jsonBoard);
         } catch (IOException e) {
-            showError("Error while saving board. Check logs.", errorX, errorY);
+            showError("Failed to generate valid board name.", errorX, errorY);
             Lockout.error(e);
-            return;
+        }
+
+        try {
+            BoardBuilderIO.INSTANCE.saveBoard(boardName, BoardBuilderData.INSTANCE.getGoals());
+        } catch (IOException e) {
+            showError("Failed to save board.", errorX, errorY);
+            Lockout.error(e);
         }
 
         String finalBoardName = boardName;
