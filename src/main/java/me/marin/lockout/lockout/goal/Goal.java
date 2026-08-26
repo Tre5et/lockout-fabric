@@ -1,10 +1,16 @@
 package me.marin.lockout.lockout.goal;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import lombok.Getter;
 import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.client.LockoutClient;
+import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.builder.GoalBuildParameters;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
+import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.hint.GoalHint;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
@@ -18,6 +24,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import oshi.util.tuples.Pair;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -69,6 +76,10 @@ public abstract class Goal<T> {
         return List.of();
     }
 
+    public String getProgress() {
+        return null;
+    }
+
     public void setProgress(String progress) {}
 
     public void sendProgress(ServerPlayer player) {}
@@ -97,6 +108,26 @@ public abstract class Goal<T> {
 
     }
 
+    public JsonElement serialize(List<? extends LockoutTeam> teams, boolean includeState) {
+        JsonObject object = new JsonObject();
+        object.add("id", new JsonPrimitive(getBuildData().getA()));
+        if(getBuildData().getB() != null) {
+            object.add("option", new JsonPrimitive(getBuildData().getB()));
+        }
+        if(includeState) {
+            object.add("completed", new JsonPrimitive(isCompleted()));
+            if (getCompletedTeam() != null) {
+                int completedTeamIndex = teams.indexOf(getCompletedTeam());
+                object.add("completedTeam", new JsonPrimitive(completedTeamIndex));
+            }
+            String progress = getProgress();
+            if (progress != null) {
+                object.add("progress", new JsonPrimitive(progress));
+            }
+        }
+        return object;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -108,5 +139,46 @@ public abstract class Goal<T> {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public static Goal<?> deserialize(JsonElement data, List<? extends LockoutTeam> teams) throws IOException {
+        if(!data.isJsonObject()) throw new IOException("Goal data is not valid.");
+        JsonObject goalData = data.getAsJsonObject();
+
+        JsonElement id = goalData.get("id");
+        if(id == null || !id.isJsonPrimitive() || !id.getAsJsonPrimitive().isString()) throw new IOException("Goal data does not contain valid id.");
+        GoalBuilder<?> builder = GoalRegistry.INSTANCE.get(id.getAsString());
+        if(builder == null) throw new IOException("Goal referenced by id could not be found.");
+
+        String option = null;
+        JsonElement optionData = goalData.get("option");
+        if(optionData != null)  {
+            if(!optionData.isJsonPrimitive() || !optionData.getAsJsonPrimitive().isString()) throw new IOException("Goal data option is invalid.");
+            option = optionData.getAsString();
+        }
+        Goal<?> goal;
+        try {
+            goal = builder.buildFromSerializedData(option);
+        } catch (IllegalGoalConstructionException e) {
+            throw new IOException("Failed to construct goal.");
+        }
+
+        JsonElement completed = goalData.get("completed");
+        if(completed == null || !completed.isJsonPrimitive() || !completed.getAsJsonPrimitive().isBoolean()) throw new IOException("Goal data does not contain valid completed state.");
+        LockoutTeam team = null;
+        JsonElement teamData = goalData.get("completedTeam");
+        if(teamData != null) {
+            if(!teamData.isJsonPrimitive() || !teamData.getAsJsonPrimitive().isNumber()) throw new IOException("Goal data does completedTeam is invalid.");
+            team = teams.get(teamData.getAsInt());
+        }
+        goal.setCompleted(completed.getAsBoolean(), team);
+
+        JsonElement progress = goalData.get("progress");
+        if(progress != null) {
+            if(!progress.isJsonPrimitive() || !progress.getAsJsonPrimitive().isString()) throw new IOException("Goal data progress is invalid.");
+            goal.setProgress(progress.getAsString());
+        }
+
+        return goal;
     }
 }

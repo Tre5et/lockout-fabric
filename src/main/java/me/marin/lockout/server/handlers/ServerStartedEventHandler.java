@@ -8,6 +8,10 @@ import me.marin.lockout.lockout.goal.requirements.GoalRequirementContextInitiali
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.storage.LevelResource;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 import static me.marin.lockout.server.LockoutServer.*;
 
@@ -53,6 +57,14 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
             var freezeCommand = "tick freeze";
             var parseResults = server.getCommands().getDispatcher().parse(freezeCommand, server.createCommandSourceStack());
             server.getCommands().performCommand(parseResults, freezeCommand);
+
+            try {
+                Lockout lockout = Lockout.load(Path.of(server.getWorldPath(LevelResource.DATA).toAbsolutePath().toString(), "lockout", "game.json"));
+                if(lockout != null) LockoutServer.lockout = lockout;
+                Lockout.log("Loaded lockout game state.");
+            } catch (IOException e) {
+                Lockout.log("Failed to load lockout game state: " + e.getMessage());
+            }
         });
     }
 }

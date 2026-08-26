@@ -1,5 +1,6 @@
 package me.marin.lockout;
 
+import com.google.gson.*;
 import lombok.Getter;
 import lombok.Setter;
 import me.marin.lockout.client.LockoutBoard;
@@ -22,6 +23,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import oshi.util.tuples.Pair;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public class Lockout {
@@ -345,4 +349,51 @@ public class Lockout {
         return (int) teams.stream().filter(t -> !t.isForfeited()).count();
     }
 
+    public void save(Path path) throws IOException {
+        if(!hasStarted) {
+            Files.delete(path);
+        } else {
+            if(!Files.exists(path)) {
+                Files.createDirectories(path.getParent());
+                Files.createFile(path);
+            }
+
+            JsonObject data = new JsonObject();
+            JsonArray teamData = new JsonArray();
+            teams.forEach(t -> teamData.add(t.serialize()));
+            data.add("teams", teamData);
+            data.add("board", board.serialize(this.teams));
+            data.add("ticks", new JsonPrimitive(ticks));
+
+            String output = new GsonBuilder().setPrettyPrinting().create().toJson(data);
+            Files.writeString(path, output);
+        }
+    }
+
+    public static Lockout load(Path path) throws IOException {
+        if(!Files.exists(path)) return null;
+        String content = Files.readString(path);
+        JsonElement data = JsonParser.parseString(content);
+        if(!data.isJsonObject()) throw new IOException("Invalid lockout save content.");
+        JsonObject object = data.getAsJsonObject();
+
+        JsonElement teamData = object.get("teams");
+        if(teamData == null || !teamData.isJsonArray()) throw new IOException("Lockout save does not contain valid teams.");
+        List<LockoutTeam> teams = new ArrayList<>();
+        for(JsonElement element : teamData.getAsJsonArray()) {
+            teams.add(LockoutTeam.deserialize(element));
+        }
+
+        JsonElement boardData = object.get("board");
+        if(boardData == null) throw new IOException("Lockout save does not contain a board.");
+        LockoutBoard board = LockoutBoard.deserialize(boardData, teams);
+
+        JsonElement ticks = object.get("ticks");
+        if(ticks == null || !ticks.isJsonPrimitive() || !ticks.getAsJsonPrimitive().isNumber()) throw new IOException("Lockout save does not contain valid ticks.");
+
+        Lockout lockout = new Lockout(board, teams);
+        lockout.setStarted(true);
+        lockout.setTicks(ticks.getAsLong());
+        return lockout;
+    }
 }

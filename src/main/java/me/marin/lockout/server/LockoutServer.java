@@ -45,10 +45,14 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.TeamColor;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 import static me.marin.lockout.Constants.PLACEHOLDER_PERM_STRING;
@@ -157,6 +161,21 @@ public class LockoutServer {
 
         ServerLifecycleEvents.SERVER_STOPPING.register((server) -> {
             isInitialized = false;
+        });
+
+        ServerLifecycleEvents.AFTER_SAVE.register((server, _, _) -> {
+            Path worldPath = server.getWorldPath(LevelResource.DATA);
+            Path filePath = Path.of(worldPath.toAbsolutePath().toString(), "lockout", "game.json");
+            try {
+                if(lockout == null) {
+                    Files.delete(filePath);
+                } else {
+                    lockout.save(filePath);
+                }
+                Lockout.log("Saved lockout state.");
+            } catch (IOException e) {
+                Lockout.log("Failed to save current lockout state: " + e.getMessage());
+            }
         });
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, minecraftServer) -> {

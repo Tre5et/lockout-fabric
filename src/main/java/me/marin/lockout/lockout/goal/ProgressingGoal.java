@@ -45,6 +45,11 @@ public abstract class ProgressingGoal<D,T,R,P extends GoalProgressTracker<T,R>> 
     }
 
     @Override
+    public String getProgress() {
+        return progressTracker.serialize();
+    }
+
+    @Override
     public void setProgress(String progress) {
         progressTracker.set(progress);
     }
