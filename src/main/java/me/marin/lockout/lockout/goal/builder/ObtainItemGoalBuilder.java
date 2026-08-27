@@ -1,7 +1,7 @@
 package me.marin.lockout.lockout.goal.builder;
 
 import me.marin.lockout.lockout.goal.Goal;
-import me.marin.lockout.lockout.goal.ObtainItemGoal;
+import me.marin.lockout.lockout.goal.SatisfiableGoal;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,7 +19,7 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<T> {
 
     @Override
     public Goal<?> build(T option) {
-        return new ObtainItemGoal(
+        return new SatisfiableGoal<Inventory>(
                 getBuildParameters(option),
                 i -> satisfiedBy(i, option)
         );

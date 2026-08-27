@@ -2,14 +2,10 @@ package me.marin.lockout.server.handlers;
 
 import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutRunnable;
-import me.marin.lockout.lockout.goal.Goal;
-import me.marin.lockout.lockout.goal.ObtainItemGoal;
-import me.marin.lockout.lockout.goal.RideEntityGoal;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityType;
 
 import java.util.HashSet;
 
@@ -31,8 +27,15 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
             }
         }
 
-        for (Goal goal : lockout.getBoard().getGoals()) {
-            if (goal == null) continue;
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            lockout.getBoard().update(player.getInventory(), player);
+            if (player.isPassenger()) {
+                lockout.getBoard().update(player.getVehicle().getType(), player);
+            }
+        }
+
+/*        for (Goal goal : lockout.getBoard().getGoals()) {
+            if (goal == null) continue;*/
 
             /*if (goal instanceof HaveMostXPLevelsGoal) {
                 for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -71,16 +74,18 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
                 lockout.recalculateDiamondBlocksGoal(goal);
             }*/
 
-            if (goal.isCompleted()) continue;
+/*            if (goal.isCompleted()) continue;
 
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                goal.updateIfValid(player.getInventory(), player);
+
                 if (goal instanceof ObtainItemGoal obtainItemsGoal) {
                     obtainItemsGoal.updateWith(player.getInventory(), player);
                 }
 
                 if (goal instanceof RideEntityGoal rideEntityGoal && player.isPassenger()) {
                     EntityType<?> vehicle = player.getVehicle().getType();
-                    rideEntityGoal.updateWith(vehicle, player);
+                    rideEntityGoal.updateWith(vehicle, player);*/
 /*                    if (Objects.equals(vehicle, rideEntityGoal.getEntityType()) || (rideEntityGoal.getEntityType() == EntityTypes.NAUTILUS && vehicle == EntityTypes.ZOMBIE_NAUTILUS)) {
                         boolean allow = true;
                         if (Objects.equals(vehicle, EntityTypes.PIG)) {
@@ -95,7 +100,7 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
                             lockout.completeGoal(goal, player);
                         }
                     }*/
-                }
+        //}
 /*                if (goal instanceof EmptyHungerBarGoal) {
                     if (player.getFoodData().getFoodLevel() == 0) {
                         lockout.completeGoal(goal, player);
@@ -121,8 +126,8 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
                         lockout.completeMultiOpponentGoal(goal, player, player.getName().getString() + " touched water.");
                     }
                 }*/
-            }
-        }
+        //}
+        //}
 
         lockout.tick();
         if (lockout.getTicks() % 20 == 0) {

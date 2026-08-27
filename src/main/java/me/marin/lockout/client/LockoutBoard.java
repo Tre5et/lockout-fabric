@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.lockout.goal.Goal;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,6 +34,18 @@ public class LockoutBoard {
 
     public List<Goal<?>> getGoals() {
         return Collections.unmodifiableList(goals);
+    }
+
+    public void update(Object data, ServerPlayer player, boolean skipCompleted) {
+        for(Goal<?> goal : goals) {
+            if(goal == null) continue;
+            if(goal.isCompleted() && skipCompleted) continue;
+            goal.updateIfValid(data, player);
+        }
+    }
+
+    public void update(Object data, ServerPlayer player) {
+        update(data, player, true);
     }
 
     public JsonElement serialize(List<? extends LockoutTeam> teams) {

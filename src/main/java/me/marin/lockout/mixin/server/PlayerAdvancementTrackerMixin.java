@@ -2,8 +2,6 @@ package me.marin.lockout.mixin.server;
 
 import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutTeamServer;
-import me.marin.lockout.lockout.goal.AdvancementCountingGoal;
-import me.marin.lockout.lockout.goal.AdvancementGoal;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.server.LockoutServer;
 import net.minecraft.advancements.AdvancementHolder;
@@ -52,40 +50,7 @@ public abstract class PlayerAdvancementTrackerMixin {
             lockout.playerAdvancements.merge(player.getUUID(), 1, Integer::sum);
         }
 
-        for (Goal goal : lockout.getBoard().getGoals()) {
-            if (goal == null) continue;
-
-            // Track player advancements for HaveMostAdvancementsGoal regardless of goal completion
-            /*if (goal instanceof HaveMostAdvancementsGoal) {
-                if (advancementDisplay.isPresent() && advancementDisplay.get().shouldAnnounceChat()) {
-                    lockout.recalculateAdvancementsGoal(goal);
-                }
-            }*/
-
-            if (goal.isCompleted()) continue;
-
-            if (goal instanceof AdvancementGoal advancementGoal) {
-                advancementGoal.updateWith(advancement, player);
-            }
-            if(goal instanceof AdvancementCountingGoal advancementCountingGoal) {
-                advancementCountingGoal.updateWith(advancement, player);
-            }
-            /*
-            if (goal instanceof GetUniqueAdvancementsGoal getUniqueAdvancementsGoal) {
-                if (advancementDisplay.isPresent()) {
-                    getUniqueAdvancementsGoal.getTrackerMap().putIfAbsent(team, new LinkedHashSet<>());
-                    getUniqueAdvancementsGoal.getTrackerMap().get(team).add(advancement.id());
-
-                    int size = getUniqueAdvancementsGoal.getTrackerMap().get(team).size();
-
-                    team.sendTooltipUpdate(getUniqueAdvancementsGoal);
-                    if (size >= getUniqueAdvancementsGoal.getAmount()) {
-                        lockout.completeGoal(goal, team);
-                    }
-                }
-            }
-            */
-        }
+        lockout.getBoard().update(advancement, player);
     }
 
     private static final Identifier ADVENTURING_TIME = Identifier.fromNamespaceAndPath("minecraft", "adventure/adventuring_time");

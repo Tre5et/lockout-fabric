@@ -1,6 +1,6 @@
 package me.marin.lockout.lockout.goal.builder;
 
-import me.marin.lockout.lockout.goal.AdvancementCountingGoal;
+import me.marin.lockout.lockout.goal.CountingProgressGoal;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
@@ -10,6 +10,7 @@ import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.StackingTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.Identifier;
 
 import java.util.List;
@@ -44,11 +45,11 @@ public class AdvancementCountingGoalBuilder extends GoalBuilder<Integer> {
 
     @Override
     public Goal<?> build(Integer option) {
-        return new AdvancementCountingGoal(
+        return new CountingProgressGoal<AdvancementHolder>(
                 getBuildParameters(option),
                 "Advancements Obtained",
                 option,
-                (_) -> 1
+                a -> a.id().getPath().startsWith("recipes/") || a.id().getPath().endsWith("/root") ? null : 1
         );
     }
 }

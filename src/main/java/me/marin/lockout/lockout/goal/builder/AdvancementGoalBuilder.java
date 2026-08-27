@@ -1,13 +1,14 @@
 package me.marin.lockout.lockout.goal.builder;
 
 import me.marin.lockout.client.LockoutClient;
-import me.marin.lockout.lockout.goal.AdvancementGoal;
 import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.lockout.goal.SatisfiableGoal;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 
@@ -61,7 +62,7 @@ public class AdvancementGoalBuilder extends GoalBuilder<Void> {
 
     @Override
     public Goal<?> build(Void option) {
-        return new AdvancementGoal(
+        return new SatisfiableGoal<AdvancementHolder>(
                 getBuildParameters(option),
                 a -> advancements.contains(a.id())
         );

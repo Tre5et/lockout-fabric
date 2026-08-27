@@ -2,7 +2,7 @@ package me.marin.lockout.lockout.goal.builder;
 
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.Goal;
-import me.marin.lockout.lockout.goal.RideEntityGoal;
+import me.marin.lockout.lockout.goal.SatisfiableGoal;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
@@ -47,7 +47,7 @@ public class RideEntityGoalBuilder extends GoalBuilder<Void> {
 
     @Override
     public Goal<?> build(Void option) {
-        return new RideEntityGoal(
+        return new SatisfiableGoal<EntityType<?>>(
                 getBuildParameters(option),
                 entityTypes::contains
         );

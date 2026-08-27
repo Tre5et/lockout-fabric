@@ -5,7 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.function.Predicate;
 
-public abstract class SatisfiableGoal<T> extends Goal<T> {
+public class SatisfiableGoal<T> extends Goal<T> {
     private final Predicate<T> satisfiedPredicate;
 
     public SatisfiableGoal(GoalBuildParameters parameters, Predicate<T> satisfiedPredicate) {

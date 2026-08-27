@@ -86,6 +86,14 @@ public abstract class Goal<T> {
 
     public abstract void updateWith(T data, ServerPlayer player);
 
+    @SuppressWarnings("unchecked")
+    public void updateIfValid(Object data, ServerPlayer player) {
+        try {
+            T converted = (T)data;
+            updateWith(converted, player);
+        } catch (ClassCastException ignored) {}
+    }
+
     public void complete(ServerPlayer player, boolean announce) {
         CompleteTaskPayload payload;
         if(player == null) {
