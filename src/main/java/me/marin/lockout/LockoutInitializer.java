@@ -1,25 +1,16 @@
 package me.marin.lockout;
 
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.lockout.DefaultGoalRegister;
 import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
-import me.marin.lockout.network.CustomBoardPayload;
 import me.marin.lockout.network.Networking;
-import me.marin.lockout.server.LockoutServer;
-import me.marin.lockout.util.PlayerSuggestionProvider;
-import me.marin.lockout.util.TeamSuggestionProvider;
+import me.marin.lockout.server.Command;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.world.item.Items;
@@ -35,7 +26,6 @@ import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import static me.marin.lockout.Constants.*;
@@ -57,7 +47,8 @@ public class LockoutInitializer implements ModInitializer {
         GoalPoolConfig.load();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            {
+            dispatcher.getRoot().addChild(Command.SERVER_COMMAND);
+            /*{
                 {
                     // Lockout command
                     var commandNode = Commands.literal("lockout").requires(PERMISSIONS).build();
@@ -109,7 +100,7 @@ public class LockoutInitializer implements ModInitializer {
                 // GiveGoal command
                 var giveGoalRoot = Commands.literal("GiveGoal").requires(PERMISSIONS).build();
                 var playerName = Commands.argument("player name", GameProfileArgument.gameProfile()).build();
-                var goalIndex = Commands.argument("goal number", IntegerArgumentType.integer(1, MAX_BOARD_SIZE * MAX_BOARD_SIZE)).executes(LockoutServer::giveGoal).build();
+                var goalIndex = Commands.argument("goal number", IntegerArgumentType.integer(1, MAX_BOARD_SIZE * MAX_BOARD_SIZE)).executes(LockoutServer::grantGoal).build();
 
                 dispatcher.getRoot().addChild(giveGoalRoot);
                 giveGoalRoot.addChild(playerName);
@@ -157,7 +148,7 @@ public class LockoutInitializer implements ModInitializer {
             {
                 // ReloadGoalPool command
 
-                dispatcher.getRoot().addChild(Commands.literal("ReloadGoalPool").requires(PERMISSIONS).executes(LockoutServer::reloadGoalPool).build());
+                dispatcher.getRoot().addChild(Commands.literal("ReloadGoalPool").requires(PERMISSIONS).executes(LockoutServer::reloadGoals).build());
             }
 
             {
@@ -173,7 +164,7 @@ public class LockoutInitializer implements ModInitializer {
             {
                 // Forfeit command
                 dispatcher.getRoot().addChild(Commands.literal("forfeit").executes(LockoutServer::forfeitCommand).build());
-            }
+            }*/
 
         });
 

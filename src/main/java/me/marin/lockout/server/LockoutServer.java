@@ -11,12 +11,7 @@ import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.lockout.goal.hint.GoalHintResult;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
-import me.marin.lockout.network.AllAdvancementsPayload;
-import me.marin.lockout.network.CustomBoardPayload;
-import me.marin.lockout.network.HintResultPayload;
-import me.marin.lockout.network.LockoutVersionPayload;
-import me.marin.lockout.network.RequestHintPayload;
-import me.marin.lockout.network.StartLockoutPayload;
+import me.marin.lockout.network.*;
 import me.marin.lockout.server.handlers.*;
 import net.minecraft.advancements.AdvancementHolder;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -54,6 +49,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static me.marin.lockout.Constants.PLACEHOLDER_PERM_STRING;
 
@@ -90,9 +86,6 @@ public class LockoutServer {
     public static final int LOCATE_SEARCH = 750;
     public static GoalRequirementContext CONTEXT = GoalRequirementContext.EMPTY;
 
-    private static int lockoutStartTime;
-    private static int boardSize;
-
     public static Lockout lockout;
     public static MinecraftServer server;
     public static CompassItemHandler compassHandler;
@@ -113,10 +106,6 @@ public class LockoutServer {
 
         LockoutConfig.load(); // reload config every time the server starts
         GoalPoolConfig.load(); // reload goal pool config every time the server starts
-        lockoutStartTime = LockoutConfig.getInstance().lockoutStartTime;
-        boardSize = LockoutConfig.getInstance().boardSize;
-        Lockout.log("Using default board size: " + boardSize);
-        Lockout.log("Using default lockout start time: " + lockoutStartTime);
 
         if (isInitialized) return;
         isInitialized = true;
@@ -352,7 +341,7 @@ public class LockoutServer {
                     CONTEXT.structures(),
                     teams
             ));
-            lockoutBoard = boardGenerator.generateBoard(boardSize);
+            lockoutBoard = boardGenerator.generateBoard(LockoutConfig.getInstance().boardSize);
             
             // Check if board generation failed due to insufficient goals
             if (lockoutBoard == null) {
@@ -367,14 +356,14 @@ public class LockoutServer {
             }
         } else {
             // Reset custom board (TODO: do this somewhere else)
-            for (Goal goal : CUSTOM_BOARD.getGoals()) {
+            for (Goal<?> goal : CUSTOM_BOARD.getGoals()) {
                 goal.setCompleted(false, null);
             }
             lockoutBoard = CUSTOM_BOARD;
         }
 
         lockout = new Lockout(lockoutBoard, teams);
-        lockout.setTicks(-20L * lockoutStartTime); // see Lockout#ticks
+        lockout.setTicks(-20L * LockoutConfig.getInstance().startTime); // see Lockout#ticks
 
         compassHandler = new CompassItemHandler(allLockoutPlayers, playerManager);
 
@@ -414,7 +403,7 @@ public class LockoutServer {
                 final int secs = i;
                 ((LockoutRunnable) () -> {
                     playerManager.broadcastSystemMessage(Component.literal("Starting in " + secs + "..."), false);
-                }).runTaskAfter(20L * (lockoutStartTime - i));
+                }).runTaskAfter(20L * (LockoutConfig.getInstance().startTime - i));
             } else {
                 ((LockoutRunnable) () -> {
                     lockout.setStarted(true);
@@ -433,7 +422,7 @@ public class LockoutServer {
                         }
                     }
                     server.getPlayerList().broadcastSystemMessage(Component.literal(lockout.getModeName() + " has begun."), false);
-                }).runTaskAfter(20L * lockoutStartTime);
+                }).runTaskAfter(20L * LockoutConfig.getInstance().startTime);
             }
         }
     }
@@ -530,14 +519,14 @@ public class LockoutServer {
         PlayerList playerManager = server.getPlayerList();
 
         try {
-            argument = context.getArgument("player names", String.class);
+            argument = context.getArgument("players", String.class);
             String[] players = argument.split(" +");
-            if (isBlackout) {
-                if (players.length == 0) {
-                    context.getSource().sendFailure(Component.literal("Not enough players listed."));
-                    return 0;
-                }
+            if (players.length < 1) {
+                context.getSource().sendFailure(Component.literal("Not enough players listed."));
+                return 0;
+            }
 
+            if (isBlackout) {
                 List<String> playerNames = new ArrayList<>();
                 for (String player : players) {
                     if (playerManager.getPlayerByName(player) == null) {
@@ -549,10 +538,6 @@ public class LockoutServer {
                 teams.add(new LockoutTeamServer(playerNames, Lockout.COLOR_ORDERS[0], server));
 
             } else {
-                if (players.length < 2) {
-                    context.getSource().sendFailure(Component.literal("Not enough players listed. Make sure you separate player names with spaces."));
-                    return 0;
-                }
                 if (players.length > 16) {
                     context.getSource().sendFailure(Component.literal("Too many players listed."));
                     return 0;
@@ -574,22 +559,18 @@ public class LockoutServer {
             try {
                 ServerScoreboard scoreboard = server.getScoreboard();
 
-                argument = context.getArgument(isBlackout ? "team name" : "team names", String.class);
+                argument = context.getArgument("teams", String.class);
                 String[] teamNames = argument.split(" +");
+                if (teamNames.length < 1) {
+                    context.getSource().sendFailure(Component.literal("Not enough teams listed."));
+                    return 0;
+                }
                 if (isBlackout) {
-                    if (teamNames.length == 0) {
-                        context.getSource().sendFailure(Component.literal("Not enough teams listed."));
-                        return 0;
-                    }
                     if (teamNames.length > 1) {
                         context.getSource().sendFailure(Component.literal("Only one team can play Blackout."));
                         return 0;
                     }
                 } else {
-                    if (teamNames.length < 2) {
-                        context.getSource().sendFailure(Component.literal("Not enough teams listed. Make sure you separate team names with spaces."));
-                        return 0;
-                    }
                     if (teamNames.length > 16) {
                         context.getSource().sendFailure(Component.literal("Too many teams listed."));
                         return 0;
@@ -657,6 +638,18 @@ public class LockoutServer {
         return false;
     }
 
+    public static int getChat(CommandContext<CommandSourceStack> context) {
+        ServerPlayer player = context.getSource().getPlayer();
+        if (player == null) {
+            context.getSource().sendFailure(Component.literal("This is a player-only command."));
+            return 0;
+        }
+
+        ChatManager.Type curr = ChatManager.getChat(player);
+        context.getSource().sendSystemMessage(Component.literal("You are currently chatting in " + curr.name() + "."));
+        return 1;
+    }
+
     public static int setChat(CommandContext<CommandSourceStack> context, ChatManager.Type type) {
         ServerPlayer player = context.getSource().getPlayer();
         if (player == null) {
@@ -674,18 +667,31 @@ public class LockoutServer {
         return 1;
     }
 
-    public static int giveGoal(CommandContext<CommandSourceStack> context) {
+    public static int getGoals(CommandContext<CommandSourceStack> context) {
+        int goalNumber = GoalRegistry.INSTANCE.getRegisteredGoals().size();
+        if(goalNumber == 0) {
+            context.getSource().sendSystemMessage(Component.literal("There are no goal registered."));
+            return 1;
+        }
+        String goals = GoalRegistry.INSTANCE.getRegisteredGoals().stream()
+                .map(g -> "- " + g)
+                .collect(Collectors.joining("\n"));
+        context.getSource().sendSystemMessage(Component.literal("There are " + goalNumber + " goals registered:\n"+goals));
+        return 1;
+    }
+
+    public static int grantGoal(CommandContext<CommandSourceStack> context) {
         try {
             if (!Lockout.isLockoutRunning(lockout)) {
                 context.getSource().sendFailure(Component.literal("There's no active lockout match."));
                 return 0;
             }
 
-            int idx = context.getArgument("goal number", Integer.class);
+            int idx = context.getArgument("goal", Integer.class);
 
             Collection<NameAndId> playerConfigs;
             try {
-                playerConfigs = GameProfileArgument.getGameProfiles(context, "player name");
+                playerConfigs = GameProfileArgument.getGameProfiles(context, "player");
             } catch (CommandSyntaxException e) {
                 context.getSource().sendFailure(Component.literal("Invalid target."));
                 return 0;
@@ -716,19 +722,85 @@ public class LockoutServer {
         }
     }
 
+    public static int revokeGoal(CommandContext<CommandSourceStack> context) {
+        try {
+            if (!Lockout.isLockoutRunning(lockout)) {
+                context.getSource().sendFailure(Component.literal("There's no active lockout match."));
+                return 0;
+            }
+
+            int idx = context.getArgument("goal", Integer.class);
+
+            Collection<NameAndId> playerConfigs;
+            try {
+                playerConfigs = GameProfileArgument.getGameProfiles(context, "player");
+            } catch (CommandSyntaxException e) {
+                context.getSource().sendFailure(Component.literal("Invalid target."));
+                return 0;
+            }
+
+            if (playerConfigs.size() != 1) {
+                context.getSource().sendFailure(Component.literal("Invalid number of targets."));
+                return 0;
+            }
+            NameAndId playerConfig = playerConfigs.stream().findFirst().get();
+            if (!lockout.isLockoutPlayer(playerConfig.id())) {
+                context.getSource().sendFailure(Component.literal("Player " + playerConfig.name() + " is not playing Lockout."));
+                return 0;
+            }
+
+            if (idx > lockout.getBoard().getGoals().size()) {
+                context.getSource().sendFailure(Component.literal("Goal number does not exist on the board."));
+                return 0;
+            }
+            Goal<?> goal = lockout.getBoard().getGoals().get(idx - 1);
+
+            context.getSource().sendSystemMessage(Component.nullToEmpty("Revoked a goal from " + playerConfig.name() + "."));
+            goal.complete(null, false);
+            return 1;
+        } catch (RuntimeException e) {
+            Lockout.error(e);
+            return 0;
+        }
+    }
+
+    public static int getStartTime(CommandContext<CommandSourceStack> context) {
+        context.getSource().sendSystemMessage(Component.literal("The current start time is " + LockoutConfig.getInstance().startTime + "s."));
+        return 1;
+    }
+
     public static int setStartTime(CommandContext<CommandSourceStack> context) {
         int seconds = context.getArgument("seconds", Integer.class);
 
-        lockoutStartTime = seconds;
+        LockoutConfig.getInstance().startTime = seconds;
+        LockoutConfig.save();
+
         context.getSource().sendSystemMessage(Component.nullToEmpty("Updated start time to " + seconds + "s."));
         return 1;
     }
 
-    public static int setBoardSize(CommandContext<CommandSourceStack> context) {
-        int size = context.getArgument("board size", Integer.class);
+    public static int clearCustomBoard(CommandContext<CommandSourceStack> context) {
+        if(CUSTOM_BOARD == null) {
+            context.getSource().sendSystemMessage(Component.literal("There is no custom board registered."));
+            return 1;
+        }
+        CUSTOM_BOARD = null;
+        context.getSource().sendSystemMessage(Component.literal("Cleared custom board."));
+        return 1;
+    }
 
-        boardSize = size;
-        context.getSource().sendSystemMessage(Component.nullToEmpty("Updated board size to " + size + "."));
+    public static int getBoardSize(CommandContext<CommandSourceStack> context) {
+        context.getSource().sendSystemMessage(Component.literal("The current board size is " + LockoutConfig.getInstance().boardSize + "x" + LockoutConfig.getInstance().boardSize + "."));
+        return 1;
+    }
+
+    public static int setBoardSize(CommandContext<CommandSourceStack> context) {
+        int size = context.getArgument("size", Integer.class);
+
+        LockoutConfig.getInstance().boardSize = size;
+        LockoutConfig.save();
+
+        context.getSource().sendSystemMessage(Component.nullToEmpty("Updated board size to " + size + "x" + size + "."));
         return 1;
     }
 
@@ -741,19 +813,27 @@ public class LockoutServer {
         ServerPlayNetworking.send(player, new AllAdvancementsPayload(advancements));
     }
 
+    public static int getGiveCompasses(CommandContext<CommandSourceStack> context) {
+        String message = LockoutConfig.getInstance().giveCompasses
+                ? "Compasses will be given to players."
+                : "Compasses will not be given to players.";
+        context.getSource().sendSystemMessage(Component.literal(message));
+        return 1;
+    }
+
     public static int setGiveCompasses(CommandContext<CommandSourceStack> context) {
-        boolean giveCompasses = context.getArgument("giveCompasses", Boolean.class);
+        boolean giveCompasses = context.getArgument("give", Boolean.class);
         LockoutConfig.getInstance().giveCompasses = giveCompasses;
         LockoutConfig.save();
 
         String message = giveCompasses
-                ? "Compasses will now be given to players"
-                : "Compasses will no longer be given to players";
+                ? "Compasses will now be given to players."
+                : "Compasses will no longer be given to players.";
         context.getSource().sendSuccess(() -> Component.literal(message), true);
         return 1;
     }
 
-    public static int reloadGoalPool(CommandContext<CommandSourceStack> context) {
+    public static int reloadGoals(CommandContext<CommandSourceStack> context) {
         try {
             GoalPoolConfig.load();
             context.getSource().sendSuccess(() -> Component.literal("Goal pool configuration reloaded successfully."), true);

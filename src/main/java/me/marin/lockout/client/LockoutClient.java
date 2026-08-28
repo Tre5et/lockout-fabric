@@ -1,5 +1,6 @@
 package me.marin.lockout.client;
 
+import com.mojang.brigadier.context.CommandContext;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.*;
 import me.marin.lockout.client.gui.*;
@@ -10,6 +11,7 @@ import me.marin.lockout.network.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -161,7 +163,7 @@ public class LockoutClient implements ClientModInitializer {
                 }
                 if(payload.announce()) {
                     client.gui.hud.getChat().addClientSystemMessage(
-                            Component.literal(ChatFormatting.GREEN + (payload.completedName() == null ? "Someone" : payload.completedName()) + " completed " + goal.extractName().getString() + ".")
+                            Component.literal(ChatFormatting.GREEN + payload.completedName().orElse("Someone") + " completed " + goal.extractName().getString() + ".")
                     );
                 }
             });
@@ -207,110 +209,35 @@ public class LockoutClient implements ClientModInitializer {
         ArgumentTypeRegistry.registerArgumentType(Constants.BOARD_POSITION_ARGUMENT_TYPE, BoardPositionArgumentType.class, SingletonArgumentInfo.contextFree(BoardPositionArgumentType::newInstance));
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            {
-                var commandNode = ClientCommands.literal("BoardPosition").build();
-                var positionNode = ClientCommands.argument("board position", BoardPositionArgumentType.newInstance()).executes((context) -> {
-                    String position = context.getArgument("board position", String.class);
 
-                    LockoutConfig.BoardPosition boardPosition = LockoutConfig.BoardPosition.match(position);
-                    if (boardPosition == null) {
-                        context.getSource().sendError(Component.literal("Invalid board position: " + position + "."));
-                        return 0;
-                    }
-                    LockoutConfig.getInstance().boardPosition = boardPosition;
-                    LockoutConfig.save();
-
-                    context.getSource().sendFeedback(Component.literal("Updated board position." + (boardPosition == LockoutConfig.BoardPosition.LEFT ? " Note: Opening debug hud (F3) will hide the board." : "")));
-
-                    return 1;
-                }).build();
-
-                dispatcher.getRoot().addChild(commandNode);
-                commandNode.addChild(positionNode);
-            }
-            {
-                var commandNode = ClientCommands.literal("BoardBuilder").executes((context) -> {
-                    Minecraft client = Minecraft.getInstance();
-                    client.schedule(() -> {
-                        if (client.player != null) {
-                            client.gui.setScreen(new BoardBuilderScreen());
-                        }
-                    });
-
-                    return 1;
-                }).build();
-
-                var boardNameNode = ClientCommands.argument("board name", CustomBoardFileArgumentType.newInstance()).executes((context) -> {
-                    String boardName = context.getArgument("board name", String.class);
-
-                    List<Goal<?>> goals;
-                    try {
-                        goals = BoardBuilderIO.INSTANCE.readBoard(boardName);
-                    } catch (IOException e) {
-                        context.getSource().sendError(Component.literal("Error while trying to read board."));
-                        Lockout.error(e);
-                        return 0;
-                    }
-
-                    int size = (int) Math.sqrt(goals.size());
-                    if (size * size != goals.size() || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE) {
-                        context.getSource().sendError(Component.literal("Board doesn't have a valid number of goals!"));
-                        return 0;
-                    }
-
-/*
-                    List<Pair<String, String>> goals = jsonBoard.goals.stream()
-                            .map(goal -> new Pair<>(goal.id, goal.data != null ? goal.data : GoalDataConstants.DATA_NONE)).toList();
-*/
-
-                    Minecraft client = Minecraft.getInstance();
-                    client.schedule(() -> {
-                        if (client.player != null) {
-                            BoardBuilderData.INSTANCE.setBoard(boardName, size, goals);
-                            client.gui.setScreen(new BoardBuilderScreen());
-                        }
-                    });
-
-                    return 1;
-                }).build();
-
-                commandNode.addChild(boardNameNode);
-                dispatcher.getRoot().addChild(commandNode);
-            }
-            {
-                var commandNode = ClientCommands.literal("SetCustomBoard").requires(ccs -> {
-                    if (Minecraft.getInstance().isLocalServer()) {
-                        return true;
-                    }
-                    return Permissions.check(ccs, PLACEHOLDER_PERM_STRING, LevelBasedPermissionSet.GAMEMASTER.level());
-                }).build();
-
-                var boardNameNode = ClientCommands.argument("board name", CustomBoardFileArgumentType.newInstance()).executes((context) -> {
-                    String boardName = context.getArgument("board name", String.class);
-
-                    List<Goal<?>> goals;
-                    try {
-                        goals = BoardBuilderIO.INSTANCE.readBoard(boardName);
-                    } catch (IOException e) {
-                        context.getSource().sendError(Component.literal("Error while trying to read board."));
-                        Lockout.error(e);
-                        return 0;
-                    }
-
-                    int size = (int) Math.sqrt(goals.size());
-                    if (size * size != goals.size() || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE) {
-                        context.getSource().sendError(Component.literal("Board doesn't have a valid number of goals!"));
-                        return 0;
-                    }
-
-                    ClientPlayNetworking.send(new CustomBoardPayload(Optional.of(goals.stream()
-                            .map(Goal::getBuildData).toList())));
-                    return 1;
-                }).build();
-
-                commandNode.addChild(boardNameNode);
-                dispatcher.getRoot().addChild(commandNode);
-            }
+            dispatcher.getRoot().addChild(ClientCommands.literal("lockoutc")
+                    .then(ClientCommands.literal("board")
+                            .then(ClientCommands.literal("set")
+                                    .requires(ccs -> {
+                                        if (Minecraft.getInstance().isLocalServer()) {
+                                            return true;
+                                        }
+                                        return Permissions.check(ccs, PLACEHOLDER_PERM_STRING, LevelBasedPermissionSet.GAMEMASTER.level());
+                                    }).then(ClientCommands.argument("name", CustomBoardFileArgumentType.newInstance())
+                                            .executes(LockoutClient::setCustomBoard)
+                                    )
+                            )
+                            .then(ClientCommands.literal("builder")
+                                    .executes(LockoutClient::openBoardBuilder)
+                                    .then(ClientCommands.argument("board", CustomBoardFileArgumentType.newInstance())
+                                            .executes(LockoutClient::openBoardBuilder)
+                                    )
+                            )
+                            .then(ClientCommands.literal("position")
+                                    .executes(LockoutClient::getBoardPosition)
+                                    .then(ClientCommands.literal("set")
+                                            .then(ClientCommands.argument("position", BoardPositionArgumentType.newInstance())
+                                                    .executes(LockoutClient::setBoardPosition)
+                                            )
+                                    )
+                            )
+                    ).build()
+            );
         });
 
         ClientPlayNetworking.registerGlobalReceiver(LockoutVersionPayload.ID, (payload, context) -> {
@@ -362,6 +289,81 @@ public class LockoutClient implements ClientModInitializer {
         }));
 
         MenuScreens.register(BOARD_SCREEN_HANDLER, BoardScreen::new);
+    }
+
+    public static int setCustomBoard(CommandContext<FabricClientCommandSource> context) {
+        String boardName = context.getArgument("name", String.class);
+
+        List<Goal<?>> goals;
+        try {
+            goals = BoardBuilderIO.INSTANCE.readBoard(boardName);
+        } catch (IOException e) {
+            context.getSource().sendError(Component.literal("Error while trying to read board."));
+            Lockout.error(e);
+            return 0;
+        }
+
+        int size = (int) Math.sqrt(goals.size());
+        if (size * size != goals.size() || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE) {
+            context.getSource().sendError(Component.literal("Board doesn't have a valid number of goals!"));
+            return 0;
+        }
+
+        ClientPlayNetworking.send(new CustomBoardPayload(Optional.of(goals.stream()
+                .map(Goal::getBuildData).toList())));
+        return 1;
+    }
+
+    public static int openBoardBuilder(CommandContext<FabricClientCommandSource> context) {
+        try {
+            String boardName = context.getArgument("board", String.class);
+            List<Goal<?>> goals;
+            try {
+                goals = BoardBuilderIO.INSTANCE.readBoard(boardName);
+            } catch (IOException e) {
+                context.getSource().sendError(Component.literal("Error while trying to read board."));
+                Lockout.error(e);
+                return 0;
+            }
+
+            int size = (int) Math.sqrt(goals.size());
+            if (size * size != goals.size() || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE) {
+                context.getSource().sendError(Component.literal("Board doesn't have a valid number of goals!"));
+                return 0;
+            }
+
+            BoardBuilderData.INSTANCE.setBoard(boardName, size, goals);
+        } catch (IllegalArgumentException ignored) {}
+
+        Minecraft client = Minecraft.getInstance();
+        client.schedule(() -> {
+            if (client.player != null) {
+                client.gui.setScreen(new BoardBuilderScreen());
+            }
+        });
+
+        return 1;
+    }
+
+    public static int getBoardPosition(CommandContext<FabricClientCommandSource> context) {
+        context.getSource().sendFeedback(Component.literal("The current board position is " + LockoutConfig.getInstance().boardPosition.name().toLowerCase() + "."));
+        return 1;
+    }
+
+    public static int setBoardPosition(CommandContext<FabricClientCommandSource> context) {
+        String position = context.getArgument("position", String.class);
+
+        LockoutConfig.BoardPosition boardPosition = LockoutConfig.BoardPosition.match(position);
+        if (boardPosition == null) {
+            context.getSource().sendError(Component.literal("Invalid board position: " + position + "."));
+            return 0;
+        }
+        LockoutConfig.getInstance().boardPosition = boardPosition;
+        LockoutConfig.save();
+
+        context.getSource().sendFeedback(Component.literal("Updated board position." + (boardPosition == LockoutConfig.BoardPosition.LEFT ? " Note: Opening debug hud (F3) will hide the board." : "")));
+
+        return 1;
     }
 
 }

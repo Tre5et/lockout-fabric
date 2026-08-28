@@ -18,16 +18,16 @@ public class LockoutConfig {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    @SerializedName("default board size")
+    @SerializedName("boardSize")
     public int boardSize = 5;
 
-    @SerializedName("board position")
+    @SerializedName("boardPosition")
     public BoardPosition boardPosition = BoardPosition.RIGHT;
 
-    @SerializedName("lockout start time")
-    public int lockoutStartTime = 60;
+    @SerializedName("startTime")
+    public int startTime = 60;
 
-    @SerializedName("give compasses")
+    @SerializedName("giveCompasses")
     public boolean giveCompasses = false;
 
     public static void load() {
@@ -51,7 +51,7 @@ public class LockoutConfig {
         instance = new LockoutConfig();
         instance.boardSize = 5;
         instance.boardPosition = BoardPosition.RIGHT;
-        instance.lockoutStartTime = 60;
+        instance.startTime = 60;
         instance.giveCompasses = false;
     }
 
