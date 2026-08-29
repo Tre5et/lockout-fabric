@@ -1,8 +1,8 @@
 package me.marin.lockout.server.handlers;
 
-import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutConfig;
 import me.marin.lockout.LockoutTeam;
+import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.server.LockoutServer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,7 +14,7 @@ public class AfterRespawnEventHandler implements ServerPlayerEvents.AfterRespawn
 
     @Override
     public void afterRespawn(ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean alive) {
-        if (!Lockout.isLockoutRunning(lockout)) return;
+        if (!LockoutGame.isActive(lockout)) return;
         if (lockout.isSoloBlackout()) return;
         if (!lockout.isLockoutPlayer(newPlayer.getUUID())) return;
         if (alive) return; // end exit portal

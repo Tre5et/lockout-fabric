@@ -2,7 +2,7 @@ package me.marin.lockout.lockout.goals.have_more;
 
 import me.marin.lockout.Constants;
 import me.marin.lockout.LockoutTeam;
-import me.marin.lockout.LockoutTeamServer;
+import me.marin.lockout.server.ServerLockoutTeam;
 import me.marin.lockout.lockout.Goal;
 import me.marin.lockout.lockout.interfaces.MostStatGoal;
 import me.marin.lockout.lockout.texture.TextureProvider;

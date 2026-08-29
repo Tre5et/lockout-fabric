@@ -2,10 +2,15 @@ package me.marin.lockout.lockout.goal.builder;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.marin.lockout.client.goal.ClientGoal;
+import me.marin.lockout.client.goal.builder.ClientGoalBuildParameters;
+import me.marin.lockout.client.goal.hint.ClientHint;
+import me.marin.lockout.client.goal.option.ClientGoalOptionGenerator;
+import me.marin.lockout.client.goal.progress.ClientGoalProgress;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
-import me.marin.lockout.lockout.goal.hint.GoalHint;
+import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.id.IdProvider;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
@@ -14,15 +19,18 @@ import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
-import oshi.util.tuples.Pair;
+import me.marin.lockout.server.goal.ServerGoal;
+import me.marin.lockout.server.goal.builder.ServerGoalBuildParameters;
+import me.marin.lockout.server.goal.hint.ServerHint;
+import me.marin.lockout.server.goal.progress.ServerGoalProgress;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
-public abstract class GoalBuilder<T> {
+public abstract class GoalBuilder<U,T> {
     protected final String id;
     @Getter
     protected final GoalCategory category;
@@ -33,7 +41,7 @@ public abstract class GoalBuilder<T> {
     private TextureExtractorProvider<T> cutomTextureExtractorProvider = null;
     @Getter
     protected final List<GoalGroup> groups = new ArrayList<>();
-    protected final List<GoalHint> hints = new ArrayList<>();
+    protected final List<HintCombination<?>> hints = new ArrayList<>();
     @Getter
     @Setter
     protected boolean enabled = true;
@@ -51,67 +59,98 @@ public abstract class GoalBuilder<T> {
 
     public abstract TextureExtractor defaultTextureExtractor(T option);
 
-    public abstract GoalOptionGenerator<T> optionGenerator();
+    public Optional<GoalOptionGenerator<T>> getOptionGenerator() {
+        return Optional.empty();
+    }
 
-    public abstract Goal<?> build(T option);
+    public Optional<ClientGoalOptionGenerator<T>> getClientOptionGenerator() {
+        return Optional.empty();
+    }
 
-    public Optional<Goal<?>> buildGenerated(GoalRequirementContext context) {
-        if(optionGenerator() == null) {
+    public abstract ServerGoalProgress<U,?> getServerGoalProgress(T option);
+
+    public abstract ClientGoalProgress<?> getClientGoalProgress(T option);
+
+    public ServerGoal<U> buildServer(T option) {
+        return new ServerGoal<>(new ServerGoalBuildParameters<>(
+                getId(option),
+                getBuildData(option),
+                getServerGoalProgress(option),
+                getServerHints(option)
+        ));
+    }
+
+    public ClientGoal buildClient(T option) {
+        return new ClientGoal(new ClientGoalBuildParameters(
+                getId(option),
+                getBuildData(option),
+                getNameExtractor(option).extract(),
+                getTextureExtractor(option),
+                getClientGoalProgress(option),
+                getClientHints(option)
+        ));
+    }
+
+    public <G extends Goal> Optional<G> buildGenerated(GoalRequirementContext context, Function<T,G> builder) {
+        Optional<GoalOptionGenerator<T>> optionGenerator = getOptionGenerator();
+        if(optionGenerator.isEmpty()) {
             if(requirements.stream().allMatch(r -> r.optionSatisfiedBy(context, null))) {
-                return Optional.of(build(null));
+                return Optional.of(builder.apply(null));
             }
             return Optional.empty();
         }
-        Optional<T> option = optionGenerator().generate((o) -> requirements.stream()
+        Optional<T> option = optionGenerator.get().generate((o) -> requirements.stream()
                 .allMatch(r -> r.optionSatisfiedBy(context, o)));
-        return option.map(this::build);
+        return option.map(builder);
     }
 
-    public List<Goal<?>> buildExamples() {
-        if(optionGenerator() == null) {
-            return List.of(build(null));
-        }
-        return optionGenerator().examples().stream()
-                .map(this::build)
-                .collect(Collectors.toUnmodifiableList());
+    public Optional<ServerGoal<U>> buildGeneratedServer(GoalRequirementContext context) {
+        return buildGenerated(context, this::buildServer);
+    }
+
+    public <G extends Goal> List<G> buildExamples(Function<T,G> builder) {
+        Optional<GoalOptionGenerator<T>> optionGenerator = getOptionGenerator();
+        return optionGenerator.map(g -> g.examples().stream()
+                .map(builder)
+                .toList()
+        ).orElseGet(() -> List.of(builder.apply(null)));
+    }
+
+    public List<ClientGoal> buildClientExamples() {
+        return buildExamples(this::buildClient);
     }
 
     @SuppressWarnings("unchecked")
-    public Goal<?> buildGeneric(Object option) throws IllegalGoalConstructionException {
-        if(option == null) return build(null);
+    public <G extends Goal> G buildGeneric(Object option, Function<T,G> builder) throws IllegalGoalConstructionException {
+        if(option == null) return builder.apply(null);
         try {
-            return build((T)option);
+            return builder.apply((T)option);
         } catch (ClassCastException e) {
             throw new IllegalGoalConstructionException("Option is not of correct type: " + option, e);
         }
     }
 
-    public Goal<?> buildFromSerializedData(String option) throws IllegalGoalConstructionException {
-        if(optionGenerator() == null) {
-            return build(null);
-        }
-        return build(optionGenerator().deserialize(option));
+    public ClientGoal buildClientGeneric(Object option) throws IllegalGoalConstructionException {
+        return buildGeneric(option, this::buildClient);
     }
 
-    public String serializeOption(T option) {
-        if(optionGenerator() == null || option == null) {
-            return null;
+    public <G extends Goal> G buildFromSerializedData(String option, Function<T,G> builder) throws IllegalGoalConstructionException {
+        if(getOptionGenerator().isEmpty()) {
+            return builder.apply(null);
         }
-        return optionGenerator().serialize(option);
+        return builder.apply(getOptionGenerator().get().deserialize(option));
+    }
+
+    public ServerGoal<U> buildServerFromSerializedData(String option) throws IllegalGoalConstructionException {
+        return buildFromSerializedData(option, this::buildServer);
+    }
+
+    public ClientGoal buildClientFromSerializedData(String option) throws IllegalGoalConstructionException {
+        return buildFromSerializedData(option, this::buildClient);
     }
 
     public String getStaticId() {
         return id;
-    }
-
-    public GoalBuildParameters getBuildParameters(T option) {
-        return new GoalBuildParameters(
-                getId(option),
-                getNameExtractor(option),
-                getTextureExtractor(option),
-                getHints(option),
-                getBuildData(option)
-        );
     }
 
     public String getId(T option) {
@@ -129,64 +168,72 @@ public abstract class GoalBuilder<T> {
         return defaultTextureExtractor(option);
     }
 
-    public List<GoalHint> getHints(T option) {
-        List<GoalHint> hints = new ArrayList<>(this.hints);
+    public List<ServerHint<?>> getServerHints(T option) {
+        List<ServerHint<?>> hints = new ArrayList<>(this.hints.stream().map(HintCombination::constructServer).toList());
         for(GoalRequirement<? super T> requirement : requirements) {
-            hints.addAll(requirement.getHints(option));
+            hints.addAll(requirement.getServerHints(option));
         }
         return hints;
     }
 
-    public Pair<String, String> getBuildData(T option) {
-        if(option == null || optionGenerator() == null) {
-            return new Pair<>(getStaticId(), null);
+    public List<ClientHint<?>> getClientHints(T option) {
+        List<ClientHint<?>> hints = new ArrayList<>(this.hints.stream().map(HintCombination::constructClient).toList());
+        for(GoalRequirement<? super T> requirement : requirements) {
+            hints.addAll(requirement.getClientHints(option));
         }
-        return new Pair<>(getStaticId(), optionGenerator().serialize(option));
+        return hints;
     }
 
-    public GoalBuilder<T> require(GoalRequirement<? super T> requirements) {
+    public BuildData getBuildData(T option) {
+        if(option == null || getOptionGenerator().isEmpty()) {
+            return new BuildData(getStaticId(), Optional.empty());
+        }
+        return new BuildData(getStaticId(), Optional.ofNullable(getOptionGenerator().get().serialize(option)));
+    }
+
+    public GoalBuilder<U,T> require(GoalRequirement<? super T> requirements) {
         getRequirements().add(requirements);
         return this;
     }
 
-    public GoalBuilder<T> customId(IdProvider<T> idProvider) {
+    public GoalBuilder<U,T> customId(IdProvider<T> idProvider) {
         this.customIdProvider = idProvider;
         return this;
     }
 
-    public GoalBuilder<T> customId(String id) {
+    public GoalBuilder<U,T> customId(String id) {
         return customId(_ -> id);
     }
 
-    public GoalBuilder<T> customNameExtractor(NameExtractorProvider<T> nameExtractorProvider) {
+    public GoalBuilder<U,T> customNameExtractor(NameExtractorProvider<T> nameExtractorProvider) {
         this.customNameExtractorProvider = nameExtractorProvider;
         return this;
     }
 
-    public GoalBuilder<T> customNameExtractor(NameExtractor extractor) {
+    public GoalBuilder<U,T> customNameExtractor(NameExtractor extractor) {
         return customNameExtractor(_ -> extractor);
     }
 
-    public GoalBuilder<T> customTextureExtractor(TextureExtractorProvider<T> textureExtractorProvider) {
+    public GoalBuilder<U,T> customTextureExtractor(TextureExtractorProvider<T> textureExtractorProvider) {
         this.cutomTextureExtractorProvider = textureExtractorProvider;
         return this;
     }
 
-    public GoalBuilder<T> customTextureExtractor(TextureExtractor extractor) {
+    public GoalBuilder<U,T> customTextureExtractor(TextureExtractor extractor) {
         return customTextureExtractor(_ -> extractor);
     }
 
-    public GoalBuilder<T> group(GoalGroup... groups) {
+    public GoalBuilder<U,T> group(GoalGroup... groups) {
         getGroups().addAll(Arrays.stream(groups).toList());
         return this;
     }
 
-    public GoalBuilder<T> defaultEnabled(boolean defaultEnabled) {
+    public GoalBuilder<U,T> defaultEnabled(boolean defaultEnabled) {
         setEnabled(defaultEnabled);
         return this;
     }
 
-    public GoalBuilder<T> hint(GoalHint... hint) {
+    public GoalBuilder<U,T> hint(HintCombination<?>... hint) {
         hints.addAll(Arrays.stream(hint).toList());
         return this;
     }

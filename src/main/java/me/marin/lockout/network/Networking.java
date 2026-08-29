@@ -6,7 +6,7 @@ public class Networking {
     public static void registerPayloads() {
         PayloadTypeRegistry.clientboundPlay().register(AllAdvancementsPayload.ID, AllAdvancementsPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(UpdateTimerPayload.ID, UpdateTimerPayload.CODEC);
-        PayloadTypeRegistry.clientboundPlay().register(LockoutGoalsTeamsPayload.ID, LockoutGoalsTeamsPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(LockoutGamePayload.ID, LockoutGamePayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(StartLockoutPayload.ID, StartLockoutPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(CompleteTaskPayload.ID, CompleteTaskPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(EndLockoutPayload.ID, EndLockoutPayload.CODEC);

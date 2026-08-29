@@ -1,13 +1,14 @@
 package me.marin.lockout.lockout.goal.builder;
 
 import me.marin.lockout.Constants;
-import me.marin.lockout.lockout.goal.Goal;
-import me.marin.lockout.lockout.goal.SatisfiableGoal;
+import me.marin.lockout.client.goal.progress.ClientGoalProgress;
+import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
-import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import me.marin.lockout.server.goal.progress.ServerGoalProgress;
+import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
@@ -15,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RideEntityGoalBuilder extends GoalBuilder<Void> {
+public class RideEntityGoalBuilder extends GoalBuilder<EntityType<?>, Void> {
     protected final List<EntityType<?>> entityTypes;
 
     public RideEntityGoalBuilder(String id, GoalCategory category, List<EntityType<?>> entityTypes) {
@@ -41,16 +42,13 @@ public class RideEntityGoalBuilder extends GoalBuilder<Void> {
     }
 
     @Override
-    public GoalOptionGenerator<Void> optionGenerator() {
-        return null;
+    public ClientGoalProgress<?> getClientGoalProgress(Void option) {
+        return new SimpleClientGoalProgress();
     }
 
     @Override
-    public Goal<?> build(Void option) {
-        return new SatisfiableGoal<EntityType<?>>(
-                getBuildParameters(option),
-                entityTypes::contains
-        );
+    public ServerGoalProgress<EntityType<?>, ?> getServerGoalProgress(Void option) {
+        return new SimpleServerGoalProgress<>(entityTypes::contains);
     }
 
     public static RideEntityGoalBuilder simple(String id, GoalCategory category, EntityType<?>... entityTypes) {

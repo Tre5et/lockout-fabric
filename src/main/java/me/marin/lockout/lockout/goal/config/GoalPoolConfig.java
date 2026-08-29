@@ -53,12 +53,12 @@ public class GoalPoolConfig {
                 
                 if (yamlData != null) {
                     // Parse the YAML data into goal states
-                    List<GoalBuilder<?>> allGoals = GoalRegistry.INSTANCE.getRegisteredGoals();
+                    List<GoalBuilder<?,?>> allGoals = GoalRegistry.INSTANCE.getRegisteredGoals();
                     int enabledCount = 0;
                     int disabledCount = 0;
                     boolean configUpdated = false;
                     
-                    for (GoalBuilder<?> goal : allGoals) {
+                    for (GoalBuilder<?,?> goal : allGoals) {
                         Object value = yamlData.get(goal.getStaticId());
                         if (value instanceof Boolean) {
                             boolean enabled = (Boolean) value;
@@ -112,14 +112,14 @@ public class GoalPoolConfig {
         yaml.append("# Goals marked as 'false' will not appear in randomly generated boards\n\n");
 
         // Group goals by category for better organization
-        Map<GoalCategory, List<GoalBuilder<?>>> categorizedGoals = categorizeGoals();
+        Map<GoalCategory, List<GoalBuilder<?,?>>> categorizedGoals = categorizeGoals();
         
-        for (Map.Entry<GoalCategory, List<GoalBuilder<?>>> entry : categorizedGoals.entrySet()) {
+        for (Map.Entry<GoalCategory, List<GoalBuilder<?,?>>> entry : categorizedGoals.entrySet()) {
             String category = entry.getKey().getName();
-            List<GoalBuilder<?>> goals = entry.getValue();
+            List<GoalBuilder<?,?>> goals = entry.getValue();
             
             yaml.append("# ").append(category).append("\n");
-            for (GoalBuilder<?> goal : goals) {
+            for (GoalBuilder<?,?> goal : goals) {
                 yaml.append(goal.getStaticId()).append(": ").append(goal.isEnabled()).append("\n");
             }
             yaml.append("\n");
@@ -128,10 +128,10 @@ public class GoalPoolConfig {
         return yaml.toString();
     }
 
-    private static Map<GoalCategory, List<GoalBuilder<?>>> categorizeGoals() {
-        Map<GoalCategory, List<GoalBuilder<?>>> categories = new LinkedHashMap<>();
+    private static Map<GoalCategory, List<GoalBuilder<?,?>>> categorizeGoals() {
+        Map<GoalCategory, List<GoalBuilder<?,?>>> categories = new LinkedHashMap<>();
 
-        for(GoalBuilder<?> goal : GoalRegistry.INSTANCE.getRegisteredGoals()) {
+        for(GoalBuilder<?,?> goal : GoalRegistry.INSTANCE.getRegisteredGoals()) {
             if(!categories.containsKey(goal.getCategory())) {
                 categories.put(goal.getCategory(), new ArrayList<>(List.of(goal)));
             } else {

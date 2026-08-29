@@ -1,10 +1,9 @@
 package me.marin.lockout.mixin.client;
 
-import me.marin.lockout.Lockout;
 import me.marin.lockout.LockoutConfig;
-import me.marin.lockout.Utility;
 import me.marin.lockout.client.LockoutClient;
 import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.Hud;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,11 +21,11 @@ public abstract class HudMixin {
     // Render the board after effects, but before chat, player list etc.
     @Inject(method = "extractRenderState", at = @At(value="INVOKE", target = "Lnet/minecraft/client/gui/Hud;extractSleepOverlay(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V", shift = At.Shift.AFTER))
     public void renderBoard(GuiGraphicsExtractor context, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (!Lockout.exists(LockoutClient.lockout)) {
+        if (LockoutClient.lockout == null) {
             return;
         }
 
-        Utility.drawBingoBoard(context);
+        LockoutClient.lockout.extractHud(context, Minecraft.getInstance().font, LockoutConfig.getInstance().boardPosition);
     }
 
     // If lockout board is visible, render effects to the left of it.
@@ -34,7 +33,7 @@ public abstract class HudMixin {
     private int renderStatusEffects(GuiGraphicsExtractor instance) {
         int width = instance.guiWidth();
 
-        if (!Lockout.exists(LockoutClient.lockout)) {
+        if (LockoutClient.lockout == null) {
             return width;
         }
 
@@ -42,7 +41,7 @@ public abstract class HudMixin {
             return width;
         }
 
-        return width - 2 * GUI_PADDING - LockoutClient.lockout.getBoard().size() * GUI_SLOT_SIZE;
+        return width - 2 * GUI_PADDING - LockoutClient.lockout.getBoard().getSize() * GUI_SLOT_SIZE;
     }
 
 }

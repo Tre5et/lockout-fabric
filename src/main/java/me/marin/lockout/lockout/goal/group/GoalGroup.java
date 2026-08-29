@@ -5,9 +5,9 @@ import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import java.util.List;
 
 public interface GoalGroup {
-    boolean canAdd(GoalBuilder<?> goal, List<GoalBuilder<?>> existingGoals);
+    boolean canAdd(GoalBuilder<?,?> goal, List<GoalBuilder<?,?>> existingGoals);
 
-    default List<GoalBuilder<?>> goalsMatching(List<GoalBuilder<?>> goalBuilders) {
+    default List<GoalBuilder<?,?>> goalsMatching(List<GoalBuilder<?,?>> goalBuilders) {
         return goalBuilders.stream().filter(g -> g.getGroups().contains(this)).toList();
     }
 
@@ -17,7 +17,7 @@ public interface GoalGroup {
 
     record Limited(int limit) implements GoalGroup {
         @Override
-        public boolean canAdd(GoalBuilder<?> goal, List<GoalBuilder<?>> existingGoals) {
+        public boolean canAdd(GoalBuilder<?,?> goal, List<GoalBuilder<?,?>> existingGoals) {
             return goalsMatching(existingGoals).size() < limit;
         }
     }

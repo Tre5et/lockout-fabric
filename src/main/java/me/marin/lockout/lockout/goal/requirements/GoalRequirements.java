@@ -1,6 +1,9 @@
 package me.marin.lockout.lockout.goal.requirements;
 
-import me.marin.lockout.lockout.goal.hint.GoalHint;
+import me.marin.lockout.client.goal.hint.PositionClientHint;
+import me.marin.lockout.lockout.goal.hint.HintCombination;
+import me.marin.lockout.server.goal.hint.BiomeServerHint;
+import me.marin.lockout.server.goal.hint.StructureServerHint;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
@@ -21,7 +24,10 @@ public class GoalRequirements {
     @SafeVarargs
     public static GoalRequirement<Object> anyBiome(String name, ResourceKey<Biome>... biomes) {
         return new GoalRequirement.AnyBiome(Arrays.stream(biomes).toList())
-                .withHint(new GoalHint.Biomes(name, List.of(Level.OVERWORLD), Arrays.stream(biomes).toList()));
+                .withHint(new HintCombination<>(
+                        () -> new BiomeServerHint(List.of(Level.OVERWORLD), Arrays.stream(biomes).toList()),
+                        () -> new PositionClientHint(name)
+                ));
     }
 
     public static GoalRequirement<Object> biome(ResourceKey<Biome> biome) {
@@ -36,7 +42,10 @@ public class GoalRequirements {
     @SafeVarargs
     public static GoalRequirement<Object> anyStructure(String name, ResourceKey<Structure>... structures) {
         return new GoalRequirement.AnyStructure(Arrays.stream(structures).toList())
-                .withHint(new GoalHint.Structures(name, List.of(Level.OVERWORLD), Arrays.stream(structures).toList()));
+                .withHint(new HintCombination<>(
+                        () -> new StructureServerHint(List.of(Level.OVERWORLD), Arrays.stream(structures).toList()),
+                        () -> new PositionClientHint(name)
+                ));
     }
 
     public static GoalRequirement<Object> structure(ResourceKey<Structure> structure) {
@@ -72,6 +81,7 @@ public class GoalRequirements {
             Biomes.FROZEN_RIVER, Biomes.SNOWY_BEACH, Biomes.FROZEN_OCEAN, Biomes.DEEP_FROZEN_OCEAN
     );
 
-    public static final GoalRequirement.AndCombined<DyeColor> COLORS = DESERT_LIKE.forOptions(DyeColor.LIME, DyeColor.GREEN, DyeColor.CYAN)
-            .and(JUNGLE.forOptions(DyeColor.BROWN));
+    public static final GoalRequirement.AndCombined<DyeColor> COLORS = DESERT_LIKE.forOptions(DyeColor.GREEN, DyeColor.CYAN)
+            .and(JUNGLE.forOptions(DyeColor.BROWN))
+            .and(DESERT_LIKE.or(anyBiome("Sea-pickle Biome", Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN)).forOptions(DyeColor.LIME));
 }

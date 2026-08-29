@@ -21,7 +21,7 @@ public class DefaultGoalRegister {
             return;
         }
         INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
-                .customNameExtractor(NameExtractor.simple("Obtain all Wooden Tolls")));
+                .customNameExtractor(NameExtractor.simple("Obtain all Wooden Tools")));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));
         INSTANCE.register(ObtainAllItemGoalBuilder.simple(GoalCategory.OBTAINING_ITEMS, Items.WITHER_SKELETON_SKULL)
                 .defaultEnabled(false)

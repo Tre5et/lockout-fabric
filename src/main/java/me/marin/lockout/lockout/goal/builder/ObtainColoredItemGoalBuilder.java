@@ -1,8 +1,11 @@
 package me.marin.lockout.lockout.goal.builder;
 
 import com.google.gson.reflect.TypeToken;
+import me.marin.lockout.client.goal.option.ClientGoalOptionGenerator;
+import me.marin.lockout.client.goal.option.ListClientGoalOptionGenerator;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
+import me.marin.lockout.lockout.goal.option.ListGoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
@@ -11,6 +14,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.ColorCollection;
+
+import java.util.Optional;
 
 public class ObtainColoredItemGoalBuilder extends ObtainItemGoalBuilder<DyeColor> {
     protected final ColorCollection<Item> items;
@@ -24,8 +29,13 @@ public class ObtainColoredItemGoalBuilder extends ObtainItemGoalBuilder<DyeColor
     }
 
     @Override
-    public GoalOptionGenerator<DyeColor> optionGenerator() {
-        return GoalOptionGenerator.list(DyeColor.VALUES, new TypeToken<>() {});
+    public Optional<GoalOptionGenerator<DyeColor>> getOptionGenerator() {
+        return Optional.of(new ListGoalOptionGenerator<>(DyeColor.VALUES, new TypeToken<>() {}));
+    }
+
+    @Override
+    public Optional<ClientGoalOptionGenerator<DyeColor>> getClientOptionGenerator() {
+        return Optional.of(new ListClientGoalOptionGenerator<>("Color", DyeColor.VALUES, new TypeToken<>() {}));
     }
 
     @Override

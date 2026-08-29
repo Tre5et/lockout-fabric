@@ -1,6 +1,5 @@
 package me.marin.lockout.mixin.client.toasts;
 
-import me.marin.lockout.Lockout;
 import me.marin.lockout.client.LockoutClient;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -15,7 +14,7 @@ public class TutorialToastMixin {
 
     @Inject(method = "extractRenderState", at = @At("HEAD"), cancellable = true)
     public void onDraw(GuiGraphicsExtractor context, Font textRenderer, long startTime, CallbackInfo ci) {
-        if (Lockout.exists(LockoutClient.lockout)) {
+        if (LockoutClient.lockout != null) {
             ci.cancel();
         }
     }

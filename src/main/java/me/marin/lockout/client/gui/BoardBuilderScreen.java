@@ -1,15 +1,12 @@
 package me.marin.lockout.client.gui;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import me.marin.lockout.Lockout;
-import me.marin.lockout.Utility;
 import me.marin.lockout.client.LockoutClient;
+import me.marin.lockout.client.goal.ClientGoal;
+import me.marin.lockout.client.goal.option.ClientGoalOptionGenerator;
 import me.marin.lockout.lockout.GoalRegistry;
-import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
-import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -26,22 +23,30 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.FormattedCharSequence;
+import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static me.marin.lockout.Constants.*;
 
 public class BoardBuilderScreen extends Screen {
+    private static final int GOAL_SIZE = 16;
+    private static final int GOAL_PADDING = 2;
+    private static final int BOARD_PADDING = 8;
+    private static final int BOARD_MARGIN = 8;
+    private static final int BUTTON_SIZE = 20;
+    private static final int BUTTON_MARGIN = 8;
 
-    public static int CENTER_OFFSET = 0;
-    public static boolean displaySearch = false;
-    public static boolean displayEditData = false;
+    public boolean displaySearch = false;
+    public boolean displayEditData = false;
+    private int sideBarWidth = 0;
+    private int boardX = 0;
+    private int boardY = 0;
+    private int boardSize = 0;
 
     private EditBox titleTextField;
     private Button saveButton;
@@ -53,9 +58,7 @@ public class BoardBuilderScreen extends Screen {
     private Button decreaseSizeButton;
     private EditBox searchTextField;
     private BoardBuilderSearchWidget boardBuilderSearchWidget;
-    private Button saveDataButton;
     private Button closeEditDataButton;
-    private StringWidget editDataErrorTextWidget;
 
 
     public BoardBuilderScreen() {
@@ -70,59 +73,26 @@ public class BoardBuilderScreen extends Screen {
         int centerX = width / 2;
         int centerY = height / 2;
 
-        int boardHalfSize = GUI_PADDING + (BoardBuilderData.INSTANCE.size() * GUI_SLOT_SIZE) / 2;
+        boardSize = getBoardSize();
+        int mainPanelWidth = getMainPanelWidth();
+        int halfBoardSize = boardSize / 2;
+        int halfMainPanelWidth = mainPanelWidth / 2;
 
-        titleTextField = new EditBox(textRenderer, centerX - 60 - CENTER_OFFSET, centerY - boardHalfSize - 18 - 8, 120, 18, Component.empty());
-        titleTextField.setResponder(BoardBuilderData.INSTANCE::setTitle);
-        titleTextField.setValue(BoardBuilderData.INSTANCE.getTitle());
-        this.addRenderableWidget(titleTextField);
-
-        final int BOTTOM_BUTTONS_Y = height - 30;
-
-        saveButton = Button.builder(Component.nullToEmpty("Save Board"), (b) -> {
-            saveGoals(10, height - 45);
-        }).width(85).pos(10, BOTTOM_BUTTONS_Y).build();
-        this.addRenderableWidget(saveButton);
-
-        closeButton = Button.builder(Component.nullToEmpty("Close"), (b) -> {
-            onClose();
-        }).width(50).pos(width - 50 - 10, BOTTOM_BUTTONS_Y).build();
-        this.addRenderableWidget(closeButton);
-
-        clearBoardButton = Button.builder(Component.nullToEmpty("Clear Board"), (b) -> {
-            BoardBuilderData.INSTANCE.clear();
-            closeEditData();
-            closeSearch();
-        }).width(85).pos(closeButton.getX() - 85 - 10, BOTTOM_BUTTONS_Y).build();
-        this.addRenderableWidget(clearBoardButton);
-
-        increaseSizeButton = Button.builder(Component.literal("+"), b -> {
-            BoardBuilderData.INSTANCE.incrementSize();
-            rebuildWidgets();
-        }).tooltip(Tooltip.create(Component.literal("Increase board size"))).width(20).pos(centerX + boardHalfSize - CENTER_OFFSET + 8, centerY - 10).build();
-        increaseSizeButton.active = BoardBuilderData.INSTANCE.size() != MAX_BOARD_SIZE;
-        this.addRenderableWidget(increaseSizeButton);
-
-        decreaseSizeButton = Button.builder(Component.literal("-"), b -> {
-            BoardBuilderData.INSTANCE.decrementSize();
-            rebuildWidgets();
-        }).tooltip(Tooltip.create(Component.literal("Decrease board size"))).width(20).pos(centerX - boardHalfSize - CENTER_OFFSET - 20 - 8, centerY - 10).build();
-        decreaseSizeButton.active = BoardBuilderData.INSTANCE.size() != MIN_BOARD_SIZE;
-        this.addRenderableWidget(decreaseSizeButton);
+        int availableSidebarWidth = width - mainPanelWidth;
 
         if (displaySearch) {
+            sideBarWidth = Math.min(BoardBuilderSearchWidget.getPreferredWidth(font), availableSidebarWidth);
+
             double scrollY = boardBuilderSearchWidget == null ? 0 : boardBuilderSearchWidget.scrollAmount();
             boardBuilderSearchWidget = new BoardBuilderSearchWidget(
-                    centerX + boardHalfSize + 35 - CENTER_OFFSET,
+                    width - sideBarWidth,
                     40,
-                    width / 2 - 125 + CENTER_OFFSET,
+                    sideBarWidth,
                     height - 40 * 2, Component.empty());
             boardBuilderSearchWidget.setScrollAmount(scrollY);
             this.addRenderableWidget(boardBuilderSearchWidget);
 
-            closeSearchButton = Button.builder(Component.nullToEmpty("<"), (b) -> {
-                closeSearch();
-            }).tooltip(Tooltip.create(Component.nullToEmpty("Close search"))).width(20).pos(boardBuilderSearchWidget.getX(), boardBuilderSearchWidget.getY() - 21).build();
+            closeSearchButton = Button.builder(Component.nullToEmpty("<"), (_) -> closeSearch()).tooltip(Tooltip.create(Component.nullToEmpty("Close search"))).width(20).pos(boardBuilderSearchWidget.getX(), boardBuilderSearchWidget.getY() - 21).build();
             this.addRenderableWidget(closeSearchButton);
 
             searchTextField = new EditBox(textRenderer, closeSearchButton.getX() + closeSearchButton.getWidth() + 1 + 5, closeSearchButton.getY() + 1, boardBuilderSearchWidget.getWidth() - closeSearchButton.getWidth() - 2 - 5, 18, Component.empty());
@@ -133,138 +103,87 @@ public class BoardBuilderScreen extends Screen {
             if (!BoardBuilderData.INSTANCE.getSearch().isEmpty()) {
                 searchTextField.setValue(BoardBuilderData.INSTANCE.getSearch());
             }
+            searchTextField.setSuggestion(searchTextField.getValue().isEmpty() ? "Search goals.." : null);
             this.addRenderableWidget(searchTextField);
-        }
-        if (displayEditData && BoardBuilderData.INSTANCE.getModifyingIdx() != null) {
-            Goal<?> goal = BoardBuilderData.INSTANCE.getModifyingGoal();
-            GoalBuilder<?> builder = GoalRegistry.INSTANCE.get(goal.getBuildData().getA());
-            if(builder.optionGenerator() == null) {
+        } else if (displayEditData && BoardBuilderData.INSTANCE.getModifyingIdx() != null) {
+            ClientGoal goal = BoardBuilderData.INSTANCE.getModifyingGoal();
+            GoalBuilder<?,?> builder = GoalRegistry.INSTANCE.get(goal.getBuildData().id());
+            if(builder.getClientOptionGenerator().isEmpty()) {
                 displayEditData = false;
             } else {
-                GoalOptionGenerator<?> generator = builder.optionGenerator();
-                int width = Math.max(generator.getPreferredRenderWidth(), 60);
+                ClientGoalOptionGenerator<?> generator = builder.getClientOptionGenerator().get();
+                sideBarWidth = Math.min(generator.getPreferredRenderWidth(), availableSidebarWidth);
                 int height = Math.min(generator.getPreferredRenderHeight(), this.height - 66);
-                int x = this.width - width;
+                int x = width - sideBarWidth;
                 int y = centerY - 30 - (height / 2);
                 try {
-                    this.addRenderableWidget(generator.getWidgetUnsafe(x, y, width, height, textRenderer, (o) -> {
+                    this.addRenderableWidget(generator.getWidgetUnsafe(x, y, sideBarWidth, height, textRenderer, (o) -> {
                         try {
-                            BoardBuilderData.INSTANCE.setGoal(builder.buildGeneric(o));
+                            BoardBuilderData.INSTANCE.setGoal(builder.buildClientGeneric(o));
+                            rebuildWidgets();
                         } catch (IllegalGoalConstructionException e) {
                             Lockout.log("Failed to update goal " + builder + " with option " + o + ": " + e.getMessage());
                         }
-                    }, goal.getBuildData().getB()));
+                    }, goal.getBuildData().option().orElse(null)));
                 } catch (IllegalGoalConstructionException e) {
-                    Lockout.log("Failed to render goal option selector for goal " + builder.getStaticId() + " with option" + goal.getBuildData().getB() + ": " + e.getMessage());
+                    Lockout.log("Failed to render goal option selector for goal " + builder.getStaticId() + " with option" + goal.getBuildData().option().orElse("null") + ": " + e.getMessage());
                 }
 
-                closeEditDataButton = Button.builder(Component.literal("Close"), (b) -> {
-                    closeEditData();
-                }).width(50).pos(x, y + height + 6).build();
+                closeEditDataButton = Button.builder(Component.literal("Close"), (_) -> closeEditData()).width(50).pos(x, y + height + 6).build();
                 this.addRenderableWidget(closeEditDataButton);
-
-/*                int errorY = y + 25;
-                saveDataButton = Button.builder(Component.nullToEmpty("Save"), (b) -> {
-                    StringBuilder sb = new StringBuilder();
-                    boolean isOk = true;
-                    String wrongDataGenerator = null;
-                    for (int i = 0; i < generators.size(); i++) {
-                        if (i > 0) sb.append(GoalDataConstants.DATA_SEPARATOR);
-                        GoalDataGenerator.Generator<?> generator = generators.get(i);
-                        if (!generator.verify(dataList.get(i))) {
-                            isOk = false;
-                            wrongDataGenerator = generator.getGeneratorName();
-                            break;
-                        }
-                        sb.append(dataList.get(i));
-                    }
-                    if (editDataErrorTextWidget != null) {
-                        this.removeWidget(editDataErrorTextWidget);
-                        this.editDataErrorTextWidget = null;
-                    }
-                    if (!isOk) {
-                        String s = "Invalid '" + wrongDataGenerator + "'.";
-                        editDataErrorTextWidget = new StringWidget(Component.literal(s).withStyle(ChatFormatting.RED), textRenderer);
-                        editDataErrorTextWidget.setPosition(x + 75 - textRenderer.width(s) / 2, errorY);
-                        this.addRenderableWidget(editDataErrorTextWidget);
-                        return;
-                    }
-
-                    if(generator.getCurrent() == null) {
-                        String s = "Invalid value.";
-                        editDataErrorTextWidget = new StringWidget(Component.literal(s).withStyle(ChatFormatting.RED), textRenderer);
-                        editDataErrorTextWidget.setPosition(x + 75 - textRenderer.width(s) / 2, errorY);
-                        this.addRenderableWidget(editDataErrorTextWidget);
-                        return;
-                    }
-                    BoardBuilderData.INSTANCE.setGoal(builder.buildFromCurrent());
-                    closeEditData();
-                }).width(50)
-                        .pos(closeEditDataButton.getX() + closeEditDataButton.getWidth() + 5, closeEditDataButton.getY())
-                        .build();
-                this.addRenderableWidget(saveDataButton);*/
             }
-            /*var generators = GoalRegistry.INSTANCE.getDataGenerator(goal.getId()).get().getGenerators();
-            List<String> dataList = new ArrayList<>(List.of(goal.getData().split(GoalDataConstants.DATA_SEPARATOR)));
-            int x = centerX + 100 - CENTER_OFFSET;
-            int y = centerY - (18 + generators.size() * 45) / 2;
-
-            for (int i = 0; i < generators.size(); i++) {
-                final int idx = i;
-                GoalDataGenerator.Generator<?> generator = generators.get(i);
-                StringWidget textWidget = new StringWidget(Component.nullToEmpty(generator.getGeneratorName()), textRenderer);
-                textWidget.setPosition(x, y);
-                this.addRenderableWidget(textWidget);
-
-                y += 15;
-
-                EditBox textFieldWidget = new EditBox(textRenderer, x, y, 150, 18, Component.empty());
-                textFieldWidget.setValue(dataList.get(idx));
-                textFieldWidget.setResponder(s -> {
-                    dataList.set(idx, s);
-                });
-                this.addRenderableWidget(textFieldWidget);
-
-                y += 30;
-            }
-
-            closeEditDataButton = Button.builder(Component.nullToEmpty("<"), (b) -> {
-                closeEditData();
-            }).tooltip(Tooltip.create(Component.nullToEmpty("Close 'Edit Data'"))).width(20).pos(x, y).build();
-            this.addRenderableWidget(closeEditDataButton);
-
-            int errorY = y + 25;
-            saveDataButton = Button.builder(Component.nullToEmpty("Save"), (b) -> {
-                StringBuilder sb = new StringBuilder();
-                boolean isOk = true;
-                String wrongDataGenerator = null;
-                for (int i = 0; i < generators.size(); i++) {
-                    if (i > 0) sb.append(GoalDataConstants.DATA_SEPARATOR);
-                    GoalDataGenerator.Generator<?> generator = generators.get(i);
-                    if (!generator.verify(dataList.get(i))) {
-                        isOk = false;
-                        wrongDataGenerator = generator.getGeneratorName();
-                        break;
-                    }
-                    sb.append(dataList.get(i));
-                }
-                if (editDataErrorTextWidget != null) {
-                    this.removeWidget(editDataErrorTextWidget);
-                    this.editDataErrorTextWidget = null;
-                }
-                if (!isOk) {
-                    String s = "Invalid '" + wrongDataGenerator + "'.";
-                    editDataErrorTextWidget = new StringWidget(Component.literal(s).withStyle(ChatFormatting.RED), textRenderer);
-                    editDataErrorTextWidget.setPosition(x + 75 - textRenderer.width(s) / 2, errorY);
-                    this.addRenderableWidget(editDataErrorTextWidget);
-                    return;
-                }
-                BoardBuilderData.INSTANCE.setGoal(GoalRegistry.INSTANCE.newGoal(goal.getId(), sb.toString()));
-                closeEditData();
-            }).width(50).pos(closeEditDataButton.getX() + closeEditDataButton.getWidth() + 5, closeEditDataButton.getY()).build();
-            this.addRenderableWidget(saveDataButton);*/
+        } else {
+            sideBarWidth = 0;
         }
 
+        int maxCenterX = width - sideBarWidth - halfMainPanelWidth;
+        int mainContentCenterX = Math.min(centerX, maxCenterX);
+        boardX = mainContentCenterX - halfBoardSize;
+        boardY = centerY - halfBoardSize;
+
+        titleTextField = new EditBox(textRenderer, mainContentCenterX - 60, boardY - 18 - 8, 120, 18, Component.empty());
+        titleTextField.setResponder(BoardBuilderData.INSTANCE::setTitle);
+        titleTextField.setValue(BoardBuilderData.INSTANCE.getTitle());
+        titleTextField.setSuggestion(titleTextField.getValue().isEmpty() ? "Board Name" : null);
+        this.addRenderableWidget(titleTextField);
+
+        final int BOTTOM_BUTTONS_Y = height - 30;
+
+        saveButton = Button.builder(Component.nullToEmpty("Save Board"), (_) -> saveGoals(10, height - 45)).width(85).pos(10, BOTTOM_BUTTONS_Y).build();
+        saveButton.active = BoardBuilderData.INSTANCE.isValid();
+        this.addRenderableWidget(saveButton);
+
+        closeButton = Button.builder(Component.nullToEmpty("Close"), (_) -> onClose()).width(50).pos(width - 50 - 10, BOTTOM_BUTTONS_Y).build();
+        this.addRenderableWidget(closeButton);
+
+        clearBoardButton = Button.builder(Component.nullToEmpty("Clear Board"), (_) -> {
+            BoardBuilderData.INSTANCE.clear();
+            closeEditData();
+            closeSearch();
+        }).width(85).pos(closeButton.getX() - 85 - 10, BOTTOM_BUTTONS_Y).build();
+        this.addRenderableWidget(clearBoardButton);
+
+        increaseSizeButton = Button.builder(Component.literal("+"), (_) -> {
+            BoardBuilderData.INSTANCE.incrementSize();
+            rebuildWidgets();
+        }).tooltip(Tooltip.create(Component.literal("Increase board size"))).width(BUTTON_SIZE).pos(mainContentCenterX + halfMainPanelWidth - BUTTON_SIZE - BUTTON_MARGIN, centerY - 10).build();
+        increaseSizeButton.active = BoardBuilderData.INSTANCE.getSize() != MAX_BOARD_SIZE;
+        this.addRenderableWidget(increaseSizeButton);
+
+        decreaseSizeButton = Button.builder(Component.literal("-"), (_) -> {
+            BoardBuilderData.INSTANCE.decrementSize();
+            rebuildWidgets();
+        }).tooltip(Tooltip.create(Component.literal("Decrease board size"))).width(BUTTON_SIZE).pos(mainContentCenterX - halfMainPanelWidth + BUTTON_MARGIN, centerY - 10).build();
+        decreaseSizeButton.active = BoardBuilderData.INSTANCE.getSize() != MIN_BOARD_SIZE;
+        this.addRenderableWidget(decreaseSizeButton);
+    }
+
+    private int getMainPanelWidth() {
+        return getBoardSize() + 2 * BOARD_PADDING + 2 * BOARD_MARGIN + 2 * BUTTON_SIZE + 2 * BUTTON_MARGIN;
+    }
+
+    private int getBoardSize() {
+        return BoardBuilderData.INSTANCE.getSize() * (GOAL_SIZE + GOAL_PADDING) - GOAL_PADDING;
     }
 
     private void saveGoals(int errorX, int errorY) {
@@ -320,25 +239,47 @@ public class BoardBuilderScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NonNull GuiGraphicsExtractor extractor, int mouseX, int mouseY, float delta) {
         //this.renderBackground(context, mouseX, mouseY, delta);
-        super.extractRenderState(context, mouseX, mouseY, delta);
+        super.extractRenderState(extractor, mouseX, mouseY, delta);
 
-        drawCenterBoard(context, mouseX, mouseY);
+        Optional<Integer> hoveredIdx = BoardBuilderData.INSTANCE.getHoveredIndex(mouseX, mouseY, boardX, boardY, GOAL_SIZE, GOAL_PADDING);
+        Integer editingIdx = BoardBuilderData.INSTANCE.getModifyingIdx();
+
+        extractor.blitSprite(RenderPipelines.GUI_TEXTURED, GUI_CENTER_IDENTIFIER, boardX - BOARD_PADDING, boardY - BOARD_PADDING, boardSize + 2*BOARD_PADDING, boardSize + 2*BOARD_PADDING);
+
+        //drawCenterBoard(extractor, mouseX, mouseY);
+        BoardBuilderData.INSTANCE.extractGoals(extractor, font, boardX, boardY, GOAL_SIZE, GOAL_PADDING, (_,_,_,_) -> {}, (x,y, index, _) -> {
+            if(hoveredIdx.isPresent() && index == hoveredIdx.get()) {
+                extractor.fill(x, y, x + GOAL_SIZE, y + GOAL_SIZE, GUI_CENTER_HOVERED_COLOR);
+            }
+            if (editingIdx != null && index == editingIdx) {
+                drawBorder(extractor, x, y, GOAL_SIZE, GOAL_SIZE, Color.RED.getRGB());
+            }
+        });
+
+        if(hoveredIdx.isPresent()) {
+            ClientGoal hoveredGoal = BoardBuilderData.INSTANCE.getGoals().get(hoveredIdx.get());
+            if(hoveredGoal != null) {
+                hoveredGoal.extractTooltip(extractor, font, mouseX, mouseY, false, false, Optional.empty(),
+                    hoveredGoal.getBuildData().option().isPresent() ? Component.literal("Right-click to edit data.").withStyle(ChatFormatting.ITALIC).withColor(TextColor.GRAY) : null
+                );
+            }
+        }
 
         titleTextField.setSuggestion(titleTextField.getValue().isEmpty() ? "Board Name" : null);
         if (displaySearch) {
             searchTextField.setSuggestion(searchTextField.getValue().isEmpty() ? "Search goals.." : null);
         }
+        saveButton.active = BoardBuilderData.INSTANCE.isValid();
     }
-
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean consumed) {
-        Optional<Integer> hoveredIdx = Utility.getBoardHoveredIndex(BoardBuilderData.INSTANCE.size(), width, height, (int) click.x(), (int) click.y());
+        Optional<Integer> hoveredIdx = BoardBuilderData.INSTANCE.getHoveredIndex((int) click.x(), (int) click.y(), boardX, boardY, GOAL_SIZE, GOAL_PADDING);
         if ((click.button() == 0 || click.button() == 1) && hoveredIdx.isPresent()) {
-            Goal goal = BoardBuilderData.INSTANCE.getGoals().get(hoveredIdx.get());
-            if (click.button() == 1 && goal != null && goal.getBuildData().getB() != null) {
+            ClientGoal goal = BoardBuilderData.INSTANCE.getGoals().get(hoveredIdx.get());
+            if (click.button() == 1 && goal != null && goal.getBuildData().option().isPresent()) {
                 openEditData(hoveredIdx.get());
             } else {
                 openSearch(hoveredIdx.get());
@@ -354,7 +295,6 @@ public class BoardBuilderScreen extends Screen {
         displaySearch = true;
 
         BoardBuilderData.INSTANCE.setModifyingIdx(hoveredIdx);
-        CENTER_OFFSET = 100;
 
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
         rebuildWidgets();
@@ -364,7 +304,6 @@ public class BoardBuilderScreen extends Screen {
         displaySearch = false;
 
         BoardBuilderData.INSTANCE.setModifyingIdx(null);
-        CENTER_OFFSET = 0;
 
         this.boardBuilderSearchWidget = null;
         this.closeSearchButton = null;
@@ -378,7 +317,6 @@ public class BoardBuilderScreen extends Screen {
         displayEditData = true;
 
         BoardBuilderData.INSTANCE.setModifyingIdx(hoveredIdx);
-        CENTER_OFFSET = 50;
 
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
         rebuildWidgets();
@@ -388,11 +326,8 @@ public class BoardBuilderScreen extends Screen {
         displayEditData = false;
 
         BoardBuilderData.INSTANCE.setModifyingIdx(null);
-        CENTER_OFFSET = 0;
 
-        this.saveDataButton = null;
         this.closeEditDataButton = null;
-        this.editDataErrorTextWidget = null;
 
         rebuildWidgets();
     }
@@ -403,16 +338,16 @@ public class BoardBuilderScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent input) {
+    public boolean keyPressed(@NonNull KeyEvent input) {
         // Check if the pressed key matches the board keybinding
-        if (LockoutClient.getBoardKeybinding().matches(input)) {
+        if (LockoutClient.getBoardKeybinding().matches(input) && !titleTextField.isFocused() && !searchTextField.isFocused()) {
             this.onClose();
             return true;
         }
         return super.keyPressed(input);
     }
 
-    public void drawCenterBoard(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+    /*public void drawCenterBoard(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         Font textRenderer = Minecraft.getInstance().font;
 
         int size = BoardBuilderData.INSTANCE.size();
@@ -434,17 +369,17 @@ public class BoardBuilderScreen extends Screen {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 int idx = j + size * i;
-                Goal goal = BoardBuilderData.INSTANCE.getGoals().get(idx);
+                ClientGoal goal = BoardBuilderData.INSTANCE.getGoals().get(idx);
                 if (goal != null) {
-                    goal.extractTexture(context, textRenderer, x, y);
-/*                    boolean success = false;
+                    goal.extractTexture(context, textRenderer, x, y, 16, 16, LockoutClient.CURRENT_TICK);
+*//*                    boolean success = false;
                     if (goal instanceof CustomTextureRenderer customTextureRenderer) {
                         success = customTextureRenderer.renderTexture(context, x, y, LockoutClient.CURRENT_TICK);
                     }
                     if (!success) {
                         context.item(goal.getTextureItemStack(), x, y);
                         context.itemDecorations(textRenderer, goal.getTextureItemStack(), x, y);
-                    }*/
+                    }*//*
                 }
 
                 if (hoveredIdx.isPresent() && hoveredIdx.get() == idx) {
@@ -456,8 +391,8 @@ public class BoardBuilderScreen extends Screen {
                 if (hoveredIdx.isPresent() && hoveredIdx.get() == idx) {
                     if (goal != null) {
                         List<FormattedCharSequence> tooltip = new ArrayList<>();
-                        tooltip.add(goal.extractName().getVisualOrderText());
-                        if (goal.getBuildData().getB() != null) {
+                        tooltip.add(goal.getName().getVisualOrderText());
+                        if (goal.getBuildData().option().isPresent()) {
                             tooltip.add(Component.literal("Right-click to edit data.").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC).getVisualOrderText());
                         }
                         context.setTooltipForNextFrame(textRenderer, tooltip, mouseX, mouseY);
@@ -469,7 +404,7 @@ public class BoardBuilderScreen extends Screen {
             y += GUI_CENTER_SLOT_SIZE;
             x = startX;
         }
-    }
+    }*/
 
     private static void drawBorder(GuiGraphicsExtractor context, int x, int y, int width, int height, int color) {
         context.fill(x, y, x + width, y + 1, color);

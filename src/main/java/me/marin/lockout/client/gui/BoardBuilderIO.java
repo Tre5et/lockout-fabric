@@ -1,7 +1,8 @@
 package me.marin.lockout.client.gui;
 
 import com.google.gson.*;
-import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.client.goal.ClientGoal;
+import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,12 +29,12 @@ public class BoardBuilderIO {
         }
     }
 
-    public void saveBoard(String name, List<Goal<?>> goals) throws IOException {
+    public void saveBoard(String name, List<ClientGoal> goals) throws IOException {
         Path boardPath = DIRECTORY.resolve(name + FILE_EXTENSION);
         Files.createFile(boardPath);
         JsonArray data = new JsonArray();
-        for(Goal<?> goal : goals) {
-            data.add(goal.serialize(List.of(), false));
+        for(ClientGoal goal : goals) {
+            data.add(goal.serialize(false));
         }
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
         String jsonString = gson.toJson(data);
@@ -48,12 +49,16 @@ public class BoardBuilderIO {
         return DIRECTORY.resolve(name + FILE_EXTENSION);
     }
 
-    public List<Goal<?>> readBoard(String name) throws IOException {
+    public List<ClientGoal> readBoard(String name) throws IOException {
         JsonElement read = JsonParser.parseString(Files.readString(getBoardPath(name)));
         if(!read.isJsonArray()) throw new IOException("Saved board is not an array.");
-        List<Goal<?>> goals = new ArrayList<>();
+        List<ClientGoal> goals = new ArrayList<>();
         for(JsonElement element : read.getAsJsonArray()) {
-            goals.add(Goal.deserialize(element, List.of()));
+            try {
+                goals.add(ClientGoal.deserialize(element));
+            } catch (IllegalGoalConstructionException e) {
+                throw new IOException("Failed to create a goal", e);
+            }
         }
         return goals;
     }

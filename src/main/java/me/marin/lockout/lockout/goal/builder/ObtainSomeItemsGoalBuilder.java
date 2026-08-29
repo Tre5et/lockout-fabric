@@ -1,7 +1,6 @@
 package me.marin.lockout.lockout.goal.builder;
 
 import me.marin.lockout.lockout.goal.config.GoalCategory;
-import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
@@ -41,11 +40,6 @@ public class ObtainSomeItemsGoalBuilder extends ObtainItemGoalBuilder<Void> {
     @Override
     public TextureExtractor defaultTextureExtractor(Void option) {
         return ItemTextureExtractor.cycleStacks(items);
-    }
-
-    @Override
-    public GoalOptionGenerator<Void> optionGenerator() {
-        return null;
     }
 
     @Override

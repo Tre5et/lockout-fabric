@@ -1,12 +1,13 @@
 package me.marin.lockout.lockout.goal.builder;
 
 import me.marin.lockout.client.LockoutClient;
-import me.marin.lockout.lockout.goal.Goal;
-import me.marin.lockout.lockout.goal.SatisfiableGoal;
+import me.marin.lockout.client.goal.progress.ClientGoalProgress;
+import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
-import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
+import me.marin.lockout.server.goal.progress.ServerGoalProgress;
+import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.Identifier;
@@ -16,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AdvancementGoalBuilder extends GoalBuilder<Void> {
+public class AdvancementGoalBuilder extends GoalBuilder<AdvancementHolder, Void> {
     private final List<Identifier> advancements;
 
     public AdvancementGoalBuilder(String id, GoalCategory category, List<Identifier> advancements) {
@@ -56,16 +57,13 @@ public class AdvancementGoalBuilder extends GoalBuilder<Void> {
     }
 
     @Override
-    public GoalOptionGenerator<Void> optionGenerator() {
-        return null;
+    public ServerGoalProgress<AdvancementHolder, ?> getServerGoalProgress(Void option) {
+        return new SimpleServerGoalProgress<>(h -> advancements.contains(h.id()));
     }
 
     @Override
-    public Goal<?> build(Void option) {
-        return new SatisfiableGoal<AdvancementHolder>(
-                getBuildParameters(option),
-                a -> advancements.contains(a.id())
-        );
+    public ClientGoalProgress<?> getClientGoalProgress(Void option) {
+        return new SimpleClientGoalProgress();
     }
 
     public static AdvancementGoalBuilder any(String id, GoalCategory category, Identifier... advancements) {

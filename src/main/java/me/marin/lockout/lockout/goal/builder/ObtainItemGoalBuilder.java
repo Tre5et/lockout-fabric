@@ -1,8 +1,10 @@
 package me.marin.lockout.lockout.goal.builder;
 
-import me.marin.lockout.lockout.goal.Goal;
-import me.marin.lockout.lockout.goal.SatisfiableGoal;
+import me.marin.lockout.client.goal.progress.ClientGoalProgress;
+import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.server.goal.progress.ServerGoalProgress;
+import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
@@ -10,20 +12,22 @@ import net.minecraft.world.item.Item;
 import java.util.Arrays;
 import java.util.Optional;
 
-public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<T> {
+public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<Inventory,T> {
     public ObtainItemGoalBuilder(String id, GoalCategory category) {
         super("OBTAIN_" + id, category);
     }
 
-    abstract boolean satisfiedBy(Inventory inventory, T option);
+    @Override
+    public ClientGoalProgress<?> getClientGoalProgress(T option) {
+        return new SimpleClientGoalProgress();
+    }
 
     @Override
-    public Goal<?> build(T option) {
-        return new SatisfiableGoal<Inventory>(
-                getBuildParameters(option),
-                i -> satisfiedBy(i, option)
-        );
+    public ServerGoalProgress<Inventory, ?> getServerGoalProgress(T option) {
+        return new SimpleServerGoalProgress<>(u -> satisfiedBy(u, option));
     }
+
+    abstract boolean satisfiedBy(Inventory inventory, T option);
 
     protected static String getItemName(Item item) {
         return item.getName(item.getDefaultInstance())

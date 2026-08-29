@@ -1,7 +1,9 @@
 package me.marin.lockout.client.gui;
 
+import lombok.Getter;
+import me.marin.lockout.client.LockoutClient;
+import me.marin.lockout.client.goal.ClientGoal;
 import me.marin.lockout.lockout.GoalRegistry;
-import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,6 +22,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -108,7 +111,7 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent click, boolean consumed) {
+    public boolean mouseClicked(@NonNull MouseButtonEvent click, boolean consumed) {
         if (hovered != null) {
             BoardBuilderData.INSTANCE.setGoal(hovered.getCurrentExampleGoal());
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
@@ -118,23 +121,34 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput builder) {}
+    protected void updateWidgetNarration(@NonNull NarrationElementOutput builder) {}
+
+    public static int getPreferredWidth(Font font) {
+        return 18 + GoalRegistry.INSTANCE.getRegisteredGoals().stream()
+                .map(GoalEntry::new)
+                .flatMap(e -> e.getGoalNames().stream())
+                .max(Comparator.comparingInt(font::width))
+                .map(font::width)
+                .orElse(0);
+    }
 
     public static final class GoalEntry extends ObjectSelectionList.Entry<GoalEntry> {
 
-        private final List<Goal<?>> exampleGoals;
+        @Getter
+        private final List<ClientGoal> exampleGoals;
         private final String goalNameSuffix;
+        @Getter
         private final List<String> goalNames;
 
-        public GoalEntry(GoalBuilder<?> goalBuilder) {
-            this.exampleGoals = goalBuilder.buildExamples();
+        public GoalEntry(GoalBuilder<?,?> goalBuilder) {
+            this.exampleGoals = goalBuilder.buildClientExamples();
             this.goalNameSuffix = exampleGoals.size() > 1 ? " (+" + (exampleGoals.size() - 1) + ")" : "";
             this.goalNames = exampleGoals.stream()
-                    .map(g -> g.extractName().toString() + goalNameSuffix)
+                    .map(g -> g.getName().toString() + goalNameSuffix)
                     .toList();
         }
 
-        public Goal getCurrentExampleGoal() {
+        public ClientGoal getCurrentExampleGoal() {
             int seconds = Math.toIntExact(System.currentTimeMillis() / 1000);
             int mod = (seconds / 3) % exampleGoals.size();
             return exampleGoals.get(mod);
@@ -146,7 +160,7 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
         }
 
         @Override
-        public Component getNarration() {
+        public @NonNull Component getNarration() {
             return Component.empty();
         }
 
@@ -154,10 +168,10 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
         public void extractContent(@NonNull GuiGraphicsExtractor context, int x, int y, boolean hovered, float tickDelta) {
             Font textRenderer = Minecraft.getInstance().font;
 
-            Goal goal = getCurrentExampleGoal();
-            String displayName = goal.extractName().getString() + goalNameSuffix;
+            ClientGoal goal = getCurrentExampleGoal();
+            String displayName = goal.getName().getString() + goalNameSuffix;
 
-            goal.extractTexture(context, textRenderer, x, y);
+            goal.extractTexture(context, textRenderer, x, y, 16, 16, LockoutClient.CURRENT_TICK);
             context.text(textRenderer, displayName, x + 18, y + 5, Color.WHITE.getRGB());
             if (hovered) {
                 // Draw border manually since drawBorder method doesn't exist

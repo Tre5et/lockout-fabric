@@ -1,7 +1,7 @@
 package me.marin.lockout.lockout.goals.wear_armor;
 
 import me.marin.lockout.LockoutTeam;
-import me.marin.lockout.LockoutTeamServer;
+import me.marin.lockout.server.ServerLockoutTeam;
 import me.marin.lockout.Utility;
 import me.marin.lockout.lockout.interfaces.HasTooltipInfo;
 import me.marin.lockout.lockout.interfaces.WearArmorPieceGoal;

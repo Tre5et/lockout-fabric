@@ -16,7 +16,7 @@ public class ItemTextureExtractor implements TextureExtractor {
     }
 
     @Override
-    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, int tick) {
+    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, long tick) {
         float scale = Math.min(width/16f, height/16f);
         withScale(extractor, x, y, scale, () -> {
             extractor.fakeItem(item, x, y);

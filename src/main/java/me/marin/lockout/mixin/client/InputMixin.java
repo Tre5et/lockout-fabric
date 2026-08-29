@@ -1,7 +1,7 @@
 package me.marin.lockout.mixin.client;
 
-import me.marin.lockout.Lockout;
 import me.marin.lockout.client.LockoutClient;
+import me.marin.lockout.game.GameState;
 import net.minecraft.client.player.ClientInput;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.world.entity.player.Input;
@@ -16,11 +16,11 @@ public class InputMixin extends ClientInput {
 
     @Inject(method ="tick", at = @At("TAIL"))
     public void tick(CallbackInfo ci) {
-        if (!Lockout.isLockoutRunning(LockoutClient.lockout)) return;
+        if (LockoutClient.lockout == null) return;
         if (LockoutClient.playerTeam == null) return;
 
         KeyboardInput input = (KeyboardInput) (Object) this;
-        if (!LockoutClient.lockout.hasStarted()) {
+        if (LockoutClient.lockout.getState() == GameState.STARTING) {
             input.keyPresses = new Input(false, false, false, false, false, input.keyPresses.shift(), false);
             moveVector = new Vec2(0, 0);
         }

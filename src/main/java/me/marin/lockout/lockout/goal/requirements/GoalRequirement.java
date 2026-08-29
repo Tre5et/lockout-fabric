@@ -1,7 +1,9 @@
 package me.marin.lockout.lockout.goal.requirements;
 
 import lombok.Getter;
-import me.marin.lockout.lockout.goal.hint.GoalHint;
+import me.marin.lockout.client.goal.hint.ClientHint;
+import me.marin.lockout.lockout.goal.hint.HintCombination;
+import me.marin.lockout.server.goal.hint.ServerHint;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -9,12 +11,13 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class GoalRequirement<T> {
     @Getter
     private final GoalRequirementContextInitializer initializer;
     @Getter
-    private final List<GoalHint> hints = new ArrayList<>();
+    private final List<HintCombination<?>> hints = new ArrayList<>();
 
     public GoalRequirement(GoalRequirementContextInitializer initializer) {
         this.initializer = initializer;
@@ -22,11 +25,19 @@ public abstract class GoalRequirement<T> {
 
     public abstract boolean optionSatisfiedBy(GoalRequirementContext context, T option);
 
-    public List<GoalHint> getHints(T option) {
+    public List<HintCombination<?>> getHints(T option) {
         return hints;
     }
 
-    public GoalRequirement<T> withHint(GoalHint... hint) {
+    public List<ServerHint<?>> getServerHints(T option) {
+        return getHints().stream().map(HintCombination::constructServer).collect(Collectors.toUnmodifiableList());
+    }
+
+    public List<ClientHint<?>> getClientHints(T option) {
+        return getHints().stream().map(HintCombination::constructClient).collect(Collectors.toUnmodifiableList());
+    }
+
+    public GoalRequirement<T> withHint(HintCombination<?>... hint) {
         hints.addAll(Arrays.stream(hint).toList());
         return this;
     }
@@ -58,7 +69,7 @@ public abstract class GoalRequirement<T> {
 
         @Override
         public boolean optionSatisfiedBy(GoalRequirementContext context, Object option) {
-            return biomes.stream().allMatch(s -> context.structures().get(s).wasLocated());
+            return biomes.stream().allMatch(b -> context.biomes().get(b).wasLocated());
         }
 
         @SafeVarargs
@@ -148,7 +159,7 @@ public abstract class GoalRequirement<T> {
         }
 
         @Override
-        public List<GoalHint> getHints(T option) {
+        public List<HintCombination<?>> getHints(T option) {
             if(options.contains(option)) return super.getHints(option);
             return List.of();
         }

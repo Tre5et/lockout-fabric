@@ -1,11 +1,15 @@
 package me.marin.lockout.client;
 
 import com.mojang.brigadier.context.CommandContext;
+import lombok.Getter;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.*;
+import me.marin.lockout.client.game.ClientLockoutBoard;
+import me.marin.lockout.client.game.ClientLockoutGame;
+import me.marin.lockout.client.goal.ClientGoal;
+import me.marin.lockout.client.goal.hint.ClientHint;
 import me.marin.lockout.client.gui.*;
-import me.marin.lockout.lockout.GoalRegistry;
-import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.game.GameState;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.network.*;
 import net.fabricmc.api.ClientModInitializer;
@@ -17,7 +21,6 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
-import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.KeyMapping;
@@ -33,7 +36,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import org.lwjgl.glfw.GLFW;
-import oshi.util.tuples.Pair;
 
 import java.io.IOException;
 import java.util.*;
@@ -44,18 +46,16 @@ import com.mojang.blaze3d.platform.InputConstants;
 
 public class LockoutClient implements ClientModInitializer {
 
-    public static Lockout lockout;
+    public static ClientLockoutGame lockout;
     public static LockoutTeam playerTeam = null;
-    private static KeyMapping keyBinding;
+    private static KeyMapping openBoardKey;
+    @Getter
+    private static List<KeyMapping> hintKeys;
     public static int CURRENT_TICK = 0;
     public static final Map<Identifier, Advancement> allAdvancements = new HashMap<>();
-    /** goalId -> hintIndex -> result message; persists until disconnect */
-    public static final Map<String, Map<Integer, String>> goalHintResults = new HashMap<>();
-    /** goalId -> hintIndex -> error message; cleared when the BoardScreen closes */
-    public static final Map<String, Map<Integer, String>> goalHintErrors = new HashMap<>();
 
     public static KeyMapping getBoardKeybinding() {
-        return keyBinding;
+        return openBoardKey;
     }
 
     public static Map<Identifier, Advancement> getAllAdvancements() {
@@ -80,7 +80,7 @@ public class LockoutClient implements ClientModInitializer {
                         allAdvancements.put(holder.id(), holder.value());
                     }
                 }));
-        ClientPlayNetworking.registerGlobalReceiver(LockoutGoalsTeamsPayload.ID, (payload, context) -> {
+        ClientPlayNetworking.registerGlobalReceiver(LockoutGamePayload.ID, (payload, context) -> {
             // Ensure goals are registered at packet handling time, when item stacks are available client-side.
             List<LockoutTeam> teams = payload.teams();
 
@@ -88,36 +88,21 @@ public class LockoutClient implements ClientModInitializer {
                     .filter(t -> t.getPlayerIds().stream().anyMatch(id -> id.equals(Minecraft.getInstance().player.getUUID())))
                     .findAny().orElse(null);
 
-            int[] completedByTeam = payload.goals().stream().mapToInt(Pair::getB).toArray();
-
-            boolean previouslyStarted = lockout != null && lockout.hasStarted();
+            boolean previouslyStarted = lockout != null && lockout.getState().isActive();
             long previousTicks = lockout != null ? lockout.getTicks() : 0;
 
             Minecraft client = context.client();
             try {
-                List<Goal<?>> goals = GoalRegistry.INSTANCE.constructGoals(payload.goals().stream().map(Pair::getA).toList());
-                lockout = new Lockout(new LockoutBoard(goals), teams);
+                List<ClientGoal> goals = ClientGoal.constructAll(payload.goals());
+                lockout = new ClientLockoutGame(new ClientLockoutBoard(goals), teams);
             } catch (IllegalGoalConstructionException e) {
                 if(client.player != null) client.player.sendSystemMessage(Component.literal(e.getMessage()));
                 Lockout.log(e.getMessage());
                 return;
             }
 
-            lockout.setRunning(payload.isRunning());
-            lockout.setStarted(previouslyStarted);
+            lockout.setState(payload.state());
             lockout.setTicks(previousTicks);
-
-            goalHintResults.clear();
-            goalHintErrors.clear();
-
-            List<Goal<?>> goalList = lockout.getBoard().getGoals();
-            for (int i = 0; i < goalList.size(); i++) {
-                if (completedByTeam[i] != -1) {
-                    LockoutTeam team = lockout.getTeams().get(completedByTeam[i]);
-                    goalList.get(i).setCompleted(true, team);
-                    team.addPoint();
-                }
-            }
 
             client.execute(() -> {
                 if (client.player != null && !previouslyStarted) {
@@ -125,65 +110,36 @@ public class LockoutClient implements ClientModInitializer {
                 }
             });
         });
-        ClientPlayNetworking.registerGlobalReceiver(StartLockoutPayload.ID, (payload, context) -> {
-            lockout.setStarted(true);
+        ClientPlayNetworking.registerGlobalReceiver(StartLockoutPayload.ID, (_, context) -> {
+            lockout.setState(GameState.RUNNING);
             context.client().execute(() -> {
                 if (Minecraft.getInstance().gui.screen() != null) {
                     Minecraft.getInstance().gui.screen().onClose();
                 }
             });
         });
-        ClientPlayNetworking.registerGlobalReceiver(UpdateTimerPayload.ID, (payload, context) -> {
-            lockout.setTicks(payload.ticks());
-        });
-        ClientPlayNetworking.registerGlobalReceiver(CompleteTaskPayload.ID, (payload, context) -> {
-            Minecraft client = context.client();
-            client.execute(() -> {
-                Optional<Goal<?>> goalFinder = lockout.getBoard().getGoals().stream().filter(g -> g.getId().equals(payload.goal())).findFirst();
-                if(goalFinder.isEmpty()) {
-                    client.gui.hud.getChat().addClientSystemMessage(Component.literal(ChatFormatting.RED + "Received completion for unknown goal: " + payload.goal()));
-                    return;
-                }
-                Goal<?> goal = goalFinder.get();
-                if (goal.isCompleted() || payload.teamIndex() == -1) {
-                    goal.setCompleted(false, null);
-                }
-                if (payload.teamIndex() != -1) {
-                    LockoutTeam team = lockout.getTeams().get(payload.teamIndex());
-                    team.addPoint();
-                    goal.setCompleted(true, lockout.getTeams().get(payload.teamIndex()));
-
-                    if (client.player != null && playerTeam != null) {
-                        if (team.getPlayerNames().contains(client.player.getName().getString())) {
-                            client.player.playSound(SoundEvents.NOTE_BLOCK_CHIME.value(), 2f, 1f);
-                        } else {
-                            client.player.playSound(SoundEvents.GUARDIAN_DEATH, 2f, 1f);
-                        }
-                    }
-                }
-                if(payload.announce()) {
-                    client.gui.hud.getChat().addClientSystemMessage(
-                            Component.literal(ChatFormatting.GREEN + payload.completedName().orElse("Someone") + " completed " + goal.extractName().getString() + ".")
-                    );
-                }
-            });
-        });
-        ClientPlayNetworking.registerGlobalReceiver(HintResultPayload.ID, (payload, context) -> {
-            if (payload.success()) {
-                goalHintResults.computeIfAbsent(payload.goalId(), k -> new HashMap<>()).put(payload.hintIndex(), payload.message());
-            } else {
-                goalHintErrors.computeIfAbsent(payload.goalId(), k -> new HashMap<>()).put(payload.hintIndex(), payload.message());
+        ClientPlayNetworking.registerGlobalReceiver(UpdateTimerPayload.ID, (payload, _) -> lockout.setTicks(payload.ticks()));
+        ClientPlayNetworking.registerGlobalReceiver(HintResultPayload.ID, (payload, _) -> {
+            Optional<ClientGoal> goal = lockout.getBoard().getGoals().stream()
+                    .filter(g -> g.getId().equals(payload.goalId()))
+                    .findAny();
+            if(goal.isEmpty() || goal.get().getHints().size() <= payload.hintIndex()) return;
+            ClientHint<?> hint = goal.get().getHints().get(payload.hintIndex());
+            try {
+                hint.updatePayload(payload);
+            } catch (IllegalArgumentException e) {
+                Lockout.error(e);
             }
         });
-        ClientPlayNetworking.registerGlobalReceiver(GoalProgressPayload.ID, (payload, context) -> {
+        ClientPlayNetworking.registerGlobalReceiver(GoalProgressPayload.ID, (payload, _) -> {
             if (lockout == null) return;
             lockout.getBoard().getGoals().stream()
                     .filter(g -> g.getId().equals(payload.goalId()))
                     .findFirst()
-                    .ifPresent(g -> g.setProgress(payload.progress()));
+                    .ifPresent(g -> g.updateProgress(payload.progress()));
         });
         ClientPlayNetworking.registerGlobalReceiver(EndLockoutPayload.ID, (payload, context) -> {
-            lockout.setRunning(false);
+            lockout.setState(GameState.FINISHED);
             Minecraft client = context.client();
             client.execute(() -> {
                 if (client.player != null) {
@@ -208,39 +164,36 @@ public class LockoutClient implements ClientModInitializer {
         ArgumentTypeRegistry.registerArgumentType(Constants.BOARD_FILE_ARGUMENT_TYPE, CustomBoardFileArgumentType.class, SingletonArgumentInfo.contextFree(CustomBoardFileArgumentType::newInstance));
         ArgumentTypeRegistry.registerArgumentType(Constants.BOARD_POSITION_ARGUMENT_TYPE, BoardPositionArgumentType.class, SingletonArgumentInfo.contextFree(BoardPositionArgumentType::newInstance));
 
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, _) -> dispatcher.getRoot().addChild(ClientCommands.literal("lockoutc")
+                .then(ClientCommands.literal("board")
+                        .then(ClientCommands.literal("set")
+                                .requires(ccs -> {
+                                    if (Minecraft.getInstance().isLocalServer()) {
+                                        return true;
+                                    }
+                                    return Permissions.check(ccs, PLACEHOLDER_PERM_STRING, LevelBasedPermissionSet.GAMEMASTER.level());
+                                }).then(ClientCommands.argument("name", CustomBoardFileArgumentType.newInstance())
+                                        .executes(LockoutClient::setCustomBoard)
+                                )
+                        )
+                        .then(ClientCommands.literal("builder")
+                                .executes(LockoutClient::openBoardBuilder)
+                                .then(ClientCommands.argument("board", CustomBoardFileArgumentType.newInstance())
+                                        .executes(LockoutClient::openBoardBuilder)
+                                )
+                        )
+                        .then(ClientCommands.literal("position")
+                                .executes(LockoutClient::getBoardPosition)
+                                .then(ClientCommands.literal("set")
+                                        .then(ClientCommands.argument("position", BoardPositionArgumentType.newInstance())
+                                                .executes(LockoutClient::setBoardPosition)
+                                        )
+                                )
+                        )
+                ).build()
+        ));
 
-            dispatcher.getRoot().addChild(ClientCommands.literal("lockoutc")
-                    .then(ClientCommands.literal("board")
-                            .then(ClientCommands.literal("set")
-                                    .requires(ccs -> {
-                                        if (Minecraft.getInstance().isLocalServer()) {
-                                            return true;
-                                        }
-                                        return Permissions.check(ccs, PLACEHOLDER_PERM_STRING, LevelBasedPermissionSet.GAMEMASTER.level());
-                                    }).then(ClientCommands.argument("name", CustomBoardFileArgumentType.newInstance())
-                                            .executes(LockoutClient::setCustomBoard)
-                                    )
-                            )
-                            .then(ClientCommands.literal("builder")
-                                    .executes(LockoutClient::openBoardBuilder)
-                                    .then(ClientCommands.argument("board", CustomBoardFileArgumentType.newInstance())
-                                            .executes(LockoutClient::openBoardBuilder)
-                                    )
-                            )
-                            .then(ClientCommands.literal("position")
-                                    .executes(LockoutClient::getBoardPosition)
-                                    .then(ClientCommands.literal("set")
-                                            .then(ClientCommands.argument("position", BoardPositionArgumentType.newInstance())
-                                                    .executes(LockoutClient::setBoardPosition)
-                                            )
-                                    )
-                            )
-                    ).build()
-            );
-        });
-
-        ClientPlayNetworking.registerGlobalReceiver(LockoutVersionPayload.ID, (payload, context) -> {
+        ClientPlayNetworking.registerGlobalReceiver(LockoutVersionPayload.ID, (payload, _) -> {
             // Compare Lockout versions, disconnect if invalid.
             String version = payload.version();
             if (!version.equals(LockoutInitializer.MOD_VERSION.getFriendlyString())) {
@@ -252,18 +205,30 @@ public class LockoutClient implements ClientModInitializer {
             ClientPlayNetworking.send(new LockoutVersionPayload(LockoutInitializer.MOD_VERSION.getFriendlyString()));
         });
         
-        keyBinding = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+        openBoardKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.lockout.open_board", // The translation key of the keybinding's name
                 InputConstants.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
                 GLFW.GLFW_KEY_B, // The keycode of the key
                 LOCKOUT_CATEGORY // The translation key of the keybinding's category.
         ));
 
+        List<Integer> defaultHintKeys = List.of(GLFW.GLFW_KEY_1, GLFW.GLFW_KEY_2, GLFW.GLFW_KEY_3, GLFW.GLFW_KEY_4, GLFW.GLFW_KEY_5, GLFW.GLFW_KEY_6, GLFW.GLFW_KEY_7, GLFW.GLFW_KEY_8, GLFW.GLFW_KEY_9, GLFW.GLFW_KEY_0);
+        List<KeyMapping> hintMappings = new ArrayList<>();
+        for(int i = 0; i < defaultHintKeys.size(); i++) {
+            hintMappings.add(KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                    "key.lockout.hint_" + i,
+                    InputConstants.Type.KEYSYM,
+                    defaultHintKeys.get(i),
+                    LOCKOUT_CATEGORY
+            )));
+        }
+        hintKeys = hintMappings;
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             CURRENT_TICK++;
 
             boolean wasPressed = false;
-            while (keyBinding.consumeClick()) {
+            while (openBoardKey.consumeClick()) {
                 wasPressed = true;
             }
             if (wasPressed) {
@@ -272,7 +237,7 @@ public class LockoutClient implements ClientModInitializer {
                 }
 
                 // If the game hasn't started, open board builder instead
-                if (!Lockout.exists(lockout)) {
+                if (lockout == null) {
                     client.gui.setScreen(new BoardBuilderScreen());
                     return;
                 }
@@ -281,11 +246,9 @@ public class LockoutClient implements ClientModInitializer {
                 client.gui.setScreen(new BoardScreen(BOARD_SCREEN_HANDLER.create(0, client.player.getInventory()), client.player.getInventory(), Component.empty()));
             }
         });
-        ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
+        ClientPlayConnectionEvents.DISCONNECT.register(((_, _) -> {
             lockout = null;
             allAdvancements.clear();
-            goalHintResults.clear();
-            goalHintErrors.clear();
         }));
 
         MenuScreens.register(BOARD_SCREEN_HANDLER, BoardScreen::new);
@@ -294,7 +257,7 @@ public class LockoutClient implements ClientModInitializer {
     public static int setCustomBoard(CommandContext<FabricClientCommandSource> context) {
         String boardName = context.getArgument("name", String.class);
 
-        List<Goal<?>> goals;
+        List<ClientGoal> goals;
         try {
             goals = BoardBuilderIO.INSTANCE.readBoard(boardName);
         } catch (IOException e) {
@@ -310,14 +273,14 @@ public class LockoutClient implements ClientModInitializer {
         }
 
         ClientPlayNetworking.send(new CustomBoardPayload(Optional.of(goals.stream()
-                .map(Goal::getBuildData).toList())));
+                .map(ClientGoal::getBuildData).toList())));
         return 1;
     }
 
     public static int openBoardBuilder(CommandContext<FabricClientCommandSource> context) {
         try {
             String boardName = context.getArgument("board", String.class);
-            List<Goal<?>> goals;
+            List<ClientGoal> goals;
             try {
                 goals = BoardBuilderIO.INSTANCE.readBoard(boardName);
             } catch (IOException e) {
@@ -332,7 +295,7 @@ public class LockoutClient implements ClientModInitializer {
                 return 0;
             }
 
-            BoardBuilderData.INSTANCE.setBoard(boardName, size, goals);
+            BoardBuilderData.INSTANCE.setBoard(boardName, goals);
         } catch (IllegalArgumentException ignored) {}
 
         Minecraft client = Minecraft.getInstance();

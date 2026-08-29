@@ -1,11 +1,13 @@
 package me.marin.lockout.server.handlers;
 
 import me.marin.lockout.Lockout;
+import me.marin.lockout.LockoutRunnable;
 import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContextInitializer;
 import me.marin.lockout.server.LockoutServer;
+import me.marin.lockout.server.game.ServerLockoutGame;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -54,13 +56,18 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
             CONTEXT = context;
 
             // Freeze ticks until lockout/blackout game starts
-            var freezeCommand = "tick freeze";
-            var parseResults = server.getCommands().getDispatcher().parse(freezeCommand, server.createCommandSourceStack());
-            server.getCommands().performCommand(parseResults, freezeCommand);
+            server.tickRateManager().setFrozen(true);
 
             try {
-                Lockout lockout = Lockout.load(Path.of(server.getWorldPath(LevelResource.DATA).toAbsolutePath().toString(), "lockout", "game.json"));
-                if(lockout != null) LockoutServer.lockout = lockout;
+                ServerLockoutGame lockout = ServerLockoutGame.load(Path.of(server.getWorldPath(LevelResource.DATA).toAbsolutePath().toString(), "lockout", "game.json"));
+                if(lockout != null) {
+                    LockoutServer.lockout = lockout;
+                    if(lockout.getTicks() >= 0) {
+                        server.tickRateManager().setFrozen(false);
+                    } else {
+                        ((LockoutRunnable)LockoutServer::startLockoutRunning).runTaskAfter(-lockout.getTicks());
+                    }
+                }
                 Lockout.log("Loaded lockout game state.");
             } catch (IOException e) {
                 Lockout.log("Failed to load lockout game state: " + e.getMessage());

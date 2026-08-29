@@ -17,10 +17,9 @@ public class CycleTextureExtractor implements TextureExtractor {
     }
 
     @Override
-    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, int tick) {
-        int mod = tick % (60 * renderers.size());
+    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, long tick) {
+        int mod = Math.toIntExact(tick % (60L * renderers.size()));
         renderers.get(mod / 60).extract(extractor, font, x, y, width, height, tick);
-
     }
 
     public static CycleTextureExtractor item(List<Item> items) {

@@ -2,12 +2,10 @@ package me.marin.lockout.client.gui;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
-import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.client.game.ClientLockoutBoard;
+import me.marin.lockout.client.goal.ClientGoal;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
 import static me.marin.lockout.Constants.MAX_BOARD_SIZE;
@@ -17,11 +15,10 @@ import static me.marin.lockout.Constants.MIN_BOARD_SIZE;
  * Stores information about BoardBuilderScreen independently of the GUI.
  * All important states are saved here (including filled goals, search query in the search bar etc.)
  */
-public class BoardBuilderData {
+public class BoardBuilderData extends ClientLockoutBoard {
+    private static final int DEFAULT_SIZE = 5;
 
     public static final BoardBuilderData INSTANCE = new BoardBuilderData();
-
-    private final List<Goal<?>> goals;
 
     @Getter @Setter
     private String title = "";
@@ -35,30 +32,25 @@ public class BoardBuilderData {
     @Setter @Getter
     private String search = "";
 
-    @Accessors(fluent = true) // size() instead of getSize()
-    @Getter
-    private int size = 5;
-
     private BoardBuilderData() {
-        goals = new ArrayList<>(Collections.nCopies(size * size, null));
+        super(Collections.nCopies(DEFAULT_SIZE * DEFAULT_SIZE, null));
     }
 
     public void clear() {
-        Collections.fill(goals, null);
+        Collections.fill(getGoals(), null);
         modifyingIdx = null;
     }
 
-    public Goal<?> getModifyingGoal() {
-        return goals.get(modifyingIdx);
+    public ClientGoal getModifyingGoal() {
+        return getGoals().get(modifyingIdx);
     }
 
     /**
      * Increases the board size by 1 by adding a column to the right and a row to the bottom of the board.
      */
     public void incrementSize() {
-        if (size == MAX_BOARD_SIZE) {
-            throw new IllegalStateException("Cannot increment at maximum size");
-        }
+        int size = getSize();
+        if (size >= MAX_BOARD_SIZE) return;
         int modifyingRow = modifyingIdx == null ? 0 : modifyingIdx / size;
         int modifyingColumn = modifyingIdx == null ? 0 : modifyingIdx % size;
 
@@ -66,7 +58,7 @@ public class BoardBuilderData {
 
         // add column to the right (without bottom right corner)
         for (int i = 0; i < size - 1; i++) {
-            goals.add((size * i) + (size - 1), null);
+            getGoals().add((size * i) + (size - 1), null);
         }
 
         if (modifyingIdx != null) {
@@ -74,7 +66,7 @@ public class BoardBuilderData {
         }
 
         // add row to the bottom (including bottom right corner)
-        goals.addAll(Collections.nCopies(size, null));
+        getGoals().addAll(Collections.nCopies(size, null));
     }
 
     /**
@@ -82,9 +74,8 @@ public class BoardBuilderData {
      * Any goals in the removed slots are voided.
      */
     public void decrementSize() {
-        if (size == MIN_BOARD_SIZE) {
-            throw new IllegalStateException("Cannot decrement at minimum size");
-        }
+        int size = getSize();
+        if (size <= MIN_BOARD_SIZE) return;
         int modifyingRow = modifyingIdx == null ? 0 : modifyingIdx / size;
         int modifyingColumn = modifyingIdx == null ? 0 : modifyingIdx % size;
 
@@ -92,12 +83,12 @@ public class BoardBuilderData {
 
         // remove the bottommost row
         for (int i = 0; i < size + 1; i++) {
-            goals.removeLast();
+            getGoals().removeLast();
         }
 
         // remove the rightmost column
         for (int i = size - 1; i >= 0; i--) {
-            goals.remove((size + 1) * i + size);
+            getGoals().remove((size + 1) * i + size);
         }
 
         if (modifyingIdx != null) {
@@ -111,28 +102,26 @@ public class BoardBuilderData {
         }
     }
 
-    /**
-     * @return unmodifiable view of goals list
-     */
-    public List<Goal<?>> getGoals() {
-        return Collections.unmodifiableList(goals);
+    public void setGoal(ClientGoal goal) {
+        getGoals().set(modifyingIdx, goal);
     }
 
-    public void setGoal(Goal<?> goal) {
-        goals.set(modifyingIdx, goal);
-    }
-
-    public void setBoard(String title, int size, List<Goal<?>> goals) {
+    public void setBoard(String title, List<ClientGoal> goals) {
         this.title = title;
-        this.size = size;
         this.modifyingIdx = null;
 
-        this.goals.clear();
-        this.goals.addAll(goals);
+        this.getGoals().clear();
+        this.getGoals().addAll(goals);
+        int size = getSize();
+        if(getGoals().size() < size * size) {
+            int targetSize = (size+1) * (size+1);
+            getGoals().addAll(Collections.nCopies(targetSize - getGoals().size(), null));
+        }
     }
 
     public boolean isValid() {
-        return goals.size() == size*size && new HashSet<>(goals).size() == size*size;
+        int size = getSize();
+        return getGoals().stream().distinct().count() == (long) size * size;
     }
 
 }

@@ -15,7 +15,7 @@ public class StackingTextureExtractor implements TextureExtractor {
     }
 
     @Override
-    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, int tick) {
+    public void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, long tick) {
         int currentOffset = 0;
         for(TextureExtractor e : extractors) {
             e.extract(extractor, font, x + currentOffset, y + currentOffset, width - 2*currentOffset, height - 2*currentOffset, tick);

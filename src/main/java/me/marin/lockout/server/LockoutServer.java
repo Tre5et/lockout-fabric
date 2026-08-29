@@ -3,15 +3,18 @@ package me.marin.lockout.server;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.marin.lockout.*;
-import me.marin.lockout.client.LockoutBoard;
+import me.marin.lockout.game.GameState;
+import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.generator.BoardGenerator;
 import me.marin.lockout.lockout.GoalRegistry;
-import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
-import me.marin.lockout.lockout.goal.hint.GoalHintResult;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.network.*;
+import me.marin.lockout.server.game.ServerLockoutBoard;
+import me.marin.lockout.server.game.ServerLockoutGame;
+import me.marin.lockout.server.goal.ServerGoal;
+import me.marin.lockout.server.goal.hint.ServerHint;
 import me.marin.lockout.server.handlers.*;
 import net.minecraft.advancements.AdvancementHolder;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -56,7 +59,7 @@ import static me.marin.lockout.Constants.PLACEHOLDER_PERM_STRING;
 public class LockoutServer {
 
     public static int forfeitCommand(CommandContext<CommandSourceStack> context) {
-        if (!Lockout.isLockoutRunning(lockout)) return 0;
+        if (!LockoutGame.isActive(lockout)) return 0;
         
         ServerPlayer player = context.getSource().getPlayer();
         if (player == null || !lockout.isLockoutPlayer(player)) {
@@ -64,14 +67,13 @@ public class LockoutServer {
             return 0;
         }
 
-        LockoutTeam team = lockout.getPlayerTeam(player.getUUID());
-        LockoutTeamServer teamServer = (LockoutTeamServer) team;
+        ServerLockoutTeam team = lockout.getPlayerTeam(player.getUUID());
 
         // Broadcast first
         server.getPlayerList().broadcastSystemMessage(Component.literal(team.getDisplayName() + " has forfeited the match."), false);
 
         // Process all members of the team
-        for (UUID memberId : teamServer.getPlayerIds()) {
+        for (UUID memberId : team.getPlayerIds()) {
             ServerPlayer teamMember = server.getPlayerList().getPlayer(memberId);
             if (teamMember != null) {
                 teamMember.setGameMode(GameType.SPECTATOR);
@@ -86,13 +88,13 @@ public class LockoutServer {
     public static final int LOCATE_SEARCH = 750;
     public static GoalRequirementContext CONTEXT = GoalRequirementContext.EMPTY;
 
-    public static Lockout lockout;
+    public static ServerLockoutGame lockout;
     public static MinecraftServer server;
     public static CompassItemHandler compassHandler;
 
     public static final Map<LockoutRunnable, Long> gameStartRunnables = new HashMap<>();
 
-    private static LockoutBoard CUSTOM_BOARD = null;
+    private static ServerLockoutBoard CUSTOM_BOARD = null;
 
     private static boolean isInitialized = false;
 
@@ -148,9 +150,7 @@ public class LockoutServer {
 
         ServerLifecycleEvents.SERVER_STARTED.register(new ServerStartedEventHandler());
 
-        ServerLifecycleEvents.SERVER_STOPPING.register((server) -> {
-            isInitialized = false;
-        });
+        ServerLifecycleEvents.SERVER_STOPPING.register((_) -> isInitialized = false);
 
         ServerLifecycleEvents.AFTER_SAVE.register((server, _, _) -> {
             Path worldPath = server.getWorldPath(LevelResource.DATA);
@@ -167,9 +167,7 @@ public class LockoutServer {
             }
         });
 
-        ServerPlayConnectionEvents.DISCONNECT.register((handler, minecraftServer) -> {
-            waitingForVersionPacketPlayersMap.remove(handler.getPlayer().getUUID());
-        });
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, _) -> waitingForVersionPacketPlayersMap.remove(handler.getPlayer().getUUID()));
 
         ServerPlayNetworking.registerGlobalReceiver(LockoutVersionPayload.ID, (payload, context) -> {
             // Client has Lockout mod, compare versions, then kick or initialize
@@ -184,9 +182,8 @@ public class LockoutServer {
 
             sendAllAdvancements(player);
 
-            if (!Lockout.isLockoutRunning(lockout)) return;
+            if (!LockoutGame.isActive(lockout)) return;
 
-            LockoutTeamServer team = null;
             if (lockout.isLockoutPlayer(player.getUUID())) {
                 player.setGameMode(GameType.SURVIVAL);
             } else {
@@ -196,12 +193,11 @@ public class LockoutServer {
 
             ServerPlayNetworking.send(player, lockout.getTeamsGoalsPacket());
             ServerPlayNetworking.send(player, lockout.getUpdateTimerPacket());
-            for(Goal goal : lockout.getBoard().getGoals()) {
-                goal.sendProgress(player);
+            for(ServerGoal<?> goal : lockout.getBoard().getGoals()) {
+                goal.getProgress().send(goal.getId(), List.of(player));
             }
-            if (lockout.hasStarted()) {
-                ServerPlayNetworking.send(player, StartLockoutPayload.INSTANCE);
-            }
+            ServerPlayNetworking.send(player, StartLockoutPayload.INSTANCE);
+            ServerLockoutTeam team = lockout.getPlayerTeam(player.getUUID());
             if (team != null) {
                 team.sendStoredHints(player);
             }
@@ -224,8 +220,8 @@ public class LockoutServer {
             } else {
                 // validate board
                 try {
-                    List<Goal<?>> goals = GoalRegistry.INSTANCE.constructGoals(payload.boardOrClear().get());
-                    CUSTOM_BOARD = new LockoutBoard(goals);
+                    List<ServerGoal<?>> goals = ServerGoal.constructAll(payload.boardOrClear().get());
+                    CUSTOM_BOARD = new ServerLockoutBoard(goals);
                     player.sendSystemMessage(Component.literal("Set custom board."));
                 } catch (IllegalGoalConstructionException e) {
                     player.sendSystemMessage(Component.literal(e.getMessage()));
@@ -236,10 +232,10 @@ public class LockoutServer {
         ServerPlayNetworking.registerGlobalReceiver(RequestHintPayload.ID, (payload, context) -> {
             ServerPlayer player = context.player();
 
-            if (!Lockout.isLockoutRunning(lockout)) return;
+            if (!LockoutGame.isActive(lockout)) return;
             if (!lockout.isLockoutPlayer(player.getUUID())) return;
 
-            Goal<?> goal = lockout.getBoard().getGoals().stream()
+            ServerGoal<?> goal = lockout.getBoard().getGoals().stream()
                     .filter(g -> g.getId().equals(payload.goalId()))
                     .findFirst()
                     .orElse(null);
@@ -248,12 +244,12 @@ public class LockoutServer {
             int hintIndex = payload.hintIndex();
             if (hintIndex < 0 || hintIndex >= goal.getHints().size()) return;
 
-            GoalHintResult result = goal.getHints().get(hintIndex).resolve(server, player);
-            HintResultPayload resultPayload = new HintResultPayload(payload.goalId(), hintIndex, result.getMessage(), result.isSuccess());
+            ServerHint<?> hint = goal.getHints().get(hintIndex);
+            HintResultPayload resultPayload = hint.resolvePayload(payload.goalId(), hintIndex, server, player);
 
-            if (result.isSuccess()) {
-                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(player.getUUID());
-                team.storeHintResult(payload.goalId(), hintIndex, result.getMessage());
+            if (resultPayload.data().isPresent()) {
+                ServerLockoutTeam team = lockout.getPlayerTeam(player.getUUID());
+                team.storeHintResult(payload.goalId(), hintIndex, resultPayload.data().get());
                 for (UUID memberId : team.getPlayerIds()) {
                     ServerPlayer teamMember = server.getPlayerList().getPlayer(memberId);
                     if (teamMember != null) {
@@ -267,7 +263,7 @@ public class LockoutServer {
     }
 
     public static int lockoutCommandLogic(CommandContext<CommandSourceStack> context) {
-        List<LockoutTeamServer> teams = new ArrayList<>();
+        List<ServerLockoutTeam> teams = new ArrayList<>();
 
         int ret = parseArgumentsIntoTeams(teams, context, false);
         if (ret == 0) return 0;
@@ -278,7 +274,7 @@ public class LockoutServer {
     }
 
     public static int blackoutCommandLogic(CommandContext<CommandSourceStack> context) {
-        List<LockoutTeamServer> teams = new ArrayList<>();
+        List<ServerLockoutTeam> teams = new ArrayList<>();
 
         int ret = parseArgumentsIntoTeams(teams, context, true);
         if (ret == 0) return 0;
@@ -288,7 +284,7 @@ public class LockoutServer {
         return 1;
     }
 
-    private static void startLockout(List<LockoutTeamServer> teams) {
+    private static void startLockout(List<ServerLockoutTeam> teams) {
         // Clear old runnables
         gameStartRunnables.clear();
 
@@ -296,10 +292,6 @@ public class LockoutServer {
         List<ServerPlayer> allServerPlayers = playerManager.getPlayers();
         List<UUID> allLockoutPlayers = teams.stream()
                 .flatMap(team -> team.getPlayerIds().stream())
-                .toList();
-        List<UUID> allSpectatorPlayers = allServerPlayers.stream()
-                .map(ServerPlayer::getUUID)
-                .filter(uuid -> !allLockoutPlayers.contains(uuid))
                 .toList();
 
         for (ServerPlayer serverPlayer : allServerPlayers) {
@@ -334,7 +326,7 @@ public class LockoutServer {
         ServerLevel world = server.getLevel(ServerLevel.OVERWORLD);
 
         // Generate & set board
-        LockoutBoard lockoutBoard;
+        ServerLockoutBoard lockoutBoard;
         if (CUSTOM_BOARD == null) {
             BoardGenerator boardGenerator = new BoardGenerator(GoalRegistry.INSTANCE.getRegisteredGoals(), new GoalRequirementContext(
                     CONTEXT.biomes(),
@@ -356,13 +348,13 @@ public class LockoutServer {
             }
         } else {
             // Reset custom board (TODO: do this somewhere else)
-            for (Goal<?> goal : CUSTOM_BOARD.getGoals()) {
-                goal.setCompleted(false, null);
+            for (ServerGoal<?> goal : CUSTOM_BOARD.getGoals()) {
+                goal.getProgress().resetAll();
             }
             lockoutBoard = CUSTOM_BOARD;
         }
 
-        lockout = new Lockout(lockoutBoard, teams);
+        lockout = new ServerLockoutGame(lockoutBoard, teams);
         lockout.setTicks(-20L * LockoutConfig.getInstance().startTime); // see Lockout#ticks
 
         compassHandler = new CompassItemHandler(allLockoutPlayers, playerManager);
@@ -394,37 +386,37 @@ public class LockoutServer {
         world.clockManager().setTotalTicks(world.dimensionType().defaultClock().orElseThrow(), 0);
 
         // Unfreeze ticks when lockout/blackout game starts
-        var unfreezeCommand = "tick unfreeze";
-        var unfreezeParseResults = server.getCommands().getDispatcher().parse(unfreezeCommand, server.createCommandSourceStack());
-        server.getCommands().performCommand(unfreezeParseResults, unfreezeCommand);
+        server.tickRateManager().setFrozen(true);
 
         for (int i = 3; i >= 0; i--) {
             if (i > 0) {
                 final int secs = i;
-                ((LockoutRunnable) () -> {
-                    playerManager.broadcastSystemMessage(Component.literal("Starting in " + secs + "..."), false);
-                }).runTaskAfter(20L * (LockoutConfig.getInstance().startTime - i));
+                ((LockoutRunnable) () -> playerManager.broadcastSystemMessage(Component.literal("Starting in " + secs + "..."), false)).runTaskAfter(20L * (LockoutConfig.getInstance().startTime - i));
             } else {
-                ((LockoutRunnable) () -> {
-                    lockout.setStarted(true);
-
-                    for (ServerPlayer player : allServerPlayers) {
-                        if (player == null) continue;
-                        ServerPlayNetworking.send(player, StartLockoutPayload.INSTANCE);
-                        if (allLockoutPlayers.contains(player.getUUID())) {
-                            player.setGameMode(GameType.SURVIVAL);
-                            
-                            // Update waypoint color to match team color with variation for team members
-                            LockoutTeam playerTeam = lockout.getPlayerTeam(player.getUUID());
-                            if (playerTeam != null) {
-                                updatePlayerWaypointColor(player, playerTeam.getColor());
-                            }
-                        }
-                    }
-                    server.getPlayerList().broadcastSystemMessage(Component.literal(lockout.getModeName() + " has begun."), false);
-                }).runTaskAfter(20L * LockoutConfig.getInstance().startTime);
+                ((LockoutRunnable) LockoutServer::startLockoutRunning).runTaskAfter(20L * LockoutConfig.getInstance().startTime);
             }
         }
+    }
+
+    public static void startLockoutRunning() {
+        if(lockout == null) return;
+        server.tickRateManager().setFrozen(false);
+        lockout.setState(GameState.RUNNING);
+
+        List<UUID> playing = lockout.getTeams().stream().flatMap(t -> t.getPlayerIds().stream()).toList();
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            ServerPlayNetworking.send(player, StartLockoutPayload.INSTANCE);
+            if (playing.contains(player.getUUID())) {
+                player.setGameMode(GameType.SURVIVAL);
+
+                // Update waypoint color to match team color with variation for team members
+                LockoutTeam playerTeam = lockout.getPlayerTeam(player.getUUID());
+                if (playerTeam != null) {
+                    updatePlayerWaypointColor(player, playerTeam.getColor());
+                }
+            }
+        }
+        server.getPlayerList().broadcastSystemMessage(Component.literal(lockout.getModeName() + " has begun."), false);
     }
 
     /**
@@ -434,12 +426,9 @@ public class LockoutServer {
      */
     public static void updatePlayerWaypointColor(ServerPlayer player, TeamColor teamColor) {
         try {
-            Integer colorValue = teamColor.textColor().getValue();
-            if (colorValue == null) {
-                return; // Skip if color has no RGB value
-            }
+            int colorValue = teamColor.rgb();
             
-            String hexColor = String.format("%06X", colorValue & 0xFFFFFF);
+            String hexColor = String.format("%06X", colorValue | 0xFFFFFF);
             
             String command = String.format("waypoint modify %s color hex %s", player.getName().getString(), hexColor);
             
@@ -513,7 +502,7 @@ public class LockoutServer {
         return (r << 16) | (g << 8) | b;
     }
 
-    private static int parseArgumentsIntoTeams(List<LockoutTeamServer> teams, CommandContext<CommandSourceStack> context, boolean isBlackout) {
+    private static int parseArgumentsIntoTeams(List<ServerLockoutTeam> teams, CommandContext<CommandSourceStack> context, boolean isBlackout) {
         String argument = null;
 
         PlayerList playerManager = server.getPlayerList();
@@ -535,7 +524,7 @@ public class LockoutServer {
                     }
                     playerNames.add(playerManager.getPlayerByName(player).getName().getString());
                 }
-                teams.add(new LockoutTeamServer(playerNames, Lockout.COLOR_ORDERS[0], server));
+                teams.add(new ServerLockoutTeam(playerNames, Lockout.COLOR_ORDERS[0], server));
 
             } else {
                 if (players.length > 16) {
@@ -549,7 +538,7 @@ public class LockoutServer {
                         context.getSource().sendFailure(Component.literal("Player " + player + " is invalid."));
                         return 0;
                     }
-                    teams.add(new LockoutTeamServer(List.of(playerManager.getPlayerByName(player).getName().getString()), Lockout.COLOR_ORDERS[i], server));
+                    teams.add(new ServerLockoutTeam(List.of(playerManager.getPlayerByName(player).getName().getString()), Lockout.COLOR_ORDERS[i], server));
                 }
             }
 
@@ -617,7 +606,7 @@ public class LockoutServer {
                     for (String playerName : team.getPlayers()) {
                         actualPlayerNames.add(playerManager.getPlayerByName(playerName).getName().getString());
                     }
-                    teams.add(new LockoutTeamServer(new ArrayList<>(actualPlayerNames), team.getColor().orElse(TeamColor.BLACK), server));
+                    teams.add(new ServerLockoutTeam(new ArrayList<>(actualPlayerNames), team.getColor().orElse(TeamColor.BLACK), server));
                 }
             } catch (Exception ignored) {}
         }
@@ -629,7 +618,7 @@ public class LockoutServer {
         return 1;
     }
 
-    private static boolean teamHasColor(List<LockoutTeamServer> teams, TeamColor color) {
+    private static boolean teamHasColor(List<ServerLockoutTeam> teams, TeamColor color) {
         for (LockoutTeam lockoutTeam : teams) {
             if (lockoutTeam.getColor() == color) {
                 return true;
@@ -682,7 +671,7 @@ public class LockoutServer {
 
     public static int grantGoal(CommandContext<CommandSourceStack> context) {
         try {
-            if (!Lockout.isLockoutRunning(lockout)) {
+            if (!LockoutGame.isActive(lockout)) {
                 context.getSource().sendFailure(Component.literal("There's no active lockout match."));
                 return 0;
             }
@@ -711,10 +700,10 @@ public class LockoutServer {
                 context.getSource().sendFailure(Component.literal("Goal number does not exist on the board."));
                 return 0;
             }
-            Goal<?> goal = lockout.getBoard().getGoals().get(idx - 1);
+            ServerGoal<?> goal = lockout.getBoard().getGoals().get(idx - 1);
 
             context.getSource().sendSystemMessage(Component.nullToEmpty("Granted a goal to " + playerConfig.name() + "."));
-            goal.complete(server.getPlayerList().getPlayer(playerConfig.id()), true);
+            goal.grant(lockout.getPlayerTeam(playerConfig.id()), lockout);
             return 1;
         } catch (RuntimeException e) {
             Lockout.error(e);
@@ -724,7 +713,7 @@ public class LockoutServer {
 
     public static int revokeGoal(CommandContext<CommandSourceStack> context) {
         try {
-            if (!Lockout.isLockoutRunning(lockout)) {
+            if (!LockoutGame.isActive(lockout)) {
                 context.getSource().sendFailure(Component.literal("There's no active lockout match."));
                 return 0;
             }
@@ -753,10 +742,10 @@ public class LockoutServer {
                 context.getSource().sendFailure(Component.literal("Goal number does not exist on the board."));
                 return 0;
             }
-            Goal<?> goal = lockout.getBoard().getGoals().get(idx - 1);
+            ServerGoal<?> goal = lockout.getBoard().getGoals().get(idx - 1);
 
             context.getSource().sendSystemMessage(Component.nullToEmpty("Revoked a goal from " + playerConfig.name() + "."));
-            goal.complete(null, false);
+            goal.revoke(lockout.getPlayerTeam(playerConfig.id()), lockout);
             return 1;
         } catch (RuntimeException e) {
             Lockout.error(e);

@@ -1,14 +1,13 @@
 package me.marin.lockout.server.handlers;
 
 import me.marin.lockout.ChatManager;
-import me.marin.lockout.Lockout;
-import me.marin.lockout.LockoutTeamServer;
+import me.marin.lockout.game.LockoutGame;
+import me.marin.lockout.server.ServerLockoutTeam;
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -23,8 +22,8 @@ public class AllowChatMessageEventHandler implements ServerMessageEvents.AllowCh
     public boolean allowChatMessage(PlayerChatMessage message, ServerPlayer sender, ChatType.Bound parameters) {
         if (ChatManager.getChat(sender) == ChatManager.Type.TEAM) {
             String m = "[Team Chat] " + ChatFormatting.RESET + "<" + sender.getName().getString() + "> " + message.decoratedContent().getString();
-            if (Lockout.isLockoutRunning(lockout)) {
-                LockoutTeamServer team = (LockoutTeamServer) lockout.getPlayerTeam(sender.getUUID());
+            if (LockoutGame.isActive(lockout)) {
+                ServerLockoutTeam team = (ServerLockoutTeam) lockout.getPlayerTeam(sender.getUUID());
                 team.sendMessage(team.getChatFormatting() + m);
             } else {
                 PlayerTeam team = sender.getTeam();
