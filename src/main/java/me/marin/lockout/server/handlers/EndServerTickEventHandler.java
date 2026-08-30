@@ -2,6 +2,7 @@ package me.marin.lockout.server.handlers;
 
 import me.marin.lockout.LockoutRunnable;
 import me.marin.lockout.game.GameState;
+import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.MinecraftServer;
@@ -31,7 +32,7 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             lockout.getBoard().update(player.getInventory(), player);
             if (player.isPassenger()) {
-                lockout.getBoard().update(player.getVehicle().getType(), player);
+                lockout.getBoard().update(new EntityUtil.RodeEntity(player.getVehicle().getType()), player);
             }
         }
 

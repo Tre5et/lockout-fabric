@@ -126,7 +126,7 @@ public abstract class GoalBuilder<U,T> {
         try {
             return builder.apply((T)option);
         } catch (ClassCastException e) {
-            throw new IllegalGoalConstructionException("Option is not of correct type: " + option, e);
+            throw new IllegalGoalConstructionException("Option is not of correct entity: " + option, e);
         }
     }
 

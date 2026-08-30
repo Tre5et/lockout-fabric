@@ -1,4 +1,4 @@
-package me.marin.lockout.lockout.goal.builder.break_item;
+package me.marin.lockout.lockout.goal.builder.item;
 
 import me.marin.lockout.client.goal.progress.ClientGoalProgress;
 import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;

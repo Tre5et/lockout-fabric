@@ -1,8 +1,14 @@
 package me.marin.lockout.lockout;
 
-import me.marin.lockout.lockout.goal.builder.break_item.BreakItemGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.entity.BreedUniqueAnimalsGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.item.BreakItemGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.entity.BreedAnimalGoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 import static me.marin.lockout.lockout.GoalRegistry.INSTANCE;
 
@@ -18,6 +24,20 @@ public class DefaultGoalRegister {
                 .customName(_ -> "Break any armor piece"));
         INSTANCE.register(BreakItemGoalBuilder.withComponent("ANY_TOOL", GoalCategory.TOOLS, DataComponents.TOOL)
                 .customName(_ -> "Break any tool"));
+
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.ARMADILLO).require(GoalRequirements.anyBiome("Savanna", Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU)));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.CAMEL).require(GoalRequirements.anyBiome("Desert", Biomes.DESERT).or(GoalRequirements.anyStructure("Desert Village", BuiltinStructures.VILLAGE_DESERT))));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.CHICKEN));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.COW, EntityTypes.MOOSHROOM).customName(_ -> "Breed Cow"));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.FOX).require(GoalRequirements.TAIGA));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.FROG).require(GoalRequirements.SWAMP));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.GOAT).require(GoalRequirements.SNOWY_MOUNTAINS));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.HOGLIN));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.PIG));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.RABBIT));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.SHEEP));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.STRIDER));
+        INSTANCE.register(BreedUniqueAnimalsGoalBuilder.range(4,8));
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));

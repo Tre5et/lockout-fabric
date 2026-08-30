@@ -4,10 +4,10 @@ import me.marin.lockout.lockout.goal.progress.TargetNumberGoalProgress;
 
 import java.util.function.Predicate;
 
-public class ServerTargetNumberGoalProgress<T> extends TargetNumberGoalProgress implements ServerGoalProgress<T,Integer> {
+public class TargetNumberServerGoalProgress<T> extends TargetNumberGoalProgress implements ServerGoalProgress<T,Integer> {
     private final Predicate<T> updatePredicate;
 
-    public ServerTargetNumberGoalProgress(int target, Predicate<T> updatePredicate) {
+    public TargetNumberServerGoalProgress(int target, Predicate<T> updatePredicate) {
         super(target);
         this.updatePredicate = updatePredicate;
     }

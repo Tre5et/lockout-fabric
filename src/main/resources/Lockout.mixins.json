@@ -7,8 +7,8 @@
 /*    "server.AgeableMobMixin",
     "server.AnvilScreenHandlerMixin",
     "server.ArmorStandMixin",
-    "server.BlockMixin",
-    "server.BredAnimalsTriggerMixin",
+    "server.BlockMixin",*/
+    "server.BredAnimalsTriggerMixin",/*
     "server.BrewedPotionTriggerMixin",
     "server.BrewingStandScreenHandlerPotionSlotMixin",
     "server.BrushableBlockEntityMixin",

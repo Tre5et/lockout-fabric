@@ -1,4 +1,4 @@
-package me.marin.lockout.lockout.goal.builder;
+package me.marin.lockout.lockout.goal.builder.item;
 
 import com.google.gson.reflect.TypeToken;
 import me.marin.lockout.client.goal.option.ClientGoalOptionGenerator;
@@ -45,7 +45,7 @@ public class ObtainColoredItemGoalBuilder extends ObtainItemGoalBuilder<DyeColor
 
     @Override
     public Component defaultName(DyeColor option) {
-        return Component.literal("Obtain " + (count > 1 ? count + " " : "")  + getItemName(items.pick(option)));
+        return Component.literal("Obtain " + (count > 1 ? count + " " : "")  + ItemUtil.getItemName(items.pick(option)));
     }
 
     @Override

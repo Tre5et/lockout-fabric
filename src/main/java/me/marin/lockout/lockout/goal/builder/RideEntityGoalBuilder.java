@@ -1,22 +1,21 @@
 package me.marin.lockout.lockout.goal.builder;
 
-import me.marin.lockout.Constants;
 import me.marin.lockout.client.goal.progress.ClientGoalProgress;
 import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
+import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
-import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
-import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.server.goal.progress.ServerGoalProgress;
 import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Items;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RideEntityGoalBuilder extends GoalBuilder<EntityType<?>, Void> {
+public class RideEntityGoalBuilder extends GoalBuilder<EntityUtil.RodeEntity, Void> {
     protected final List<EntityType<?>> entityTypes;
 
     public RideEntityGoalBuilder(String id, GoalCategory category, List<EntityType<?>> entityTypes) {
@@ -27,18 +26,17 @@ public class RideEntityGoalBuilder extends GoalBuilder<EntityType<?>, Void> {
     @Override
     public Component defaultName(Void option) {
         return Component.literal("Ride " + entityTypes.stream()
-                .map(EntityType::toShortString)
-                .map(s -> Arrays.stream(s.split("_"))
-                        .map(p -> p.substring(0,1).toUpperCase() + p.substring(1).toLowerCase())
-                        .collect(Collectors.joining(" "))
-                )
+                .map(EntityUtil::getEntityName)
                 .collect(Collectors.joining(" or ")
         ));
     }
 
     @Override
     public TextureExtractor defaultTextureExtractor(Void option) {
-        return GenericTextureExtractor.texture(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/goals/ride/" + id.toLowerCase() + ".png"));
+        return new CornerIconTextureExtractor(
+                CycleTextureExtractor.texture(entityTypes.stream().map(EntityUtil::getEntityTexture).toList()),
+                ItemTextureExtractor.item(Items.SADDLE),
+        10);
     }
 
     @Override
@@ -47,8 +45,8 @@ public class RideEntityGoalBuilder extends GoalBuilder<EntityType<?>, Void> {
     }
 
     @Override
-    public ServerGoalProgress<EntityType<?>, ?> getServerGoalProgress(Void option) {
-        return new SimpleServerGoalProgress<>(entityTypes::contains);
+    public ServerGoalProgress<EntityUtil.RodeEntity, ?> getServerGoalProgress(Void option) {
+        return new SimpleServerGoalProgress<>(e -> entityTypes.contains(e.entity()));
     }
 
     public static RideEntityGoalBuilder simple(String id, GoalCategory category, EntityType<?>... entityTypes) {
@@ -62,8 +60,7 @@ public class RideEntityGoalBuilder extends GoalBuilder<EntityType<?>, Void> {
     public static RideEntityGoalBuilder simple(GoalCategory category, EntityType<?>... entityTypes) {
         return simple(
                 Arrays.stream(entityTypes)
-                        .map(EntityType::toShortString)
-                        .map(String::toUpperCase)
+                        .map(EntityUtil::getEntityId)
                         .collect(Collectors.joining("_OR_")),
                 category,
                 entityTypes

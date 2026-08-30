@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class UniqueServerGoalProgress<T> extends ServerTargetNumberGoalProgress<T> {
+public class UniqueServerGoalProgress<T> extends TargetNumberServerGoalProgress<T> {
     private final Set<T> values = new HashSet<>();
 
     public UniqueServerGoalProgress(int target, Predicate<T> updatePredicate) {

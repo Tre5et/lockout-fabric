@@ -38,12 +38,16 @@ public class CycleTextureExtractor implements TextureExtractor {
         );
     }
 
-    public static CycleTextureExtractor texture(Identifier... textures) {
+    public static CycleTextureExtractor texture(List<Identifier> textures) {
         return new CycleTextureExtractor(
-                Arrays.stream(textures)
+                textures.stream()
                         .map(GenericTextureExtractor::texture)
                         .toList()
         );
+    }
+
+    public static CycleTextureExtractor texture(Identifier... textures) {
+        return texture(Arrays.stream(textures).toList());
     }
 
 }

@@ -212,7 +212,7 @@ public class LockoutClient implements ClientModInitializer {
         
         openBoardKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.lockout.open_board", // The translation key of the keybinding's name
-                InputConstants.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
+                InputConstants.Type.KEYSYM, // The entity of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
                 GLFW.GLFW_KEY_B, // The keycode of the key
                 LOCKOUT_CATEGORY // The translation key of the keybinding's category.
         ));

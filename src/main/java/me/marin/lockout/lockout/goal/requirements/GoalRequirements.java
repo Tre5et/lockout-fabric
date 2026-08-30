@@ -76,6 +76,18 @@ public class GoalRequirements {
             "Desert-like Biome", Biomes.DESERT, Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS
     );
 
+    public static final GoalRequirement<Object> TAIGA = anyBiome("Taiga",
+            Biomes.TAIGA, Biomes.OLD_GROWTH_PINE_TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA, Biomes.SNOWY_TAIGA, Biomes.GROVE
+    );
+
+    public static final GoalRequirement<Object> SWAMP = anyBiome("Swamp",
+            Biomes.SWAMP, Biomes.MANGROVE_SWAMP
+    );
+
+    public static final GoalRequirement<Object> SNOWY_MOUNTAINS = anyBiome("Snowy Mountains",
+            Biomes.JAGGED_PEAKS, Biomes.FROZEN_PEAKS, Biomes.SNOWY_SLOPES
+    );
+
     public static final GoalRequirement<Object> SNOWY = anyBiome(
             "Snowy Biome", Biomes.SNOWY_PLAINS, Biomes.ICE_SPIKES, Biomes.SNOWY_TAIGA, Biomes.GROVE, Biomes.SNOWY_SLOPES, Biomes.FROZEN_PEAKS,
             Biomes.FROZEN_RIVER, Biomes.SNOWY_BEACH, Biomes.FROZEN_OCEAN, Biomes.DEEP_FROZEN_OCEAN

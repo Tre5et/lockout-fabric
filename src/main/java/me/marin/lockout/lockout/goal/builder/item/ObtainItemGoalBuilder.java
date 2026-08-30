@@ -1,7 +1,8 @@
-package me.marin.lockout.lockout.goal.builder;
+package me.marin.lockout.lockout.goal.builder.item;
 
 import me.marin.lockout.client.goal.progress.ClientGoalProgress;
 import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.server.goal.progress.ServerGoalProgress;
 import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
@@ -10,7 +11,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<Inventory,T> {
     public ObtainItemGoalBuilder(String id, GoalCategory category) {
@@ -28,12 +28,6 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<Inventory,T> 
     }
 
     abstract boolean satisfiedBy(Inventory inventory, T option);
-
-    public static String getItemName(Item item) {
-        return item.getName(item.getDefaultInstance())
-                .getContents().visit(Optional::of)
-                .orElse(String.valueOf(Item.getId(item)));
-    }
 
     public static String getItemId(Item item) {
         return Arrays.stream(BuiltInRegistries.ITEM.getKey(item).getPath().split("/")).toList().getLast().toUpperCase();

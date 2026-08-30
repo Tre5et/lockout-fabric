@@ -1,7 +1,7 @@
 package me.marin.lockout.mixin.server;
 
 import me.marin.lockout.game.LockoutGame;
-import me.marin.lockout.lockout.goal.builder.break_item.BreakItemGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.item.BreakItemGoalBuilder;
 import me.marin.lockout.server.LockoutServer;
 import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.server.level.ServerPlayer;

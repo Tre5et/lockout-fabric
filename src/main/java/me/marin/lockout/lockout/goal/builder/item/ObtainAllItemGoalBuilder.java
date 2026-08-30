@@ -1,4 +1,4 @@
-package me.marin.lockout.lockout.goal.builder;
+package me.marin.lockout.lockout.goal.builder.item;
 
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
@@ -22,7 +22,7 @@ public class ObtainAllItemGoalBuilder extends ObtainItemGoalBuilder<Void> {
     @Override
     public Component defaultName(Void option) {
         return Component.literal("Obtain " + items.stream()
-                .map(e -> (e.getB() > 1 ? e.getB() + " " : "") + ObtainItemGoalBuilder.getItemName(e.getA()))
+                .map(e -> (e.getB() > 1 ? e.getB() + " " : "") + ItemUtil.getItemName(e.getA()))
                 .collect(Collectors.joining(" and "))
         );
     }
