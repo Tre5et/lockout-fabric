@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ServerGoalProgress<U,T> extends GoalProgress<T> {
     Gson GSON = new GsonBuilder().create();
@@ -39,8 +40,12 @@ public interface ServerGoalProgress<U,T> extends GoalProgress<T> {
         getProgress().clear();
     }
 
-    default void send(String goalId, List<ServerPlayer> players) {
-        GoalProgressPayload payload = new GoalProgressPayload(goalId, GSON.toJson(serialize()));
+    default void send(String goalId, List<ServerPlayer> players, Optional<LockoutTeam> newCompletion, ServerLockoutGame lockout) {
+        GoalProgressPayload payload = new GoalProgressPayload(goalId, GSON.toJson(serialize()), newCompletion.map(t -> lockout.getTeams().indexOf(t)));
         players.forEach(p -> ServerPlayNetworking.send(p, payload));
+    }
+
+    default void send(String goalId, List<ServerPlayer> players) {
+        send(goalId, players, Optional.empty(), null);
     }
 }

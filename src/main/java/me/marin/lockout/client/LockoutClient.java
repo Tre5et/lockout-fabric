@@ -131,12 +131,17 @@ public class LockoutClient implements ClientModInitializer {
                 Lockout.error(e);
             }
         });
-        ClientPlayNetworking.registerGlobalReceiver(GoalProgressPayload.ID, (payload, _) -> {
+        ClientPlayNetworking.registerGlobalReceiver(GoalProgressPayload.ID, (payload, context) -> {
             if (lockout == null) return;
             lockout.getBoard().getGoals().stream()
                     .filter(g -> g.getId().equals(payload.goalId()))
                     .findFirst()
-                    .ifPresent(g -> g.updateProgress(payload.progress()));
+                    .ifPresent(g -> {
+                        g.updateProgress(payload.progress());
+                        if(payload.newCompletion().isPresent()) {
+                            g.announceCompletion(payload.newCompletion().get(), lockout, context.client());
+                        }
+                    });
         });
         ClientPlayNetworking.registerGlobalReceiver(EndLockoutPayload.ID, (payload, context) -> {
             lockout.setState(GameState.FINISHED);

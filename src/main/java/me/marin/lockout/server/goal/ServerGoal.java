@@ -18,6 +18,8 @@ import oshi.util.tuples.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ServerGoal<U> extends Goal {
@@ -33,9 +35,7 @@ public class ServerGoal<U> extends Goal {
     }
 
     public void updateProgress(LockoutTeam team, U update, ServerLockoutGame lockout) {
-        if(progress.update(team, update, lockout)) {
-            handleProgress();
-        }
+        handlingProgress(team, lockout, () -> progress.update(team, update, lockout));
     }
 
     @SuppressWarnings("unchecked")
@@ -46,18 +46,25 @@ public class ServerGoal<U> extends Goal {
     }
 
     public void grant(LockoutTeam team, ServerLockoutGame lockout) {
-        getProgress().grant(team, lockout);
-        handleProgress();
+        handlingProgress(team, lockout, () -> {
+            getProgress().grant(team, lockout);
+            return true;
+        });
     }
 
     public void revoke(LockoutTeam team, ServerLockoutGame lockout) {
-        getProgress().reset(team, lockout);
-        handleProgress();
+        handlingProgress(team, lockout, () -> {
+            getProgress().reset(team, lockout);
+            return true;
+        });
     }
 
-    public void handleProgress() {
-        getProgress().send(getId(), LockoutServer.server.getPlayerList().getPlayers());
-        LockoutServer.lockout.evaluateWinnerAndEndGame();
+    public void handlingProgress(LockoutTeam team, ServerLockoutGame lockout, Supplier<Boolean> updater) {
+        boolean prevCompleted = getProgress().isCompleted(team, lockout);
+        if(updater.get()) {
+            Optional<LockoutTeam> completedTeam = (!prevCompleted && getProgress().isCompleted(team, lockout)) ? Optional.of(team) : Optional.empty();
+            getProgress().send(getId(), LockoutServer.server.getPlayerList().getPlayers(), completedTeam, lockout);
+        }
     }
 
     public static ServerGoal<?> deserialize(JsonElement element) throws IllegalGoalConstructionException {

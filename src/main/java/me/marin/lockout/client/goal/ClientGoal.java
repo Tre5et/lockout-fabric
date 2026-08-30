@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import lombok.Getter;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.client.LockoutClient;
+import me.marin.lockout.client.game.ClientLockoutGame;
 import me.marin.lockout.client.goal.builder.ClientGoalBuildParameters;
 import me.marin.lockout.client.goal.hint.ClientHint;
 import me.marin.lockout.client.goal.progress.ClientGoalProgress;
@@ -17,6 +18,7 @@ import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.TextureSetup;
@@ -93,15 +95,6 @@ public class ClientGoal extends Goal {
 
         if(completedTeams.size() == 1) {
             extractor.fill(x, y, x + width, y + height, 0xFF000000 | completedTeams.getFirst().getColor().rgb());
-/*            extractor.guiRenderState.addGuiElement(new ColoredTriangleRenderState(
-                    RenderPipelines.GUI, TextureSetup.noTexture(),
-                    new Matrix3x2f(extractor.pose()),
-                    x, y,
-                    x, y + height,
-                    x + width, y,
-                    0xFF000000 | completedTeams.getFirst().getColor().rgb(),
-                    extractor.scissorStack.peek()
-            ));*/
         } else if(completedTeams.size() == 2) {
             extractor.guiRenderState.addGuiElement(new ColoredTriangleRenderState(
                     RenderPipelines.GUI, TextureSetup.noTexture(),
@@ -155,7 +148,15 @@ public class ClientGoal extends Goal {
 
     public void updateProgress(String progress) throws IllegalArgumentException {
         JsonElement progressJson = JsonParser.parseString(progress);
-        this.progress.deserialize(progressJson);
+        getProgress().deserialize(progressJson);
+    }
+
+    public void announceCompletion(LockoutTeam team, Minecraft minecraft) {
+        getProgress().announceCompletion(team, minecraft, getName());
+    }
+
+    public void announceCompletion(int teamIndex, ClientLockoutGame lockout, Minecraft minecraft) {
+        announceCompletion(lockout.getTeams().get(teamIndex), minecraft);
     }
 
     public static ClientGoal deserialize(JsonElement element) throws IllegalGoalConstructionException {

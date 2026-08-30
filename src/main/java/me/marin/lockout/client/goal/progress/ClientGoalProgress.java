@@ -3,7 +3,9 @@ package me.marin.lockout.client.goal.progress;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.progress.GoalProgress;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,5 +33,13 @@ public interface ClientGoalProgress<T> extends GoalProgress<T> {
             );
         }
         return components;
+    }
+
+    default void announceCompletion(LockoutTeam team, Minecraft minecraft, Component goalName) {
+        minecraft.gui.hud.getChat().addClientSystemMessage(
+                Component.empty().withColor(TextColor.GREEN)
+                        .append(Component.literal(team.getDisplayName() + " completed "))
+                        .append(goalName)
+        );
     }
 }
