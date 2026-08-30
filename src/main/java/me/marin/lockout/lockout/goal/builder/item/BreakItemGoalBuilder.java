@@ -21,7 +21,7 @@ public class BreakItemGoalBuilder extends GoalBuilder<BreakItemGoalBuilder.Broke
     private final DataComponentType<?> component;
 
     public BreakItemGoalBuilder(String id, GoalCategory category, DataComponentType<?> component) {
-        super(id, category);
+        super("BREAK_" + id, category);
         this.component = component;
     }
 

@@ -6,6 +6,7 @@ import me.marin.lockout.lockout.goal.builder.entity.BreedAnimalGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.BrewPotionGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.BrewPotionTypeGoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.group.GoalGroups;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EntityTypes;
@@ -25,9 +26,11 @@ public class DefaultGoalRegister {
         }
 
         INSTANCE.register(BreakItemGoalBuilder.withComponent("ANY_ARMOR_PIECE", GoalCategory.ARMOR, DataComponents.EQUIPPABLE)
-                .customName(_ -> "Break any armor piece"));
+                .customName(_ -> "Break any armor piece")
+                .group(GoalGroups.ARMOR_SPECIAL));
         INSTANCE.register(BreakItemGoalBuilder.withComponent("ANY_TOOL", GoalCategory.TOOLS, DataComponents.TOOL)
-                .customName(_ -> "Break any tool"));
+                .customName(_ -> "Break any tool")
+                .group(GoalGroups.TOOLS));
 
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.ARMADILLO).require(GoalRequirements.anyBiome("Savanna", Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU)));
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.CAMEL).require(GoalRequirements.anyBiome("Desert", Biomes.DESERT).or(GoalRequirements.anyStructure("Desert Village", BuiltinStructures.VILLAGE_DESERT))));

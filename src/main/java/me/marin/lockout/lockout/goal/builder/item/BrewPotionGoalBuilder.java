@@ -5,6 +5,7 @@ import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.group.GoalGroups;
 import me.marin.lockout.lockout.goal.rendering.texture.CycleTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
@@ -70,6 +71,8 @@ public class BrewPotionGoalBuilder extends GoalBuilder<Holder<Potion>, Void> {
                 .map(p -> p.value().name().toUpperCase())
                 .distinct()
                 .collect(Collectors.joining("_OR_"));
-        return new BrewPotionGoalBuilder(id, GoalCategory.BREWING, Arrays.stream(potions).toList());
+        BrewPotionGoalBuilder builder = new BrewPotionGoalBuilder(id, GoalCategory.BREWING, Arrays.stream(potions).toList());
+        builder.group(GoalGroups.BREW_POTION);
+        return builder;
     }
 }

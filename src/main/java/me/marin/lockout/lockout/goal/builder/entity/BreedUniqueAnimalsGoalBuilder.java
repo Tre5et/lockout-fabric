@@ -6,6 +6,7 @@ import me.marin.lockout.client.goal.progress.ClientGoalProgress;
 import me.marin.lockout.client.goal.progress.TargetNumberClientGoalProgress;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.group.GoalGroups;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.option.IntegerGoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
@@ -64,6 +65,8 @@ public class BreedUniqueAnimalsGoalBuilder extends GoalBuilder<EntityUtil.BredEn
     }
 
     public static BreedUniqueAnimalsGoalBuilder range(int min, int max) {
-        return new BreedUniqueAnimalsGoalBuilder(min + "_" + max, GoalCategory.BREEDING, min, max);
+        BreedUniqueAnimalsGoalBuilder builder = new BreedUniqueAnimalsGoalBuilder(min + "_" + max, GoalCategory.BREEDING, min, max);
+        builder.group(GoalGroups.BREED);
+        return builder;
     }
 }

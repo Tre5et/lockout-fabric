@@ -4,6 +4,7 @@ import me.marin.lockout.client.goal.progress.ClientGoalProgress;
 import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.group.GoalGroups;
 import me.marin.lockout.lockout.goal.rendering.texture.CornerIconTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.CycleTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
@@ -67,6 +68,8 @@ public class BreedAnimalGoalBuilder extends GoalBuilder<EntityUtil.BredEntity, V
         String id = Arrays.stream(entities)
                 .map(EntityUtil::getEntityId)
                 .collect(Collectors.joining("_OR_"));
-        return new BreedAnimalGoalBuilder(id, GoalCategory.BREEDING, Arrays.stream(entities).toList());
+        BreedAnimalGoalBuilder builder = new BreedAnimalGoalBuilder(id, GoalCategory.BREEDING, Arrays.stream(entities).toList());
+        builder.group(GoalGroups.BREED);
+        return builder;
     }
 }
