@@ -347,65 +347,6 @@ public class BoardBuilderScreen extends Screen {
         return super.keyPressed(input);
     }
 
-    /*public void drawCenterBoard(GuiGraphicsExtractor context, int mouseX, int mouseY) {
-        Font textRenderer = Minecraft.getInstance().font;
-
-        int size = BoardBuilderData.INSTANCE.size();
-
-        int boardWidth = 2 * GUI_CENTER_PADDING + size * GUI_CENTER_SLOT_SIZE;
-        int boardHeight = 2 * GUI_CENTER_PADDING + size * GUI_CENTER_SLOT_SIZE;
-        int x = width / 2 - boardWidth / 2 - CENTER_OFFSET;
-        int y = height / 2 - boardHeight / 2;
-
-        context.blitSprite(RenderPipelines.GUI_TEXTURED, GUI_CENTER_IDENTIFIER, x, y, boardWidth, boardHeight);
-
-        x += GUI_CENTER_PADDING + 1;
-        y += GUI_CENTER_PADDING + 1;
-        final int startX = x;
-
-        Optional<Integer> hoveredIdx = Utility.getBoardHoveredIndex(BoardBuilderData.INSTANCE.size(), width, height, mouseX, mouseY);
-        Integer editingIdx = BoardBuilderData.INSTANCE.getModifyingIdx();
-
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                int idx = j + size * i;
-                ClientGoal goal = BoardBuilderData.INSTANCE.getGoals().get(idx);
-                if (goal != null) {
-                    goal.extractTexture(context, textRenderer, x, y, 16, 16, LockoutClient.CURRENT_TICK);
-*//*                    boolean success = false;
-                    if (goal instanceof CustomTextureRenderer customTextureRenderer) {
-                        success = customTextureRenderer.renderTexture(context, x, y, LockoutClient.CURRENT_TICK);
-                    }
-                    if (!success) {
-                        context.item(goal.getTextureItemStack(), x, y);
-                        context.itemDecorations(textRenderer, goal.getTextureItemStack(), x, y);
-                    }*//*
-                }
-
-                if (hoveredIdx.isPresent() && hoveredIdx.get() == idx) {
-                    context.fill(x, y, x + 16, y + 16, GUI_CENTER_HOVERED_COLOR);
-                }
-                if (editingIdx != null && editingIdx == idx) {
-                    drawBorder(context, x - 1, y - 1, GUI_SLOT_SIZE, GUI_SLOT_SIZE, Color.RED.getRGB());
-                }
-                if (hoveredIdx.isPresent() && hoveredIdx.get() == idx) {
-                    if (goal != null) {
-                        List<FormattedCharSequence> tooltip = new ArrayList<>();
-                        tooltip.add(goal.getName().getVisualOrderText());
-                        if (goal.getBuildData().option().isPresent()) {
-                            tooltip.add(Component.literal("Right-click to edit data.").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC).getVisualOrderText());
-                        }
-                        context.setTooltipForNextFrame(textRenderer, tooltip, mouseX, mouseY);
-                    }
-                }
-
-                x += GUI_CENTER_SLOT_SIZE;
-            }
-            y += GUI_CENTER_SLOT_SIZE;
-            x = startX;
-        }
-    }*/
-
     private static void drawBorder(GuiGraphicsExtractor context, int x, int y, int width, int height, int color) {
         context.fill(x, y, x + width, y + 1, color);
         context.fill(x, y + height - 1, x + width, y + height, color);

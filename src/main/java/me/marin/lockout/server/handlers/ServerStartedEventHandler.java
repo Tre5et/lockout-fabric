@@ -32,24 +32,6 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
                             .toList()
             ).initialize(server);
 
-/*            for (GoalBuilder<?> goal : GoalRegistry.INSTANCE.getRegisteredGoals()) {
-                GoalRequirements goalRequirements = goal.getRequirements();
-                if (goalRequirements == null) continue;
-
-                java.util.Set<ResourceKey<Biome>> biomesToLocate = new java.util.HashSet<>(goalRequirements.getRequiredBiomes());
-
-                if (goalRequirements.getBiomeRequirement() != null) {
-                    goalRequirements.getBiomeRequirement().collectBiomes(biomesToLocate);
-                }
-
-                for (ResourceKey<Biome> biome : biomesToLocate) {
-                    locateBiome(server, biome);
-                }
-
-                for (ResourceKey<Structure> structure : goalRequirements.getRequiredStructures()) {
-                    locateStructure(server, structure);
-                }
-            }*/
             long end = System.currentTimeMillis();
             Lockout.log("Located " + context.biomes().size() + " biomes and " + context.structures().size() + " structures in " + String.format("%.2f", ((end-start)/1000.0)) + "s!");
 

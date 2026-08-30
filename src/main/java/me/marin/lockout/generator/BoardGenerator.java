@@ -48,16 +48,6 @@ public class BoardGenerator {
                 // Group does not permit this goal to be added.
                 continue;
             }
-/*
-            GoalRequirements goalRequirements = goal.getRequirements();
-            if (goalRequirements != null) {
-                if (!goalRequirements.isTeamsSizeOk(teams.size())) {
-                    continue;
-                }
-                if (!goalRequirements.isSatisfied(biomes, structures)) {
-                    continue;
-                }
-            }*/
 
             var constructed = goal.buildGeneratedServer(context);
             if(constructed.isPresent()) {
@@ -72,14 +62,6 @@ public class BoardGenerator {
             return generateBoard(size, recursionDepth + 1);
         }
 
-        // Construct the goals with ramdom options
-/*        List<Goal> goals = new ArrayList<>();
-        for(GoalBuilder<?> goal : goalBuilders) {
-            goals.add(goal.buildGenerated());
-        }*/
-
-        // Shuffle the board again. Some goals will always be after some other goals (GoalGroup#requirePredecessor),
-        // and shuffle fixes this.
         Collections.shuffle(goals);
 
         return new ServerLockoutBoard(goals);

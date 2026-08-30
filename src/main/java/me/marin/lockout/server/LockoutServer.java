@@ -144,10 +144,6 @@ public class LockoutServer {
             });
         });
 
-/*        ServerLivingEntityEvents.AFTER_DEATH.register(new AfterDeathEventHandler());
-
-        UseBlockCallback.EVENT.register(new UseBlockEventHandler());*/
-
         ServerLifecycleEvents.SERVER_STARTED.register(new ServerStartedEventHandler());
 
         ServerLifecycleEvents.SERVER_STOPPING.register((_) -> isInitialized = false);
@@ -358,21 +354,6 @@ public class LockoutServer {
         lockout.setTicks(-20L * LockoutConfig.getInstance().startTime); // see Lockout#ticks
 
         compassHandler = new CompassItemHandler(allLockoutPlayers, playerManager);
-
-/*        List<Goal> tooltipGoals = new ArrayList<>(lockout.getBoard().getGoals()).stream().filter(g -> g.getTooltipInfo() != null).toList();
-        for (Goal goal : tooltipGoals) {
-            // Update teams tooltip
-            for (LockoutTeam team : lockout.getTeams()) {
-                ((LockoutTeamServer) team).sendTooltipUpdate(goal, false);
-            }
-            // Update spectator tooltip
-            if (!allSpectatorPlayers.isEmpty()) {
-                var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getSpectatorTooltip()));
-                for (UUID spectator : allSpectatorPlayers) {
-                    ServerPlayNetworking.send(playerManager.getPlayer(spectator), payload);
-                }
-            }
-        }*/
 
         for (ServerPlayer player : allServerPlayers) {
             ServerPlayNetworking.send(player, lockout.getTeamsGoalsPacket());

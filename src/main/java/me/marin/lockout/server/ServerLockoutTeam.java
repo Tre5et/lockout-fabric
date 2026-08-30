@@ -30,7 +30,6 @@ public class ServerLockoutTeam extends LockoutTeam {
         this.server = server;
     }
 
-
     public void sendMessage(String message) {
         for (UUID uuid : getPlayerIds()) {
             ServerPlayer player = server.getPlayerList().getPlayer(uuid);
@@ -39,31 +38,6 @@ public class ServerLockoutTeam extends LockoutTeam {
             }
         }
     }
-
-/*    public void sendTooltipUpdate(Goal goal) {
-        sendTooltipUpdate(goal, true);
-    }
-    public void sendTooltipUpdate(Goal goal, boolean updateSpectators) {
-        if (goal.getTooltipInfo() == null) return;
-        for (UUID playerId : getPlayerIds()) {
-            ServerPlayer player = server.getPlayerList().getPlayer(playerId);
-            var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getTooltip(this, player)));
-            if (player != null) {
-                ServerPlayNetworking.send(player, payload);
-            }
-        }
-
-        if (updateSpectators) {
-            this.sendTooltipPacketSpectators(goal);
-        }
-    }*/
-/*    private void sendTooltipPacketSpectators(Goal goal) {
-        if (goal.getTooltipInfo() == null) return;
-        var payload = new UpdateTooltipPayload(goal.getId(), String.join("\n", goal.getSpectatorTooltip()));
-        for (ServerPlayer spectator : Utility.getSpectators(LockoutServer.lockout, server)) {
-            ServerPlayNetworking.send(spectator, payload);
-        }
-    }*/
 
     public void storeHintResult(String goalId, int hintIndex, String data) {
         resolvedHints.computeIfAbsent(goalId, _ -> new HashMap<>()).put(hintIndex, data);

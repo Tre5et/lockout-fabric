@@ -31,10 +31,6 @@ import java.util.function.Predicate;
 import static me.marin.lockout.Constants.*;
 
 public class LockoutInitializer implements ModInitializer {
-
-    private static final Predicate<CommandSourceStack> PERMISSIONS = (ssc) ->
-            ssc.getServer() != null && (Permissions.check(ssc, PLACEHOLDER_PERM_STRING, LevelBasedPermissionSet.GAMEMASTER.level()) || ssc.getServer().isSingleplayer());
-
     public static Version MOD_VERSION;
 
     @Override
@@ -48,124 +44,6 @@ public class LockoutInitializer implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.getRoot().addChild(Command.SERVER_COMMAND);
-            /*{
-                {
-                    // Lockout command
-                    var commandNode = Commands.literal("lockout").requires(PERMISSIONS).build();
-                    var teamsNode = Commands.literal("teams").build();
-                    var playersNode = Commands.literal("players").build();
-                    //TODO make custom argument types
-                    var teamListNode = Commands.argument("team names", StringArgumentType.greedyString()).suggests(new TeamSuggestionProvider()).executes(LockoutServer::lockoutCommandLogic).build();
-                    var playerListNode = Commands.argument("player names", StringArgumentType.greedyString()).suggests(new PlayerSuggestionProvider()).executes(LockoutServer::lockoutCommandLogic).build();
-
-                    dispatcher.getRoot().addChild(commandNode);
-                    commandNode.addChild(teamsNode);
-                    commandNode.addChild(playersNode);
-                    teamsNode.addChild(teamListNode);
-                    playersNode.addChild(playerListNode);
-                }
-
-
-                {
-                    // Blackout command
-                    var commandNode = Commands.literal("blackout").requires(PERMISSIONS).build();
-                    var teamNode = Commands.literal("team").build();
-                    var playersNode = Commands.literal("players").build();
-                    //TODO make custom argument types
-                    var teamNameNode = Commands.argument("team name", StringArgumentType.greedyString()).suggests(new TeamSuggestionProvider()).executes(LockoutServer::blackoutCommandLogic).build();
-                    var playerListNode = Commands.argument("player names", StringArgumentType.greedyString()).suggests(new PlayerSuggestionProvider()).executes(LockoutServer::blackoutCommandLogic).build();
-
-                    dispatcher.getRoot().addChild(commandNode);
-                    commandNode.addChild(teamNode);
-                    commandNode.addChild(playersNode);
-                    teamNode.addChild(teamNameNode);
-                    playersNode.addChild(playerListNode);
-                }
-            }
-
-
-            {
-                // Chat command
-                var chatCommandNode = Commands.literal("chat").build();
-                var chatTeamNode = Commands.literal("team").executes(context -> LockoutServer.setChat(context, ChatManager.Type.TEAM)).build();
-                var chatLocalNode = Commands.literal("local").executes(context -> LockoutServer.setChat(context, ChatManager.Type.LOCAL)).build();
-
-                dispatcher.getRoot().addChild(chatCommandNode);
-                chatCommandNode.addChild(chatTeamNode);
-                chatCommandNode.addChild(chatLocalNode);
-            }
-
-
-            {
-                // GiveGoal command
-                var giveGoalRoot = Commands.literal("GiveGoal").requires(PERMISSIONS).build();
-                var playerName = Commands.argument("player name", GameProfileArgument.gameProfile()).build();
-                var goalIndex = Commands.argument("goal number", IntegerArgumentType.integer(1, MAX_BOARD_SIZE * MAX_BOARD_SIZE)).executes(LockoutServer::grantGoal).build();
-
-                dispatcher.getRoot().addChild(giveGoalRoot);
-                giveGoalRoot.addChild(playerName);
-                playerName.addChild(goalIndex);
-            }
-
-            {
-                // SetStartTime command
-                var setStartTimeRoot = Commands.literal("SetStartTime").requires(PERMISSIONS).build();
-                var seconds = Commands.argument("seconds", IntegerArgumentType.integer(5, 300)).executes(LockoutServer::setStartTime).build();
-
-                dispatcher.getRoot().addChild(setStartTimeRoot);
-                setStartTimeRoot.addChild(seconds);
-            }
-
-            {
-                // RemoveCustomBoard command (SetCustomBoard is registered in LockoutClient, and server listens for a packet)
-
-                dispatcher.getRoot().addChild(Commands.literal("RemoveCustomBoard").requires(PERMISSIONS).executes((context) -> {
-                    ClientPlayNetworking.send(new CustomBoardPayload(Optional.empty()));
-                    return 1;
-                }).build());
-            }
-
-            {
-                // SetBoardSize command
-
-                var setBoardTimeRoot = Commands.literal("SetBoardSize").requires(PERMISSIONS).build();
-                var size = Commands.argument("board size", IntegerArgumentType.integer(3, 7)).executes(LockoutServer::setBoardSize).build();
-
-                dispatcher.getRoot().addChild(setBoardTimeRoot);
-                setBoardTimeRoot.addChild(size);
-            }
-
-            {
-                // SetGiveCompasses command
-
-                var setGiveCompassesRoot = Commands.literal("SetGiveCompasses").requires(PERMISSIONS).build();
-                var giveCompasses = Commands.argument("giveCompasses", BoolArgumentType.bool()).executes(LockoutServer::setGiveCompasses).build();
-
-                dispatcher.getRoot().addChild(setGiveCompassesRoot);
-                setGiveCompassesRoot.addChild(giveCompasses);
-            }
-
-            {
-                // ReloadGoalPool command
-
-                dispatcher.getRoot().addChild(Commands.literal("ReloadGoalPool").requires(PERMISSIONS).executes(LockoutServer::reloadGoals).build());
-            }
-
-            {
-                // GetNearbyStructures command
-                dispatcher.getRoot().addChild(Commands.literal("GetNearbyStructures").requires(PERMISSIONS).executes(LockoutServer::getNearbyStructures).build());
-            }
-
-            {
-                // GetNearbyBiomes command
-                dispatcher.getRoot().addChild(Commands.literal("GetNearbyBiomes").requires(PERMISSIONS).executes(LockoutServer::getNearbyBiomes).build());
-            }
-
-            {
-                // Forfeit command
-                dispatcher.getRoot().addChild(Commands.literal("forfeit").executes(LockoutServer::forfeitCommand).build());
-            }*/
-
         });
 
         LootTableEvents.REPLACE.register(((key, original, source, registries) -> {

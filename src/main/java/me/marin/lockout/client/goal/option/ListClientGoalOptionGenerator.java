@@ -112,17 +112,6 @@ public class ListClientGoalOptionGenerator<T> extends ListGoalOptionGenerator<T>
                 return getEntries().get(index);
             }
             return null;
-
-/*            int halfRowWidth = this.getWidth() / 2;
-            int centerX = this.getX() + this.width / 2;
-            int left = centerX - halfRowWidth;
-            int right = centerX + halfRowWidth;
-            int scrolledY = Mth.floor(y + (int)scrollAmount() + 3);
-            int idx = scrolledY / ITEM_HEIGHT;
-            if (x < (this.getX() + this.getWidth() - 6) && x >= (double) left && x <= (double) right && idx >= 0 && scrolledY >= 0 && idx < entries.size()) {
-                return entries.get(idx);
-            }
-            return null;*/
         }
 
         @Override

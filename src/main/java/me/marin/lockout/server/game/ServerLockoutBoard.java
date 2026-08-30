@@ -14,7 +14,7 @@ public class ServerLockoutBoard extends LockoutBoard<ServerGoal<?>> {
         super(goals);
     }
 
-    public void update(Object data, ServerPlayer player, boolean skipCompleted) {
+    public void update(Object data, ServerPlayer player) {
         Optional<? extends LockoutTeam> team = LockoutServer.lockout.getTeams().stream()
                 .filter(t -> t.containsPlayer(player.getUUID()))
                 .findAny();
@@ -22,7 +22,7 @@ public class ServerLockoutBoard extends LockoutBoard<ServerGoal<?>> {
 
         for(ServerGoal<?> goal : getGoals()) {
             if(goal == null) continue;
-            if(goal.hasAnyCompleted() && skipCompleted) continue;
+            if(goal.hasAnyCompleted()) continue;
             goal.updateProgressUnchecked(team.get(), data, LockoutServer.lockout);
         }
     }

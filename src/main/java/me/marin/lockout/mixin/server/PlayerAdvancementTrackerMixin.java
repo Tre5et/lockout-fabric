@@ -40,7 +40,7 @@ public abstract class PlayerAdvancementTrackerMixin {
         if (!lockout.isLockoutPlayer(player.getUUID())) return;
         ServerLockoutTeam team = (ServerLockoutTeam) lockout.getPlayerTeam(player.getUUID());
 
-        lockout.getBoard().update(advancement, player, true);
+        lockout.getBoard().update(advancement, player);
     }
 
     private static final Identifier ADVENTURING_TIME = Identifier.fromNamespaceAndPath("minecraft", "adventure/adventuring_time");
