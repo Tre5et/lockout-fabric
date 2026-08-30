@@ -14,6 +14,7 @@ import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
+import me.marin.lockout.lockout.goal.rendering.name.StringNameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
@@ -210,7 +211,7 @@ public abstract class GoalBuilder<U,T> {
         return this;
     }
 
-    public GoalBuilder<U,T> customName(NameProvider.StringNameProvider<T> nameExtractorProvider) {
+    public GoalBuilder<U,T> customName(StringNameProvider<T> nameExtractorProvider) {
         this.customNameProvider = nameExtractorProvider;
         return this;
     }

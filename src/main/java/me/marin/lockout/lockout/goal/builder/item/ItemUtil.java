@@ -20,4 +20,8 @@ public class ItemUtil {
     public record BrewedItem(
             Item item
     ) {}
+
+    public record CompostedItem(
+            Item item
+    ) {}
 }

@@ -20,8 +20,8 @@
     "server.CarvedPumpkinBlockMixin",
     "server.ChiseledBookshelfBlockMixin",
     "server.CompassItemMixin",
-    "server.CompassItemUseOnBlockMixin",
-    "server.ComposterBlockMixin",
+    "server.CompassItemUseOnBlockMixin",*/
+    "server.ComposterBlockMixin",/*
     "server.ConsumeItemTriggerMixin",
     "server.CraftingResultSlotMixin",
     "server.CrossbowItemMixin",
