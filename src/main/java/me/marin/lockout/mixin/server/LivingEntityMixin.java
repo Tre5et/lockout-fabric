@@ -1,27 +1,22 @@
 package me.marin.lockout.mixin.server;
 
-import me.marin.lockout.Lockout;
-import me.marin.lockout.server.ServerLockoutTeam;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.goals.misc.Deal400DamageGoal;
-import me.marin.lockout.lockout.interfaces.BreakItemsGoal;
+import me.marin.lockout.game.LockoutGame;
+import me.marin.lockout.lockout.goal.builder.break_item.BreakItemGoalBuilder;
 import me.marin.lockout.server.LockoutServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
+import me.marin.lockout.server.game.ServerLockoutGame;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
 public class LivingEntityMixin {
 
-    @Inject(method = "hurtServer", at = @At("RETURN"))
+    /*@Inject(method = "hurtServer", at = @At("RETURN"))
     public void onDamage(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
@@ -44,26 +39,17 @@ public class LivingEntityMixin {
                 }
             }
         }
-    }
+    }*/
 
     @Inject(method = "onEquippedItemBroken", at = @At("HEAD"))
     public void onEquipmentBreak(Item item, EquipmentSlot slot, CallbackInfo ci) {
-        if (!((Object)this instanceof Player player)) return;
+        if (!((Object)this instanceof ServerPlayer player)) return;
         if (player.level().isClientSide()) return;
 
-        Lockout lockout = LockoutServer.lockout;
-        if (!Lockout.isLockoutRunning(lockout)) return;
+        ServerLockoutGame lockout = LockoutServer.lockout;
+        if (!LockoutGame.isActive(lockout)) return;
 
-        for (Goal goal : lockout.getBoard().getGoals()) {
-            if (goal == null) continue;
-            if (goal.isCompleted()) continue;
-
-            if (goal instanceof BreakItemsGoal) {
-                if(((BreakItemsGoal)goal).satisfiedBy(item)) {
-                    lockout.completeGoal(goal, player);
-                }
-            }
-        }
+        lockout.getBoard().update(new BreakItemGoalBuilder.BrokenItem(item), player);
     }
 
 }

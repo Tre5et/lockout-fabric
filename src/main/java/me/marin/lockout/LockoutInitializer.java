@@ -1,6 +1,5 @@
 package me.marin.lockout;
 
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.lockout.DefaultGoalRegister;
 import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.network.Networking;
@@ -10,9 +9,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -26,7 +23,6 @@ import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 import java.util.Objects;
-import java.util.function.Predicate;
 
 import static me.marin.lockout.Constants.*;
 

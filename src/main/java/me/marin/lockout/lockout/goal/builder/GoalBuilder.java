@@ -11,10 +11,9 @@ import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
-import me.marin.lockout.lockout.goal.id.IdProvider;
+import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
-import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
-import me.marin.lockout.lockout.goal.rendering.name.NameExtractorProvider;
+import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
@@ -23,6 +22,7 @@ import me.marin.lockout.server.goal.ServerGoal;
 import me.marin.lockout.server.goal.builder.ServerGoalBuildParameters;
 import me.marin.lockout.server.goal.hint.ServerHint;
 import me.marin.lockout.server.goal.progress.ServerGoalProgress;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ public abstract class GoalBuilder<U,T> {
     @Getter
     protected List<GoalRequirement<? super T>> requirements = new ArrayList<>();
     private IdProvider<T> customIdProvider = null;
-    private NameExtractorProvider<T> customNameExtractorProvider = null;
+    private NameProvider<T> customNameProvider = null;
     private TextureExtractorProvider<T> cutomTextureExtractorProvider = null;
     @Getter
     protected final List<GoalGroup> groups = new ArrayList<>();
@@ -55,7 +55,7 @@ public abstract class GoalBuilder<U,T> {
         return id;
     }
 
-    public abstract NameExtractor defaultNameExtractor(T option);
+    public abstract Component defaultName(T option);
 
     public abstract TextureExtractor defaultTextureExtractor(T option);
 
@@ -84,7 +84,7 @@ public abstract class GoalBuilder<U,T> {
         return new ClientGoal(new ClientGoalBuildParameters(
                 getId(option),
                 getBuildData(option),
-                getNameExtractor(option).extract(),
+                getName(option),
                 getTextureExtractor(option),
                 getClientGoalProgress(option),
                 getClientHints(option)
@@ -158,9 +158,9 @@ public abstract class GoalBuilder<U,T> {
         return defaultId(option);
     }
 
-    public NameExtractor getNameExtractor(T option) {
-        if(customNameExtractorProvider != null) return customNameExtractorProvider.get(option);
-        return defaultNameExtractor(option);
+    public Component getName(T option) {
+        if(customNameProvider != null) return customNameProvider.get(option);
+        return defaultName(option);
     }
 
     public TextureExtractor getTextureExtractor(T option) {
@@ -205,13 +205,14 @@ public abstract class GoalBuilder<U,T> {
         return customId(_ -> id);
     }
 
-    public GoalBuilder<U,T> customNameExtractor(NameExtractorProvider<T> nameExtractorProvider) {
-        this.customNameExtractorProvider = nameExtractorProvider;
+    public GoalBuilder<U,T> customName(NameProvider<T> nameExtractorProvider) {
+        this.customNameProvider = nameExtractorProvider;
         return this;
     }
 
-    public GoalBuilder<U,T> customNameExtractor(NameExtractor extractor) {
-        return customNameExtractor(_ -> extractor);
+    public GoalBuilder<U,T> customName(NameProvider.StringNameProvider<T> nameExtractorProvider) {
+        this.customNameProvider = nameExtractorProvider;
+        return this;
     }
 
     public GoalBuilder<U,T> customTextureExtractor(TextureExtractorProvider<T> textureExtractorProvider) {

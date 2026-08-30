@@ -7,7 +7,6 @@ import me.marin.lockout.client.goal.progress.TargetNumberClientGoalProgress;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.option.IntegerGoalOptionGenerator;
-import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.StackingTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextTextureExtractor;
@@ -15,6 +14,7 @@ import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.server.goal.progress.ServerGoalProgress;
 import me.marin.lockout.server.goal.progress.UniqueServerGoalProgress;
 import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 import java.util.List;
@@ -31,8 +31,8 @@ public class AdvancementCountingGoalBuilder extends GoalBuilder<AdvancementHolde
     }
 
     @Override
-    public NameExtractor defaultNameExtractor(Integer option) {
-        return NameExtractor.simple("Obtain " + option + " unique Advancements");
+    public Component defaultName(Integer option) {
+        return Component.literal("Obtain " + option + " unique Advancements");
     }
 
     @Override

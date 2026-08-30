@@ -4,11 +4,11 @@ import me.marin.lockout.Constants;
 import me.marin.lockout.client.goal.progress.ClientGoalProgress;
 import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
-import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.server.goal.progress.ServerGoalProgress;
 import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
@@ -25,15 +25,15 @@ public class RideEntityGoalBuilder extends GoalBuilder<EntityType<?>, Void> {
     }
 
     @Override
-    public NameExtractor defaultNameExtractor(Void option) {
-        return NameExtractor.simple(() -> "Ride " + entityTypes.stream()
+    public Component defaultName(Void option) {
+        return Component.literal("Ride " + entityTypes.stream()
                 .map(EntityType::toShortString)
                 .map(s -> Arrays.stream(s.split("_"))
                         .map(p -> p.substring(0,1).toUpperCase() + p.substring(1).toLowerCase())
                         .collect(Collectors.joining(" "))
                 )
-                .collect(Collectors.joining(" or "))
-        );
+                .collect(Collectors.joining(" or ")
+        ));
     }
 
     @Override

@@ -4,12 +4,12 @@ import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.client.goal.progress.ClientGoalProgress;
 import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
-import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.server.goal.progress.ServerGoalProgress;
 import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 
@@ -26,8 +26,8 @@ public class AdvancementGoalBuilder extends GoalBuilder<AdvancementHolder, Void>
     }
 
     @Override
-    public NameExtractor defaultNameExtractor(Void option) {
-        return NameExtractor.simple(() -> "Obtain " + advancements.stream()
+    public Component defaultName(Void option) {
+        return Component.literal("Obtain " + advancements.stream()
                 .map(a -> {
                     Advancement advancement = LockoutClient.allAdvancements.get(a);
                     if(advancement == null) {

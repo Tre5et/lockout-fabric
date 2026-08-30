@@ -15,7 +15,7 @@ public class SimpleClientGoalProgress extends SimpleGoalProgress implements Clie
 
     @Override
     public Component getDisplayString(Boolean value) {
-        return Component.literal(value ? "yes" : "no");
+        return Component.literal(value ? "Yes" : "No");
     }
 
     @Override

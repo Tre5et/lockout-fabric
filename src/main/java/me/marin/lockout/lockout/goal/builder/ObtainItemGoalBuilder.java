@@ -29,13 +29,13 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<Inventory,T> 
 
     abstract boolean satisfiedBy(Inventory inventory, T option);
 
-    protected static String getItemName(Item item) {
+    public static String getItemName(Item item) {
         return item.getName(item.getDefaultInstance())
                 .getContents().visit(Optional::of)
                 .orElse(String.valueOf(Item.getId(item)));
     }
 
-    protected static String getItemId(Item item) {
+    public static String getItemId(Item item) {
         return Arrays.stream(BuiltInRegistries.ITEM.getKey(item).getPath().split("/")).toList().getLast().toUpperCase();
     }
 }

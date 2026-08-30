@@ -1,9 +1,9 @@
 package me.marin.lockout.lockout.goal.builder;
 
 import me.marin.lockout.lockout.goal.config.GoalCategory;
-import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import oshi.util.tuples.Pair;
@@ -23,14 +23,14 @@ public class ObtainSomeItemsGoalBuilder extends ObtainItemGoalBuilder<Void> {
     }
 
     @Override
-    public NameExtractor defaultNameExtractor(Void option) {
+    public Component defaultName(Void option) {
         if(number > 1) {
-            return NameExtractor.simple(() -> "Obtain " + number + " of " + items.stream()
+            return Component.literal("Obtain " + number + " of " + items.stream()
                     .map(e -> (e.getB() > 1 ? e.getB() + " " : "") + ObtainItemGoalBuilder.getItemName(e.getA()))
                     .collect(Collectors.joining(" or "))
             );
         } else {
-            return NameExtractor.simple(() -> "Obtain " + items.stream()
+            return Component.literal("Obtain " + items.stream()
                     .map(e -> (e.getB() > 1 ? e.getB() + " " : "") + ObtainItemGoalBuilder.getItemName(e.getA()))
                     .collect(Collectors.joining(" or "))
             );

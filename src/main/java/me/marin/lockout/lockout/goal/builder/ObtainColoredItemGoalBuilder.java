@@ -6,10 +6,10 @@ import me.marin.lockout.client.goal.option.ListClientGoalOptionGenerator;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.option.ListGoalOptionGenerator;
-import me.marin.lockout.lockout.goal.rendering.name.NameExtractor;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -44,8 +44,8 @@ public class ObtainColoredItemGoalBuilder extends ObtainItemGoalBuilder<DyeColor
     }
 
     @Override
-    public NameExtractor defaultNameExtractor(DyeColor option) {
-        return NameExtractor.simple(() -> "Obtain " + (count > 1 ? count + " " : "")  + getItemName(items.pick(option)));
+    public Component defaultName(DyeColor option) {
+        return Component.literal("Obtain " + (count > 1 ? count + " " : "")  + getItemName(items.pick(option)));
     }
 
     @Override
