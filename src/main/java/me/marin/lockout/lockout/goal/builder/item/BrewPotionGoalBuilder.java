@@ -1,0 +1,75 @@
+package me.marin.lockout.lockout.goal.builder.item;
+
+import me.marin.lockout.client.goal.progress.ClientGoalProgress;
+import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
+import me.marin.lockout.lockout.goal.builder.BuilderUtil;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
+import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.rendering.texture.CycleTextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import me.marin.lockout.server.goal.progress.ServerGoalProgress;
+import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class BrewPotionGoalBuilder extends GoalBuilder<Holder<Potion>, Void> {
+    private final List<Holder<Potion>> acceptablePotions;
+
+    public BrewPotionGoalBuilder(String id, GoalCategory category, List<Holder<Potion>> acceptablePotions) {
+        super("BREW_POTION_" + id, category);
+        this.acceptablePotions = acceptablePotions;
+    }
+
+    @Override
+    public Component defaultName(Void option) {
+        return Component.literal("Brew a Potion of " + acceptablePotions.stream()
+                .map(p -> p.value().name())
+                .distinct()
+                .map(BuilderUtil::idToName)
+                .collect(Collectors.joining(" or "))
+        );
+    }
+
+    @Override
+    public TextureExtractor defaultTextureExtractor(Void option) {
+        return new CycleTextureExtractor(acceptablePotions.stream()
+                .map(p -> new ItemTextureExtractor(getPotionItemStack(p)))
+                .toList()
+        );
+    }
+
+    @Override
+    public ServerGoalProgress<Holder<Potion>, ?> getServerGoalProgress(Void option) {
+        return new SimpleServerGoalProgress<>(acceptablePotions::contains);
+    }
+
+    @Override
+    public ClientGoalProgress<?> getClientGoalProgress(Void option) {
+        return new SimpleClientGoalProgress();
+    }
+
+    public static ItemStack getPotionItemStack(Holder<Potion> potion) {
+        ItemStack stack = Items.POTION.getDefaultInstance();
+        stack.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
+        return stack;
+    }
+
+    @SafeVarargs
+    public static BrewPotionGoalBuilder any(Holder<Potion>... potions) {
+        String id = Arrays.stream(potions)
+                .map(p -> p.value().name().toUpperCase())
+                .distinct()
+                .collect(Collectors.joining("_OR_"));
+        return new BrewPotionGoalBuilder(id, GoalCategory.BREWING, Arrays.stream(potions).toList());
+    }
+}

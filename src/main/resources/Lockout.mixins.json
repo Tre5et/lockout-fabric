@@ -8,9 +8,9 @@
     "server.AnvilScreenHandlerMixin",
     "server.ArmorStandMixin",
     "server.BlockMixin",*/
-    "server.BredAnimalsTriggerMixin",/*
+    "server.BredAnimalsTriggerMixin",
     "server.BrewedPotionTriggerMixin",
-    "server.BrewingStandScreenHandlerPotionSlotMixin",
+    "server.BrewingStandScreenHandlerPotionSlotMixin",/*
     "server.BrushableBlockEntityMixin",
     "server.BrushableBlockEntityMixin",
     "server.BundleItemMixin",

@@ -1,17 +1,13 @@
 package me.marin.lockout.lockout.goal.builder.entity;
 
 import me.marin.lockout.Constants;
+import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 public class EntityUtil {
     public static String getEntityName(EntityType<?> entity) {
-        return Arrays.stream(entity.toShortString().split("_"))
-                .map(p -> p.substring(0, 1).toUpperCase() + p.substring(1).toLowerCase())
-                .collect(Collectors.joining(" "));
+        return BuilderUtil.idToName(entity.toShortString());
     }
 
     public static Identifier getEntityTexture(EntityType<?> entity) {

@@ -3,10 +3,14 @@ package me.marin.lockout.lockout;
 import me.marin.lockout.lockout.goal.builder.entity.BreedUniqueAnimalsGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.BreakItemGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.BreedAnimalGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.item.BrewPotionGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.item.BrewPotionTypeGoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
@@ -38,6 +42,14 @@ public class DefaultGoalRegister {
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.SHEEP));
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.STRIDER));
         INSTANCE.register(BreedUniqueAnimalsGoalBuilder.range(4,8));
+
+        INSTANCE.register(BrewPotionGoalBuilder.any(Potions.HEALING, Potions.STRONG_HEALING));
+        INSTANCE.register(BrewPotionGoalBuilder.any(Potions.INVISIBILITY, Potions.LONG_INVISIBILITY));
+        INSTANCE.register(BrewPotionGoalBuilder.any(Potions.POISON, Potions.LONG_POISON, Potions.STRONG_POISON));
+        INSTANCE.register(BrewPotionGoalBuilder.any(Potions.SWIFTNESS, Potions.LONG_SWIFTNESS, Potions.STRONG_SWIFTNESS));
+        INSTANCE.register(BrewPotionGoalBuilder.any(Potions.WATER_BREATHING, Potions.LONG_WATER_BREATHING));
+        INSTANCE.register(BrewPotionGoalBuilder.any(Potions.WEAKNESS, Potions.LONG_WEAKNESS));
+        INSTANCE.register(BrewPotionTypeGoalBuilder.of(Items.LINGERING_POTION));
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));

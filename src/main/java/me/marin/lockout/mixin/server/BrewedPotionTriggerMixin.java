@@ -1,9 +1,8 @@
 package me.marin.lockout.mixin.server;
 
-import me.marin.lockout.Lockout;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.interfaces.ObtainPotionItemGoal;
+import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.server.LockoutServer;
+import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.advancements.triggers.BrewedPotionTrigger;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,19 +17,10 @@ public class BrewedPotionTriggerMixin {
 
     @Inject(method = "trigger", at = @At("HEAD"))
     public void onTrigger(ServerPlayer player, Holder<Potion> potion, CallbackInfo ci) {
-        Lockout lockout = LockoutServer.lockout;
-        if (!Lockout.isLockoutRunning(lockout)) return;
+        ServerLockoutGame lockout = LockoutServer.lockout;
+        if (!LockoutGame.isActive(lockout)) return;
 
-        for (Goal goal : lockout.getBoard().getGoals()) {
-            if (goal == null) continue;
-            if (goal.isCompleted()) continue;
-
-            if (goal instanceof ObtainPotionItemGoal obtainPotionItemGoal) {
-                if (obtainPotionItemGoal.getPotions().contains(potion)) {
-                    lockout.completeGoal(obtainPotionItemGoal, player);
-                }
-            }
-        }
+        lockout.getBoard().update(potion, player);
     }
 
 }

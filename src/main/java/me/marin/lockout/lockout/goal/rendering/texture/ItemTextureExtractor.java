@@ -11,7 +11,7 @@ import java.util.List;
 public class ItemTextureExtractor implements TextureExtractor {
     private final ItemStack item;
 
-    private ItemTextureExtractor(ItemStack item) {
+    public ItemTextureExtractor(ItemStack item) {
         this.item = item;
     }
 
