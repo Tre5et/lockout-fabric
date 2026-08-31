@@ -64,6 +64,9 @@ public class BreedUniqueAnimalsGoalBuilder extends GoalBuilder<EntityUtil.BredEn
         return new TargetNumberClientGoalProgress("Animals bred", option);
     }
 
+    @Override
+    public void reifiedUpdater(EntityUtil.BredEntity update) {}
+
     public static BreedUniqueAnimalsGoalBuilder range(int min, int max) {
         BreedUniqueAnimalsGoalBuilder builder = new BreedUniqueAnimalsGoalBuilder(min + "_" + max, GoalCategory.BREEDING, min, max);
         builder.group(GoalGroups.BREED);

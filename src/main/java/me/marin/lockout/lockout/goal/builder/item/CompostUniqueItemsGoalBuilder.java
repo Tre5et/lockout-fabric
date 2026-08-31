@@ -71,6 +71,9 @@ public class CompostUniqueItemsGoalBuilder extends GoalBuilder<ItemUtil.Composte
         return new TargetNumberClientGoalProgress("Composted items", option);
     }
 
+    @Override
+    public void reifiedUpdater(ItemUtil.CompostedItem update) {}
+
     public static CompostUniqueItemsGoalBuilder any(String id, int min, int max, Item... items) {
         return new CompostUniqueItemsGoalBuilder(id, GoalCategory.WORKSTATIONS, min, max, Arrays.stream(items).toList());
     }

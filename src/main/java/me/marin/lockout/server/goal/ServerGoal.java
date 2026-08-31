@@ -19,6 +19,7 @@ import oshi.util.tuples.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -27,11 +28,14 @@ public class ServerGoal<U> extends Goal {
     private final ServerGoalProgress<U,?> progress;
     @Getter
     private final List<ServerHint<?>> hints;
+    @Getter
+    private final Consumer<U> reifiedUpdater;
 
     public ServerGoal(ServerGoalBuildParameters<U> parameters) {
         super(parameters);
         this.progress = parameters.getProgress();
         this.hints = parameters.getHints();
+        this.reifiedUpdater = parameters.getReifiedUpdater();
     }
 
     public void updateProgress(LockoutTeam team, U update, ServerLockoutGame lockout) {
@@ -39,9 +43,15 @@ public class ServerGoal<U> extends Goal {
     }
 
     @SuppressWarnings("unchecked")
+    protected U convertUpdate(Object object) throws ClassCastException {
+        U update = (U)object;
+        reifiedUpdater.accept(update);
+        return update;
+    }
+
     public void updateProgressUnchecked(LockoutTeam team, Object update, ServerLockoutGame lockout) {
         try {
-            updateProgress(team, (U)update, lockout);
+            updateProgress(team, convertUpdate(update), lockout);
         } catch (ClassCastException ignored) {}
     }
 

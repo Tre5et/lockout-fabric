@@ -59,6 +59,9 @@ public class BrewPotionGoalBuilder extends GoalBuilder<Holder<Potion>, Void> {
         return new SimpleClientGoalProgress();
     }
 
+    @Override
+    public void reifiedUpdater(Holder<Potion> update) {}
+
     public static ItemStack getPotionItemStack(Holder<Potion> potion) {
         ItemStack stack = Items.POTION.getDefaultInstance();
         stack.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));

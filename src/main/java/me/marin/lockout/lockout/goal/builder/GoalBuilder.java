@@ -72,12 +72,18 @@ public abstract class GoalBuilder<U,T> {
 
     public abstract ClientGoalProgress<?> getClientGoalProgress(T option);
 
+    /**
+     * This method should be overridden by a class with a fixed U type and should stay blank.
+     */
+    public abstract void reifiedUpdater(U update);
+
     public ServerGoal<U> buildServer(T option) {
         return new ServerGoal<>(new ServerGoalBuildParameters<>(
                 getId(option),
                 getBuildData(option),
                 getServerGoalProgress(option),
-                getServerHints(option)
+                getServerHints(option),
+                this::reifiedUpdater
         ));
     }
 

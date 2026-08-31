@@ -42,6 +42,9 @@ public class BrewPotionTypeGoalBuilder extends GoalBuilder<ItemUtil.BrewedItem, 
         return new SimpleClientGoalProgress();
     }
 
+    @Override
+    public void reifiedUpdater(ItemUtil.BrewedItem update) {}
+
     public static BrewPotionTypeGoalBuilder of(Item item) {
         BrewPotionTypeGoalBuilder builder = new BrewPotionTypeGoalBuilder(ItemUtil.getItemId(item), GoalCategory.BREWING, item);
         builder.group(GoalGroups.BREW_POTION);

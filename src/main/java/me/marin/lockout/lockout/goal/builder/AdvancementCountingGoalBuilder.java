@@ -62,4 +62,7 @@ public class AdvancementCountingGoalBuilder extends GoalBuilder<AdvancementHolde
     public ClientGoalProgress<?> getClientGoalProgress(Integer option) {
         return new TargetNumberClientGoalProgress("Advancements obtained", option);
     }
+
+    @Override
+    public void reifiedUpdater(AdvancementHolder update) {}
 }

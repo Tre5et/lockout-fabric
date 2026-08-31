@@ -53,6 +53,9 @@ public class BreedAnimalGoalBuilder extends GoalBuilder<EntityUtil.BredEntity, V
         return new SimpleClientGoalProgress();
     }
 
+    @Override
+    public void reifiedUpdater(EntityUtil.BredEntity update) {}
+
     public static BreedAnimalGoalBuilder any(String id, GoalCategory category, EntityType<?>... entities) {
         return new BreedAnimalGoalBuilder(id, category, Arrays.stream(entities).toList());
     }

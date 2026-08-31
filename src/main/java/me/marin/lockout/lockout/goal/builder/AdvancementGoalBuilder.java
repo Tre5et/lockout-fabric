@@ -66,6 +66,9 @@ public class AdvancementGoalBuilder extends GoalBuilder<AdvancementHolder, Void>
         return new SimpleClientGoalProgress();
     }
 
+    @Override
+    public void reifiedUpdater(AdvancementHolder update) {}
+
     public static AdvancementGoalBuilder any(String id, GoalCategory category, Identifier... advancements) {
         return new AdvancementGoalBuilder(
                 id,

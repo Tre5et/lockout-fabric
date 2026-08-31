@@ -45,6 +45,9 @@ public class RideEntityGoalBuilder extends GoalBuilder<EntityUtil.RodeEntity, Vo
     }
 
     @Override
+    public void reifiedUpdater(EntityUtil.RodeEntity update) {}
+
+    @Override
     public ServerGoalProgress<EntityUtil.RodeEntity, ?> getServerGoalProgress(Void option) {
         return new SimpleServerGoalProgress<>(e -> entityTypes.contains(e.entity()));
     }

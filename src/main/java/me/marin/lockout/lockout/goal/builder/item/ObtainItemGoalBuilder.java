@@ -27,6 +27,9 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<Inventory,T> 
         return new SimpleServerGoalProgress<>(u -> satisfiedBy(u, option));
     }
 
+    @Override
+    public void reifiedUpdater(Inventory update) {}
+
     abstract boolean satisfiedBy(Inventory inventory, T option);
 
     public static String getItemId(Item item) {

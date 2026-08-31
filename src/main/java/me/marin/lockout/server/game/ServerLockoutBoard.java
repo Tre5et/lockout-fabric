@@ -4,7 +4,6 @@ import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.game.LockoutBoard;
 import me.marin.lockout.server.LockoutServer;
 import me.marin.lockout.server.goal.ServerGoal;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
@@ -20,8 +19,6 @@ public class ServerLockoutBoard extends LockoutBoard<ServerGoal<?>> {
                 .filter(t -> t.containsPlayer(player.getUUID()))
                 .findAny();
         if(team.isEmpty()) return;
-
-        if(data instanceof Inventory) return;
 
         for(ServerGoal<?> goal : getGoals()) {
             if(goal == null) continue;

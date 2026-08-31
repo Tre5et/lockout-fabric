@@ -39,8 +39,6 @@ public class BreakItemGoalBuilder extends GoalBuilder<BreakItemGoalBuilder.Broke
                 (e,f,x,y,w,h,t) -> e.fill(x+1, y+h-2, x+w-1, y+h-1, 0xFF000000),
                 (e,f,x,y,w,h,t) -> e.fill(x+1, y+h-2, x+4, y+h-1, 0xFFFF0000)
         ), 0);
-
-
     }
 
     @Override
@@ -52,6 +50,9 @@ public class BreakItemGoalBuilder extends GoalBuilder<BreakItemGoalBuilder.Broke
     public ClientGoalProgress<?> getClientGoalProgress(Void option) {
         return new SimpleClientGoalProgress();
     }
+
+    @Override
+    public void reifiedUpdater(BrokenItem update) {}
 
     public static List<Item> getItemsWithComponents(DataComponentType<?>... components) {
         return BuiltInRegistries.ITEM.stream()
