@@ -1,50 +1,28 @@
 package me.marin.lockout.server.handlers;
 
-import me.marin.lockout.Lockout;
-import me.marin.lockout.LockoutTeam;
-import me.marin.lockout.server.ServerLockoutTeam;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.goals.death.DieByDrowningGoal;
-import me.marin.lockout.lockout.goals.death.DieToFallingOffVinesGoal;
-import me.marin.lockout.lockout.goals.death.DieToTNTMinecartGoal;
-import me.marin.lockout.lockout.goals.have_more.HaveMostPlayerKillsGoal;
-import me.marin.lockout.lockout.goals.kill.*;
-import me.marin.lockout.lockout.goals.opponent.OpponentDies3TimesGoal;
-import me.marin.lockout.lockout.goals.opponent.OpponentDiesGoal;
-import me.marin.lockout.lockout.interfaces.*;
+import me.marin.lockout.game.LockoutGame;
+import me.marin.lockout.lockout.goal.builder.damage.DamageUtil;
+import me.marin.lockout.server.LockoutServer;
+import me.marin.lockout.server.game.ServerLockoutGame;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageType;
-import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.damagesource.FallLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.sheep.Sheep;
-import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.minecart.MinecartTNT;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
+import org.jspecify.annotations.NonNull;
 
-import static me.marin.lockout.server.LockoutServer.lockout;
 
 public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDeath {
     @Override
-    public void afterDeath(LivingEntity entity, DamageSource source) {
-        if (!Lockout.isLockoutRunning(lockout)) {
-            return;
-        }
-        if (entity instanceof Player player && !lockout.isLockoutPlayer(player)) {
-            return;
+    public void afterDeath(@NonNull LivingEntity entity, @NonNull DamageSource source) {
+        ServerLockoutGame lockout = LockoutServer.lockout;
+        if (!LockoutGame.isActive(lockout)) return;
+        if (entity instanceof Player player && !lockout.isLockoutPlayer(player)) return;
+
+        if(entity instanceof Player player) {
+            lockout.getBoard().update(new DamageUtil.PlayerDied(source), player);
         }
 
-        boolean playerDied = entity instanceof Player;
-        boolean mobDied = !playerDied;
-        boolean killedByPlayer = entity.getKillCredit() instanceof Player;
-
-        if (playerDied) {
+        /*if (playerDied) {
             LockoutTeam team = lockout.getPlayerTeam(entity.getUUID());
 
             lockout.deaths.putIfAbsent(team, 0);
@@ -213,6 +191,6 @@ public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDea
                     }
                 }
             }
-        }
+        }*/
     }
 }

@@ -93,6 +93,10 @@ public class GoalRequirements {
             Biomes.FROZEN_RIVER, Biomes.SNOWY_BEACH, Biomes.FROZEN_OCEAN, Biomes.DEEP_FROZEN_OCEAN
     );
 
+    public static final GoalRequirement<Object> WARM_OCEAN = anyBiome("Warm Ocean",
+            Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN
+    );
+
     public static final GoalRequirement.AndCombined<DyeColor> COLORS = DESERT_LIKE.forOptions(DyeColor.GREEN, DyeColor.CYAN)
             .and(JUNGLE.forOptions(DyeColor.BROWN))
             .and(DESERT_LIKE.or(anyBiome("Sea-pickle Biome", Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN)).forOptions(DyeColor.LIME));

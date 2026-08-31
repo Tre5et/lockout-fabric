@@ -16,6 +16,7 @@ import me.marin.lockout.server.game.ServerLockoutGame;
 import me.marin.lockout.server.goal.ServerGoal;
 import me.marin.lockout.server.goal.hint.ServerHint;
 import me.marin.lockout.server.handlers.*;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.advancements.AdvancementHolder;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -162,6 +163,8 @@ public class LockoutServer {
                 Lockout.log("Failed to save current lockout state: " + e.getMessage());
             }
         });
+
+        ServerLivingEntityEvents.AFTER_DEATH.register(new AfterDeathEventHandler());
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, _) -> waitingForVersionPacketPlayersMap.remove(handler.getPlayer().getUUID()));
 
