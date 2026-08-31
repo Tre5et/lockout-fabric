@@ -1,5 +1,6 @@
 package me.marin.lockout.lockout;
 
+import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.BreedUniqueAnimalsGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.SpawnEntityGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.*;
@@ -63,6 +64,7 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(CraftUniqueItemsGoalBuilder.of(20, 100, 10));
 
+        INSTANCE.register(DealDamageGoalBuilder.of(100, 500, 25));
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));
