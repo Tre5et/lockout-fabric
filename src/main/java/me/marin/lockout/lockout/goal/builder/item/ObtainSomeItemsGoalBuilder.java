@@ -44,7 +44,7 @@ public class ObtainSomeItemsGoalBuilder extends ObtainItemGoalBuilder<Void> {
     }
 
     @Override
-    boolean satisfiedBy(Inventory inventory, Void option) {
+    protected boolean satisfiedBy(Inventory inventory, Void option) {
         return items.stream()
                 .filter(i -> inventory.countItem(i.getA()) >= i.getB())
                 .limit(number)

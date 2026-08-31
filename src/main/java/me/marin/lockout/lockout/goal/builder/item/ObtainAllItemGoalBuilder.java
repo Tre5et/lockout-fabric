@@ -34,7 +34,7 @@ public class ObtainAllItemGoalBuilder extends ObtainItemGoalBuilder<Void> {
     }
 
     @Override
-    boolean satisfiedBy(Inventory inventory, Void option) {
+    protected boolean satisfiedBy(Inventory inventory, Void option) {
         return items.stream().allMatch(i -> inventory.countItem(i.getA()) >= i.getB());
     }
 

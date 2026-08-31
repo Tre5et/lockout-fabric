@@ -31,7 +31,7 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<Inventory,T> 
     @Override
     public void reifiedUpdater(Inventory update) {}
 
-    abstract boolean satisfiedBy(Inventory inventory, T option);
+    protected abstract boolean satisfiedBy(Inventory inventory, T option);
 
     public static String getItemId(Item item) {
         return Arrays.stream(BuiltInRegistries.ITEM.getKey(item).getPath().split("/")).toList().getLast().toUpperCase();

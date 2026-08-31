@@ -10,10 +10,15 @@ import me.marin.lockout.lockout.goal.group.GoalGroups;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+
+import java.util.Random;
+import java.util.function.Consumer;
 
 import static me.marin.lockout.lockout.GoalRegistry.INSTANCE;
 
@@ -65,6 +70,13 @@ public class DefaultGoalRegister {
         INSTANCE.register(CraftUniqueItemsGoalBuilder.of(20, 100, 10));
 
         INSTANCE.register(DealDamageGoalBuilder.of(100, 500, 25));
+
+        INSTANCE.register(ObtainItemWithStackCheckGoalBuilder.of("SHIELD_WITH_BANNER", "Obtain Shield with Banner", Items.SHIELD, s -> s.get(DataComponents.BASE_COLOR) != null,
+                DyeColor.VALUES.stream().map(c -> (Consumer<ItemStack>)(s -> {
+                    s.set(DataComponents.BASE_COLOR, c);
+                    s.set(DataComponents.BANNER_PATTERNS, ItemUtil.getRandomBannerPattern(DyeColor.VALUES.stream().filter(o -> o != c).sorted((_, _) -> new Random().nextInt(-1, 1)).findFirst().get()));
+                })).toList()
+        ));
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));

@@ -55,7 +55,7 @@ public class ObtainColoredItemGoalBuilder extends ObtainItemGoalBuilder<DyeColor
     }
 
     @Override
-    boolean satisfiedBy(Inventory inventory, DyeColor option) {
+    protected boolean satisfiedBy(Inventory inventory, DyeColor option) {
         return inventory.countItem(items.pick(option)) >= count;
     }
 
