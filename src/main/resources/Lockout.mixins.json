@@ -14,7 +14,6 @@
     "server.BrushableBlockEntityMixin",
     "server.BrushableBlockEntityMixin",
     "server.BundleItemMixin",
-    "server.FilledMapItemMixin",
     "server.CampfireBlockEntityMixin",
     "server.CampfireBlockEntityMixin",*/
     "server.CarvedPumpkinBlockMixin",/*
@@ -28,7 +27,8 @@
     "server.DecorationItemMixin",
     "server.EndCrystalItemMixin",
     "server.EntityMixin",
-    "server.FoodComponentMixin",
+    "server.FilledMapItemMixin",*/
+    "server.FoodComponentMixin",/*
     "server.GlowInkSacItemMixin",
     "server.GoatHornItemMixin",
     "server.GrindstoneScreenHandlerOutputSlotMixin",
@@ -36,10 +36,10 @@
     "server.ItemMixin",*/
     "server.LivingEntityMixin",
     "server.PlayerAdvancementTrackerMixin",
-    "server.PlayerInventoryAccessor"/*,
+    "server.PlayerInventoryAccessor",/*
     "server.PlayerMixin",
-    "server.PotentSulfurBlockEntityMixin",
-    "server.PotionContentsComponentMixin",
+    "server.PotentSulfurBlockEntityMixin",*/
+    "server.PotionContentsComponentMixin"/*,
     "server.RaidMixin",
     "server.ServerPlayerEntityMixin",
     "server.ShelfBlockMixin",

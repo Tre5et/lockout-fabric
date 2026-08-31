@@ -45,6 +45,14 @@ public class ItemUtil {
         return new BannerPatternLayers(layers);
     }
 
+    public static List<Item> getAllItemsWithComponents(List<DataComponentType<?>> componentTypes) {
+        return BuiltInRegistries.ITEM.stream()
+                .filter(i -> {
+                    ItemStack item = i.getDefaultInstance();
+                    return componentTypes.stream().allMatch(item::has);
+                }).toList();
+    }
+
     public static <T> ItemStack applyComponent(ItemStack stack, DataComponentType<T> type, T value) {
         stack.set(type, value);
         return stack;
@@ -60,5 +68,9 @@ public class ItemUtil {
 
     public record CraftedItem(
             Item item
+    ) {}
+
+    public record ConsumedItem(
+            ItemStack itemStack
     ) {}
 }

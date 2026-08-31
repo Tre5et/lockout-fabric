@@ -1,5 +1,6 @@
 package me.marin.lockout.lockout;
 
+import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.BreedUniqueAnimalsGoalBuilder;
@@ -28,7 +29,6 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
-import java.awt.*;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -108,6 +108,23 @@ public class DefaultGoalRegister {
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.PUFFERFISH).require(GoalRequirements.WARM_OCEAN));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.TNT_MINECART).customName(_ -> "Die to TNT Minecart"));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.WARDEN).require(GoalRequirements.anyBiome("Deep Dark", Biomes.DEEP_DARK)));
+
+        INSTANCE.register(ConsumeItemGoalBuilder.any(Items.HONEY_BOTTLE).customName(_ -> "Drink Honey Bottle"));
+        INSTANCE.register(ConsumeItemGoalBuilder.any(Items.POTION).additionalCondition(i -> i.get(DataComponents.POTION_CONTENTS).is(Potions.WATER))
+                .customName(_ -> "Drink Water Bottle"));
+        INSTANCE.register(new ConsumeUniqueItemsGoalBuilder("FOODS", GoalCategory.EATING_DRINKING, 5, 25, AcceptanceCondition.anyItemWithDefaultComponents(DataComponents.FOOD))
+                .customName(n -> "Eat " + n + " Unique Food"));
+        INSTANCE.register(ConsumeItemGoalBuilder.any(Items.GLOW_BERRIES).require(GoalRequirements.anyBiome("Lush Caves", Biomes.LUSH_CAVES))
+                .customName(_ -> "Eat a Glow Berry"));
+        INSTANCE.register(ConsumeItemGoalBuilder.any(Items.POISONOUS_POTATO).customName(_ -> "Eat a Poisonous Potato"));
+        INSTANCE.register(ConsumeItemGoalBuilder.any(Items.COOKIE).require(GoalRequirements.JUNGLE).customName(_ -> "Eat a Cookie"));
+        INSTANCE.register(ConsumeUniqueItemsGoalBuilder.any("SOUP", 2, 4, Items.RABBIT_STEW, Items.BEETROOT_SOUP, Items.MUSHROOM_STEW, Items.SUSPICIOUS_STEW)
+                .customName(n -> "Eat " + n + " Unique Soups"));
+        INSTANCE.register(ConsumeItemGoalBuilder.any(Items.BEETROOT_SOUP).customName(_ -> "Eat Beetroot Soup"));
+        INSTANCE.register(ConsumeItemGoalBuilder.any(Items.PUMPKIN_PIE).customName(_ -> "Eat Pumpkin Pie"));
+        INSTANCE.register(ConsumeItemGoalBuilder.any(Items.RABBIT_STEW).customName(_ -> "Eat Rabbit Stew"));
+        INSTANCE.register(ConsumeItemGoalBuilder.any(Items.SUSPICIOUS_STEW).customName(_ -> "Eat Suspicious Stew"));
+
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));
