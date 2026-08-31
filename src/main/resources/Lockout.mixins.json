@@ -22,8 +22,8 @@
     "server.CompassItemMixin",
     "server.CompassItemUseOnBlockMixin",*/
     "server.ComposterBlockMixin",/*
-    "server.ConsumeItemTriggerMixin",
-    "server.CraftingResultSlotMixin",
+    "server.ConsumeItemTriggerMixin",*/
+    "server.CraftingResultSlotMixin",/*
     "server.CrossbowItemMixin",
     "server.DecorationItemMixin",
     "server.EndCrystalItemMixin",

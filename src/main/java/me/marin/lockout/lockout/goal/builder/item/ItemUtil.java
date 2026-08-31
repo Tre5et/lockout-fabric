@@ -24,4 +24,8 @@ public class ItemUtil {
     public record CompostedItem(
             Item item
     ) {}
+
+    public record CraftedItem(
+            Item item
+    ) {}
 }

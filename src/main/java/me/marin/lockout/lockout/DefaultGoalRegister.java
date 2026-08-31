@@ -2,11 +2,8 @@ package me.marin.lockout.lockout;
 
 import me.marin.lockout.lockout.goal.builder.entity.BreedUniqueAnimalsGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.SpawnEntityGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.item.BreakItemGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.item.*;
 import me.marin.lockout.lockout.goal.builder.entity.BreedAnimalGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.item.BrewPotionGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.item.BrewPotionTypeGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.item.CompostUniqueItemsGoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroups;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
@@ -63,6 +60,8 @@ public class DefaultGoalRegister {
         INSTANCE.register(SpawnEntityGoalBuilder.any(EntityTypes.IRON_GOLEM).group(GoalGroups.IRON_HEAVY));
         INSTANCE.register(SpawnEntityGoalBuilder.any(EntityTypes.COPPER_GOLEM));
         INSTANCE.register(SpawnEntityGoalBuilder.any(EntityTypes.SNOW_GOLEM).require(GoalRequirements.SNOWY));
+
+        INSTANCE.register(CraftUniqueItemsGoalBuilder.of(20, 100, 10));
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));

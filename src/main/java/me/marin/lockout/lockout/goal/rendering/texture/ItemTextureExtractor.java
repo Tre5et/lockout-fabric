@@ -34,7 +34,7 @@ public class ItemTextureExtractor implements TextureExtractor {
 
     public static ItemTextureExtractor stack(Item item, int count) {
         ItemStack stack = item.getDefaultInstance();
-        stack.setCount(Math.clamp(count, 1, item.getDefaultMaxStackSize()));
+        stack.setCount(count);
         return new ItemTextureExtractor(stack);
     }
 

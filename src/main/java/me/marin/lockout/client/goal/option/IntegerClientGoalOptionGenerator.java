@@ -58,17 +58,17 @@ public class IntegerClientGoalOptionGenerator extends IntegerGoalOptionGenerator
             super(x, y, width, height, message);
             this.current = current;
             this.minusButton = Button.builder(Component.literal("-"), (_) -> {
-                if(this.current > getMin()) {
-                    update.accept(--this.current);
+                if(this.current - getStep() >= getMin()) {
+                    update.accept(this.current - getStep());
                 }
             }).pos(x + MARGIN_X, y + TITLE_HEIGHT + MARGIN_Y).size(18, 18).build();
-            minusButton.active = current > getMin();
+            minusButton.active = current - getStep() >= getMin();
             this.plusButton = Button.builder(Component.literal("+"), (_) -> {
-                if(this.current < getMax()) {
-                    update.accept(++this.current);
+                if(this.current + getStep() <= getMax()) {
+                    update.accept(this.current + getStep());
                 }
             }).pos(x + 54 + MARGIN_X, y + TITLE_HEIGHT + MARGIN_Y).size(18, 18).build();
-            plusButton.active = current < getMax();
+            plusButton.active = current + getStep() <= getMax();
         }
 
         @Override
