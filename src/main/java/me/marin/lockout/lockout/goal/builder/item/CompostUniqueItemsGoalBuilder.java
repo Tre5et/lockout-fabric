@@ -14,6 +14,7 @@ import me.marin.lockout.server.goal.progress.UniqueServerGoalProgress;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +44,7 @@ public class CompostUniqueItemsGoalBuilder extends GoalBuilder<ItemUtil.Composte
     }
 
     @Override
-    public Component defaultName(Integer option) {
+    public @NonNull Component defaultName(Integer option) {
         return Component.literal("Compost " + option + " of " + acceptableItems.stream()
                 .map(ItemUtil::getItemName)
                 .collect(Collectors.joining(" or "))
@@ -51,7 +52,7 @@ public class CompostUniqueItemsGoalBuilder extends GoalBuilder<ItemUtil.Composte
     }
 
     @Override
-    public TextureExtractor defaultTextureExtractor(Integer option) {
+    public @NonNull TextureExtractor defaultTextureExtractor(Integer option) {
         return new StackingTextureExtractor(List.of(
                 new CornerIconTextureExtractor(
                         ItemTextureExtractor.item(Items.COMPOSTER),
@@ -62,12 +63,12 @@ public class CompostUniqueItemsGoalBuilder extends GoalBuilder<ItemUtil.Composte
     }
 
     @Override
-    public ServerGoalProgress<ItemUtil.CompostedItem, ?> getServerGoalProgress(Integer option) {
+    public @NonNull ServerGoalProgress<ItemUtil.CompostedItem, ?> getServerGoalProgress(Integer option) {
         return new UniqueServerGoalProgress<>(option, i -> acceptableItems.contains(i.item()));
     }
 
     @Override
-    public ClientGoalProgress<?> getClientGoalProgress(Integer option) {
+    public @NonNull ClientGoalProgress<?> getClientGoalProgress(Integer option) {
         return new TargetNumberClientGoalProgress("Composted items", option);
     }
 

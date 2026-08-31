@@ -16,6 +16,7 @@ import me.marin.lockout.server.goal.progress.UniqueServerGoalProgress;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,12 +32,12 @@ public class AdvancementCountingGoalBuilder extends GoalBuilder<AdvancementHolde
     }
 
     @Override
-    public Component defaultName(Integer option) {
+    public @NonNull Component defaultName(Integer option) {
         return Component.literal("Obtain " + option + " unique Advancements");
     }
 
     @Override
-    public TextureExtractor defaultTextureExtractor(Integer option) {
+    public @NonNull TextureExtractor defaultTextureExtractor(Integer option) {
         return new StackingTextureExtractor(List.of(
                 GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/gui/sprites/advancements/challenge_frame_obtained.png")),
                 TextTextureExtractor.text(String.valueOf(option))
@@ -54,12 +55,12 @@ public class AdvancementCountingGoalBuilder extends GoalBuilder<AdvancementHolde
     }
 
     @Override
-    public ServerGoalProgress<AdvancementHolder, ?> getServerGoalProgress(Integer option) {
+    public @NonNull ServerGoalProgress<AdvancementHolder, ?> getServerGoalProgress(Integer option) {
         return new UniqueServerGoalProgress<>(option, a -> !a.id().getPath().startsWith("recipes/") && !a.id().getPath().endsWith("/root"));
     }
 
     @Override
-    public ClientGoalProgress<?> getClientGoalProgress(Integer option) {
+    public @NonNull ClientGoalProgress<?> getClientGoalProgress(Integer option) {
         return new TargetNumberClientGoalProgress("Advancements obtained", option);
     }
 

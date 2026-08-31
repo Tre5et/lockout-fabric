@@ -16,8 +16,8 @@
     "server.BundleItemMixin",
     "server.FilledMapItemMixin",
     "server.CampfireBlockEntityMixin",
-    "server.CampfireBlockEntityMixin",
-    "server.CarvedPumpkinBlockMixin",
+    "server.CampfireBlockEntityMixin",*/
+    "server.CarvedPumpkinBlockMixin",/*
     "server.ChiseledBookshelfBlockMixin",
     "server.CompassItemMixin",
     "server.CompassItemUseOnBlockMixin",*/

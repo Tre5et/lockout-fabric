@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.ColorCollection;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 
@@ -44,12 +45,12 @@ public class ObtainColoredItemGoalBuilder extends ObtainItemGoalBuilder<DyeColor
     }
 
     @Override
-    public Component defaultName(DyeColor option) {
+    public @NonNull Component defaultName(DyeColor option) {
         return Component.literal("Obtain " + (count > 1 ? count + " " : "")  + ItemUtil.getItemName(items.pick(option)));
     }
 
     @Override
-    public TextureExtractor defaultTextureExtractor(DyeColor option) {
+    public @NonNull TextureExtractor defaultTextureExtractor(DyeColor option) {
         return ItemTextureExtractor.stack(items.pick(option), count);
     }
 

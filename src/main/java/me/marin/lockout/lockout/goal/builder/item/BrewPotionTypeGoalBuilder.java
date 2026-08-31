@@ -13,6 +13,7 @@ import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
+import org.jspecify.annotations.NonNull;
 
 public class BrewPotionTypeGoalBuilder extends GoalBuilder<ItemUtil.BrewedItem, Void> {
     private final Item item;
@@ -23,22 +24,22 @@ public class BrewPotionTypeGoalBuilder extends GoalBuilder<ItemUtil.BrewedItem, 
     }
 
     @Override
-    public Component defaultName(Void option) {
+    public @NonNull Component defaultName(Void option) {
         return Component.literal("Brew a " + BuilderUtil.identifierToName(BuiltInRegistries.ITEM.getKey(item)));
     }
 
     @Override
-    public TextureExtractor defaultTextureExtractor(Void option) {
+    public @NonNull TextureExtractor defaultTextureExtractor(Void option) {
         return ItemTextureExtractor.item(item);
     }
 
     @Override
-    public ServerGoalProgress<ItemUtil.BrewedItem, ?> getServerGoalProgress(Void option) {
+    public @NonNull ServerGoalProgress<ItemUtil.BrewedItem, ?> getServerGoalProgress(Void option) {
         return new SimpleServerGoalProgress<>(i -> item.equals(i.item()));
     }
 
     @Override
-    public ClientGoalProgress<?> getClientGoalProgress(Void option) {
+    public @NonNull ClientGoalProgress<?> getClientGoalProgress(Void option) {
         return new SimpleClientGoalProgress();
     }
 

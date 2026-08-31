@@ -1,6 +1,7 @@
 package me.marin.lockout.lockout;
 
 import me.marin.lockout.lockout.goal.builder.entity.BreedUniqueAnimalsGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.entity.SpawnEntityGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.BreakItemGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.BreedAnimalGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.BrewPotionGoalBuilder;
@@ -58,6 +59,10 @@ public class DefaultGoalRegister {
         INSTANCE.register(CompostUniqueItemsGoalBuilder.any("FOODS", 3, 7, Items.DRIED_KELP, Items.GLOW_BERRIES, Items.SWEET_BERRIES, Items.MELON_SLICE, Items.APPLE, Items.BEETROOT, Items.CARROT, Items.POTATO, Items.BAKED_POTATO, Items.BREAD, Items.COOKIE, Items.CAKE, Items.PUMPKIN_PIE)
                 .customName(n -> "Compost " + n + " Unique Foods")
         );
+
+        INSTANCE.register(SpawnEntityGoalBuilder.any(EntityTypes.IRON_GOLEM).group(GoalGroups.IRON_HEAVY));
+        INSTANCE.register(SpawnEntityGoalBuilder.any(EntityTypes.COPPER_GOLEM));
+        INSTANCE.register(SpawnEntityGoalBuilder.any(EntityTypes.SNOW_GOLEM).require(GoalRequirements.SNOWY));
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));

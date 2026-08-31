@@ -17,6 +17,7 @@ import me.marin.lockout.server.goal.progress.ServerGoalProgress;
 import me.marin.lockout.server.goal.progress.UniqueServerGoalProgress;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,12 +43,12 @@ public class BreedUniqueAnimalsGoalBuilder extends GoalBuilder<EntityUtil.BredEn
     }
 
     @Override
-    public Component defaultName(Integer option) {
+    public @NonNull Component defaultName(Integer option) {
         return Component.literal("Breed " + option + " Unique animals");
     }
 
     @Override
-    public TextureExtractor defaultTextureExtractor(Integer option) {
+    public @NonNull TextureExtractor defaultTextureExtractor(Integer option) {
         return new StackingTextureExtractor(List.of(
                 GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/gui/sprites/hud/heart/full.png")),
                 new ItemCountTextureExtractor(Component.literal(option.toString()))
@@ -55,12 +56,12 @@ public class BreedUniqueAnimalsGoalBuilder extends GoalBuilder<EntityUtil.BredEn
     }
 
     @Override
-    public ServerGoalProgress<EntityUtil.BredEntity, ?> getServerGoalProgress(Integer option) {
+    public @NonNull ServerGoalProgress<EntityUtil.BredEntity, ?> getServerGoalProgress(Integer option) {
         return new UniqueServerGoalProgress<>(option, _ -> true);
     }
 
     @Override
-    public ClientGoalProgress<?> getClientGoalProgress(Integer option) {
+    public @NonNull ClientGoalProgress<?> getClientGoalProgress(Integer option) {
         return new TargetNumberClientGoalProgress("Animals bred", option);
     }
 

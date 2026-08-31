@@ -9,6 +9,7 @@ import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 
@@ -18,12 +19,12 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<Inventory,T> 
     }
 
     @Override
-    public ClientGoalProgress<?> getClientGoalProgress(T option) {
+    public @NonNull ClientGoalProgress<?> getClientGoalProgress(T option) {
         return new SimpleClientGoalProgress();
     }
 
     @Override
-    public ServerGoalProgress<Inventory, ?> getServerGoalProgress(T option) {
+    public @NonNull ServerGoalProgress<Inventory, ?> getServerGoalProgress(T option) {
         return new SimpleServerGoalProgress<>(u -> satisfiedBy(u, option));
     }
 

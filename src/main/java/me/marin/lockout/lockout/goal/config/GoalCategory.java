@@ -15,6 +15,7 @@ public enum GoalCategory {
     BIOMES("Biomes"),
     EATING_DRINKING("Eating/Drinking"),
     MISC_ACTIONS("Misc Actions"),
+    SPAWNING("Spawning"),
     ADVANCEMENTS("Advancements"),
     STATUS_EFFECTS("Status Effects"),
     EXPERIENCE("Experience"),

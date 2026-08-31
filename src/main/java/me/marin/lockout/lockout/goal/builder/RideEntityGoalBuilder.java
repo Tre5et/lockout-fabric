@@ -10,6 +10,7 @@ import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +25,7 @@ public class RideEntityGoalBuilder extends GoalBuilder<EntityUtil.RodeEntity, Vo
     }
 
     @Override
-    public Component defaultName(Void option) {
+    public @NonNull Component defaultName(Void option) {
         return Component.literal("Ride " + entityTypes.stream()
                 .map(EntityUtil::getEntityName)
                 .collect(Collectors.joining(" or ")
@@ -32,7 +33,7 @@ public class RideEntityGoalBuilder extends GoalBuilder<EntityUtil.RodeEntity, Vo
     }
 
     @Override
-    public TextureExtractor defaultTextureExtractor(Void option) {
+    public @NonNull TextureExtractor defaultTextureExtractor(Void option) {
         return new CornerIconTextureExtractor(
                 CycleTextureExtractor.texture(entityTypes.stream().map(EntityUtil::getEntityTexture).toList()),
                 ItemTextureExtractor.item(Items.SADDLE),
@@ -40,7 +41,7 @@ public class RideEntityGoalBuilder extends GoalBuilder<EntityUtil.RodeEntity, Vo
     }
 
     @Override
-    public ClientGoalProgress<?> getClientGoalProgress(Void option) {
+    public @NonNull ClientGoalProgress<?> getClientGoalProgress(Void option) {
         return new SimpleClientGoalProgress();
     }
 
@@ -48,7 +49,7 @@ public class RideEntityGoalBuilder extends GoalBuilder<EntityUtil.RodeEntity, Vo
     public void reifiedUpdater(EntityUtil.RodeEntity update) {}
 
     @Override
-    public ServerGoalProgress<EntityUtil.RodeEntity, ?> getServerGoalProgress(Void option) {
+    public @NonNull ServerGoalProgress<EntityUtil.RodeEntity, ?> getServerGoalProgress(Void option) {
         return new SimpleServerGoalProgress<>(e -> entityTypes.contains(e.entity()));
     }
 

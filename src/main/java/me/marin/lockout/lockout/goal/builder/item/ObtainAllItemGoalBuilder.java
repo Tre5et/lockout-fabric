@@ -6,6 +6,7 @@ import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
+import org.jspecify.annotations.NonNull;
 import oshi.util.tuples.Pair;
 
 import java.util.*;
@@ -20,7 +21,7 @@ public class ObtainAllItemGoalBuilder extends ObtainItemGoalBuilder<Void> {
     }
 
     @Override
-    public Component defaultName(Void option) {
+    public @NonNull Component defaultName(Void option) {
         return Component.literal("Obtain " + items.stream()
                 .map(e -> (e.getB() > 1 ? e.getB() + " " : "") + ItemUtil.getItemName(e.getA()))
                 .collect(Collectors.joining(" and "))
@@ -28,7 +29,7 @@ public class ObtainAllItemGoalBuilder extends ObtainItemGoalBuilder<Void> {
     }
 
     @Override
-    public TextureExtractor defaultTextureExtractor(Void option) {
+    public @NonNull TextureExtractor defaultTextureExtractor(Void option) {
         return ItemTextureExtractor.cycleStacks(items);
     }
 

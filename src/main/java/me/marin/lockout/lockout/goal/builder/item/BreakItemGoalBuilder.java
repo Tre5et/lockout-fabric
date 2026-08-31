@@ -14,6 +14,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -26,12 +27,12 @@ public class BreakItemGoalBuilder extends GoalBuilder<BreakItemGoalBuilder.Broke
     }
 
     @Override
-    public Component defaultName(Void option) {
+    public @NonNull Component defaultName(Void option) {
         return Component.literal("Break any " + BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component).getPath().replace("/", " ").replace("_", " ") + " item.");
     }
 
     @Override
-    public TextureExtractor defaultTextureExtractor(Void option) {
+    public @NonNull TextureExtractor defaultTextureExtractor(Void option) {
         List<Item> acceptableItems = new ArrayList<>(getItemsWithComponents(component, DataComponents.DAMAGE));
         Collections.shuffle(acceptableItems);
         return new StackingTextureExtractor(List.of(
@@ -42,12 +43,12 @@ public class BreakItemGoalBuilder extends GoalBuilder<BreakItemGoalBuilder.Broke
     }
 
     @Override
-    public ServerGoalProgress<BrokenItem, ?> getServerGoalProgress(Void option) {
+    public @NonNull ServerGoalProgress<BrokenItem, ?> getServerGoalProgress(Void option) {
         return new SimpleServerGoalProgress<>(i -> i.item().getDefaultInstance().has(component));
     }
 
     @Override
-    public ClientGoalProgress<?> getClientGoalProgress(Void option) {
+    public @NonNull ClientGoalProgress<?> getClientGoalProgress(Void option) {
         return new SimpleClientGoalProgress();
     }
 

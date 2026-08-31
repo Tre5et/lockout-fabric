@@ -25,4 +25,8 @@ public class EntityUtil {
     public record RodeEntity(
             EntityType<?> entity
     ) {}
+
+    public record PlayerSpawnedEntity(
+            EntityType<?> entity
+    ) {}
 }

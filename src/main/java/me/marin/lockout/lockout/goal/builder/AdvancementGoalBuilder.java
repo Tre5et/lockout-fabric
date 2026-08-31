@@ -12,6 +12,7 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +27,7 @@ public class AdvancementGoalBuilder extends GoalBuilder<AdvancementHolder, Void>
     }
 
     @Override
-    public Component defaultName(Void option) {
+    public @NonNull Component defaultName(Void option) {
         return Component.literal("Obtain " + advancements.stream()
                 .map(a -> {
                     Advancement advancement = LockoutClient.allAdvancements.get(a);
@@ -41,7 +42,7 @@ public class AdvancementGoalBuilder extends GoalBuilder<AdvancementHolder, Void>
     }
 
     @Override
-    public TextureExtractor defaultTextureExtractor(Void option) {
+    public @NonNull TextureExtractor defaultTextureExtractor(Void option) {
         return new CycleTextureExtractor(advancements.stream()
                 .map(a -> {
                     Advancement advancement = LockoutClient.allAdvancements.get(a);
@@ -57,12 +58,12 @@ public class AdvancementGoalBuilder extends GoalBuilder<AdvancementHolder, Void>
     }
 
     @Override
-    public ServerGoalProgress<AdvancementHolder, ?> getServerGoalProgress(Void option) {
+    public @NonNull ServerGoalProgress<AdvancementHolder, ?> getServerGoalProgress(Void option) {
         return new SimpleServerGoalProgress<>(h -> advancements.contains(h.id()));
     }
 
     @Override
-    public ClientGoalProgress<?> getClientGoalProgress(Void option) {
+    public @NonNull ClientGoalProgress<?> getClientGoalProgress(Void option) {
         return new SimpleClientGoalProgress();
     }
 

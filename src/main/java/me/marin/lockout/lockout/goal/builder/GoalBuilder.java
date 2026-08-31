@@ -1,6 +1,7 @@
 package me.marin.lockout.lockout.goal.builder;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import me.marin.lockout.client.goal.ClientGoal;
 import me.marin.lockout.client.goal.builder.ClientGoalBuildParameters;
@@ -56,9 +57,9 @@ public abstract class GoalBuilder<U,T> {
         return id;
     }
 
-    public abstract Component defaultName(T option);
+    public abstract @NonNull Component defaultName(T option);
 
-    public abstract TextureExtractor defaultTextureExtractor(T option);
+    public abstract @NonNull TextureExtractor defaultTextureExtractor(T option);
 
     public Optional<GoalOptionGenerator<T>> getOptionGenerator() {
         return Optional.empty();
@@ -68,9 +69,9 @@ public abstract class GoalBuilder<U,T> {
         return Optional.empty();
     }
 
-    public abstract ServerGoalProgress<U,?> getServerGoalProgress(T option);
+    public abstract @NonNull ServerGoalProgress<U,?> getServerGoalProgress(T option);
 
-    public abstract ClientGoalProgress<?> getClientGoalProgress(T option);
+    public abstract @NonNull ClientGoalProgress<?> getClientGoalProgress(T option);
 
     /**
      * This method should be overridden by a class with a fixed U type and should stay blank.

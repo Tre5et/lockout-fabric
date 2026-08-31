@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +33,7 @@ public class BrewPotionGoalBuilder extends GoalBuilder<Holder<Potion>, Void> {
     }
 
     @Override
-    public Component defaultName(Void option) {
+    public @NonNull Component defaultName(Void option) {
         return Component.literal("Brew a Potion of " + acceptablePotions.stream()
                 .map(p -> p.value().name())
                 .distinct()
@@ -42,7 +43,7 @@ public class BrewPotionGoalBuilder extends GoalBuilder<Holder<Potion>, Void> {
     }
 
     @Override
-    public TextureExtractor defaultTextureExtractor(Void option) {
+    public @NonNull TextureExtractor defaultTextureExtractor(Void option) {
         return new CycleTextureExtractor(acceptablePotions.stream()
                 .map(p -> new ItemTextureExtractor(getPotionItemStack(p)))
                 .toList()
@@ -50,12 +51,12 @@ public class BrewPotionGoalBuilder extends GoalBuilder<Holder<Potion>, Void> {
     }
 
     @Override
-    public ServerGoalProgress<Holder<Potion>, ?> getServerGoalProgress(Void option) {
+    public @NonNull ServerGoalProgress<Holder<Potion>, ?> getServerGoalProgress(Void option) {
         return new SimpleServerGoalProgress<>(acceptablePotions::contains);
     }
 
     @Override
-    public ClientGoalProgress<?> getClientGoalProgress(Void option) {
+    public @NonNull ClientGoalProgress<?> getClientGoalProgress(Void option) {
         return new SimpleClientGoalProgress();
     }
 
