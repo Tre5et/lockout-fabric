@@ -39,7 +39,7 @@
     "server.PlayerInventoryAccessor",/*
     "server.PlayerMixin",
     "server.PotentSulfurBlockEntityMixin",*/
-    "server.PotionContentsComponentMixin"/*,
+    "server.PotionContentsComponentMixin",/*
     "server.RaidMixin",
     "server.ServerPlayerEntityMixin",
     "server.ShelfBlockMixin",
@@ -48,8 +48,8 @@
     "server.StatusEffectMixin",
     "server.TameAnimalTriggerMixin",
     "server.WolfEntityMixin",
-    "server.ZombieEntityMixin",
-    "server.ZombifiedPiglinEntityMixin"*/
+    "server.ZombieEntityMixin"*/
+    "server.ZombifiedPiglinMixin"
   ],
   "client": [
     "client.HudMixin",

@@ -58,4 +58,8 @@ public class EntityUtil {
     public record PlayerSpawnedEntity(
             EntityType<?> entity
     ) {}
+
+    public record AngeredEntity(
+            EntityType<?> entity
+    ) {}
 }

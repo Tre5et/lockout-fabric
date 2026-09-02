@@ -4,6 +4,7 @@ import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.builder.PlayerStateGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.entity.AngerMobGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.SpawnEntityGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.*;
 import me.marin.lockout.lockout.goal.builder.entity.BreedAnimalGoalBuilder;
@@ -137,6 +138,8 @@ public class DefaultGoalRegister {
                         GenericTextureExtractor.texture(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/up_arrow.png")),
                 8))
                 .defaultEnabled(false));
+
+        INSTANCE.register(AngerMobGoalBuilder.any(EntityTypes.ZOMBIFIED_PIGLIN));
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));
