@@ -37,7 +37,7 @@ public class CraftingResultSlotMixin {
 
         if (!(player.containerMenu instanceof CraftingMenu || player.containerMenu instanceof InventoryMenu)) return;
 
-        lockout.getBoard().update(new ItemUtil.CraftedItem(stack.getItem()), player);
+        lockout.getBoard().update(new ItemUtil.CraftedItem(stack), player);
     }
 
 }

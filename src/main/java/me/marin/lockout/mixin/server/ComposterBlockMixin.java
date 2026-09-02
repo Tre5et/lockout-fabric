@@ -26,7 +26,7 @@ public class ComposterBlockMixin {
         ServerLockoutGame lockout = LockoutServer.lockout;
         if(!LockoutGame.isActive(lockout)) return;
 
-        lockout.getBoard().update(new ItemUtil.CompostedItem(itemStack.getItem()), player);
+        lockout.getBoard().update(new ItemUtil.CompostedItem(itemStack), player);
     }
 
 /*    @Inject(method = "extractProduce", at = @At("RETURN"))

@@ -1,6 +1,8 @@
 package me.marin.lockout.lockout.goal.builder.item;
 
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
+import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -15,6 +17,9 @@ import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class ItemUtil {
     private static final Random RANDOM = new Random();
@@ -29,7 +34,11 @@ public class ItemUtil {
         return BuilderUtil.identifierToId(BuiltInRegistries.ITEM.getKey(item));
     }
 
+    public static TextureExtractor getItemTextureExtractor(Item item) {
+        return new ItemTextureExtractor(item.getDefaultInstance());
+    }
 
+    @SuppressWarnings("unchecked")
     public static BannerPatternLayers getRandomBannerPattern(DyeColor overlayColor) {
         var bannerPatternRegistry = Minecraft.getInstance().level.registryAccess().lookup(Registries.BANNER_PATTERN);
         if(bannerPatternRegistry.isEmpty()) return BannerPatternLayers.EMPTY;
@@ -45,8 +54,8 @@ public class ItemUtil {
         return new BannerPatternLayers(layers);
     }
 
-    public static List<Item> getAllItemsWithComponents(List<DataComponentType<?>> componentTypes) {
-        return BuiltInRegistries.ITEM.stream()
+    public static List<Item> getAllItemsWithComponents(List<Item> items, List<DataComponentType<?>> componentTypes) {
+        return items.stream()
                 .filter(i -> {
                     ItemStack item = i.getDefaultInstance();
                     return componentTypes.stream().allMatch(item::has);
@@ -59,18 +68,39 @@ public class ItemUtil {
     }
 
     public record BrewedItem(
-            Item item
+            ItemStack itemStack
     ) {}
 
     public record CompostedItem(
-            Item item
+            ItemStack itemStack
     ) {}
 
     public record CraftedItem(
-            Item item
+            ItemStack itemStack
     ) {}
 
     public record ConsumedItem(
             ItemStack itemStack
     ) {}
+
+    public record BrokenItem(
+            Item item
+    ) {}
+
+    public record DataComponentCondition<T>(
+            DataComponentType<T> component,
+            Predicate<T> valueChecker,
+            Consumer<ItemStack> valueApplier,
+            Supplier<String> id,
+            Supplier<String> name
+    ) {
+        public boolean test(ItemStack stack) {
+            return stack.has(component) && valueChecker.test(stack.get(component));
+        }
+
+        public ItemStack apply(ItemStack stack) {
+            valueApplier.accept(stack);
+            return stack;
+        }
+    }
 }

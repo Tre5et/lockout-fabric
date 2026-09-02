@@ -2,7 +2,7 @@ package me.marin.lockout.mixin.server;
 
 import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.builder.damage.DamageUtil;
-import me.marin.lockout.lockout.goal.builder.item.BreakItemGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
 import me.marin.lockout.server.LockoutServer;
 import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.server.level.ServerLevel;
@@ -39,7 +39,7 @@ public class LivingEntityMixin {
         ServerLockoutGame lockout = LockoutServer.lockout;
         if (!LockoutGame.isActive(lockout)) return;
 
-        lockout.getBoard().update(new BreakItemGoalBuilder.BrokenItem(item), player);
+        lockout.getBoard().update(new ItemUtil.BrokenItem(item), player);
     }
 
 }

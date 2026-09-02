@@ -25,14 +25,17 @@ import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ListClientGoalOptionGenerator<T> extends ListGoalOptionGenerator<T> implements ClientGoalOptionGenerator<T> {
     @Getter
     private final String title;
+    private final Function<T,String> toName;
 
-    public ListClientGoalOptionGenerator(String title, List<T> entries, TypeToken<T> typeToken) {
+    public ListClientGoalOptionGenerator(String title, List<T> entries, TypeToken<T> typeToken, Function<T, String> toName) {
         super(entries, typeToken);
         this.title = title;
+        this.toName = toName;
     }
 
     @Override
@@ -87,7 +90,7 @@ public class ListClientGoalOptionGenerator<T> extends ListGoalOptionGenerator<T>
 
             int y = MARGIN_Y;
             for (T entry : getEntries()) {
-                String name = entry.toString();
+                String name = toName.apply(entry);
                 context.text(textRenderer, name, getX() + 2, getY() + y - (int)scrollAmount() + 5, Color.WHITE.getRGB());
                 if (Objects.equals(entry, hovered)) {
                     // Draw border manually since drawBorder method doesn't exist

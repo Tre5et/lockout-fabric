@@ -1,6 +1,7 @@
 package me.marin.lockout.lockout.goal.builder.damage;
 
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.player.Player;
 
 public class DamageUtil {
     public record DealtDamage(
@@ -8,6 +9,7 @@ public class DamageUtil {
     ) {}
 
     public record PlayerDied(
-            DamageSource source
+            DamageSource source,
+            Player player
     ) {}
 }

@@ -19,7 +19,7 @@ public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDea
         if (entity instanceof Player player && !lockout.isLockoutPlayer(player)) return;
 
         if(entity instanceof Player player) {
-            lockout.getBoard().update(new DamageUtil.PlayerDied(source), player);
+            lockout.getBoard().update(new DamageUtil.PlayerDied(source, player), player);
         }
 
         /*if (playerDied) {

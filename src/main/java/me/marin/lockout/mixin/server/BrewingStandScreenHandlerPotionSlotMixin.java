@@ -21,7 +21,7 @@ public class BrewingStandScreenHandlerPotionSlotMixin {
         ServerLockoutGame lockout = LockoutServer.lockout;
         if (!LockoutGame.isActive(lockout)) return;
 
-        lockout.getBoard().update(new ItemUtil.BrewedItem(stack.getItem()), player);
+        lockout.getBoard().update(new ItemUtil.BrewedItem(stack), player);
     }
 
 }

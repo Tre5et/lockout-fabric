@@ -1,40 +1,51 @@
 package me.marin.lockout.lockout.goal.acceptance;
 
-import me.marin.lockout.lockout.goal.builder.BuilderUtil;
-import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
-import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public interface AcceptanceCondition<T> {
     boolean test(T value);
 
+    String getId();
+
     String getName();
 
-    List<T> getExamples();
+    List<TextureExtractor> getExamples();
 
-    default ModifiedAcceptanceCondition<T> modify(Predicate<T> acceptanceChecker, Function<T, Stream<T>> modifyAndExpandExamples) {
-        return new ModifiedAcceptanceCondition<>(this, acceptanceChecker, modifyAndExpandExamples);
+    default <M> MappedAcceptanceCondition<T,M> map(Function<M,T> mapper) {
+        return new MappedAcceptanceCondition<>(this, mapper);
     }
 
-    default ModifiedAcceptanceCondition<T> modify(Predicate<T> acceptanceChecker) {
-        return new ModifiedAcceptanceCondition<>(this, acceptanceChecker, Stream::of);
-    }
+    class MappedAcceptanceCondition<T,M> implements AcceptanceCondition<M> {
+        private final AcceptanceCondition<T> original;
+        private final Function<M,T> mapper;
 
-    static ModifiedAcceptanceCondition<ItemStack> anyItemWithDefaultComponents(DataComponentType<?>... components) {
-        return new AnyAcceptanceCondition<>(
-                () -> Arrays.stream(components)
-                        .map(c -> BuilderUtil.identifierToId(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(c)))
-                        .collect(Collectors.joining(" and ")) + " Items",
-                () -> ItemUtil.getAllItemsWithComponents(Arrays.asList(components)).stream().map(Item::getDefaultInstance).toList()
-        ).modify(s -> Arrays.stream(components).anyMatch(s::has));
+        public MappedAcceptanceCondition(AcceptanceCondition<T> original, Function<M, T> mapper) {
+            this.original = original;
+            this.mapper = mapper;
+        }
+
+
+        @Override
+        public boolean test(M value) {
+            return original.test(mapper.apply(value));
+        }
+
+        @Override
+        public String getId() {
+            return original.getId();
+        }
+
+        @Override
+        public String getName() {
+            return original.getName();
+        }
+
+        @Override
+        public List<TextureExtractor> getExamples() {
+            return original.getExamples();
+        }
     }
 }

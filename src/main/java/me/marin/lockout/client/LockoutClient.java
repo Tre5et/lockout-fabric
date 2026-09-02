@@ -81,7 +81,7 @@ public class LockoutClient implements ClientModInitializer {
                     }
                 }));
         ClientPlayNetworking.registerGlobalReceiver(LockoutGamePayload.ID, (payload, context) -> {
-            // Ensure goals are registered at packet handling time, when item stacks are available client-side.
+            // Ensure goals are registered at packet handling time, when itemStack stacks are available client-side.
             List<LockoutTeam> teams = payload.teams();
 
             LockoutClient.playerTeam = teams.stream()

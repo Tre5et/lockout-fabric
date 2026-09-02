@@ -1,39 +1,62 @@
 package me.marin.lockout.lockout.goal.builder.item;
 
-import me.marin.lockout.client.goal.progress.ClientGoalProgress;
-import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
+import com.google.gson.reflect.TypeToken;
+import me.marin.lockout.lockout.goal.acceptance.AllInInventoryAcceptanceCondition;
+import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
+import me.marin.lockout.lockout.goal.acceptance.ItemWithComponentAcceptanceCondition;
+import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
-import me.marin.lockout.server.goal.progress.ServerGoalProgress;
-import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
-import net.minecraft.core.registries.BuiltInRegistries;
+import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
+import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
-import org.jspecify.annotations.NonNull;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.ColorCollection;
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<Inventory,T> {
-    public ObtainItemGoalBuilder(String id, GoalCategory category) {
-        super("OBTAIN_" + id, category);
-    }
-
-    @Override
-    public @NonNull ClientGoalProgress<?> getClientGoalProgress(T option) {
-        return new SimpleClientGoalProgress();
-    }
-
-    @Override
-    public @NonNull ServerGoalProgress<Inventory, ?> getServerGoalProgress(T option) {
-        return new SimpleServerGoalProgress<>(u -> satisfiedBy(u, option));
+public class ObtainItemGoalBuilder<T> extends GoalBuilder<Inventory,T> {
+    public ObtainItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Inventory, ?> progressSupplier) {
+        super("OBTAIN", "Obtain", GoalCategory.OBTAINING_ITEMS, optionSupplier, progressSupplier);
     }
 
     @Override
     public void reifiedUpdater(Inventory update) {}
 
-    protected abstract boolean satisfiedBy(Inventory inventory, T option);
+    public static ObtainItemGoalBuilder<Void> any(Item... items) {
+        return new ObtainItemGoalBuilder<>(
+                GoalOptionSupplier.NONE,
+                GoalProgressSupplier.simple(_ -> AllInInventoryAcceptanceCondition.of(InListAcceptanceCondition.item(items)))
+        );
+    }
 
-    public static String getItemId(Item item) {
-        return Arrays.stream(BuiltInRegistries.ITEM.getKey(item).getPath().split("/")).toList().getLast().toUpperCase();
+    public static ObtainItemGoalBuilder<DyeColor> colored(ColorCollection<Item> item) {
+        return new ObtainItemGoalBuilder<>(
+                GoalOptionSupplier.list("Color", DyeColor.VALUES, new TypeToken<>() {}, "COLORED", DyeColor::getName),
+                GoalProgressSupplier.simple(c -> AllInInventoryAcceptanceCondition.of(InListAcceptanceCondition.item(item.pick(c))))
+        );
+    }
+
+    public static ObtainItemGoalBuilder<Void> shieldWithBanner() {
+        return new ObtainItemGoalBuilder<>(
+                GoalOptionSupplier.NONE,
+                GoalProgressSupplier.simple(_ -> AllInInventoryAcceptanceCondition.of(
+                        new ItemWithComponentAcceptanceCondition(List.of(new ItemUtil.DataComponentCondition<>(
+                                DataComponents.BASE_COLOR,
+                                _ -> true,
+                                s -> {
+                                    DyeColor color = BuilderUtil.getRandomElement(DyeColor.VALUES);
+                                    s.set(DataComponents.BASE_COLOR, color);
+                                    s.set(DataComponents.BANNER_PATTERNS, ItemUtil.getRandomBannerPattern(BuilderUtil.getRandomElement(DyeColor.VALUES.stream().filter(c -> c != color).toList())));
+                                },
+                                () -> "SHIELD_WITH_BANNER",
+                                () -> "Shield with Banner"
+                        )), () -> Collections.nCopies(20, Items.SHIELD.getDefaultInstance()))
+                ))
+        );
     }
 }

@@ -1,15 +1,19 @@
 package me.marin.lockout.lockout.goal.acceptance;
 
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+
 import java.util.List;
 import java.util.function.Supplier;
 
 public class AnyAcceptanceCondition<T> implements AcceptanceCondition<T> {
+    private final String id;
     private final Supplier<String> nameSupplier;
-    private final Supplier<List<T>> instanceSupplier;
+    private final Supplier<List<TextureExtractor>> textureExtractorSupplier;
 
-    public AnyAcceptanceCondition(Supplier<String> nameSupplier, Supplier<List<T>> instanceSupplier) {
+    public AnyAcceptanceCondition(String id, Supplier<String> nameSupplier, Supplier<List<TextureExtractor>> textureExtractorSupplier) {
+        this.id = id;
         this.nameSupplier = nameSupplier;
-        this.instanceSupplier = instanceSupplier;
+        this.textureExtractorSupplier = textureExtractorSupplier;
     }
 
     @Override
@@ -18,12 +22,17 @@ public class AnyAcceptanceCondition<T> implements AcceptanceCondition<T> {
     }
 
     @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
     public String getName() {
         return nameSupplier.get();
     }
 
     @Override
-    public List<T> getExamples() {
-        return instanceSupplier.get();
+    public List<TextureExtractor> getExamples() {
+        return textureExtractorSupplier.get();
     }
 }

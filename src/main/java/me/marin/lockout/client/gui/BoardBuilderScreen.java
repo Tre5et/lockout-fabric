@@ -108,10 +108,10 @@ public class BoardBuilderScreen extends Screen {
         } else if (displayEditData && BoardBuilderData.INSTANCE.getModifyingIdx() != null) {
             ClientGoal goal = BoardBuilderData.INSTANCE.getModifyingGoal();
             GoalBuilder<?,?> builder = GoalRegistry.INSTANCE.get(goal.getBuildData().id());
-            if(builder.getClientOptionGenerator().isEmpty()) {
+            ClientGoalOptionGenerator<?> generator = builder.getOptionSupplier().getClient();
+            if(generator == null) {
                 displayEditData = false;
             } else {
-                ClientGoalOptionGenerator<?> generator = builder.getClientOptionGenerator().get();
                 sideBarWidth = Math.min(generator.getPreferredRenderWidth(), availableSidebarWidth);
                 int height = Math.min(generator.getPreferredRenderHeight(), this.height - 66);
                 int x = width - sideBarWidth;

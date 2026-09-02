@@ -2,6 +2,7 @@ package me.marin.lockout.server.goal.progress;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.lockout.goal.progress.GoalProgress;
 import me.marin.lockout.network.GoalProgressPayload;
@@ -10,12 +11,63 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface ServerGoalProgress<U,T> extends GoalProgress<T> {
     Gson GSON = new GsonBuilder().create();
 
     T update(T current, U update);
+
+    default <M> MappedServerGoalProgress<U,T,M> map(Function<M,U> mapper) {
+        return new MappedServerGoalProgress<>(this, mapper);
+    }
+
+    class MappedServerGoalProgress<U,T,M> implements ServerGoalProgress<M,T> {
+        private final ServerGoalProgress<U,T> original;
+        private final Function<M,U> mapper;
+
+        public MappedServerGoalProgress(ServerGoalProgress<U, T> original, Function<M, U> mapper) {
+            this.original = original;
+            this.mapper = mapper;
+        }
+
+        @Override
+        public T update(T current, M update) {
+            return original.update(current, mapper.apply(update));
+        }
+
+        @Override
+        public Map<Integer, T> getProgress() {
+            return original.getProgress();
+        }
+
+        @Override
+        public T getDefaultProgress() {
+            return original.getDefaultProgress();
+        }
+
+        @Override
+        public T getCompletedProgress() {
+            return original.getCompletedProgress();
+        }
+
+        @Override
+        public boolean isCompleted(T value) {
+            return original.isCompleted(value);
+        }
+
+        @Override
+        public JsonElement serializeData(T value) {
+            return original.serializeData(value);
+        }
+
+        @Override
+        public T deserializeData(JsonElement element) throws IllegalArgumentException {
+            return original.deserializeData(element);
+        }
+    }
 
     default void grant(LockoutTeam team, ServerLockoutGame lockout) {
         int teamIndex = lockout.getTeams().indexOf(team);

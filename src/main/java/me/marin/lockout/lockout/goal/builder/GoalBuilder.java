@@ -1,17 +1,16 @@
 package me.marin.lockout.lockout.goal.builder;
 
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import me.marin.lockout.client.goal.ClientGoal;
 import me.marin.lockout.client.goal.builder.ClientGoalBuildParameters;
 import me.marin.lockout.client.goal.hint.ClientHint;
-import me.marin.lockout.client.goal.option.ClientGoalOptionGenerator;
-import me.marin.lockout.client.goal.progress.ClientGoalProgress;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
+import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
+import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
@@ -23,7 +22,6 @@ import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.server.goal.ServerGoal;
 import me.marin.lockout.server.goal.builder.ServerGoalBuildParameters;
 import me.marin.lockout.server.goal.hint.ServerHint;
-import me.marin.lockout.server.goal.progress.ServerGoalProgress;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -33,9 +31,14 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public abstract class GoalBuilder<U,T> {
-    protected final String id;
+    protected final String idPrefix;
+    protected final String namePrefix;
     @Getter
     protected final GoalCategory category;
+    @Getter
+    protected final GoalOptionSupplier<T> optionSupplier;
+    @Getter
+    protected final GoalProgressSupplier<T,U,?> progressSupplier;
     @Getter
     protected List<GoalRequirement<? super T>> requirements = new ArrayList<>();
     private IdProvider<T> customIdProvider = null;
@@ -48,30 +51,13 @@ public abstract class GoalBuilder<U,T> {
     @Setter
     protected boolean enabled = true;
 
-    public GoalBuilder(String id, GoalCategory category) {
-        this.id = id;
+    public GoalBuilder(String idPrefix, String namePrefix, GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T,U,?> progressSupplier) {
+        this.idPrefix = idPrefix;
+        this.namePrefix = namePrefix;
         this.category = category;
+        this.optionSupplier = optionSupplier;
+        this.progressSupplier = progressSupplier;
     }
-
-    public String defaultId(T option) {
-        return id;
-    }
-
-    public abstract @NonNull Component defaultName(T option);
-
-    public abstract @NonNull TextureExtractor defaultTextureExtractor(T option);
-
-    public Optional<GoalOptionGenerator<T>> getOptionGenerator() {
-        return Optional.empty();
-    }
-
-    public Optional<ClientGoalOptionGenerator<T>> getClientOptionGenerator() {
-        return Optional.empty();
-    }
-
-    public abstract @NonNull ServerGoalProgress<U,?> getServerGoalProgress(T option);
-
-    public abstract @NonNull ClientGoalProgress<?> getClientGoalProgress(T option);
 
     /**
      * This method should be overridden by a class with a fixed U type and should stay blank.
@@ -82,7 +68,7 @@ public abstract class GoalBuilder<U,T> {
         return new ServerGoal<>(new ServerGoalBuildParameters<>(
                 getId(option),
                 getBuildData(option),
-                getServerGoalProgress(option),
+                progressSupplier.getServer(option),
                 getServerHints(option),
                 this::reifiedUpdater
         ));
@@ -94,20 +80,20 @@ public abstract class GoalBuilder<U,T> {
                 getBuildData(option),
                 getName(option),
                 getTextureExtractor(option),
-                getClientGoalProgress(option),
+                progressSupplier.getClient(option),
                 getClientHints(option)
         ));
     }
 
     public <G extends Goal> Optional<G> buildGenerated(GoalRequirementContext context, Function<T,G> builder) {
-        Optional<GoalOptionGenerator<T>> optionGenerator = getOptionGenerator();
-        if(optionGenerator.isEmpty()) {
+        GoalOptionGenerator<T> optionGenerator = optionSupplier.get();
+        if(optionGenerator == null) {
             if(requirements.stream().allMatch(r -> r.optionSatisfiedBy(context, null))) {
                 return Optional.of(builder.apply(null));
             }
             return Optional.empty();
         }
-        Optional<T> option = optionGenerator.get().generate((o) -> requirements.stream()
+        Optional<T> option = optionGenerator.generate((o) -> requirements.stream()
                 .allMatch(r -> r.optionSatisfiedBy(context, o)));
         return option.map(builder);
     }
@@ -117,11 +103,11 @@ public abstract class GoalBuilder<U,T> {
     }
 
     public <G extends Goal> List<G> buildExamples(Function<T,G> builder) {
-        Optional<GoalOptionGenerator<T>> optionGenerator = getOptionGenerator();
-        return optionGenerator.map(g -> g.examples().stream()
+        GoalOptionGenerator<T> optionGenerator = optionSupplier.get();
+        if(optionGenerator == null) return List.of(builder.apply(null));
+        return optionGenerator.examples().stream()
                 .map(builder)
-                .toList()
-        ).orElseGet(() -> List.of(builder.apply(null)));
+                .toList();
     }
 
     public List<ClientGoal> buildClientExamples() {
@@ -143,10 +129,11 @@ public abstract class GoalBuilder<U,T> {
     }
 
     public <G extends Goal> G buildFromSerializedData(String option, Function<T,G> builder) throws IllegalGoalConstructionException {
-        if(getOptionGenerator().isEmpty()) {
+        GoalOptionGenerator<T> optionGenerator = optionSupplier.get();
+        if(optionGenerator == null) {
             return builder.apply(null);
         }
-        return builder.apply(getOptionGenerator().get().deserialize(option));
+        return builder.apply(optionGenerator.deserialize(option));
     }
 
     public ServerGoal<U> buildServerFromSerializedData(String option) throws IllegalGoalConstructionException {
@@ -158,22 +145,22 @@ public abstract class GoalBuilder<U,T> {
     }
 
     public String getStaticId() {
-        return id;
+        return formatId(idPrefix + "_" + optionSupplier.getStaticId() + "_" + progressSupplier.getStaticId());
     }
 
     public String getId(T option) {
         if(customIdProvider != null) return customIdProvider.get(option);
-        return defaultId(option);
+        return formatId(idPrefix + "_" + progressSupplier.getId(option));
     }
 
     public Component getName(T option) {
         if(customNameProvider != null) return customNameProvider.get(option);
-        return defaultName(option);
+        return Component.literal(namePrefix + " " + progressSupplier.getName(option));
     }
 
     public TextureExtractor getTextureExtractor(T option) {
         if(cutomTextureExtractorProvider != null) return cutomTextureExtractorProvider.get(option);
-        return defaultTextureExtractor(option);
+        return progressSupplier.getTextureExtractor(option);
     }
 
     public List<ServerHint<?>> getServerHints(T option) {
@@ -193,10 +180,10 @@ public abstract class GoalBuilder<U,T> {
     }
 
     public BuildData getBuildData(T option) {
-        if(option == null || getOptionGenerator().isEmpty()) {
+        if(option == null) {
             return new BuildData(getStaticId(), Optional.empty());
         }
-        return new BuildData(getStaticId(), Optional.ofNullable(getOptionGenerator().get().serialize(option)));
+        return new BuildData(getStaticId(), Optional.ofNullable(optionSupplier.get().serialize(option)));
     }
 
     public GoalBuilder<U,T> require(GoalRequirement<? super T> requirements) {
@@ -250,5 +237,9 @@ public abstract class GoalBuilder<U,T> {
     @Override
     public String toString() {
         return getStaticId();
+    }
+
+    public static String formatId(String string) {
+        return string.toUpperCase().replaceAll("__+", "_");
     }
 }
