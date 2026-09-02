@@ -149,7 +149,7 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
         }
 
         public ClientGoal getCurrentExampleGoal() {
-            int seconds = Math.toIntExact(System.currentTimeMillis() / 1000);
+            int seconds = LockoutClient.CURRENT_TICK / 20;
             int mod = (seconds / 3) % exampleGoals.size();
             return exampleGoals.get(mod);
         }

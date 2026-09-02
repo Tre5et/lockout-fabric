@@ -8,8 +8,10 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Item;
 
+import java.util.List;
 import java.util.Optional;
 
 public class EntityUtil {
@@ -34,6 +36,16 @@ public class EntityUtil {
         Identifier spawnEggId = Identifier.fromNamespaceAndPath(entityId.getNamespace(), entityId.getPath() + "_spawn_egg");
         return BuiltInRegistries.ITEM.get(spawnEggId).map(Holder.Reference::value);
     }
+
+    public static final List<EntityType<?>> BREEDABLE = List.of(
+            EntityTypes.HORSE, EntityTypes.DONKEY,
+            EntityTypes.COW, EntityTypes.MOOSHROOM, EntityTypes.GOAT, EntityTypes.SHEEP, EntityTypes.PIG, EntityTypes.CHICKEN,
+            EntityTypes.WOLF, EntityTypes.CAT, EntityTypes.OCELOT,
+            EntityTypes.AXOLOTL, EntityTypes.LLAMA, EntityTypes.TRADER_LLAMA,
+            EntityTypes.RABBIT, EntityTypes.TURTLE, EntityTypes.PANDA,
+            EntityTypes.FOX, EntityTypes.BEE, EntityTypes.STRIDER, EntityTypes.HOGLIN, EntityTypes.FROG,
+            EntityTypes.CAMEL, EntityTypes.SNIFFER, EntityTypes.ARMADILLO, EntityTypes.NAUTILUS
+    );
 
     public record BredEntity(
             EntityType<?> entity

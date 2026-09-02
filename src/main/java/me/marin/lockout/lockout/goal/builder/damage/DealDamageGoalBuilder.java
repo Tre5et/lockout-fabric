@@ -14,6 +14,14 @@ public class DealDamageGoalBuilder<T> extends GoalBuilder<DamageUtil.DealtDamage
     }
 
     @Override
+    public TextureExtractor applyTextureExtractor(TextureExtractor textureExtractor, T option) {
+        return new CornerIconTextureExtractor(
+                textureExtractor,
+                ItemTextureExtractor.item(Items.IRON_SWORD),
+        10);
+    }
+
+    @Override
     public void reifiedUpdater(DamageUtil.DealtDamage update) {}
 
     public static DealDamageGoalBuilder<Integer> total(int min, int max, int step) {

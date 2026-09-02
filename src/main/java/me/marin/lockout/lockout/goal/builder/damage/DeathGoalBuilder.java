@@ -1,5 +1,6 @@
 package me.marin.lockout.lockout.goal.builder.damage;
 
+import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.acceptance.EqualsAcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
@@ -7,6 +8,7 @@ import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.FallLocation;
@@ -20,6 +22,14 @@ import java.util.function.Supplier;
 public class DeathGoalBuilder<T> extends GoalBuilder<DamageUtil.PlayerDied, T> {
     public DeathGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, DamageUtil.PlayerDied, ?> progressSupplier) {
         super("DEATH", "Die to", GoalCategory.DEATH_DAMAGE, optionSupplier, progressSupplier);
+    }
+
+    @Override
+    public TextureExtractor applyTextureExtractor(TextureExtractor textureExtractor, T option) {
+        return new CornerIconTextureExtractor(
+                textureExtractor,
+                GenericTextureExtractor.texture(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/death.png")),
+        7);
     }
 
     @Override

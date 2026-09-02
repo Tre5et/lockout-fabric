@@ -59,6 +59,10 @@ public abstract class GoalBuilder<U,T> {
         this.progressSupplier = progressSupplier;
     }
 
+    public TextureExtractor applyTextureExtractor(TextureExtractor textureExtractor, T option) {
+        return textureExtractor;
+    }
+
     /**
      * This method should be overridden by a class with a fixed U type and should stay blank.
      */
@@ -160,7 +164,7 @@ public abstract class GoalBuilder<U,T> {
 
     public TextureExtractor getTextureExtractor(T option) {
         if(cutomTextureExtractorProvider != null) return cutomTextureExtractorProvider.get(option);
-        return progressSupplier.getTextureExtractor(option);
+        return progressSupplier.applyFinalTextureExtractor(applyTextureExtractor(progressSupplier.getTextureExtractor(option), option), option);
     }
 
     public List<ServerHint<?>> getServerHints(T option) {

@@ -32,6 +32,10 @@ public interface GoalProgressSupplier<T,U,E> {
 
     TextureExtractor getTextureExtractor(T data);
 
+    default TextureExtractor applyFinalTextureExtractor(TextureExtractor extractor, T data) {
+        return extractor;
+    }
+
     default <M> MappedGoalProgressSupplier<T,U,E,M> map(Function<M,U> mapper) {
         return new MappedGoalProgressSupplier<>(this, mapper);
     }
@@ -78,6 +82,11 @@ public interface GoalProgressSupplier<T,U,E> {
         public TextureExtractor getTextureExtractor(T data) {
             return original.getTextureExtractor(data);
         }
+
+        @Override
+        public TextureExtractor applyFinalTextureExtractor(TextureExtractor extractor, T data) {
+            return original.applyFinalTextureExtractor(extractor, data);
+        }
     }
 
     class MappedCreationGoalProgressSupplier<T,U,E,M> implements  GoalProgressSupplier<M,U,E> {
@@ -117,6 +126,11 @@ public interface GoalProgressSupplier<T,U,E> {
         @Override
         public TextureExtractor getTextureExtractor(M data) {
             return original.getTextureExtractor(mapper.apply(data));
+        }
+
+        @Override
+        public TextureExtractor applyFinalTextureExtractor(TextureExtractor extractor, M data) {
+            return original.applyFinalTextureExtractor(extractor, mapper.apply(data));
         }
     }
 
@@ -187,8 +201,13 @@ public interface GoalProgressSupplier<T,U,E> {
 
             @Override
             public TextureExtractor getTextureExtractor(Integer data) {
+                return new CycleTextureExtractor(condition.apply(data).getExamples());
+            }
+
+            @Override
+            public TextureExtractor applyFinalTextureExtractor(TextureExtractor extractor, Integer data) {
                 return new StackingTextureExtractor(List.of(
-                        new CycleTextureExtractor(condition.apply(data).getExamples()),
+                        extractor,
                         new ItemCountTextureExtractor(Component.literal(data.toString()))
                 ), 0);
             }
@@ -229,6 +248,14 @@ public interface GoalProgressSupplier<T,U,E> {
             @Override
             public TextureExtractor getTextureExtractor(Float data) {
                 return baseTexture.get();
+            }
+
+            @Override
+            public TextureExtractor applyFinalTextureExtractor(TextureExtractor extractor, Float data) {
+                return new StackingTextureExtractor(List.of(
+                        extractor,
+                        new ItemCountTextureExtractor(Component.literal(String.valueOf(data.intValue())))
+                ), 0);
             }
         };
     }

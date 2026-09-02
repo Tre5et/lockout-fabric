@@ -11,16 +11,23 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ItemWithComponentAcceptanceCondition implements AcceptanceCondition<ItemStack> {
     private final List<ItemUtil.DataComponentCondition<?>> components;
     private final Supplier<List<ItemStack>> exampleItems;
+    private final Consumer<ItemStack> additionalApplier;
 
-    public ItemWithComponentAcceptanceCondition(List<ItemUtil.DataComponentCondition<?>> components, Supplier<List<ItemStack>> exampleItems) {
+    public ItemWithComponentAcceptanceCondition(List<ItemUtil.DataComponentCondition<?>> components, Supplier<List<ItemStack>> exampleItems, Consumer<ItemStack> additionalApplier) {
         this.components = components;
         this.exampleItems = exampleItems;
+        this.additionalApplier = additionalApplier;
+    }
+
+    public ItemWithComponentAcceptanceCondition(List<ItemUtil.DataComponentCondition<?>> components, Supplier<List<ItemStack>> exampleItems) {
+        this(components, exampleItems, _ -> {});
     }
 
     @Override
@@ -47,9 +54,17 @@ public class ItemWithComponentAcceptanceCondition implements AcceptanceCondition
         return exampleItems.get().stream()
                 .map(i -> {
                     ItemStack item = i.copy();
-                    components.forEach(c -> c.apply(item));
+                    components.forEach(c -> additionalApplier.accept(c.apply(item)));
                     return new ItemTextureExtractor(item);
                 }).collect(Collectors.toUnmodifiableList());
+    }
+
+    public ItemWithComponentAcceptanceCondition applyAdditional(Consumer<ItemStack> consumer) {
+        return new ItemWithComponentAcceptanceCondition(
+                components, exampleItems, i -> {
+                    additionalApplier.accept(i);
+                    consumer.accept(i);
+        });
     }
 
     public static ItemWithComponentAcceptanceCondition hasComponents(List<Item> items, DataComponentType<?>... components) {

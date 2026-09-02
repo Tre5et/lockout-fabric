@@ -10,12 +10,18 @@ import me.marin.lockout.lockout.goal.rendering.texture.*;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
-import java.util.List;
-
 public class BreedAnimalGoalBuilder<T> extends GoalBuilder<EntityUtil.BredEntity, T> {
 
     public BreedAnimalGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityType<?>, ?> progressSupplier) {
         super("BREED", "Breed", GoalCategory.BREEDING, optionSupplier, progressSupplier.map(EntityUtil.BredEntity::entity));
+    }
+
+    @Override
+    public TextureExtractor applyTextureExtractor(TextureExtractor textureExtractor, T option) {
+        return new CornerIconTextureExtractor(
+                textureExtractor,
+                GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/gui/sprites/hud/heart/full.png")),
+        8);
     }
 
     @Override
@@ -30,6 +36,6 @@ public class BreedAnimalGoalBuilder<T> extends GoalBuilder<EntityUtil.BredEntity
     }
 
     public static BreedAnimalGoalBuilder<Integer> unique(int min, int max) {
-        return new BreedAnimalGoalBuilder<>(GoalOptionSupplier.integer("Animals to breed", min, max, 1), GoalProgressSupplier.unique("Animals bred", _ -> new AnyAcceptanceCondition<>("ANIMALS", () -> "Animals", () -> List.of(GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/gui/sprites/hud/heart/full.png"))))));
+        return new BreedAnimalGoalBuilder<>(GoalOptionSupplier.integer("Animals to breed", min, max, 1), GoalProgressSupplier.unique("Animals bred", _ -> new AnyAcceptanceCondition<>("ANIMALS", () -> "Animals", () -> EntityUtil.BREEDABLE.stream().map(EntityUtil::getEntityTextureExtractor).toList())));
     }
 }
