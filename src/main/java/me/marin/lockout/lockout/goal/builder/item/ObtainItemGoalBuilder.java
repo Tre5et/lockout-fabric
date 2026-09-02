@@ -10,6 +10,7 @@ import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -19,13 +20,13 @@ import net.minecraft.world.level.block.ColorCollection;
 import java.util.Collections;
 import java.util.List;
 
-public class ObtainItemGoalBuilder<T> extends GoalBuilder<Inventory,T> {
+public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
     public ObtainItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Inventory, ?> progressSupplier) {
-        super("OBTAIN", "Obtain", GoalCategory.OBTAINING_ITEMS, optionSupplier, progressSupplier);
+        super("OBTAIN", "Obtain", GoalCategory.OBTAINING_ITEMS, optionSupplier, progressSupplier.map(ServerPlayer::getInventory));
     }
 
     @Override
-    public void reifiedUpdater(Inventory update) {}
+    public void reifiedUpdater(ServerPlayer update) {}
 
     public static ObtainItemGoalBuilder<Void> any(Item... items) {
         return new ObtainItemGoalBuilder<>(

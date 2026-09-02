@@ -1,5 +1,7 @@
 package me.marin.lockout.lockout;
 
+import me.marin.lockout.Constants;
+import me.marin.lockout.lockout.goal.builder.PlayerStateGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.SpawnEntityGoalBuilder;
@@ -7,13 +9,11 @@ import me.marin.lockout.lockout.goal.builder.item.*;
 import me.marin.lockout.lockout.goal.builder.entity.BreedAnimalGoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroups;
-import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
-import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
-import me.marin.lockout.lockout.goal.rendering.texture.SpriteTextureExtractor;
-import me.marin.lockout.lockout.goal.rendering.texture.StackingTextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.damagesource.FallLocation;
 import net.minecraft.world.entity.EntityTypes;
@@ -129,6 +129,14 @@ public class DefaultGoalRegister {
         INSTANCE.register(ConsumeItemGoalBuilder.any(Items.RABBIT_STEW).customName(_ -> "Eat Rabbit Stew"));
         INSTANCE.register(ConsumeItemGoalBuilder.any(Items.SUSPICIOUS_STEW).customName(_ -> "Eat Suspicious Stew"));
 
+        INSTANCE.register(PlayerStateGoalBuilder.emptyHungerBar());
+        INSTANCE.register(PlayerStateGoalBuilder.heightAbove(320, ServerLevel.OVERWORLD).customName(_ -> "Reach height limit"));
+        INSTANCE.register(PlayerStateGoalBuilder.heightAbove(128, ServerLevel.NETHER).customName(_ -> "Reach Nether Roof")
+                .customTextureExtractor(_ -> new CornerIconTextureExtractor(
+                        ItemTextureExtractor.item(Items.BEDROCK),
+                        GenericTextureExtractor.texture(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/up_arrow.png")),
+                8))
+                .defaultEnabled(false));
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));

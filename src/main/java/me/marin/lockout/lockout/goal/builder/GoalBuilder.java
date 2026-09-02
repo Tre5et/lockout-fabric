@@ -219,10 +219,6 @@ public abstract class GoalBuilder<U,T> {
         return this;
     }
 
-    public GoalBuilder<U,T> customTextureExtractor(TextureExtractor extractor) {
-        return customTextureExtractor(_ -> extractor);
-    }
-
     public GoalBuilder<U,T> group(GoalGroup... groups) {
         getGroups().addAll(Arrays.stream(groups).toList());
         return this;

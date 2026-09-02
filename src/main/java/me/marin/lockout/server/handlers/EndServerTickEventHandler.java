@@ -30,7 +30,7 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
         }
 
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            lockout.getBoard().update(player.getInventory(), player);
+            lockout.getBoard().update(player, player);
             if (player.isPassenger()) {
                 lockout.getBoard().update(new EntityUtil.RodeEntity(player.getVehicle().getType()), player);
             }
