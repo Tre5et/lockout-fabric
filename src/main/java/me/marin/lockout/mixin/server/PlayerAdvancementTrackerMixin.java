@@ -1,6 +1,5 @@
 package me.marin.lockout.mixin.server;
 
-import me.marin.lockout.server.ServerLockoutTeam;
 import me.marin.lockout.server.LockoutServer;
 import me.marin.lockout.server.game.ServerLockoutGame;
 import me.marin.lockout.server.goal.ServerGoal;
@@ -38,7 +37,6 @@ public abstract class PlayerAdvancementTrackerMixin {
         ServerLockoutGame lockout = LockoutServer.lockout;
         if (lockout == null || !lockout.getState().isActive()) return;
         if (!lockout.isLockoutPlayer(player.getUUID())) return;
-        ServerLockoutTeam team = (ServerLockoutTeam) lockout.getPlayerTeam(player.getUUID());
 
         lockout.getBoard().update(advancement, player);
     }

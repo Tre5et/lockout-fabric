@@ -1,12 +1,17 @@
 package me.marin.lockout.lockout.goal.acceptance;
 
+import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
 import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
+import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.StackingTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.damagesource.FallLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -124,6 +129,31 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
                 l -> l.id().toUpperCase(),
                 l -> BuilderUtil.idToName(l.id()),
                 l -> locations.stream().filter(p -> p.getA() == l).findFirst().get().getB().get()
+        );
+    }
+
+    public static InListAcceptanceCondition<Identifier, Identifier> advancement(Identifier... identifiers) {
+        return new InListAcceptanceCondition<>(
+                Arrays.asList(identifiers),
+                e -> e,
+                BuilderUtil::identifierToId,
+                a -> {
+                    Advancement advancement = LockoutClient.allAdvancements.get(a);
+                    if (advancement == null) {
+                        return "\"" + BuilderUtil.identifierToName(a) + "\" Advancement";
+                    }
+                    return "\"" + advancement.display().get().getTitle().getString() + "\" Advancement";
+                },
+                a -> {
+                    Advancement advancement = LockoutClient.allAdvancements.get(a);
+                    if (advancement == null) {
+                        return ItemTextureExtractor.item(Items.BARRIER);
+                    }
+                    return new StackingTextureExtractor(List.of(
+                            GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/gui/sprites/advancements/challenge_frame_unobtained.png")),
+                            ItemTextureExtractor.item(advancement.display().get().getIcon().item().value())
+                    ), 3);
+                }
         );
     }
 }

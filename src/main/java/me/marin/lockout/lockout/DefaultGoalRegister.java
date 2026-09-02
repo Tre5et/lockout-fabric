@@ -2,6 +2,7 @@ package me.marin.lockout.lockout;
 
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.builder.PlayerStateGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.advancement.ObtainAdvancementGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.AngerMobGoalBuilder;
@@ -140,6 +141,21 @@ public class DefaultGoalRegister {
                 .defaultEnabled(false));
 
         INSTANCE.register(AngerMobGoalBuilder.any(EntityTypes.ZOMBIFIED_PIGLIN));
+
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("story/enter_the_nether").customName(_ -> "Enter The Nether"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("story/enter_the_end").customName(_ -> "Enter The End"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("story/follow_ender_eye").customName(_ -> "Enter a Stronghold"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("nether/charge_respawn_anchor").customName(_ -> "Fully charge a Respawn Anchor"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("adventure/whos_the_pillager_now").customName(_ -> "Kill a Pillager using a Crossbow"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("adventure/bullseye"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("adventure/spear_many_mobs"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("nether/distract_piglin"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("adventure/sniper_duel"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("husbandry/place_dried_ghast_in_water"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("nether/ride_strider"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("husbandry/wax_on"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("husbandry/wax_off"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.unique(5, 30, 1));
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));
