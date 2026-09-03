@@ -264,6 +264,14 @@ public class DefaultGoalRegister {
                 .require(GoalRequirements.structure("Suspicious Structure", BuiltinStructures.TRAIL_RUINS, BuiltinStructures.OCEAN_RUIN_WARM, BuiltinStructures.OCEAN_RUIN_COLD, BuiltinStructures.DESERT_PYRAMID)));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.TNT));
         INSTANCE.register(ObtainItemGoalBuilder.any(ItemUtil.HANGING_SIGN.toArray(Item[]::new)).customName(_ -> "Obtain Hanging Sign"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(2, 4, ItemUtil.ARMOR_TRIM.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Armor Trims"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(2, 5, ItemUtil.HORSE_ARMOR.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Horse Armor"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(2, 5, ItemUtil.BANNER_PATTERN.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Banner Patterns"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(2, 5, ItemUtil.SAPLING.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Saplings"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(2, 5, ItemUtil.SEED.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Seeds"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(4, 7, ItemUtil.BUCKET.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Buckets"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(3, 7, ItemUtil.FLOWER.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Flowers"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(4, 7, ItemUtil.WORKSTATION.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Workstations"));
 
         INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.FLOWER_POT), Stats.POT_FLOWER).customName(_ -> "Pot any Flower"));
         INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.CAKE), Stats.EAT_CAKE_SLICE).customName(_ -> "Eat a slice of Cake"));

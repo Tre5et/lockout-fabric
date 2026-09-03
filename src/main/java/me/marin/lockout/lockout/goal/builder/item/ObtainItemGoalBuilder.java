@@ -2,7 +2,7 @@ package me.marin.lockout.lockout.goal.builder.item;
 
 import com.google.gson.reflect.TypeToken;
 import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
-import me.marin.lockout.lockout.goal.acceptance.AllInInventoryAcceptanceCondition;
+import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.ItemWithComponentAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
@@ -22,8 +22,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.ColorCollection;
 import oshi.util.tuples.Pair;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
     public ObtainItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Inventory, ?> progressSupplier) {
@@ -36,14 +38,21 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
     public static ObtainItemGoalBuilder<Void> all(Item... items) {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> AllInInventoryAcceptanceCondition.allItems(items))
+                GoalProgressSupplier.<Void,ItemStack>all(_ -> Arrays.stream(items).map(InListAcceptanceCondition::item).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectStacks)
         );
     }
 
     public static ObtainItemGoalBuilder<Void> any(Item... items) {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> AllInInventoryAcceptanceCondition.anyItems(items))
+                GoalProgressSupplier.<Void,ItemStack>any(_ -> List.of(InListAcceptanceCondition.item(items))).map(ItemUtil::collectStacks)
+        );
+    }
+
+    public static ObtainItemGoalBuilder<Integer> atLeast(int min, int max, Item... items) {
+        return new ObtainItemGoalBuilder<>(
+                GoalOptionSupplier.integer("Items to obtain", min, max, 1),
+                GoalProgressSupplier.atLeast(_ -> Arrays.stream(items).map(InListAcceptanceCondition::item).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectStacks)
         );
     }
 
@@ -51,7 +60,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
     public static ObtainItemGoalBuilder<Void> allWithCount(Pair<Item, Integer>... items) {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> AllInInventoryAcceptanceCondition.allItemsWithCount(items))
+                GoalProgressSupplier.<Void,Pair<Item,Integer>>all(_ -> Arrays.stream(items).map(InListAcceptanceCondition::itemWithCount).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectCounts)
         );
     }
 
@@ -62,7 +71,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
     public static ObtainItemGoalBuilder<Void> anyFullStack() {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> AllInInventoryAcceptanceCondition.singleSlot(new AcceptanceCondition<>() {
+                GoalProgressSupplier.<Void,ItemStack>any(_ -> List.of(new AcceptanceCondition<>() {
                     @Override
                     public boolean test(ItemStack value) {
                         return value.isStackable() && value.count() == value.getMaxStackSize();
@@ -82,14 +91,14 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
                     public List<TextureExtractor> getExamples() {
                         return List.of(TextTextureExtractor.text("64"));
                     }
-                }))
+                })).map(ItemUtil::collectStacks)
         );
     }
 
     public static ObtainItemGoalBuilder<DyeColor> colored(ColorCollection<Item> item, Integer count, String id) {
         ObtainItemGoalBuilder<DyeColor> builder = new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.list("Color", DyeColor.VALUES, new TypeToken<>() {}, "COLORED", DyeColor::getName),
-                GoalProgressSupplier.<DyeColor,Inventory>simple(c -> AllInInventoryAcceptanceCondition.allItemsWithCount(new Pair<>(c == null ? null : item.pick(c), count))).withStaticId(id)
+                GoalProgressSupplier.<DyeColor,Pair<Item,Integer>>any(c -> List.of(InListAcceptanceCondition.itemWithCount(new Pair<>(c == null ? null : item.white(), count)))).map(ItemUtil::collectCounts).withStaticId(id)
         );
         builder.require(GoalRequirements.COLORS);
         return builder;
@@ -98,8 +107,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
     public static ObtainItemGoalBuilder<Void> shieldWithBanner() {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> AllInInventoryAcceptanceCondition.singleSlot(
-                        new ItemWithComponentAcceptanceCondition(List.of(new ItemUtil.DataComponentCondition<>(
+                GoalProgressSupplier.<Void,ItemStack>any(_ -> List.of(new ItemWithComponentAcceptanceCondition(List.of(new ItemUtil.DataComponentCondition<>(
                                 DataComponents.BASE_COLOR,
                                 _ -> true,
                                 s -> {
@@ -109,8 +117,8 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
                                 },
                                 () -> "SHIELD_WITH_BANNER",
                                 () -> "Shield with Banner"
-                        )), () -> Collections.nCopies(20, Items.SHIELD.getDefaultInstance()))
-                ))
+                        )), () -> Collections.nCopies(20, Items.SHIELD.getDefaultInstance())))
+                ).map(ItemUtil::collectStacks)
         );
     }
 }

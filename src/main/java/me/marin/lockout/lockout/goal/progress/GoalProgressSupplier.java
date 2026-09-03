@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public interface GoalProgressSupplier<T,U,E> {
     ClientGoalProgress<E> getClient(T data);
@@ -262,6 +263,138 @@ public interface GoalProgressSupplier<T,U,E> {
 
     static <U> GoalProgressSupplier<Integer,U,Integer> unique(String title, Function<Integer, AcceptanceCondition<U>> condition) {
         return unique(title, condition, u -> u);
+    }
+
+    static <T,U> GoalProgressSupplier<T,List<U>,Boolean> any(Function<T, List<AcceptanceCondition<U>>> conditions) {
+        return new GoalProgressSupplier<>() {
+            @Override
+            public ClientGoalProgress<Boolean> getClient(T data) {
+                return new SimpleClientGoalProgress();
+            }
+
+            @Override
+            public ServerGoalProgress<List<U>, Boolean> getServer(T data) {
+                List<AcceptanceCondition<U>> resolvedConditions = conditions.apply(data);
+                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && d.stream()
+                        .anyMatch(e -> resolvedConditions.stream().anyMatch(c -> c.test(e)))
+                );
+            }
+
+            @Override
+            public String getStaticId() {
+                return conditions.apply(null).stream().map(AcceptanceCondition::getId).collect(Collectors.joining("_OR_"));
+            }
+
+            @Override
+            public String getId(T data) {
+                return conditions.apply(data).stream().map(AcceptanceCondition::getId).collect(Collectors.joining("_OR_"));
+            }
+
+            @Override
+            public String getName(T data) {
+                return conditions.apply(data).stream().map(AcceptanceCondition::getName).collect(Collectors.joining(" or "));
+            }
+
+            @Override
+            public TextureExtractor getTextureExtractor(T data) {
+                return new CycleTextureExtractor(conditions.apply(data).stream()
+                                .flatMap(c -> c.getExamples().stream())
+                                .toList()
+                );
+            }
+        };
+    }
+
+    static <T,U> GoalProgressSupplier<T,List<U>,Boolean> all(Function<T, List<AcceptanceCondition<U>>> conditions) {
+        return new GoalProgressSupplier<>() {
+            @Override
+            public ClientGoalProgress<Boolean> getClient(T data) {
+                return new SimpleClientGoalProgress();
+            }
+
+            @Override
+            public ServerGoalProgress<List<U>, Boolean> getServer(T data) {
+                List<AcceptanceCondition<U>> resolvedConditions = conditions.apply(data);
+                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && d.stream()
+                        .allMatch(e -> resolvedConditions.stream().anyMatch(c -> c.test(e)))
+                );
+            }
+
+            @Override
+            public String getStaticId() {
+                return conditions.apply(null).stream().map(AcceptanceCondition::getId).collect(Collectors.joining("_AND_"));
+            }
+
+            @Override
+            public String getId(T data) {
+                return conditions.apply(data).stream().map(AcceptanceCondition::getId).collect(Collectors.joining("_AND_"));
+            }
+
+            @Override
+            public String getName(T data) {
+                return conditions.apply(data).stream().map(AcceptanceCondition::getName).collect(Collectors.joining(" and "));
+            }
+
+            @Override
+            public TextureExtractor getTextureExtractor(T data) {
+                int count = conditions.apply(data).size();
+                if(count > 1) {
+                    return new StackingTextureExtractor(List.of(
+                            new CycleTextureExtractor(conditions.apply(data).stream()
+                                    .flatMap(c -> c.getExamples().stream())
+                                    .toList()),
+                            new ItemCountTextureExtractor(Component.literal(String.valueOf(conditions.apply(data).size())))
+                    ), 0);
+                } else {
+                    return new CycleTextureExtractor(conditions.apply(data).stream()
+                            .flatMap(c -> c.getExamples().stream())
+                            .toList());
+                }
+            }
+        };
+    }
+
+    static <U> GoalProgressSupplier<Integer,List<U>,Boolean> atLeast(Function<Integer, List<AcceptanceCondition<U>>> conditions) {
+        return new GoalProgressSupplier<>() {
+            @Override
+            public ClientGoalProgress<Boolean> getClient(Integer data) {
+                return new SimpleClientGoalProgress();
+            }
+
+            @Override
+            public ServerGoalProgress<List<U>, Boolean> getServer(Integer data) {
+                List<AcceptanceCondition<U>> resolvedConditions = conditions.apply(data);
+                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && d.stream()
+                        .filter(e -> resolvedConditions.stream().anyMatch(c -> c.test(e)))
+                        .count() >= data
+                );
+            }
+
+            @Override
+            public String getStaticId() {
+                return conditions.apply(null).stream().map(AcceptanceCondition::getId).collect(Collectors.joining("_OR_"));
+            }
+
+            @Override
+            public String getId(Integer data) {
+                return data + "_" + conditions.apply(data).stream().map(AcceptanceCondition::getId).collect(Collectors.joining("_OR_"));
+            }
+
+            @Override
+            public String getName(Integer data) {
+                return data + " of " + conditions.apply(data).stream().map(AcceptanceCondition::getName).collect(Collectors.joining(" or "));
+            }
+
+            @Override
+            public TextureExtractor getTextureExtractor(Integer data) {
+                return new StackingTextureExtractor(List.of(
+                        new CycleTextureExtractor(conditions.apply(data).stream()
+                                .flatMap(c -> c.getExamples().stream())
+                                .toList()),
+                        new ItemCountTextureExtractor(Component.literal(data.toString()))
+                ), 0);
+            }
+        };
     }
 
     static <U> GoalProgressSupplier<Number,U,Number> total(String title, Function<Number, AcceptanceCondition<U>> condition, Function<U, Number> toNumber, Function<Number, String> numberToString) {
