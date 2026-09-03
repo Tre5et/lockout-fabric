@@ -167,4 +167,14 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
                 }
         );
     }
+
+    public static InListAcceptanceCondition<Identifier, Identifier> statistic(Supplier<TextureExtractor> extractor, Identifier... statistics) {
+        return new InListAcceptanceCondition<>(
+                Arrays.asList(statistics),
+                a -> a,
+                BuilderUtil::identifierToId,
+                BuilderUtil::identifierToName,
+                _ -> extractor.get()
+        );
+    }
 }

@@ -37,8 +37,8 @@
     "server.ItemMixin",*/
     "server.LivingEntityMixin",
     "server.PlayerAdvancementTrackerMixin",
-    "server.PlayerInventoryAccessor",/*
-    "server.PlayerMixin",
+    "server.PlayerInventoryAccessor",
+    "server.PlayerMixin",/*
     "server.PotentSulfurBlockEntityMixin",*/
     "server.PotionContentsComponentMixin",/*
     "server.RaidMixin",
