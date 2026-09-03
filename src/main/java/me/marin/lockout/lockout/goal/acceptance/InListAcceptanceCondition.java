@@ -50,7 +50,7 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
 
     @Override
     public boolean test(T value) {
-        return acceptableElements.stream().allMatch(e -> equalsFunction.test(value, e));
+        return acceptableElements.stream().anyMatch(e -> equalsFunction.test(value, e));
     }
 
     @Override

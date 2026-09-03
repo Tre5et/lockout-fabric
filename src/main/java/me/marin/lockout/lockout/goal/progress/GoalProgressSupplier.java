@@ -5,6 +5,7 @@ import me.marin.lockout.client.goal.progress.SimpleClientGoalProgress;
 import me.marin.lockout.client.goal.progress.TargetFloatClientGoalProgress;
 import me.marin.lockout.client.goal.progress.TargetNumberClientGoalProgress;
 import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
+import me.marin.lockout.lockout.goal.acceptance.AnyAcceptanceCondition;
 import me.marin.lockout.lockout.goal.rendering.texture.CycleTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemCountTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.StackingTextureExtractor;
@@ -44,7 +45,7 @@ public interface GoalProgressSupplier<T,U,E> {
         return new MappedCreationGoalProgressSupplier<>(this, mapper);
     }
 
-    class MappedGoalProgressSupplier<T,U,E,M> implements  GoalProgressSupplier<T,M,E> {
+    class MappedGoalProgressSupplier<T,U,E,M> implements GoalProgressSupplier<T,M,E> {
         private final GoalProgressSupplier<T,U,E> original;
         private final Function<M,U> mapper;
 
@@ -89,7 +90,7 @@ public interface GoalProgressSupplier<T,U,E> {
         }
     }
 
-    class MappedCreationGoalProgressSupplier<T,U,E,M> implements  GoalProgressSupplier<M,U,E> {
+    class MappedCreationGoalProgressSupplier<T,U,E,M> implements GoalProgressSupplier<M,U,E> {
         private final GoalProgressSupplier<T,U,E> original;
         private final Function<M,T> mapper;
 
@@ -215,48 +216,61 @@ public interface GoalProgressSupplier<T,U,E> {
     }
 
     static <U> GoalProgressSupplier<Integer,U,Integer> unique(String title, Function<Integer, AcceptanceCondition<U>> condition) {
-        return unique(title, condition, u ->u);
+        return unique(title, condition, u -> u);
     }
 
-    static <U> GoalProgressSupplier<Float,U,Float> total(String title, Function<U, Float> toFloat, String name, Supplier<TextureExtractor> baseTexture) {
+    static <U> GoalProgressSupplier<Number,U,Number> total(String title, Function<Number, AcceptanceCondition<U>> condition, Function<U, Number> toNumber, Function<Number, String> numberToString) {
         return new GoalProgressSupplier<>() {
             @Override
-            public ClientGoalProgress<Float> getClient(Float data) {
-                return new TargetFloatClientGoalProgress(title, data);
+            public ClientGoalProgress<Number> getClient(Number data) {
+                return new TargetFloatClientGoalProgress(title, data, numberToString);
             }
 
             @Override
-            public ServerGoalProgress<U, Float> getServer(Float data) {
-                return new TargetFloatServerGoalProgress<>(data, toFloat);
+            public ServerGoalProgress<U, Number> getServer(Number data) {
+                AcceptanceCondition<U> resolvedCondition = condition.apply(data);
+                return new TargetFloatServerGoalProgress<>(data, u -> resolvedCondition.test(u) ? toNumber.apply(u) : 0);
             }
 
             @Override
             public String getStaticId() {
-                return name.toUpperCase() + "_TOTAL";
+                return "TOTAL_" + condition.apply(null).getId();
             }
 
             @Override
-            public String getId(Float data) {
-                return name.toUpperCase() + "_TOTAL_" + data;
+            public String getId(Number data) {
+                return "_TOTAL_" + numberToString.apply(data) + "_" + condition.apply(data).getId();
             }
 
             @Override
-            public String getName(Float data) {
-                return data + " " + name;
+            public String getName(Number data) {
+                return numberToString.apply(data) + " " + condition.apply(data).getName();
             }
 
             @Override
-            public TextureExtractor getTextureExtractor(Float data) {
-                return baseTexture.get();
+            public TextureExtractor getTextureExtractor(Number data) {
+                return new CycleTextureExtractor(condition.apply(data).getExamples());
             }
 
             @Override
-            public TextureExtractor applyFinalTextureExtractor(TextureExtractor extractor, Float data) {
+            public TextureExtractor applyFinalTextureExtractor(TextureExtractor extractor, Number data) {
                 return new StackingTextureExtractor(List.of(
                         extractor,
-                        new ItemCountTextureExtractor(Component.literal(String.valueOf(data.intValue())))
+                        new ItemCountTextureExtractor(Component.literal(numberToString.apply(data)))
                 ), 0);
             }
         };
+    }
+
+    static <U> GoalProgressSupplier<Integer, U, Number> countTotal(String title, Function<Integer, AcceptanceCondition<U>> condition) {
+        return GoalProgressSupplier.total(title, n -> condition.apply(n == null ? null : n.intValue()), _ -> 1, n -> String.valueOf(n.intValue())).mapCreation(i -> i);
+    }
+
+    static GoalProgressSupplier<Float, Float, Number> rawTotal(String title, Supplier<String> name, Supplier<TextureExtractor> baseTexture) {
+        return GoalProgressSupplier.<Float>total(title, n -> new AnyAcceptanceCondition<>(
+                "",
+                name,
+                () -> List.of(baseTexture.get())
+        ), f -> f, f -> String.valueOf(Math.round(f.floatValue()))).mapCreation(f -> f);
     }
 }

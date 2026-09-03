@@ -25,7 +25,8 @@
     "server.CraftingResultSlotMixin",/*
     "server.CrossbowItemMixin",
     "server.DecorationItemMixin",
-    "server.EndCrystalItemMixin",
+    "server.EndCrystalItemMixin",*/
+    "server.EndCrystalMixin",/*
     "server.EntityMixin",
     "server.FilledMapItemMixin",*/
     "server.FoodComponentMixin",/*

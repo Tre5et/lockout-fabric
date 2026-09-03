@@ -4,16 +4,16 @@ import me.marin.lockout.lockout.goal.progress.TargetFloatGoalProgress;
 
 import java.util.function.Function;
 
-public class TargetFloatServerGoalProgress<T> extends TargetFloatGoalProgress implements ServerGoalProgress<T, Float> {
-    private final Function<T,Float> updateFunction;
+public class TargetFloatServerGoalProgress<T> extends TargetFloatGoalProgress implements ServerGoalProgress<T, Number> {
+    private final Function<T,Number> updateFunction;
 
-    public TargetFloatServerGoalProgress(Float target, Function<T, Float> updateFunction) {
+    public TargetFloatServerGoalProgress(Number target, Function<T, Number> updateFunction) {
         super(target);
         this.updateFunction = updateFunction;
     }
 
     @Override
-    public Float update(Float current, T update) {
-        return current + updateFunction.apply(update);
+    public Number update(Number current, T update) {
+        return current.doubleValue() + updateFunction.apply(update).doubleValue();
     }
 }

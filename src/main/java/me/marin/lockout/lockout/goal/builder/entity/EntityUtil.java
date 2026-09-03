@@ -47,6 +47,34 @@ public class EntityUtil {
             EntityTypes.CAMEL, EntityTypes.SNIFFER, EntityTypes.ARMADILLO, EntityTypes.NAUTILUS
     );
 
+    public static final List<EntityType<?>> HOSTILE = List.of(
+            EntityTypes.BLAZE, EntityTypes.BOGGED, EntityTypes.BREEZE, EntityTypes.CREAKING, EntityTypes.CREEPER,
+            EntityTypes.ELDER_GUARDIAN, EntityTypes.ENDERMITE, EntityTypes.EVOKER, EntityTypes.GHAST,
+            EntityTypes.GUARDIAN, EntityTypes.HOGLIN, EntityTypes.HUSK, EntityTypes.MAGMA_CUBE, EntityTypes.PARCHED,
+            EntityTypes.PHANTOM, EntityTypes.PIGLIN_BRUTE, EntityTypes.PILLAGER, EntityTypes.RAVAGER,
+            EntityTypes.SHULKER, EntityTypes.SILVERFISH, EntityTypes.SKELETON, EntityTypes.SLIME, EntityTypes.STRAY,
+            EntityTypes.VEX, EntityTypes.VINDICATOR, EntityTypes.WARDEN, EntityTypes.WITCH,
+            EntityTypes.WITHER_SKELETON, EntityTypes.ZOGLIN, EntityTypes.ZOMBIE, EntityTypes.ZOMBIE_VILLAGER
+    );
+
+    public static final List<EntityType<?>> ARTHROPODS = List.of(
+            EntityTypes.BEE, EntityTypes.CAVE_SPIDER, EntityTypes.ENDERMITE,
+            EntityTypes.SILVERFISH, EntityTypes.SPIDER
+    );
+
+    public static final List<EntityType<?>> UNDEAD = List.of(
+            EntityTypes.CAMEL_HUSK, EntityTypes.DROWNED, EntityTypes.HUSK,
+            EntityTypes.ZOMBIE_HORSE, EntityTypes.ZOMBIE_NAUTILUS, EntityTypes.ZOMBIE_VILLAGER,
+            EntityTypes.ZOMBIFIED_PIGLIN, EntityTypes.BOGGED, EntityTypes.PARCHED, EntityTypes.SKELETON,
+            EntityTypes.SKELETON_HORSE, EntityTypes.STRAY, EntityTypes.WITHER, EntityTypes.WITHER_SKELETON,
+            EntityTypes.PHANTOM, EntityTypes.ZOGLIN, EntityTypes.ZOMBIE
+    );
+
+    public static final List<EntityType<?>> RAID = List.of(
+            EntityTypes.PILLAGER, EntityTypes.VINDICATOR, EntityTypes.RAVAGER,
+            EntityTypes.WITCH, EntityTypes.EVOKER, EntityTypes.VEX
+    );
+
     public record BredEntity(
             EntityType<?> entity
     ) {}

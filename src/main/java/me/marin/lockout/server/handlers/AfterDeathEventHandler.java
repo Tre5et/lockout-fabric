@@ -6,6 +6,7 @@ import me.marin.lockout.server.LockoutServer;
 import me.marin.lockout.server.game.ServerLockoutGame;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.NonNull;
@@ -20,6 +21,10 @@ public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDea
 
         if(entity instanceof Player player) {
             lockout.getBoard().update(new DamageUtil.PlayerDied(source, player), player);
+        } else {
+            Entity killer = source.getEntity() == null ? source.getEntity() : source.getDirectEntity();
+            if(!(killer instanceof Player player) || !lockout.isLockoutPlayer(player)) return;
+            lockout.getBoard().update(new DamageUtil.KilledEntity(entity, source), player);
         }
 
         /*if (playerDied) {

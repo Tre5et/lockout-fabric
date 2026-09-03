@@ -5,7 +5,9 @@ import me.marin.lockout.lockout.goal.builder.PlayerStateGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.advancement.ObtainAdvancementGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.damage.KillEntityGoal;
 import me.marin.lockout.lockout.goal.builder.entity.AngerMobGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
 import me.marin.lockout.lockout.goal.builder.entity.SpawnEntityGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.*;
 import me.marin.lockout.lockout.goal.builder.entity.BreedAnimalGoalBuilder;
@@ -18,6 +20,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.damagesource.FallLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -45,8 +48,8 @@ public class DefaultGoalRegister {
                 .customName(_ -> "Break any tool")
                 .group(GoalGroups.TOOLS));
 
-        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.ARMADILLO).require(GoalRequirements.anyBiome("Savanna", Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU)));
-        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.CAMEL).require(GoalRequirements.anyBiome("Desert", Biomes.DESERT).or(GoalRequirements.anyStructure("Desert Village", BuiltinStructures.VILLAGE_DESERT))));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.ARMADILLO).require(GoalRequirements.biome("Savanna", Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU)));
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.CAMEL).require(GoalRequirements.biome("Desert", Biomes.DESERT).or(GoalRequirements.structure("Desert Village", BuiltinStructures.VILLAGE_DESERT))));
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.CHICKEN));
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.COW, EntityTypes.MOOSHROOM).customName(_ -> "Breed Cow"));
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.FOX).require(GoalRequirements.TAIGA));
@@ -106,21 +109,21 @@ public class DefaultGoalRegister {
                 .group(GoalGroups.IRON_HEAVY));
         INSTANCE.register(DeathGoalBuilder.type(DamageTypes.FALLING_STALACTITE, () -> ItemTextureExtractor.cycleItems(List.of(Items.POINTED_DRIPSTONE, Items.SULFUR_SPIKE)))
                 .customName(_ -> "Die to falling Stalactite")
-                .require(GoalRequirements.anyBiome("Spiky Caves", Biomes.DRIPSTONE_CAVES, Biomes.SULFUR_CAVES)));
+                .require(GoalRequirements.biome("Spiky Caves", Biomes.DRIPSTONE_CAVES, Biomes.SULFUR_CAVES)));
         INSTANCE.register(DeathGoalBuilder.type(DamageTypes.FIREWORKS, () -> ItemTextureExtractor.item(Items.FIREWORK_ROCKET))
                 .customName(_ -> "Die to Firework Rocket"));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.IRON_GOLEM).require(GoalRequirements.VILLAGE));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.POLAR_BEAR).require(GoalRequirements.SNOWY));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.PUFFERFISH).require(GoalRequirements.WARM_OCEAN));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.TNT_MINECART).customName(_ -> "Die to TNT Minecart"));
-        INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.WARDEN).require(GoalRequirements.anyBiome("Deep Dark", Biomes.DEEP_DARK)));
+        INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.WARDEN).require(GoalRequirements.biome("Deep Dark", Biomes.DEEP_DARK)));
 
         INSTANCE.register(ConsumeItemGoalBuilder.any(Items.HONEY_BOTTLE).customName(_ -> "Drink Honey Bottle"));
         INSTANCE.register(ConsumeItemGoalBuilder.anyWithComponent(DataComponents.POTION_CONTENTS, new PotionContents(Potions.WATER), "WATER_BOTTLE", "Water Bottle", Items.POTION)
                 .customName(_ -> "Drink Water Bottle"));
         INSTANCE.register(ConsumeItemGoalBuilder.uniqueWithComponent(5, 25, DataComponents.FOOD)
                 .customName(n -> "Eat " + n + " Unique Foods"));
-        INSTANCE.register(ConsumeItemGoalBuilder.any(Items.GLOW_BERRIES).require(GoalRequirements.anyBiome("Lush Caves", Biomes.LUSH_CAVES))
+        INSTANCE.register(ConsumeItemGoalBuilder.any(Items.GLOW_BERRIES).require(GoalRequirements.biome("Lush Caves", Biomes.LUSH_CAVES))
                 .customName(_ -> "Eat a Glow Berry"));
         INSTANCE.register(ConsumeItemGoalBuilder.any(Items.POISONOUS_POTATO).customName(_ -> "Eat a Poisonous Potato"));
         INSTANCE.register(ConsumeItemGoalBuilder.any(Items.COOKIE).require(GoalRequirements.JUNGLE).customName(_ -> "Eat a Cookie"));
@@ -146,7 +149,8 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("story/enter_the_end").customName(_ -> "Enter The End"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("story/follow_ender_eye").customName(_ -> "Enter a Stronghold"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("nether/charge_respawn_anchor").customName(_ -> "Fully charge a Respawn Anchor"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any("adventure/whos_the_pillager_now").customName(_ -> "Kill a Pillager using a Crossbow"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("adventure/whos_the_pillager_now").customName(_ -> "Kill a Pillager using a Crossbow")
+                .require(GoalRequirements.structure("Pillager Outpost", BuiltinStructures.PILLAGER_OUTPOST)));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("adventure/bullseye"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("adventure/spear_many_mobs"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("nether/distract_piglin"));
@@ -156,6 +160,38 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("husbandry/wax_on"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("husbandry/wax_off"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.unique(5, 30, 1));
+
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.END_CRYSTAL).customName(_ -> "Explode End Crystal").customTextureExtractor(_ -> ItemTextureExtractor.item(Items.END_CRYSTAL)));
+
+        INSTANCE.register(KillEntityGoal.unique(5,15, EntityUtil.HOSTILE.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Unique Hostile Mobs"));
+        INSTANCE.register(KillEntityGoal.total(10, 30, 1, EntityUtil.ARTHROPODS.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Arthropods"));
+        INSTANCE.register(KillEntityGoal.total(10, 30, 1, EntityUtil.UNDEAD.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Undead Mobs"));
+        INSTANCE.register(KillEntityGoal.unique(3,6, EntityUtil.RAID.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Raid Mobs"));
+        INSTANCE.register(KillEntityGoal.total(50,150, 5, EntityUtil.HOSTILE.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Hostile Mobs"));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.BAT));
+        INSTANCE.register(KillEntityGoal.coloredSheep());
+        INSTANCE.register(KillEntityGoal.deathType(DamageTypes.WIND_CHARGE, () -> ItemTextureExtractor.item(Items.WIND_CHARGE), EntityTypes.BREEZE)
+                .require(GoalRequirements.structure("Trial Chambers", BuiltinStructures.TRIAL_CHAMBERS)));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.BOGGED)
+                .require(GoalRequirements.biome("Swamp", Biomes.SWAMP, Biomes.MANGROVE_SWAMP).or(GoalRequirements.structure("Trial Chambers", BuiltinStructures.TRIAL_CHAMBERS))));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.ELDER_GUARDIAN)
+                .require(GoalRequirements.structure("Ocean Monument", BuiltinStructures.OCEAN_MONUMENT)));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.GUARDIAN)
+                .require(GoalRequirements.structure("Ocean Monument", BuiltinStructures.OCEAN_MONUMENT)));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.HUSK)
+                .require(GoalRequirements.biome("Desert", Biomes.DESERT)));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.SILVERFISH));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.SNOW_GOLEM)
+                .require(GoalRequirements.SNOWY));
+        INSTANCE.register(KillEntityGoal.dimension(ServerLevel.NETHER, () -> ItemTextureExtractor.item(Items.NETHERRACK), EntityTypes.SNOW_GOLEM)
+                .require(GoalRequirements.SNOWY));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.STRAY)
+                .require(GoalRequirements.SNOWY));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.WARDEN)
+                .require(GoalRequirements.structure("Ancient City", BuiltinStructures.ANCIENT_CITY)));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.WITCH));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.ZOGLIN));
+        INSTANCE.register(KillEntityGoal.any(EntityTypes.ZOMBIE_VILLAGER));
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));

@@ -3,12 +3,16 @@ package me.marin.lockout.client.goal.progress;
 import me.marin.lockout.lockout.goal.progress.TargetFloatGoalProgress;
 import net.minecraft.network.chat.Component;
 
-public class TargetFloatClientGoalProgress extends TargetFloatGoalProgress implements ClientGoalProgress<Float> {
-    private final String title;
+import java.util.function.Function;
 
-    public TargetFloatClientGoalProgress(String title, Float target) {
+public class TargetFloatClientGoalProgress extends TargetFloatGoalProgress implements ClientGoalProgress<Number> {
+    private final String title;
+    private final Function<Number, String> numberToString;
+
+    public TargetFloatClientGoalProgress(String title, Number target, Function<Number, String> numberToString) {
         super(target);
         this.title = title;
+        this.numberToString = numberToString;
     }
 
     @Override
@@ -17,7 +21,7 @@ public class TargetFloatClientGoalProgress extends TargetFloatGoalProgress imple
     }
 
     @Override
-    public Component getDisplayString(Float value) {
-        return Component.literal(String.format("%.1f / %.1f", value, getTarget()));
+    public Component getDisplayString(Number value) {
+        return Component.literal(numberToString.apply(value) + " / " + numberToString.apply(getTarget()));
     }
 }

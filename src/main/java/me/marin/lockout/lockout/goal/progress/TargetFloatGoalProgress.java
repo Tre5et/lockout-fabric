@@ -7,44 +7,44 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TargetFloatGoalProgress implements GoalProgress<Float> {
-    private final Map<Integer, Float> progress = new HashMap<>();
+public class TargetFloatGoalProgress implements GoalProgress<Number> {
+    private final Map<Integer, Number> progress = new HashMap<>();
 
     @Getter
-    private final Float target;
+    private final Number target;
 
-    public TargetFloatGoalProgress(Float target) {
+    public TargetFloatGoalProgress(Number target) {
         this.target = target;
     }
 
     @Override
-    public Map<Integer, Float> getProgress() {
+    public Map<Integer, Number> getProgress() {
         return progress;
     }
 
     @Override
-    public Float getDefaultProgress() {
-        return 0f;
+    public Number getDefaultProgress() {
+        return 0;
     }
 
     @Override
-    public Float getCompletedProgress() {
+    public Number getCompletedProgress() {
         return target;
     }
 
     @Override
-    public boolean isCompleted(Float value) {
-        return value >= target;
+    public boolean isCompleted(Number value) {
+        return value.doubleValue() > target.doubleValue();
     }
 
     @Override
-    public JsonElement serializeData(Float value) {
+    public JsonElement serializeData(Number value) {
         return new JsonPrimitive(value);
     }
 
     @Override
-    public Float deserializeData(JsonElement element) throws IllegalArgumentException {
+    public Number deserializeData(JsonElement element) throws IllegalArgumentException {
         if(element == null || !element.isJsonPrimitive() || !element.getAsJsonPrimitive().isNumber()) throw new IllegalArgumentException("Target progress is not a number.");
-        return element.getAsFloat();
+        return element.getAsNumber();
     }
 }

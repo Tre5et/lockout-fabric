@@ -27,10 +27,8 @@ public class DealDamageGoalBuilder<T> extends GoalBuilder<DamageUtil.DealtDamage
     public static DealDamageGoalBuilder<Integer> total(int min, int max, int step) {
         return new DealDamageGoalBuilder<>(
                 GoalOptionSupplier.integer("Amount of damage to deal", min, max, step),
-                GoalProgressSupplier.<Float>total("Damage dealt", f -> f, "Damage", () -> new CornerIconTextureExtractor(
-                        GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/gui/sprites/hud/heart/half.png")),
-                        ItemTextureExtractor.item(Items.IRON_SWORD),
-                        10)
+                GoalProgressSupplier.rawTotal("Damage dealt", () -> "Damage",
+                        () -> GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/gui/sprites/hud/heart/half.png"))
                 ).mapCreation(i -> (float)i)
         );
     }

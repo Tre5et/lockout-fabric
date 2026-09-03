@@ -22,7 +22,7 @@ public class GoalRequirements {
     }
 
     @SafeVarargs
-    public static GoalRequirement<Object> anyBiome(String name, ResourceKey<Biome>... biomes) {
+    public static GoalRequirement<Object> biome(String name, ResourceKey<Biome>... biomes) {
         return new GoalRequirement.AnyBiome(Arrays.stream(biomes).toList())
                 .withHint(new HintCombination<>(
                         () -> new BiomeServerHint(List.of(Level.OVERWORLD), Arrays.stream(biomes).toList()),
@@ -31,7 +31,7 @@ public class GoalRequirements {
     }
 
     public static GoalRequirement<Object> biome(ResourceKey<Biome> biome) {
-        return anyBiome(biome.identifier().getPath(), biome);
+        return biome(biome.identifier().getPath(), biome);
     }
 
     @SafeVarargs
@@ -40,7 +40,7 @@ public class GoalRequirements {
     }
 
     @SafeVarargs
-    public static GoalRequirement<Object> anyStructure(String name, ResourceKey<Structure>... structures) {
+    public static GoalRequirement<Object> structure(String name, ResourceKey<Structure>... structures) {
         return new GoalRequirement.AnyStructure(Arrays.stream(structures).toList())
                 .withHint(new HintCombination<>(
                         () -> new StructureServerHint(List.of(Level.OVERWORLD), Arrays.stream(structures).toList()),
@@ -49,7 +49,7 @@ public class GoalRequirements {
     }
 
     public static GoalRequirement<Object> structure(ResourceKey<Structure> structure) {
-        return anyStructure(structure.identifier().getPath(), structure);
+        return structure(structure.identifier().getPath(), structure);
     }
 
     public static GoalRequirement.TeamCountMin minTeams(int count) {
@@ -64,40 +64,40 @@ public class GoalRequirements {
         return minTeams(min).and(maxTeams(max));
     }
 
-    public static final GoalRequirement<Object> VILLAGE = anyStructure(
+    public static final GoalRequirement<Object> VILLAGE = structure(
             "Village", BuiltinStructures.VILLAGE_PLAINS, BuiltinStructures.VILLAGE_DESERT, BuiltinStructures.VILLAGE_SAVANNA, BuiltinStructures.VILLAGE_SNOWY, BuiltinStructures.VILLAGE_TAIGA
     );
 
-    public static final GoalRequirement<Object> JUNGLE = anyBiome(
+    public static final GoalRequirement<Object> JUNGLE = biome(
             "Jungle", Biomes.JUNGLE, Biomes.BAMBOO_JUNGLE, Biomes.SPARSE_JUNGLE
     );
 
-    public static final GoalRequirement<Object> DESERT_LIKE = anyBiome(
+    public static final GoalRequirement<Object> DESERT_LIKE = biome(
             "Desert-like Biome", Biomes.DESERT, Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS
     );
 
-    public static final GoalRequirement<Object> TAIGA = anyBiome("Taiga",
+    public static final GoalRequirement<Object> TAIGA = biome("Taiga",
             Biomes.TAIGA, Biomes.OLD_GROWTH_PINE_TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA, Biomes.SNOWY_TAIGA, Biomes.GROVE
     );
 
-    public static final GoalRequirement<Object> SWAMP = anyBiome("Swamp",
+    public static final GoalRequirement<Object> SWAMP = biome("Swamp",
             Biomes.SWAMP, Biomes.MANGROVE_SWAMP
     );
 
-    public static final GoalRequirement<Object> SNOWY_MOUNTAINS = anyBiome("Snowy Mountains",
+    public static final GoalRequirement<Object> SNOWY_MOUNTAINS = biome("Snowy Mountains",
             Biomes.JAGGED_PEAKS, Biomes.FROZEN_PEAKS, Biomes.SNOWY_SLOPES
     );
 
-    public static final GoalRequirement<Object> SNOWY = anyBiome(
+    public static final GoalRequirement<Object> SNOWY = biome(
             "Snowy Biome", Biomes.SNOWY_PLAINS, Biomes.ICE_SPIKES, Biomes.SNOWY_TAIGA, Biomes.GROVE, Biomes.SNOWY_SLOPES, Biomes.FROZEN_PEAKS,
             Biomes.FROZEN_RIVER, Biomes.SNOWY_BEACH, Biomes.FROZEN_OCEAN, Biomes.DEEP_FROZEN_OCEAN
     );
 
-    public static final GoalRequirement<Object> WARM_OCEAN = anyBiome("Warm Ocean",
+    public static final GoalRequirement<Object> WARM_OCEAN = biome("Warm Ocean",
             Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN
     );
 
     public static final GoalRequirement.AndCombined<DyeColor> COLORS = DESERT_LIKE.forOptions(DyeColor.GREEN, DyeColor.CYAN)
             .and(JUNGLE.forOptions(DyeColor.BROWN))
-            .and(DESERT_LIKE.or(anyBiome("Sea-pickle Biome", Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN)).forOptions(DyeColor.LIME));
+            .and(DESERT_LIKE.or(biome("Sea-pickle Biome", Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN)).forOptions(DyeColor.LIME));
 }
