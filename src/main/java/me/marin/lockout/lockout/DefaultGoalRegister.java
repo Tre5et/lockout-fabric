@@ -162,6 +162,11 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("husbandry/wax_off"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.unique(5, 30, 1));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("adventure/spyglass_at_parrot", "adventure/spyglass_at_ghast", "adventure/spyglass_at_dragon").customName(_ -> "Obtain any Spyglass Advancement"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("adventure/trade").customName(_ -> "Trade with Villager"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("nether/brew_potion").customName(_ -> "Brew a Potion"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("story/enchant_item").customName(_ -> "Enchant Item at Enchanting Table"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("husbandry/make_a_sign_glow").customName(_ -> "Use Glow Ink on a Sign"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("nether/explore_nether"));
 
         INSTANCE.register(KillEntityGoal.any(EntityTypes.END_CRYSTAL).customName(_ -> "Explode End Crystal").customTextureExtractor(_ -> ItemTextureExtractor.item(Items.END_CRYSTAL)));
 
@@ -257,7 +262,6 @@ public class DefaultGoalRegister {
                 .require(GoalRequirements.structure("Suspicious Structure", BuiltinStructures.TRAIL_RUINS, BuiltinStructures.OCEAN_RUIN_WARM, BuiltinStructures.OCEAN_RUIN_COLD, BuiltinStructures.DESERT_PYRAMID)));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.TNT));
         INSTANCE.register(ObtainItemGoalBuilder.any(ItemUtil.HANGING_SIGN.toArray(Item[]::new)).customName(_ -> "Obtain Hanging Sign"));
-
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
