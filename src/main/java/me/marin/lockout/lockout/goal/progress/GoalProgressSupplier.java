@@ -274,10 +274,8 @@ public interface GoalProgressSupplier<T,U,E> {
 
             @Override
             public ServerGoalProgress<List<U>, Boolean> getServer(T data) {
-                List<AcceptanceCondition<U>> resolvedConditions = conditions.apply(data);
-                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && d.stream()
-                        .anyMatch(e -> resolvedConditions.stream().anyMatch(c -> c.test(e)))
-                );
+                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && conditions.apply(data).stream()
+                        .anyMatch(c -> d.stream().allMatch(c::test)));
             }
 
             @Override
@@ -314,9 +312,8 @@ public interface GoalProgressSupplier<T,U,E> {
 
             @Override
             public ServerGoalProgress<List<U>, Boolean> getServer(T data) {
-                List<AcceptanceCondition<U>> resolvedConditions = conditions.apply(data);
-                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && d.stream()
-                        .allMatch(e -> resolvedConditions.stream().anyMatch(c -> c.test(e)))
+                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && conditions.apply(data).stream()
+                        .allMatch(c -> d.stream().anyMatch(c::test))
                 );
             }
 
@@ -363,9 +360,8 @@ public interface GoalProgressSupplier<T,U,E> {
 
             @Override
             public ServerGoalProgress<List<U>, Boolean> getServer(Integer data) {
-                List<AcceptanceCondition<U>> resolvedConditions = conditions.apply(data);
-                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && d.stream()
-                        .filter(e -> resolvedConditions.stream().anyMatch(c -> c.test(e)))
+                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && conditions.apply(data).stream()
+                        .filter(c -> d.stream().anyMatch(c::test))
                         .count() >= data
                 );
             }

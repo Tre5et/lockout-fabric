@@ -87,33 +87,33 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(ObtainItemGoalBuilder.shieldWithBanner().customName(_ -> "Obtain Shield with Banner"));
 
-        INSTANCE.register(DeathGoalBuilder.type(DamageTypes.DROWN, () -> new StackingTextureExtractor(List.of(SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/air_empty")), SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/air_bursting"))), 0))
+        INSTANCE.register(DeathGoalBuilder.type(() -> new StackingTextureExtractor(List.of(SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/air_empty")), SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/air_bursting"))), 0), DamageTypes.DROWN)
                 .customName(_ -> "Die by Drowning"));
-        INSTANCE.register(DeathGoalBuilder.type(DamageTypes.FELL_OUT_OF_WORLD, () -> GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/particle/spark_4.png")))
+        INSTANCE.register(DeathGoalBuilder.type(() -> GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/particle/spark_4.png")), DamageTypes.FELL_OUT_OF_WORLD)
                 .customName(_ -> "Die by Falling in Void"));
         INSTANCE.register(DeathGoalBuilder.fallLocation(new Pair<>(FallLocation.VINES, Items.VINE), new Pair<>(FallLocation.TWISTING_VINES, Items.TWISTING_VINES), new Pair<>(FallLocation.WEEPING_VINES, Items.WEEPING_VINES))
                 .customName(_ -> "Die by Falling of Vines"));
-        INSTANCE.register(DeathGoalBuilder.type(DamageTypes.FREEZE, () -> SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/heart/frozen_full")))
+        INSTANCE.register(DeathGoalBuilder.type(() -> SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/heart/frozen_full")), DamageTypes.FREEZE)
                 .customName(_ -> "Die by Freezing")
                 .require(GoalRequirements.SNOWY));
-        INSTANCE.register(DeathGoalBuilder.type(DamageTypes.MAGIC, () -> new ItemTextureExtractor(ItemUtil.applyComponent(Items.POTION.getDefaultInstance(), DataComponents.POTION_CONTENTS, new PotionContents(Potions.HARMING))))
+        INSTANCE.register(DeathGoalBuilder.type(() -> new ItemTextureExtractor(ItemUtil.applyComponent(Items.POTION.getDefaultInstance(), DataComponents.POTION_CONTENTS, new PotionContents(Potions.HARMING))), DamageTypes.MAGIC, DamageTypes.INDIRECT_MAGIC)
                 .customName(_ -> "Die by Magic"));
-        INSTANCE.register(DeathGoalBuilder.type(DamageTypes.BAD_RESPAWN_POINT, () -> ItemTextureExtractor.cycleItems(List.of(Items.BED.red(), Items.RESPAWN_ANCHOR)))
+        INSTANCE.register(DeathGoalBuilder.type(() -> ItemTextureExtractor.cycleItems(List.of(Items.BED.red(), Items.RESPAWN_ANCHOR)), DamageTypes.BAD_RESPAWN_POINT)
                 .customName(_ -> "Die to [Intentional Game Design]"));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.BEE));
-        INSTANCE.register(DeathGoalBuilder.type(DamageTypes.SWEET_BERRY_BUSH, () -> ItemTextureExtractor.item(Items.SWEET_BERRIES))
+        INSTANCE.register(DeathGoalBuilder.type(() -> ItemTextureExtractor.item(Items.SWEET_BERRIES), DamageTypes.SWEET_BERRY_BUSH)
                 .customName(_ -> "Die to Berry Bush")
                 .require(GoalRequirements.TAIGA));
-        INSTANCE.register(DeathGoalBuilder.type(DamageTypes.CACTUS, () -> ItemTextureExtractor.item(Items.CACTUS))
+        INSTANCE.register(DeathGoalBuilder.type(() -> ItemTextureExtractor.item(Items.CACTUS), DamageTypes.CACTUS)
                 .customName(_ -> "Die to Cactus")
                 .require(GoalRequirements.DESERT_LIKE));
-        INSTANCE.register(DeathGoalBuilder.type(DamageTypes.FALLING_ANVIL, () -> ItemTextureExtractor.item(Items.ANVIL))
+        INSTANCE.register(DeathGoalBuilder.type(() -> ItemTextureExtractor.item(Items.ANVIL), DamageTypes.FALLING_ANVIL)
                 .customName(_ -> "Die to falling Anvil")
                 .group(GoalGroups.IRON_HEAVY));
-        INSTANCE.register(DeathGoalBuilder.type(DamageTypes.FALLING_STALACTITE, () -> ItemTextureExtractor.cycleItems(List.of(Items.POINTED_DRIPSTONE, Items.SULFUR_SPIKE)))
+        INSTANCE.register(DeathGoalBuilder.type(() -> ItemTextureExtractor.cycleItems(List.of(Items.POINTED_DRIPSTONE, Items.SULFUR_SPIKE)), DamageTypes.FALLING_STALACTITE)
                 .customName(_ -> "Die to falling Stalactite")
                 .require(GoalRequirements.biome("Spiky Caves", Biomes.DRIPSTONE_CAVES, Biomes.SULFUR_CAVES)));
-        INSTANCE.register(DeathGoalBuilder.type(DamageTypes.FIREWORKS, () -> ItemTextureExtractor.item(Items.FIREWORK_ROCKET))
+        INSTANCE.register(DeathGoalBuilder.type(() -> ItemTextureExtractor.item(Items.FIREWORK_ROCKET), DamageTypes.FIREWORKS)
                 .customName(_ -> "Die to Firework Rocket"));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.IRON_GOLEM).require(GoalRequirements.VILLAGE));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.POLAR_BEAR).require(GoalRequirements.SNOWY));
@@ -232,7 +232,6 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.DRIED_KELP_BLOCK));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.EMERALD_BLOCK));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.ENDER_CHEST));
-        INSTANCE.register(ObtainItemGoalBuilder.all(Items.EMERALD_BLOCK));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.FURNACE, Items.BLAST_FURNACE, Items.SMOKER).customName(_ -> "Obtain every type of Furnace"));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.MINECART, Items.CHEST_MINECART, Items.HOPPER_MINECART, Items.TNT_MINECART, Items.FURNACE_MINECART).customName(_ -> "Obtain every type of Minecart"));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.BROWN_MUSHROOM, Items.RED_MUSHROOM, Items.CRIMSON_FUNGUS, Items.WARPED_FUNGUS).customName(_ -> "Obtain every type of Mushroom"));
@@ -247,7 +246,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.MUD_BRICK_WALL).require(GoalRequirements.biome("Mangrove Swamp", Biomes.MANGROVE_SWAMP)));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.NETHERITE_SCRAP));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.PISTON));
-        INSTANCE.register(ObtainItemGoalBuilder.any(ItemUtil.POTTERY_SHERDS.toArray(Item[]::new)).require(GoalRequirements.structure("Suspicious Structure", BuiltinStructures.TRAIL_RUINS, BuiltinStructures.TRIAL_CHAMBERS, BuiltinStructures.OCEAN_RUIN_WARM, BuiltinStructures.OCEAN_RUIN_COLD, BuiltinStructures.DESERT_PYRAMID)));
+        INSTANCE.register(ObtainItemGoalBuilder.any(ItemUtil.POTTERY_SHERDS.toArray(Item[]::new)).require(GoalRequirements.structure("Suspicious Structure", BuiltinStructures.TRAIL_RUINS, BuiltinStructures.TRIAL_CHAMBERS, BuiltinStructures.OCEAN_RUIN_WARM, BuiltinStructures.OCEAN_RUIN_COLD, BuiltinStructures.DESERT_PYRAMID)).customName(_ -> "Obtain any Pottery Sherd"));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.POWDER_SNOW_BUCKET).require(GoalRequirements.SNOWY));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.POWERED_RAIL));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.RED_NETHER_BRICKS));

@@ -10,6 +10,7 @@ import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.damagesource.DamageType;
@@ -62,7 +63,7 @@ public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
     }
 
     public static KillEntityGoal<DyeColor> coloredSheep() {
-        return new KillEntityGoal<>(
+        KillEntityGoal<DyeColor> goal = new KillEntityGoal<>(
                 GoalOptionSupplier.list("Color", DyeColor.VALUES, new TypeToken<>() {}, "Color", DyeColor::toString),
                 GoalProgressSupplier.simple(c -> new AcceptanceCondition<>() {
                     @Override
@@ -86,6 +87,8 @@ public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
                     }
                 })
         );
+        goal.require(GoalRequirements.COLORS);
+        return goal;
     }
 
     public static KillEntityGoal<Void> deathType(ResourceKey<DamageType> type, Supplier<TextureExtractor> icon, EntityType<?>... entities) {

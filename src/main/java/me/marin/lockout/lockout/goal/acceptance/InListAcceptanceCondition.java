@@ -12,6 +12,8 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.FallLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -174,6 +176,16 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
                 a -> a,
                 BuilderUtil::identifierToId,
                 BuilderUtil::identifierToName,
+                _ -> extractor.get()
+        );
+    }
+
+    public static InListAcceptanceCondition<ResourceKey<DamageType>, ResourceKey<DamageType>> damageType(Supplier<TextureExtractor> extractor, ResourceKey<DamageType>... types) {
+        return new InListAcceptanceCondition<>(
+                Arrays.asList(types),
+                t -> t,
+                d -> BuilderUtil.identifierToId(d.identifier()),
+                d -> BuilderUtil.identifierToName(d.identifier()),
                 _ -> extractor.get()
         );
     }

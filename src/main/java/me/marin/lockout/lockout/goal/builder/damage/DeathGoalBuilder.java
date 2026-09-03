@@ -1,7 +1,6 @@
 package me.marin.lockout.lockout.goal.builder.damage;
 
 import me.marin.lockout.Constants;
-import me.marin.lockout.lockout.goal.acceptance.EqualsAcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
@@ -35,10 +34,11 @@ public class DeathGoalBuilder<T> extends GoalBuilder<DamageUtil.PlayerDied, T> {
     @Override
     public void reifiedUpdater(DamageUtil.PlayerDied update) {}
 
-    public static DeathGoalBuilder<Void> type(ResourceKey<DamageType> type, Supplier<TextureExtractor> textureExtractorSupplier) {
+    @SafeVarargs
+    public static DeathGoalBuilder<Void> type(Supplier<TextureExtractor> textureExtractorSupplier, ResourceKey<DamageType>... types) {
         return new DeathGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> EqualsAcceptanceCondition.damageType(type, textureExtractorSupplier).mapEquals((s,t) -> s.source().typeHolder().is(t)))
+                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.damageType(textureExtractorSupplier, types).mapEquals((s,t) -> s.source().typeHolder().is(t)))
         );
     }
 
