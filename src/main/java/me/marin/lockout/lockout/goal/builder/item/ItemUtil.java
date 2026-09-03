@@ -13,6 +13,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
 
@@ -67,6 +68,46 @@ public class ItemUtil {
         return stack;
     }
 
+    public static List<Item> POTTERY_SHERDS = List.of(
+            Items.ANGLER_POTTERY_SHERD,
+            Items.ARCHER_POTTERY_SHERD,
+            Items.ARMS_UP_POTTERY_SHERD,
+            Items.BLADE_POTTERY_SHERD,
+            Items.BREWER_POTTERY_SHERD,
+            Items.BURN_POTTERY_SHERD,
+            Items.DANGER_POTTERY_SHERD,
+            Items.EXPLORER_POTTERY_SHERD,
+            Items.FLOW_POTTERY_SHERD,
+            Items.FRIEND_POTTERY_SHERD,
+            Items.GUSTER_POTTERY_SHERD,
+            Items.HEART_POTTERY_SHERD,
+            Items.HEARTBREAK_POTTERY_SHERD,
+            Items.HOWL_POTTERY_SHERD,
+            Items.MINER_POTTERY_SHERD,
+            Items.MOURNER_POTTERY_SHERD,
+            Items.PLENTY_POTTERY_SHERD,
+            Items.PRIZE_POTTERY_SHERD,
+            Items.SCRAPE_POTTERY_SHERD,
+            Items.SHEAF_POTTERY_SHERD,
+            Items.SHELTER_POTTERY_SHERD,
+            Items.SKULL_POTTERY_SHERD,
+            Items.SNORT_POTTERY_SHERD
+    );
+
+    public static List<Item> HANGING_SIGN = List.of(
+            Items.OAK_HANGING_SIGN,
+            Items.SPRUCE_HANGING_SIGN,
+            Items.BIRCH_HANGING_SIGN,
+            Items.JUNGLE_HANGING_SIGN,
+            Items.ACACIA_HANGING_SIGN,
+            Items.CHERRY_HANGING_SIGN,
+            Items.DARK_OAK_HANGING_SIGN,
+            Items.PALE_OAK_HANGING_SIGN,
+            Items.MANGROVE_HANGING_SIGN,
+            Items.BAMBOO_HANGING_SIGN,
+            Items.CRIMSON_HANGING_SIGN,
+            Items.WARPED_HANGING_SIGN
+    );
     public record BrewedItem(
             ItemStack itemStack
     ) {}

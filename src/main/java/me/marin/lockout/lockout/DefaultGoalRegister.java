@@ -22,6 +22,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.damagesource.FallLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
@@ -160,6 +161,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("husbandry/wax_on"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any("husbandry/wax_off"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.unique(5, 30, 1));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any("adventure/spyglass_at_parrot", "adventure/spyglass_at_ghast", "adventure/spyglass_at_dragon").customName(_ -> "Obtain any Spyglass Advancement"));
 
         INSTANCE.register(KillEntityGoal.any(EntityTypes.END_CRYSTAL).customName(_ -> "Explode End Crystal").customTextureExtractor(_ -> ItemTextureExtractor.item(Items.END_CRYSTAL)));
 
@@ -192,6 +194,71 @@ public class DefaultGoalRegister {
         INSTANCE.register(KillEntityGoal.any(EntityTypes.WITCH));
         INSTANCE.register(KillEntityGoal.any(EntityTypes.ZOGLIN));
         INSTANCE.register(KillEntityGoal.any(EntityTypes.ZOMBIE_VILLAGER));
+
+        INSTANCE.register(ObtainItemGoalBuilder.colored(Items.CONCRETE, 64, "CONCRETE"));
+        INSTANCE.register(ObtainItemGoalBuilder.colored(Items.WOOL, 64, "WOOL"));
+        INSTANCE.register(ObtainItemGoalBuilder.withCount(Items.COARSE_DIRT, 64));
+        INSTANCE.register(ObtainItemGoalBuilder.anyFullStack());
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.ACTIVATOR_RAIL));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.GOLDEN_SWORD, Items.GOLDEN_AXE, Items.GOLDEN_PICKAXE, Items.GOLDEN_SHOVEL, Items.GOLDEN_HOE, Items.GOLDEN_SPEAR).customName(_ -> "Obtain all Gold Tools"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.IRON_SWORD, Items.IRON_AXE, Items.IRON_PICKAXE, Items.IRON_SHOVEL, Items.IRON_HOE, Items.IRON_SPEAR).customName(_ -> "Obtain all Iron Tools"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.STONE_SWORD, Items.STONE_AXE, Items.STONE_PICKAXE, Items.STONE_SHOVEL, Items.STONE_HOE, Items.STONE_SPEAR).customName(_ -> "Obtain all Stone Tools"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.WOODEN_SWORD, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_SHOVEL, Items.WOODEN_HOE, Items.WOODEN_SPEAR).customName(_ -> "Obtain all Wooden Tools"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.COPPER_SWORD, Items.COPPER_AXE, Items.COPPER_PICKAXE, Items.COPPER_SHOVEL, Items.COPPER_HOE, Items.COPPER_SPEAR).customName(_ -> "Obtain all Copper Tools"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.DIAMOND_SWORD, Items.DIAMOND_AXE, Items.DIAMOND_PICKAXE, Items.DIAMOND_SHOVEL, Items.DIAMOND_HOE, Items.DIAMOND_SPEAR).customName(_ -> "Obtain all Diamond Tools"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.BELL));
+        INSTANCE.register(ObtainItemGoalBuilder.colored(Items.GLAZED_TERRACOTTA, 1, "GLAZED_TERRACOTTA"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.RESIN_BLOCK).require(GoalRequirements.biome("Pale Garden", Biomes.PALE_GARDEN)));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.BONE_BLOCK));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.BOOKSHELF).require(GoalRequirements.VILLAGE));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.EXPERIENCE_BOTTLE));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.BRICK_WALL));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.TROPICAL_FISH_BUCKET).require(GoalRequirements.WARM_OCEAN));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.SULFUR_CUBE_BUCKET).require(GoalRequirements.biome("Sulfur Caves", Biomes.SULFUR_CAVES)));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.CLOCK));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.COBWEB));
+        INSTANCE.register(ObtainItemGoalBuilder.any(Items.COPPER_CHEST.asList().toArray(Item[]::new)).customName(_ -> "Obtain Copper Chest"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.DAYLIGHT_DETECTOR));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.DEAD_BUSH).require(GoalRequirements.biome("Dead Biome", Biomes.DESERT, Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS, Biomes.SWAMP, Biomes.MANGROVE_SWAMP, Biomes.OLD_GROWTH_PINE_TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA)));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.DETECTOR_RAIL));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.DISPENSER));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.DRIED_KELP_BLOCK));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.EMERALD_BLOCK));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.ENDER_CHEST));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.EMERALD_BLOCK));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.FURNACE, Items.BLAST_FURNACE, Items.SMOKER).customName(_ -> "Obtain every type of Furnace"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.MINECART, Items.CHEST_MINECART, Items.HOPPER_MINECART, Items.TNT_MINECART, Items.FURNACE_MINECART).customName(_ -> "Obtain every type of Minecart"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.BROWN_MUSHROOM, Items.RED_MUSHROOM, Items.CRIMSON_FUNGUS, Items.WARPED_FUNGUS).customName(_ -> "Obtain every type of Mushroom"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.PUMPKIN, Items.CARVED_PUMPKIN, Items.JACK_O_LANTERN).customName(_ -> "Obtain every type of Pumpkin"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.RAW_IRON_BLOCK, Items.RAW_COPPER_BLOCK, Items.RAW_GOLD_BLOCK).customName(_ -> "Obtain every type of Raw Ore Block"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.TORCH, Items.SOUL_TORCH, Items.COPPER_TORCH, Items.REDSTONE_TORCH).customName(_ -> "Obtain every type of Torch"));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.FLOWERING_AZALEA).require(GoalRequirements.biome("Lush Caves", Biomes.LUSH_CAVES)));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.GILDED_BLACKSTONE));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.HEART_OF_THE_SEA).require(GoalRequirements.structure("Shipwreck", BuiltinStructures.SHIPWRECK, BuiltinStructures.SHIPWRECK_BEACHED)));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.LODESTONE));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.MOSSY_STONE_BRICK_WALL));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.MUD_BRICK_WALL).require(GoalRequirements.biome("Mangrove Swamp", Biomes.MANGROVE_SWAMP)));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.NETHERITE_SCRAP));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.PISTON));
+        INSTANCE.register(ObtainItemGoalBuilder.any(ItemUtil.POTTERY_SHERDS.toArray(Item[]::new)).require(GoalRequirements.structure("Suspicious Structure", BuiltinStructures.TRAIL_RUINS, BuiltinStructures.TRIAL_CHAMBERS, BuiltinStructures.OCEAN_RUIN_WARM, BuiltinStructures.OCEAN_RUIN_COLD, BuiltinStructures.DESERT_PYRAMID)));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.POWDER_SNOW_BUCKET).require(GoalRequirements.SNOWY));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.POWERED_RAIL));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.RED_NETHER_BRICKS));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.COMPARATOR));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.REDSTONE_LAMP));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.REPEATER));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.RESIN_BRICK_WALL).require(GoalRequirements.biome("Pale Garden", Biomes.PALE_GARDEN)));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.SCAFFOLDING).require(GoalRequirements.JUNGLE));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.SMOOTH_BASALT));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.SMOOTH_QUARTZ_STAIRS));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.SOUL_LANTERN));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.SPONGE).require(GoalRequirements.structure("Ocean Monument", BuiltinStructures.OCEAN_MONUMENT)));
+        INSTANCE.register(ObtainItemGoalBuilder.any(Items.SUSPICIOUS_SAND, Items.SUSPICIOUS_GRAVEL).customName(_ -> "Obtain Suspicious Block")
+                .require(GoalRequirements.structure("Suspicious Structure", BuiltinStructures.TRAIL_RUINS, BuiltinStructures.OCEAN_RUIN_WARM, BuiltinStructures.OCEAN_RUIN_COLD, BuiltinStructures.DESERT_PYRAMID)));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.TNT));
+        INSTANCE.register(ObtainItemGoalBuilder.any(ItemUtil.HANGING_SIGN.toArray(Item[]::new)).customName(_ -> "Obtain Hanging Sign"));
+
+
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));

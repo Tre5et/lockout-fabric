@@ -88,6 +88,17 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
         );
     }
 
+    @SafeVarargs
+    public static InListAcceptanceCondition<Pair<Item, Integer>, Pair<Item, Integer>> itemWithCount(Pair<Item, Integer>... items) {
+        return new InListAcceptanceCondition<>(
+                Arrays.asList(items),
+                p -> (p.getB() == 1 ? "" :  p.getB() + "_") + ItemUtil.getItemId(p.getA()),
+                p -> (p.getB() == 1 ? "" :  p.getB() + " ") + ItemUtil.getItemName(p.getA()),
+                p -> ItemTextureExtractor.stack(p.getA(), p.getB()),
+                (a, b) -> a.getA() == b.getA() && a.getB() >= b.getB()
+        );
+    }
+
     public static InListAcceptanceCondition<EntityType<?>, EntityType<?>> entity(EntityType<?>... entities) {
         return new InListAcceptanceCondition<>(
                 Arrays.asList(entities),

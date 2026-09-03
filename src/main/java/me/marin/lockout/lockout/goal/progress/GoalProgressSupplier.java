@@ -37,6 +37,10 @@ public interface GoalProgressSupplier<T,U,E> {
         return extractor;
     }
 
+    default CustomStaticIdGoalProgressSupplier<T,U,E> withStaticId(String id) {
+        return new CustomStaticIdGoalProgressSupplier<>(this, id);
+    }
+
     default <M> MappedGoalProgressSupplier<T,U,E,M> map(Function<M,U> mapper) {
         return new MappedGoalProgressSupplier<>(this, mapper);
     }
@@ -132,6 +136,47 @@ public interface GoalProgressSupplier<T,U,E> {
         @Override
         public TextureExtractor applyFinalTextureExtractor(TextureExtractor extractor, M data) {
             return original.applyFinalTextureExtractor(extractor, mapper.apply(data));
+        }
+    }
+
+    class CustomStaticIdGoalProgressSupplier<T,U,E> implements GoalProgressSupplier<T,U,E> {
+        private final GoalProgressSupplier<T,U,E> original;
+        private final String id;
+
+        public CustomStaticIdGoalProgressSupplier(GoalProgressSupplier<T, U, E> original, String id) {
+            this.original = original;
+            this.id = id;
+        }
+
+
+        @Override
+        public ClientGoalProgress<E> getClient(T data) {
+            return original.getClient(data);
+        }
+
+        @Override
+        public ServerGoalProgress<U, E> getServer(T data) {
+            return original.getServer(data);
+        }
+
+        @Override
+        public String getStaticId() {
+            return id;
+        }
+
+        @Override
+        public String getId(T data) {
+            return original.getId(data);
+        }
+
+        @Override
+        public String getName(T data) {
+            return original.getName(data);
+        }
+
+        @Override
+        public TextureExtractor getTextureExtractor(T data) {
+            return original.getTextureExtractor(data);
         }
     }
 
@@ -267,7 +312,7 @@ public interface GoalProgressSupplier<T,U,E> {
     }
 
     static GoalProgressSupplier<Float, Float, Number> rawTotal(String title, Supplier<String> name, Supplier<TextureExtractor> baseTexture) {
-        return GoalProgressSupplier.<Float>total(title, n -> new AnyAcceptanceCondition<>(
+        return GoalProgressSupplier.<Float>total(title, _ -> new AnyAcceptanceCondition<>(
                 "",
                 name,
                 () -> List.of(baseTexture.get())
