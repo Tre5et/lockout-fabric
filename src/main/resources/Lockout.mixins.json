@@ -46,8 +46,8 @@
     "server.ShelfBlockMixin",
     "server.SlotMixin",
     "server.SmithingScreenHandlerMixin",
-    "server.StatusEffectMixin",
-    "server.TameAnimalTriggerMixin",
+    "server.StatusEffectMixin",*/
+    "server.TameAnimalTriggerMixin",/*
     "server.WolfEntityMixin",
     "server.ZombieEntityMixin"*/
     "server.ZombifiedPiglinMixin"

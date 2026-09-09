@@ -7,12 +7,9 @@ import me.marin.lockout.lockout.goal.builder.block.MineBlockGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.KillEntityGoal;
-import me.marin.lockout.lockout.goal.builder.entity.AngerMobGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
-import me.marin.lockout.lockout.goal.builder.entity.SpawnEntityGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.entity.*;
 import me.marin.lockout.lockout.goal.builder.experience.ReachExperienceLevelGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.*;
-import me.marin.lockout.lockout.goal.builder.entity.BreedAnimalGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.statistic.ChangeStatisticGoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroups;
@@ -300,6 +297,14 @@ public class DefaultGoalRegister {
                 .require(GoalRequirements.SNOWY).customTextureExtractor(_ -> new CornerIconTextureExtractor(ItemTextureExtractor.cycleItems(List.of(Items.ICE, Items.PACKED_ICE, Items.BLUE_ICE)), ItemTextureExtractor.item(Items.IRON_PICKAXE), 10)));
 
         INSTANCE.register(ReachExperienceLevelGoalBuilder.of(10, 30, 1));
+
+        INSTANCE.register(TameAnimalGoalBuilder.any(EntityTypes.CAT).require(GoalRequirements.VILLAGE.or(GoalRequirements.structure("Swamp Hut", BuiltinStructures.SWAMP_HUT))));
+        INSTANCE.register(TameAnimalGoalBuilder.any(EntityTypes.HORSE).require(GoalRequirements.biome("Horse Biome", Biomes.PLAINS, Biomes.SUNFLOWER_PLAINS, Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU, Biomes.WINDSWEPT_SAVANNA)));
+        INSTANCE.register(TameAnimalGoalBuilder.any(EntityTypes.NAUTILUS).require(GoalRequirements.OCEAN));
+        INSTANCE.register(TameAnimalGoalBuilder.any(EntityTypes.PARROT).require(GoalRequirements.JUNGLE));
+        INSTANCE.register(TameAnimalGoalBuilder.any(EntityTypes.WOLF).require(GoalRequirements.biome("Wolf Biome", Biomes.FOREST, Biomes.GROVE, Biomes.TAIGA, Biomes.SNOWY_TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA, Biomes.OLD_GROWTH_PINE_TAIGA, Biomes.SPARSE_JUNGLE, Biomes.SAVANNA_PLATEAU, Biomes.WOODED_BADLANDS)));
+
+
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));

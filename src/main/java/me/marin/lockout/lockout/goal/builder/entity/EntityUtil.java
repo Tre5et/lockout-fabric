@@ -90,4 +90,8 @@ public class EntityUtil {
     public record AngeredEntity(
             EntityType<?> entity
     ) {}
+
+    public record TamedEntity(
+            EntityType<?> entity
+    ) {}
 }
