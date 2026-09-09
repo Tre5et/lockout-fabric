@@ -20,6 +20,10 @@ public class TextTextureExtractor implements TextureExtractor {
     }
 
     public static TextTextureExtractor text(String text) {
-        return new TextTextureExtractor(Component.literal(text).withColor(TextColor.WHITE));
+        return text(text, TextColor.WHITE);
+    }
+
+    public static TextTextureExtractor text(String text, TextColor color) {
+        return new TextTextureExtractor(Component.literal(text).withColor(color));
     }
 }

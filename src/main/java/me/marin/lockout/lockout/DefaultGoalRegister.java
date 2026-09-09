@@ -10,6 +10,7 @@ import me.marin.lockout.lockout.goal.builder.damage.KillEntityGoal;
 import me.marin.lockout.lockout.goal.builder.entity.AngerMobGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
 import me.marin.lockout.lockout.goal.builder.entity.SpawnEntityGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.experience.ReachExperienceLevelGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.*;
 import me.marin.lockout.lockout.goal.builder.entity.BreedAnimalGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.statistic.ChangeStatisticGoalBuilder;
@@ -298,6 +299,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(MineBlockGoalBuilder.unique(3, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE, Blocks.FROSTED_ICE).customName(_ -> "Mine 3 types of Ice")
                 .require(GoalRequirements.SNOWY).customTextureExtractor(_ -> new CornerIconTextureExtractor(ItemTextureExtractor.cycleItems(List.of(Items.ICE, Items.PACKED_ICE, Items.BLUE_ICE)), ItemTextureExtractor.item(Items.IRON_PICKAXE), 10)));
 
+        INSTANCE.register(ReachExperienceLevelGoalBuilder.of(10, 30, 1));
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));

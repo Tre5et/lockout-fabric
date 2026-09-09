@@ -1,6 +1,7 @@
 package me.marin.lockout.mixin.server;
 
 import me.marin.lockout.game.LockoutGame;
+import me.marin.lockout.lockout.goal.builder.experience.ExperienceUtils;
 import me.marin.lockout.lockout.goal.builder.statistic.StatisticUtil;
 import me.marin.lockout.server.LockoutServer;
 import me.marin.lockout.server.game.ServerLockoutGame;
@@ -121,26 +122,17 @@ public abstract class PlayerMixin {
         lockout.getBoard().update(new StatisticUtil.StatisticChanged(stat, amount), player);
     }
 
-    /*@Inject(method = "giveExperienceLevels", at = @At("TAIL"))
+    @Inject(method = "giveExperienceLevels", at = @At("TAIL"))
     public void onExperienceLevelUp(int levels, CallbackInfo ci) {
-        Lockout lockout = LockoutServer.lockout;
-        if (!Lockout.isLockoutRunning(lockout)) return;
+        ServerLockoutGame lockout = LockoutServer.lockout;
+        if (!LockoutGame.isActive(lockout)) return;
         Player player = (Player) (Object) this;
         if (player.level().isClientSide()) return;
 
-        for (Goal goal : lockout.getBoard().getGoals()) {
-            if (goal == null) continue;
-            if (goal.isCompleted()) continue;
-
-            if (goal instanceof ReachXPLevelGoal reachXPLevelGoal) {
-                if (player.experienceLevel >= reachXPLevelGoal.getAmount()) {
-                    lockout.completeGoal(goal, player);
-                }
-            }
-        }
+        lockout.getBoard().update(new ExperienceUtils.ReachedExperienceLevel(player.experienceLevel), player);
     }
 
-    @Inject(method = "blockUsingItem", at = @At(value = "TAIL"))
+    /*@Inject(method = "blockUsingItem", at = @At(value = "TAIL"))
     public void onTakeShieldHit(ServerLevel world, LivingEntity attacker, DamageSource source, float damage, CallbackInfo ci) {
         Lockout lockout = LockoutServer.lockout;
         if (!Lockout.isLockoutRunning(lockout)) return;
