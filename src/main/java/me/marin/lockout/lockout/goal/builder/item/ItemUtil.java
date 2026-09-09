@@ -154,7 +154,8 @@ public class ItemUtil {
             Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE,
             Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE,
             Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE,
-            Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE
+            Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE,
+            Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE
     );
 
     public static final List<Item> HORSE_ARMOR = List.of(

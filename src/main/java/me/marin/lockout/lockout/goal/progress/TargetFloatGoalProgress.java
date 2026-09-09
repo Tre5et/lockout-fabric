@@ -34,7 +34,7 @@ public class TargetFloatGoalProgress implements GoalProgress<Number> {
 
     @Override
     public boolean isCompleted(Number value) {
-        return value.doubleValue() > target.doubleValue();
+        return value.doubleValue() >= target.doubleValue();
     }
 
     @Override

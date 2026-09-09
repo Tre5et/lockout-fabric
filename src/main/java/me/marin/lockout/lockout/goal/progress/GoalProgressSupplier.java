@@ -275,7 +275,7 @@ public interface GoalProgressSupplier<T,U,E> {
             @Override
             public ServerGoalProgress<List<U>, Boolean> getServer(T data) {
                 return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && conditions.apply(data).stream()
-                        .anyMatch(c -> d.stream().allMatch(c::test)));
+                        .anyMatch(c -> d.stream().anyMatch(c::test)));
             }
 
             @Override

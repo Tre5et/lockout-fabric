@@ -26,6 +26,7 @@ import oshi.util.tuples.Pair;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -47,7 +48,7 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
     }
 
     public InListAcceptanceCondition(List<E> acceptableElements, Function<T,E> toListItem, Function<E, String> toId, Function<E, String> toName, Function<E, TextureExtractor> toTextureExtractor) {
-        this(acceptableElements, toId, toName, toTextureExtractor, (v,e) -> toListItem.apply(v).equals(e));
+        this(acceptableElements, toId, toName, toTextureExtractor, (v,e) -> Objects.equals(toListItem.apply(v), e));
     }
 
     @Override

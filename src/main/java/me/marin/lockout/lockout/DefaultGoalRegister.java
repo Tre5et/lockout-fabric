@@ -181,6 +181,8 @@ public class DefaultGoalRegister {
         INSTANCE.register(KillEntityGoal.coloredSheep());
         INSTANCE.register(KillEntityGoal.deathType(DamageTypes.WIND_CHARGE, () -> ItemTextureExtractor.item(Items.WIND_CHARGE), EntityTypes.BREEZE)
                 .require(GoalRequirements.structure("Trial Chambers", BuiltinStructures.TRIAL_CHAMBERS)));
+        INSTANCE.register(KillEntityGoal.deathType(DamageTypes.THROWN, () -> ItemTextureExtractor.item(Items.SNOWBALL), EntityTypes.BLAZE)
+                .require(GoalRequirements.SNOWY).customName(_ -> "Kill Blaze using Snowball").defaultEnabled(false));
         INSTANCE.register(KillEntityGoal.any(EntityTypes.BOGGED)
                 .require(GoalRequirements.biome("Swamp", Biomes.SWAMP, Biomes.MANGROVE_SWAMP).or(GoalRequirements.structure("Trial Chambers", BuiltinStructures.TRIAL_CHAMBERS))));
         INSTANCE.register(KillEntityGoal.any(EntityTypes.ELDER_GUARDIAN)
