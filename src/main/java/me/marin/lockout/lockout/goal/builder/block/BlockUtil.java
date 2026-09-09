@@ -1,0 +1,9 @@
+package me.marin.lockout.lockout.goal.builder.block;
+
+import net.minecraft.world.level.block.state.BlockState;
+
+public class BlockUtil {
+    public record MinedBlock(
+            BlockState block
+    ) {}
+}

@@ -22,6 +22,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import oshi.util.tuples.Pair;
 
 import java.util.Arrays;
@@ -188,6 +191,16 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
                 d -> BuilderUtil.identifierToId(d.identifier()),
                 d -> BuilderUtil.identifierToName(d.identifier()),
                 _ -> extractor.get()
+        );
+    }
+
+    public static InListAcceptanceCondition<BlockState, Block> block(Block... blocks) {
+        return new InListAcceptanceCondition<>(
+                Arrays.asList(blocks),
+                BlockBehaviour.BlockStateBase::getBlock,
+                b -> ItemUtil.getItemId(b.asItem()),
+                b -> ItemUtil.getItemName(b.asItem()),
+                b -> ItemUtil.getItemTextureExtractor(b.asItem())
         );
     }
 }

@@ -3,6 +3,7 @@ package me.marin.lockout.lockout;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.builder.PlayerStateGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.advancement.ObtainAdvancementGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.block.MineBlockGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.KillEntityGoal;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import oshi.util.tuples.Pair;
 
@@ -287,6 +289,14 @@ public class DefaultGoalRegister {
         INSTANCE.register(ChangeStatisticGoalBuilder.count(500, 3000, 100, i -> i*100, i -> i / 100, "Distance to Boat", "Distance Boated", () -> ItemTextureExtractor.item(Items.OAK_BOAT), Stats.BOAT_ONE_CM).customName(d -> "Boat " + d + "m"));
         INSTANCE.register(ChangeStatisticGoalBuilder.count(500, 2000, 100, i -> i*100, i -> i / 100, "Distance to Sprint", "Distance Sprinted", () -> GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/mob_effect/speed.png")), Stats.SPRINT_ONE_CM).customName(d -> "Sprint " + d + "m"));
 
+        INSTANCE.register(MineBlockGoalBuilder.any(Blocks.SPAWNER, Blocks.TRIAL_SPAWNER).customName(_ -> "Mine a Spawner")
+                .require(GoalRequirements.structure("Spawner Structure", BuiltinStructures.MINESHAFT, BuiltinStructures.MINESHAFT_MESA, BuiltinStructures.STRONGHOLD, BuiltinStructures.TRIAL_CHAMBERS)));
+        INSTANCE.register(MineBlockGoalBuilder.any(Blocks.CRAFTER));
+        INSTANCE.register(MineBlockGoalBuilder.any(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE).customName(_ -> "Mine Diamond Ore"));
+        INSTANCE.register(MineBlockGoalBuilder.any(Blocks.EMERALD_ORE, Blocks.DEEPSLATE_EMERALD_ORE).customName(_ -> "Mine Emerald Ore"));
+        INSTANCE.register(MineBlockGoalBuilder.any(Blocks.TURTLE_EGG).require(GoalRequirements.biome(Biomes.BEACH)));
+        INSTANCE.register(MineBlockGoalBuilder.unique(3, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE, Blocks.FROSTED_ICE).customName(_ -> "Mine 3 types of Ice")
+                .require(GoalRequirements.SNOWY).customTextureExtractor(_ -> new CornerIconTextureExtractor(ItemTextureExtractor.cycleItems(List.of(Items.ICE, Items.PACKED_ICE, Items.BLUE_ICE)), ItemTextureExtractor.item(Items.IRON_PICKAXE), 10)));
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
