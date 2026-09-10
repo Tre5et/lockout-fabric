@@ -102,7 +102,12 @@ public class GoalRequirements {
             Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN
     );
 
+    public static final GoalRequirement<Object> SUSPICIOUS = structure("Suspicious Structure",
+            BuiltinStructures.TRAIL_RUINS, BuiltinStructures.OCEAN_RUIN_WARM, BuiltinStructures.OCEAN_RUIN_COLD, BuiltinStructures.DESERT_PYRAMID
+    );
+
     public static final GoalRequirement.AndCombined<DyeColor> COLORS = DESERT_LIKE.forOptions(DyeColor.GREEN, DyeColor.CYAN)
             .and(JUNGLE.forOptions(DyeColor.BROWN))
-            .and(DESERT_LIKE.or(biome("Sea-pickle Biome", Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN)).forOptions(DyeColor.LIME));
+            .and(DESERT_LIKE.or(biome("Sea-pickle Biome", Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN)).forOptions(DyeColor.LIME)
+    );
 }

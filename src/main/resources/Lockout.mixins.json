@@ -10,9 +10,8 @@
     "server.BlockMixin",
     "server.BredAnimalsTriggerMixin",
     "server.BrewedPotionTriggerMixin",
-    "server.BrewingStandScreenHandlerPotionSlotMixin",/*
-    "server.BrushableBlockEntityMixin",
-    "server.BrushableBlockEntityMixin",
+    "server.BrewingStandScreenHandlerPotionSlotMixin",
+    "server.BrushableBlockEntityMixin",/*
     "server.BundleItemMixin",
     "server.CampfireBlockEntityMixin",
     "server.CampfireBlockEntityMixin",*/
@@ -29,8 +28,8 @@
     "server.EndCrystalMixin",/*
     "server.EntityMixin",
     "server.FilledMapItemMixin",*/
-    "server.FoodComponentMixin",/*
-    "server.GlowInkSacItemMixin",
+    "server.FoodComponentMixin",
+    "server.GlowInkSacItemMixin",/*
     "server.GoatHornItemMixin",
     "server.GrindstoneScreenHandlerOutputSlotMixin",
     "server.ItemFrameEntityMixin",

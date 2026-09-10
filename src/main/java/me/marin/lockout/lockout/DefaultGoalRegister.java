@@ -3,6 +3,7 @@ package me.marin.lockout.lockout;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.builder.PlayerStateGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.advancement.ObtainAdvancementGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.block.UseItemOnBlockGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.block.MineBlockGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
@@ -262,7 +263,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.SOUL_LANTERN));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.SPONGE).require(GoalRequirements.structure("Ocean Monument", BuiltinStructures.OCEAN_MONUMENT)));
         INSTANCE.register(ObtainItemGoalBuilder.any(Items.SUSPICIOUS_SAND, Items.SUSPICIOUS_GRAVEL).customName(_ -> "Obtain Suspicious Block")
-                .require(GoalRequirements.structure("Suspicious Structure", BuiltinStructures.TRAIL_RUINS, BuiltinStructures.OCEAN_RUIN_WARM, BuiltinStructures.OCEAN_RUIN_COLD, BuiltinStructures.DESERT_PYRAMID)));
+                .require(GoalRequirements.SUSPICIOUS));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.TNT));
         INSTANCE.register(ObtainItemGoalBuilder.any(ItemUtil.HANGING_SIGN.toArray(Item[]::new)).customName(_ -> "Obtain Hanging Sign"));
         INSTANCE.register(ObtainItemGoalBuilder.atLeast(2, 4, ItemUtil.ARMOR_TRIM.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Armor Trims"));
@@ -286,6 +287,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.ANVIL), Stats.INTERACT_WITH_ANVIL).customName(_ -> "Use an Anvil"));
         INSTANCE.register(ChangeStatisticGoalBuilder.count(500, 3000, 100, i -> i*100, i -> i / 100, "Distance to Boat", "Distance Boated", () -> ItemTextureExtractor.item(Items.OAK_BOAT), Stats.BOAT_ONE_CM).customName(d -> "Boat " + d + "m"));
         INSTANCE.register(ChangeStatisticGoalBuilder.count(500, 2000, 100, i -> i*100, i -> i / 100, "Distance to Sprint", "Distance Sprinted", () -> GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/mob_effect/speed.png")), Stats.SPRINT_ONE_CM).customName(d -> "Sprint " + d + "m"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.CAULDRON), Stats.CLEAN_ARMOR, Stats.CLEAN_BANNER, Stats.CLEAN_SHULKER_BOX).customName(_ -> "Clean an Item in a Cauldron"));
 
         INSTANCE.register(MineBlockGoalBuilder.any(Blocks.SPAWNER, Blocks.TRIAL_SPAWNER).customName(_ -> "Mine a Spawner")
                 .require(GoalRequirements.structure("Spawner Structure", BuiltinStructures.MINESHAFT, BuiltinStructures.MINESHAFT_MESA, BuiltinStructures.STRONGHOLD, BuiltinStructures.TRIAL_CHAMBERS)));
@@ -304,6 +306,8 @@ public class DefaultGoalRegister {
         INSTANCE.register(TameAnimalGoalBuilder.any(EntityTypes.PARROT).require(GoalRequirements.JUNGLE));
         INSTANCE.register(TameAnimalGoalBuilder.any(EntityTypes.WOLF).require(GoalRequirements.biome("Wolf Biome", Biomes.FOREST, Biomes.GROVE, Biomes.TAIGA, Biomes.SNOWY_TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA, Biomes.OLD_GROWTH_PINE_TAIGA, Biomes.SPARSE_JUNGLE, Biomes.SAVANNA_PLATEAU, Biomes.WOODED_BADLANDS)));
 
+        INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.BRUSH, Blocks.SUSPICIOUS_GRAVEL, Blocks.SUSPICIOUS_SAND).customName(_ -> "Brush Suspicious Block").require(GoalRequirements.SUSPICIOUS));
+        INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.GLOW_INK_SAC, Blocks.CRIMSON_SIGN, Blocks.WARPED_SIGN).customName(_ -> "Make a Nether Wood Sign Glow"));
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
