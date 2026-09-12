@@ -263,6 +263,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.SMOOTH_QUARTZ_STAIRS));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.SOUL_LANTERN));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.SPONGE).require(GoalRequirements.structure("Ocean Monument", BuiltinStructures.OCEAN_MONUMENT)));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.WRITTEN_BOOK).customName(_ -> "Write a Book"));
         INSTANCE.register(ObtainItemGoalBuilder.any(Items.SUSPICIOUS_SAND, Items.SUSPICIOUS_GRAVEL).customName(_ -> "Obtain Suspicious Block")
                 .require(GoalRequirements.SUSPICIOUS));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.TNT));
@@ -322,6 +323,9 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainItemGoalBuilder.allEnchantedArmor());
         INSTANCE.register(ObtainItemGoalBuilder.allDifferentArmorMaterial());
         INSTANCE.register(ObtainItemGoalBuilder.allDifferentDyedLeatherArmor());
+
+        INSTANCE.register(LeashEntityGoalBuilder.any(EntityTypes.IRON_GOLEM));
+        INSTANCE.register(LeashEntityGoalBuilder.unique(3, 8, 1));
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));

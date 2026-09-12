@@ -471,17 +471,19 @@ public interface GoalProgressSupplier<T,U,E> {
 
             @Override
             public String getName(Integer data) {
-                return data + " distinct of " + conditions.apply(data).stream().map(AcceptanceCondition::getName).collect(Collectors.joining(" or "));
+                return data + " distinct " + conditions.apply(data).stream().map(AcceptanceCondition::getName).collect(Collectors.joining(" or "));
             }
 
             @Override
             public TextureExtractor getTextureExtractor(Integer data) {
-                return new StackingTextureExtractor(List.of(
+                return data > 1 ? new StackingTextureExtractor(List.of(
                         new CycleTextureExtractor(conditions.apply(data).stream()
                                 .flatMap(c -> c.getExamples().stream())
                                 .toList()),
                         new ItemCountTextureExtractor(Component.literal(data.toString()))
-                ), 0);
+                ), 0) : new CycleTextureExtractor(conditions.apply(data).stream()
+                        .flatMap(c -> c.getExamples().stream())
+                        .toList());
             }
         };
     }

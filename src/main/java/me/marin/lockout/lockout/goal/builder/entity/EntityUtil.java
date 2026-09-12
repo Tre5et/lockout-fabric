@@ -75,6 +75,20 @@ public class EntityUtil {
             EntityTypes.WITCH, EntityTypes.EVOKER, EntityTypes.VEX
     );
 
+    public static final List<EntityType<?>> LEASHABLE = List.of(
+            EntityTypes.ALLAY, EntityTypes.ARMADILLO, EntityTypes.AXOLOTL, EntityTypes.BEE,
+            EntityTypes.CAMEL, EntityTypes.CAT,
+            EntityTypes.CHICKEN, EntityTypes.COPPER_GOLEM, EntityTypes.COW, EntityTypes.DOLPHIN,
+            EntityTypes.DONKEY, EntityTypes.FOX, EntityTypes.FROG, EntityTypes.GLOW_SQUID,
+            EntityTypes.GOAT, EntityTypes.HAPPY_GHAST, EntityTypes.HOGLIN, EntityTypes.HORSE,
+            EntityTypes.IRON_GOLEM, EntityTypes.LLAMA, EntityTypes.MOOSHROOM, EntityTypes.MULE,
+            EntityTypes.OCELOT, EntityTypes.PARROT, EntityTypes.PIG, EntityTypes.POLAR_BEAR,
+            EntityTypes.RABBIT, EntityTypes.SHEEP, EntityTypes.SKELETON_HORSE, EntityTypes.SNIFFER,
+            EntityTypes.SNOW_GOLEM, EntityTypes.SQUID, EntityTypes.STRIDER, EntityTypes.TRADER_LLAMA,
+            EntityTypes.WOLF, EntityTypes.ZOGLIN, EntityTypes.NAUTILUS, EntityTypes.ZOMBIE_NAUTILUS,
+            EntityTypes.CAMEL_HUSK, EntityTypes.ZOMBIE_HORSE
+    );
+
     public record BredEntity(
             EntityType<?> entity
     ) {}

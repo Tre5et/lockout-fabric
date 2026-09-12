@@ -22,7 +22,8 @@ public enum GoalCategory {
     RIDING("Riding"),
     WORKSTATIONS("Workstations"),
     DEATH_DAMAGE("Death/Damage"),
-    TEAM_GOALS("Team Goals");
+    TEAM_GOALS("Team Goals"),
+    LEASHING("Leashing");
 
     @Getter
     private final String name;
