@@ -2,9 +2,7 @@ package me.marin.lockout.lockout.goal.builder;
 
 import net.minecraft.resources.Identifier;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BuilderUtil {
@@ -32,7 +30,17 @@ public class BuilderUtil {
         return id.toUpperCase();
     }
 
+    public static <T> List<T> shuffled(List<T> list) {
+        List<T> copy = new ArrayList<>(list);
+        Collections.shuffle(copy);
+        return copy;
+    }
+
     public static <T> T getRandomElement(List<T> list) {
         return list.get(RANDOM.nextInt(list.size()));
+    }
+
+    public static <T> List<T> getDistinctRandomElements(List<T> list, int count) {
+        return shuffled(list).subList(0,count);
     }
 }

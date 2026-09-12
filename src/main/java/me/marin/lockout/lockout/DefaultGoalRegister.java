@@ -28,6 +28,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
@@ -86,7 +87,7 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(DealDamageGoalBuilder.total(100, 500, 25));
 
-        INSTANCE.register(ObtainItemGoalBuilder.shieldWithBanner().customName(_ -> "Obtain Shield with Banner"));
+        INSTANCE.register(ObtainItemGoalBuilder.shieldWithBanner());
 
         INSTANCE.register(DeathGoalBuilder.type(() -> new StackingTextureExtractor(List.of(SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/air_empty")), SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/air_bursting"))), 0), DamageTypes.DROWN)
                 .customName(_ -> "Die by Drowning"));
@@ -308,6 +309,19 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.BRUSH, Blocks.SUSPICIOUS_GRAVEL, Blocks.SUSPICIOUS_SAND).customName(_ -> "Brush Suspicious Block").require(GoalRequirements.SUSPICIOUS));
         INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.GLOW_INK_SAC, Blocks.CRIMSON_SIGN, Blocks.WARPED_SIGN).customName(_ -> "Make a Nether Wood Sign Glow"));
+
+        INSTANCE.register(ObtainItemGoalBuilder.armorPiece(ItemUtil.ARMORS.get(ArmorMaterials.CHAINMAIL).toArray(Item[]::new)).customName(_ -> "Wear a Chain Armor Piece"));
+        INSTANCE.register(ObtainItemGoalBuilder.dyedArmorPiece(Items.LEATHER_HELMET));
+        INSTANCE.register(ObtainItemGoalBuilder.dyedArmorPiece(Items.LEATHER_CHESTPLATE));
+        INSTANCE.register(ObtainItemGoalBuilder.dyedArmorPiece(Items.LEATHER_LEGGINGS));
+        INSTANCE.register(ObtainItemGoalBuilder.dyedArmorPiece(Items.LEATHER_BOOTS));
+        INSTANCE.register(ObtainItemGoalBuilder.allArmorOfMaterial(ArmorMaterials.DIAMOND).customName(_ -> "Wear full Diamond Armor"));
+        INSTANCE.register(ObtainItemGoalBuilder.allArmorOfMaterial(ArmorMaterials.GOLD).customName(_ -> "Wear full Gold Armor"));
+        INSTANCE.register(ObtainItemGoalBuilder.allArmorOfMaterial(ArmorMaterials.IRON).customName(_ -> "Wear full Iron Armor"));
+        INSTANCE.register(ObtainItemGoalBuilder.allArmorOfMaterial(ArmorMaterials.COPPER).customName(_ -> "Wear full Copper Armor"));
+        INSTANCE.register(ObtainItemGoalBuilder.allEnchantedArmor());
+        INSTANCE.register(ObtainItemGoalBuilder.allDifferentArmorMaterial());
+        INSTANCE.register(ObtainItemGoalBuilder.allDifferentDyedLeatherArmor());
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));

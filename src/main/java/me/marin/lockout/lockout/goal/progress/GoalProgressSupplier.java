@@ -16,7 +16,7 @@ import me.marin.lockout.server.goal.progress.TargetFloatServerGoalProgress;
 import me.marin.lockout.server.goal.progress.UniqueServerGoalProgress;
 import net.minecraft.network.chat.Component;
 
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -48,6 +48,10 @@ public interface GoalProgressSupplier<T,U,E> {
 
     default <M> MappedCreationGoalProgressSupplier<T,U,E,M> mapCreation(Function<M,T> mapper) {
         return new MappedCreationGoalProgressSupplier<>(this, mapper);
+    }
+
+    default MappedCreationGoalProgressSupplier<T,U,E,Void> creationValue(T value) {
+        return mapCreation(_ -> value);
     }
 
     class MappedGoalProgressSupplier<T,U,E,M> implements GoalProgressSupplier<T,M,E> {
@@ -379,6 +383,95 @@ public interface GoalProgressSupplier<T,U,E> {
             @Override
             public String getName(Integer data) {
                 return data + " of " + conditions.apply(data).stream().map(AcceptanceCondition::getName).collect(Collectors.joining(" or "));
+            }
+
+            @Override
+            public TextureExtractor getTextureExtractor(Integer data) {
+                return new StackingTextureExtractor(List.of(
+                        new CycleTextureExtractor(conditions.apply(data).stream()
+                                .flatMap(c -> c.getExamples().stream())
+                                .toList()),
+                        new ItemCountTextureExtractor(Component.literal(data.toString()))
+                ), 0);
+            }
+        };
+    }
+
+    static <U> GoalProgressSupplier<Integer, List<U>, Boolean> countMatching(Function<Integer,List<AcceptanceCondition<U>>> conditions) {
+        return new GoalProgressSupplier<>() {
+            @Override
+            public ClientGoalProgress<Boolean> getClient(Integer data) {
+                return new SimpleClientGoalProgress();
+            }
+
+            @Override
+            public ServerGoalProgress<List<U>, Boolean> getServer(Integer data) {
+                List<AcceptanceCondition<U>> resolvedConditions = conditions.apply(data);
+                return new SimpleServerGoalProgress<>(d -> d.stream()
+                        .filter(e -> resolvedConditions.stream().anyMatch(c -> c.test(e)))
+                        .count() >= data
+                );
+            }
+
+            @Override
+            public String getStaticId() {
+                return "MATCHING_" + conditions.apply(null).stream().map(AcceptanceCondition::getId).collect(Collectors.joining("_OR_"));
+            }
+
+            @Override
+            public String getId(Integer data) {
+                return "MATCHING_" + conditions.apply(data).stream().map(AcceptanceCondition::getId).collect(Collectors.joining("_OR_"));
+            }
+
+            @Override
+            public String getName(Integer data) {
+                return conditions.apply(data).stream().map(AcceptanceCondition::getName).collect(Collectors.joining(" or "));
+            }
+
+            @Override
+            public TextureExtractor getTextureExtractor(Integer data) {
+                return new StackingTextureExtractor(List.of(
+                        new CycleTextureExtractor(conditions.apply(data).stream()
+                                .flatMap(c -> c.getExamples().stream())
+                                .toList()),
+                        new ItemCountTextureExtractor(Component.literal(data.toString()))
+                ), 0);
+            }
+        };
+    }
+
+    static <U,K> GoalProgressSupplier<Integer, List<U>, Boolean> distinct(Function<Integer,List<AcceptanceCondition<U>>> conditions, Function<U,K> keyExtractor) {
+        return new GoalProgressSupplier<>() {
+            @Override
+            public ClientGoalProgress<Boolean> getClient(Integer data) {
+                return new SimpleClientGoalProgress();
+            }
+
+            @Override
+            public ServerGoalProgress<List<U>, Boolean> getServer(Integer data) {
+                List<AcceptanceCondition<U>> resolvedConditions = conditions.apply(data);
+                return new SimpleServerGoalProgress<>(d -> d.stream()
+                            .filter(e -> resolvedConditions.stream().anyMatch(c -> c.test(e)))
+                            .map(keyExtractor)
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .count() >= data
+                );
+            }
+
+            @Override
+            public String getStaticId() {
+                return "DISTINCT_" + conditions.apply(null).stream().map(AcceptanceCondition::getId).collect(Collectors.joining("_OR_"));
+            }
+
+            @Override
+            public String getId(Integer data) {
+                return "DISTINCT_" + data + "_" + conditions.apply(data).stream().map(AcceptanceCondition::getId).collect(Collectors.joining("_OR_"));
+            }
+
+            @Override
+            public String getName(Integer data) {
+                return data + " distinct of " + conditions.apply(data).stream().map(AcceptanceCondition::getName).collect(Collectors.joining(" or "));
             }
 
             @Override

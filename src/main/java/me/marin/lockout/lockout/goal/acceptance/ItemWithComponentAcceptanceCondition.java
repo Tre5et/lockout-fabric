@@ -46,7 +46,7 @@ public class ItemWithComponentAcceptanceCondition implements AcceptanceCondition
     public String getName() {
         return components.stream()
                 .map(c -> c.name().get())
-                .collect(Collectors.joining(" and ")) + " Item";
+                .collect(Collectors.joining(" and "));
     }
 
     @Override
@@ -74,7 +74,7 @@ public class ItemWithComponentAcceptanceCondition implements AcceptanceCondition
                         _ -> true,
                         _ -> {},
                         () -> BuilderUtil.identifierToId(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(c)),
-                        () -> BuilderUtil.identifierToName(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(c))
+                        () -> BuilderUtil.identifierToName(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(c)) + "Item"
                 )).collect(Collectors.toUnmodifiableList()),
                 () -> ItemUtil.getAllItemsWithComponents(items, Arrays.asList(components)).stream().map(Item::getDefaultInstance).toList()
         );

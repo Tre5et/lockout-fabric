@@ -17,6 +17,8 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import oshi.util.tuples.Pair;
@@ -80,6 +82,15 @@ public class ItemUtil {
         var offHandItem = ((PlayerInventoryAccessor) inventory).getEquipment().get(EquipmentSlot.OFFHAND);
         if(!offHandItem.isEmpty()) stacks.add(offHandItem);
         return stacks;
+    }
+
+    public static List<ItemStack> collectArmorPieces(Inventory inventory) {
+        List<ItemStack> armor = new ArrayList<>();
+        armor.add(((PlayerInventoryAccessor)inventory).getEquipment().get(EquipmentSlot.HEAD));
+        armor.add(((PlayerInventoryAccessor)inventory).getEquipment().get(EquipmentSlot.CHEST));
+        armor.add(((PlayerInventoryAccessor)inventory).getEquipment().get(EquipmentSlot.LEGS));
+        armor.add(((PlayerInventoryAccessor)inventory).getEquipment().get(EquipmentSlot.FEET));
+        return armor;
     }
 
     public static List<Pair<Item, Integer>> collectCounts(Inventory inventory) {
@@ -255,6 +266,28 @@ public class ItemUtil {
             Items.CAULDRON,
             Items.BREWING_STAND
     );
+
+    public static final Map<ArmorMaterial,List<Item>> ARMORS = Map.of(
+            ArmorMaterials.NETHERITE, List.of(Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS),
+            ArmorMaterials.DIAMOND, List.of(Items.DIAMOND_HELMET, Items.DIAMOND_CHESTPLATE, Items.DIAMOND_LEGGINGS, Items.DIAMOND_BOOTS),
+            ArmorMaterials.GOLD, List.of(Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS),
+            ArmorMaterials.IRON, List.of(Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS),
+            ArmorMaterials.COPPER, List.of(Items.COPPER_HELMET, Items.COPPER_CHESTPLATE, Items.COPPER_LEGGINGS, Items.COPPER_BOOTS),
+            ArmorMaterials.CHAINMAIL, List.of(Items.CHAINMAIL_HELMET, Items.CHAINMAIL_CHESTPLATE, Items.CHAINMAIL_LEGGINGS, Items.CHAINMAIL_BOOTS),
+            ArmorMaterials.LEATHER, List.of(Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS),
+            ArmorMaterials.TURTLE_SCUTE, List.of(Items.TURTLE_HELMET)
+    );
+
+    public static final List<Item> ARMOR_PIECE = ARMORS.entrySet().stream().sorted(Comparator.comparing(a -> a.getKey().assetId().identifier())).flatMap(e -> e.getValue().stream()).toList();
+
+    public static final List<ArmorMaterial> FULL_ARMOR_MATERIALS = List.of(ArmorMaterials.NETHERITE, ArmorMaterials.DIAMOND, ArmorMaterials.GOLD, ArmorMaterials.IRON, ArmorMaterials.CHAINMAIL, ArmorMaterials.COPPER, ArmorMaterials.LEATHER);
+
+    public static Optional<ArmorMaterial> getArmorMaterial(Item item) {
+        return ARMORS.entrySet().stream()
+                .filter(e -> e.getValue().contains(item))
+                .map(Map.Entry::getKey)
+                .findAny();
+    }
 
     public record BrewedItem(
             ItemStack itemStack

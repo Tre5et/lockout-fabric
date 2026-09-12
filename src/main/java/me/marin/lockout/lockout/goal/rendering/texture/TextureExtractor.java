@@ -10,10 +10,20 @@ public interface TextureExtractor {
      */
     void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, long tick);
 
+    default TextureExtractor overlay(TextureExtractor extractor, TextureAnchor anchor, int size) {
+        return new OverlayTextureExtractor(this, extractor, anchor, size);
+    }
+
+    default TextureExtractor overlay(TextureExtractor extractor, TextureAnchor anchor) {
+        return overlay(extractor, anchor, 8);
+    }
+
     default void withScale(GuiGraphicsExtractor extractor, int x, int y, float scale, Runnable function) {
         extractor.pose().pushMatrix();
         extractor.pose().scaleAround(scale, x, y);
         function.run();
         extractor.pose().popMatrix();
     }
+
+    TextureExtractor BLANK = (_, _, _, _, _, _, _) -> {};
 }

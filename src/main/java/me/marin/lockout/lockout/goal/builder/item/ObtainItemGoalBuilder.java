@@ -9,8 +9,7 @@ import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
-import me.marin.lockout.lockout.goal.rendering.texture.TextTextureExtractor;
-import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,17 +18,26 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.level.block.ColorCollection;
 import oshi.util.tuples.Pair;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
+    public ObtainItemGoalBuilder(String idPrefix, String namePrefix, GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Inventory, ?> progressSupplier) {
+        super(idPrefix, namePrefix, category, optionSupplier, progressSupplier.map(ServerPlayer::getInventory));
+    }
+
     public ObtainItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Inventory, ?> progressSupplier) {
-        super("OBTAIN", "Obtain", GoalCategory.OBTAINING_ITEMS, optionSupplier, progressSupplier.map(ServerPlayer::getInventory));
+        this("OBTAIN", "Obtain", GoalCategory.OBTAINING_ITEMS, optionSupplier, progressSupplier);
     }
 
     @Override
@@ -120,5 +128,96 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
                         )), () -> Collections.nCopies(20, Items.SHIELD.getDefaultInstance())))
                 ).map(ItemUtil::collectStacks)
         );
+    }
+
+    public static ObtainItemGoalBuilder<Void> armorPiece(Item... items) {
+        return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
+                GoalOptionSupplier.NONE,
+                GoalProgressSupplier.<Void,ItemStack>any(_ -> List.of(InListAcceptanceCondition.item(items))).map(ItemUtil::collectArmorPieces)
+        );
+    }
+
+    public static GoalBuilder<ServerPlayer,DyeColor> dyedArmorPiece(Item item) {
+        return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
+                GoalOptionSupplier.list("Color", DyeColor.VALUES, new TypeToken<>() {}, "COLORED", DyeColor::getName),
+                GoalProgressSupplier.<DyeColor,ItemStack>any(c -> List.of(new ItemWithComponentAcceptanceCondition(
+                        List.of(new ItemUtil.DataComponentCondition<>(
+                                DataComponents.DYED_COLOR, v -> v.rgb() == (c.getTextureDiffuseColor() & 0xFFFFFF),
+                                i -> i.set(DataComponents.DYED_COLOR, new DyedItemColor(c.getTextureDiffuseColor() & 0xFFFFFF)),
+                                () -> (c == null ? "COLORED" : "COLORED_" + c.getName().toUpperCase()) + "_" + ItemUtil.getItemId(item), () -> BuilderUtil.idToName(c.getName()) + " " + ItemUtil.getItemName(item)
+                        )),
+                        () -> List.of(item.getDefaultInstance())
+                ).and(InListAcceptanceCondition.item(item)))).map(ItemUtil::collectArmorPieces)
+        ).customTextureExtractor(c -> {
+            ItemStack stack = item.getDefaultInstance();
+            stack.set(DataComponents.DYED_COLOR, new DyedItemColor(c.getTextureDiffuseColor() & 0xFFFFFF));
+            return new ItemTextureExtractor(stack);
+        }).require(GoalRequirements.COLORS);
+    }
+
+    public static ObtainItemGoalBuilder<Void> allArmorOfMaterial(ArmorMaterial material) {
+        return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
+                GoalOptionSupplier.NONE,
+                GoalProgressSupplier.<Void,ItemStack>all(_ -> ItemUtil.ARMORS.getOrDefault(material, List.of()).stream().map(InListAcceptanceCondition::item).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectArmorPieces)
+        );
+    }
+
+    public static GoalBuilder<ServerPlayer,Void> allEnchantedArmor() {
+        return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
+                GoalOptionSupplier.NONE,
+                GoalProgressSupplier.countMatching(_ -> List.of(new ItemWithComponentAcceptanceCondition(List.of(new ItemUtil.DataComponentCondition<>(
+                        DataComponents.ENCHANTMENTS,
+                        v -> !v.isEmpty(),
+                        s -> s.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true),
+                        () -> "FULL_ENCHANTED_ARMOR",
+                        () -> "full Enchanted Armor"
+                )), () -> ItemUtil.ARMOR_PIECE.stream().map(Item::getDefaultInstance).toList()))
+                ).creationValue(4).map(ItemUtil::collectArmorPieces)
+        );
+    }
+
+    public static GoalBuilder<ServerPlayer,Void> allDifferentArmorMaterial() {
+        return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
+                GoalOptionSupplier.NONE,
+                GoalProgressSupplier.distinct(_ -> List.of(InListAcceptanceCondition.item(ItemUtil.ARMOR_PIECE.toArray(Item[]::new))), v -> ItemUtil.getArmorMaterial(v.getItem()).orElse(null))
+                        .creationValue(4).map(ItemUtil::collectArmorPieces)
+        ).customName(_ -> "Wear full Armor of different Materials")
+                .customTextureExtractor(_ -> new CycleTextureExtractor(Stream.generate(() -> BuilderUtil.getDistinctRandomElements(
+                                ItemUtil.FULL_ARMOR_MATERIALS,
+                                4
+                        ))
+                        .limit(10)
+                        .map(a -> TextureExtractor.BLANK
+                                .overlay(ItemTextureExtractor.item(ItemUtil.ARMORS.get(a.getFirst()).getFirst()), TextureAnchor.TOP_LEFT)
+                                .overlay(ItemTextureExtractor.item(ItemUtil.ARMORS.get(a.get(1)).get(1)), TextureAnchor.TOP_RIGHT)
+                                .overlay(ItemTextureExtractor.item(ItemUtil.ARMORS.get(a.get(2)).get(2)), TextureAnchor.BOTTOM_LEFT)
+                                .overlay(ItemTextureExtractor.item(ItemUtil.ARMORS.get(a.get(3)).get(3)), TextureAnchor.BOTTOM_RIGHT))
+                        .toList())
+                );
+    }
+
+    public static GoalBuilder<ServerPlayer,Void> allDifferentDyedLeatherArmor() {
+        return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
+                GoalOptionSupplier.NONE,
+                GoalProgressSupplier.distinct(_ -> List.of(InListAcceptanceCondition.item(ItemUtil.ARMORS.get(ArmorMaterials.LEATHER).toArray(Item[]::new))), v -> {
+                        if(!v.has(DataComponents.DYED_COLOR)) return null;
+                        return v.get(DataComponents.DYED_COLOR).rgb();
+                }).creationValue(4).map(ItemUtil::collectArmorPieces)
+        ).customName(_ -> "Wear full Leather Armor in different Colors")
+                .customTextureExtractor(_ -> new CycleTextureExtractor(Stream.generate(() -> BuilderUtil.getDistinctRandomElements(DyeColor.VALUES, 4)
+                                        .stream().<Function<Item,ItemStack>>map(c -> i -> {
+                                            ItemStack stack = i.getDefaultInstance();
+                                            stack.set(DataComponents.DYED_COLOR, new DyedItemColor(c.getTextureDiffuseColor() & 0xFFFFFF));
+                                            return stack;
+                                        }).toList()
+                        )
+                        .limit(10)
+                        .map(a -> TextureExtractor.BLANK
+                                .overlay(new ItemTextureExtractor(a.getFirst().apply(Items.LEATHER_HELMET)), TextureAnchor.TOP_LEFT)
+                                .overlay(new ItemTextureExtractor(a.get(1).apply(Items.LEATHER_CHESTPLATE)), TextureAnchor.TOP_RIGHT)
+                                .overlay(new ItemTextureExtractor(a.get(2).apply(Items.LEATHER_LEGGINGS)), TextureAnchor.BOTTOM_LEFT)
+                                .overlay(new ItemTextureExtractor(a.get(3).apply(Items.LEATHER_BOOTS)), TextureAnchor.BOTTOM_RIGHT))
+                        .toList()
+                ));
     }
 }

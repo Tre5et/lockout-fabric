@@ -11,7 +11,6 @@ import me.marin.lockout.lockout.goal.rendering.texture.CornerIconTextureExtracto
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -21,14 +20,6 @@ import java.util.stream.Collectors;
 public class UseItemOnBlockGoalBuilder<T> extends GoalBuilder<BlockUtil.UsedItemOnBlock, T> {
     public UseItemOnBlockGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, BlockUtil.UsedItemOnBlock, ?> progressSupplier) {
         super("USE", "Use", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier);
-    }
-
-    @Override
-    public TextureExtractor applyTextureExtractor(TextureExtractor textureExtractor, T option) {
-        return new CornerIconTextureExtractor(
-                textureExtractor,
-                ItemTextureExtractor.item(Items.BRUSH),
-        10);
     }
 
     @Override
