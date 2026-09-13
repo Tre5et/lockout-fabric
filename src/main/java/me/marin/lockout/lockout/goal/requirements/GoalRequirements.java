@@ -102,6 +102,10 @@ public class GoalRequirements {
             Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN
     );
 
+    public static final GoalRequirement<Object> NAUSEA_BIOME = biome("Nausea Biome",
+            Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN, Biomes.PALE_GARDEN, Biomes.SULFUR_CAVES
+    );
+
     public static final GoalRequirement<Object> SUSPICIOUS = structure("Suspicious Structure",
             BuiltinStructures.TRAIL_RUINS, BuiltinStructures.OCEAN_RUIN_WARM, BuiltinStructures.OCEAN_RUIN_COLD, BuiltinStructures.DESERT_PYRAMID
     );

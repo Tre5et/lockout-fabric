@@ -15,6 +15,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.FallLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -201,6 +203,17 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
                 b -> ItemUtil.getItemId(b.asItem()),
                 b -> ItemUtil.getItemName(b.asItem()),
                 b -> ItemUtil.getItemTextureExtractor(b.asItem())
+        );
+    }
+
+    @SafeVarargs
+    public static InListAcceptanceCondition<MobEffectInstance, Holder<MobEffect>> statusEffect(Holder<MobEffect>... effects) {
+        return new InListAcceptanceCondition<>(
+                Arrays.asList(effects),
+                MobEffectInstance::getEffect,
+                e -> BuilderUtil.identifierToId(Identifier.parse(e.getRegisteredName())),
+                e -> e.value().getDisplayName().getString(),
+                e -> GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/mob_effect/" + Identifier.parse(e.getRegisteredName()).getPath() + ".png"))
         );
     }
 }

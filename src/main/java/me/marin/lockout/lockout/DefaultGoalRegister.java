@@ -13,6 +13,7 @@ import me.marin.lockout.lockout.goal.builder.experience.ReachExperienceLevelGoal
 import me.marin.lockout.lockout.goal.builder.inventory.UpdateInventoryGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.*;
 import me.marin.lockout.lockout.goal.builder.statistic.ChangeStatisticGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.statistic.HaveStatusEffectGoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroups;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
@@ -23,6 +24,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.damagesource.FallLocation;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Item;
@@ -338,6 +340,14 @@ public class DefaultGoalRegister {
         INSTANCE.register(UpdateInventoryGoalBuilder.fillBlock(Blocks.CHISELED_BOOKSHELF));
         INSTANCE.register(UpdateInventoryGoalBuilder.fillBlock(Blocks.COMPOSTER));
         INSTANCE.register(UpdateInventoryGoalBuilder.fillEntity(EntityTypes.ARMOR_STAND));
+
+        INSTANCE.register(HaveStatusEffectGoalBuilder.any(MobEffects.ABSORPTION));
+        INSTANCE.register(HaveStatusEffectGoalBuilder.any(MobEffects.BAD_OMEN).require(GoalRequirements.structure("Bad Omen Structure", BuiltinStructures.PILLAGER_OUTPOST, BuiltinStructures.TRIAL_CHAMBERS)));
+        INSTANCE.register(HaveStatusEffectGoalBuilder.any(MobEffects.JUMP_BOOST));
+        INSTANCE.register(HaveStatusEffectGoalBuilder.any(MobEffects.MINING_FATIGUE).require(GoalRequirements.structure("Ocean Monument", BuiltinStructures.OCEAN_MONUMENT)));
+        INSTANCE.register(HaveStatusEffectGoalBuilder.any(MobEffects.NAUSEA).require(GoalRequirements.NAUSEA_BIOME));
+        INSTANCE.register(HaveStatusEffectGoalBuilder.any(MobEffects.POISON));
+        INSTANCE.register(HaveStatusEffectGoalBuilder.any(MobEffects.WEAKNESS));
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
