@@ -11,6 +11,7 @@ import me.marin.lockout.lockout.goal.rendering.texture.CornerIconTextureExtracto
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -51,6 +52,39 @@ public class UseItemOnBlockGoalBuilder<T> extends GoalBuilder<BlockUtil.UsedItem
                         return condition.getExamples().stream().map(c -> new CornerIconTextureExtractor(
                                 c,
                                 ItemTextureExtractor.item(item),
+                                10)
+                        ).collect(Collectors.toUnmodifiableList());
+                    }
+                })
+        );
+    }
+
+    public static UseItemOnBlockGoalBuilder<Void> anyItem(Block block, Item... items) {
+        return new UseItemOnBlockGoalBuilder<>(
+                GoalOptionSupplier.NONE,
+                GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
+                    private final InListAcceptanceCondition<ItemStack, Item> condition = InListAcceptanceCondition.item(items);
+
+                    @Override
+                    public boolean test(BlockUtil.UsedItemOnBlock value) {
+                        return value.block().getBlock().equals(block) && condition.test(value.item());
+                    }
+
+                    @Override
+                    public String getId() {
+                        return condition.getId() + "_ON_" + ItemUtil.getItemId(block.asItem());
+                    }
+
+                    @Override
+                    public String getName() {
+                        return condition.getName() + " on " + ItemUtil.getItemName(block.asItem());
+                    }
+
+                    @Override
+                    public List<TextureExtractor> getExamples() {
+                        return condition.getExamples().stream().map(c -> new CornerIconTextureExtractor(
+                                ItemTextureExtractor.item(block.asItem()),
+                                c,
                                 10)
                         ).collect(Collectors.toUnmodifiableList());
                     }

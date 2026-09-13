@@ -165,6 +165,7 @@ public class LockoutServer {
         });
 
         ServerLivingEntityEvents.AFTER_DEATH.register(new AfterDeathEventHandler());
+        //UseBlockCallback.EVENT.register(new UseBlockEventHandler());
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, _) -> waitingForVersionPacketPlayersMap.remove(handler.getPlayer().getUUID()));
 

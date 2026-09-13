@@ -1,14 +1,19 @@
 package me.marin.lockout.mixin.server;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.builder.experience.ExperienceUtils;
+import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
 import me.marin.lockout.lockout.goal.builder.statistic.StatisticUtil;
 import me.marin.lockout.server.LockoutServer;
 import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlocksAttacks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -132,25 +137,15 @@ public abstract class PlayerMixin {
         lockout.getBoard().update(new ExperienceUtils.ReachedExperienceLevel(player.experienceLevel), player);
     }
 
-    /*@Inject(method = "blockUsingItem", at = @At(value = "TAIL"))
-    public void onTakeShieldHit(ServerLevel world, LivingEntity attacker, DamageSource source, float damage, CallbackInfo ci) {
-        Lockout lockout = LockoutServer.lockout;
-        if (!Lockout.isLockoutRunning(lockout)) return;
+    @Inject(method = "blockUsingItem", at = @At(value = "TAIL"))
+    public void onTakeShieldHit(ServerLevel level, LivingEntity attacker, DamageSource source, float damage, boolean fullyBlocked, CallbackInfo ci, @Local(name = "itemBlockingWith") ItemStack itemBlockingWith, @Local(name = "blocksAttacks") BlocksAttacks blockingData, @Local(name = "secondsToDisableBlocking") float secondsToDisableBlocking) {
+        ServerLockoutGame lockout = LockoutServer.lockout;
+        if (!LockoutGame.isActive(lockout)) return;
         Player player = (Player) (Object) this;
         if (player.level().isClientSide()) return;
 
-        float f = attacker.getSecondsToDisableBlocking();
-
-        for (Goal goal : lockout.getBoard().getGoals()) {
-            if (goal == null) continue;
-            if (goal.isCompleted()) continue;
-            if (f <= 0.0F) continue;
-
-            if (goal instanceof HaveShieldDisabledGoal) {
-                lockout.completeGoal(goal, player);
-            }
-        }
-    }*/
+        lockout.getBoard().update(new ItemUtil.BlockedWithItem(itemBlockingWith, blockingData, secondsToDisableBlocking), player);
+    }
 
 
 }

@@ -17,6 +17,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.BlocksAttacks;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.level.block.entity.BannerPattern;
@@ -311,6 +312,12 @@ public class ItemUtil {
 
     public record BrokenItem(
             Item item
+    ) {}
+
+    public record BlockedWithItem(
+            ItemStack item,
+            BlocksAttacks blockingData,
+            float secondsToDisable
     ) {}
 
     public record DataComponentCondition<T>(

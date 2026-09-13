@@ -316,6 +316,7 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.BRUSH, Blocks.SUSPICIOUS_GRAVEL, Blocks.SUSPICIOUS_SAND).customName(_ -> "Brush Suspicious Block").require(GoalRequirements.SUSPICIOUS));
         INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.GLOW_INK_SAC, Blocks.CRIMSON_SIGN, Blocks.WARPED_SIGN).customName(_ -> "Make a Nether Wood Sign Glow"));
+        INSTANCE.register(UseItemOnBlockGoalBuilder.anyItem(Blocks.CANDLE, Items.FLINT_AND_STEEL, Items.FIRE_CHARGE).customName(_ -> "Light a Candle"));
 
         INSTANCE.register(ObtainItemGoalBuilder.armorPiece(ItemUtil.ARMORS.get(ArmorMaterials.CHAINMAIL).toArray(Item[]::new)).customName(_ -> "Wear a Chain Armor Piece"));
         INSTANCE.register(ObtainItemGoalBuilder.dyedArmorPiece(Items.LEATHER_HELMET));
@@ -348,6 +349,11 @@ public class DefaultGoalRegister {
         INSTANCE.register(HaveStatusEffectGoalBuilder.any(MobEffects.NAUSEA).require(GoalRequirements.NAUSEA_BIOME));
         INSTANCE.register(HaveStatusEffectGoalBuilder.any(MobEffects.POISON));
         INSTANCE.register(HaveStatusEffectGoalBuilder.any(MobEffects.WEAKNESS));
+
+        INSTANCE.register(BlockWithItemGoalBuilder.disabled(Items.SHIELD));
+
+        INSTANCE.register(UseItemOnEntityGoalBuilder.nameTag("Dinnerbone", EntityTypes.GHAST));
+        INSTANCE.register(UseItemOnEntityGoalBuilder.nameTag("jeb_", EntityTypes.SHEEP));
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));

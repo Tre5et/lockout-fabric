@@ -10,8 +10,12 @@ public interface TextureExtractor {
      */
     void extract(GuiGraphicsExtractor extractor, Font font, int x, int y, int width, int height, long tick);
 
+    default TextureExtractor overlay(TextureExtractor extractor, TextureAnchor anchor, int width, int height) {
+        return new OverlayTextureExtractor(this, extractor, anchor, width, height);
+    }
+
     default TextureExtractor overlay(TextureExtractor extractor, TextureAnchor anchor, int size) {
-        return new OverlayTextureExtractor(this, extractor, anchor, size);
+        return overlay(extractor, anchor, size, size);
     }
 
     default TextureExtractor overlay(TextureExtractor extractor, TextureAnchor anchor) {

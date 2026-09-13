@@ -10,6 +10,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 import java.util.Optional;
@@ -129,6 +130,11 @@ public class EntityUtil {
     ) {}
 
     public record AgeLockedEntity(
+            EntityType<?> entity
+    ) {}
+
+    public record UsedItemOnEntity(
+            ItemStack item,
             EntityType<?> entity
     ) {}
 }
