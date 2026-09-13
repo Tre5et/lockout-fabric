@@ -1,6 +1,5 @@
 package me.marin.lockout.mixin.client;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.datafixers.util.Either;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.client.LockoutClient;
@@ -13,9 +12,7 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.WaypointStyle;
 import net.minecraft.client.waypoints.ClientWaypointManager;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.ColorRGBA;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.PlayerSkin;

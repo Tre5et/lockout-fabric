@@ -3,7 +3,10 @@ package me.marin.lockout.mixin.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.marin.lockout.CompassItemHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
+import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -12,11 +15,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ItemInHandRenderer.class)
-public class ItemInHandRendererMixin {
+@Mixin(ItemInHandLayer.class)
+public class ItemInHandLayerMixin<S extends ArmedEntityRenderState> {
 
-    @Inject(method = "applyItemArmTransform", at = @At("HEAD"), cancellable = true)
-    public void render(PoseStack matrices, HumanoidArm arm, float equipProgress, CallbackInfo ci) {
+    @Inject(method = "submitArmWithItem", at = @At("HEAD"), cancellable = true)
+    public void render(S state, ItemStackRenderState item, ItemStack itemStack, HumanoidArm arm, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, CallbackInfo ci) {
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
         ItemStack stack = arm == player.getMainArm() ? player.getMainHandItem() : player.getOffhandItem();
@@ -24,7 +27,7 @@ public class ItemInHandRendererMixin {
 
         ci.cancel();
         int i = arm == HumanoidArm.RIGHT ? 1 : -1;
-        matrices.translate((float)i * 0.56F, -0.52F + 0 * -0.6F, -0.72F);
+        poseStack.translate((float)i * 0.56F, -0.52F + 0 * -0.6F, -0.72F);
     }
 
 }

@@ -11,7 +11,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -32,14 +32,14 @@ public class LivingEntityMixin {
     }
 
     @Inject(method = "onEquippedItemBroken", at = @At("HEAD"))
-    public void onEquipmentBreak(Item item, EquipmentSlot slot, CallbackInfo ci) {
+    public void onEquipmentBreak(ItemStack brokenItem, EquipmentSlot inSlot, CallbackInfo ci) {
         if (!((Object)this instanceof ServerPlayer player)) return;
         if (player.level().isClientSide()) return;
 
         ServerLockoutGame lockout = LockoutServer.lockout;
         if (!LockoutGame.isActive(lockout)) return;
 
-        lockout.getBoard().update(new ItemUtil.BrokenItem(item), player);
+        lockout.getBoard().update(new ItemUtil.BrokenItem(brokenItem.getItem()), player);
     }
 
 }

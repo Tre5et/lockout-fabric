@@ -19,8 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BrushableBlockEntity.class)
 public class BrushableBlockEntityMixin {
 
-    @Inject(method = "brushingCompleted", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"))
-    public void finishBrushing(ServerLevel world, LivingEntity brusher, ItemStack brush, CallbackInfo ci, @Local BlockState blockState) {
+    @Inject(method = "brushingCompleted", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;setBlockAndUpdate(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"))
+    public void finishBrushing(ServerLevel world, LivingEntity brusher, ItemStack brush, CallbackInfo ci, @Local(name = "blockState") BlockState blockState) {
         if (brusher instanceof Player player)
         {
             if (player.level().isClientSide()) return;

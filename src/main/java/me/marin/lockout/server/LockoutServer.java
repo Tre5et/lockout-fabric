@@ -423,8 +423,6 @@ public class LockoutServer {
                 player.getRotationVector(),
                 player.level(),
                 LevelBasedPermissionSet.OWNER, // Permission level 4 (op level)
-                player.getName().getString(),
-                Component.empty(),
                 server,
                 player
             );

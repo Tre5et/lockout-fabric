@@ -159,7 +159,7 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
                     if (advancement == null) {
                         return "\"" + BuilderUtil.identifierToName(a) + "\" Advancement";
                     }
-                    return "\"" + advancement.display().get().getTitle().getString() + "\" Advancement";
+                    return "\"" + advancement.display().get().title().getString() + "\" Advancement";
                 },
                 a -> {
                     Advancement advancement = LockoutClient.allAdvancements.get(a);
@@ -168,7 +168,7 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
                     }
                     return new StackingTextureExtractor(List.of(
                             GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/gui/sprites/advancements/challenge_frame_unobtained.png")),
-                            ItemTextureExtractor.item(advancement.display().get().getIcon().item().value())
+                            ItemTextureExtractor.item(advancement.display().get().icon().item().value())
                     ), 3);
                 }
         );

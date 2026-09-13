@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
@@ -20,7 +21,8 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.EnchantRandomlyFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
-import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProvider;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 
 import java.util.Objects;
 
@@ -44,18 +46,18 @@ public class LockoutInitializer implements ModInitializer {
 
         LootTableEvents.REPLACE.register(((key, original, source, registries) -> {
             if (Objects.equals(key, BuiltInLootTables.PIGLIN_BARTERING)) {
-                UniformGenerator ironNuggetsCount = UniformGenerator.between(9.0F, 36.0F);
-                UniformGenerator quartzCount = UniformGenerator.between(8.0F, 16.0F);
-                UniformGenerator glowstoneDustCount = UniformGenerator.between(5.0F, 12.0F);
-                UniformGenerator magmaCreamCount = UniformGenerator.between(2.0F, 6.0F);
-                UniformGenerator enderPearlCount = UniformGenerator.between(4.0F, 8.0F);
-                UniformGenerator stringCount = UniformGenerator.between(8.0F, 24.0F);
-                UniformGenerator fireChargeCount = UniformGenerator.between(1.0F, 5.0F);
-                UniformGenerator gravelCount = UniformGenerator.between(8.0F, 16.0F);
-                UniformGenerator leatherCount = UniformGenerator.between(4.0F, 10.0F);
-                UniformGenerator netherBrickCount = UniformGenerator.between(4.0F, 16.0F);
-                UniformGenerator cryingObsidianCount = UniformGenerator.between(1.0F, 3.0F);
-                UniformGenerator soulSandCount = UniformGenerator.between(4.0F, 16.0F);
+                Holder<ContextIntProvider> ironNuggetsCount = ContextIntProviders.between(9, 36);
+                Holder<ContextIntProvider> quartzCount = ContextIntProviders.between(8, 16);
+                Holder<ContextIntProvider> glowstoneDustCount = ContextIntProviders.between(5, 12);
+                Holder<ContextIntProvider> magmaCreamCount = ContextIntProviders.between(2, 6);
+                Holder<ContextIntProvider> enderPearlCount = ContextIntProviders.between(4, 8);
+                Holder<ContextIntProvider> stringCount = ContextIntProviders.between(8, 24);
+                Holder<ContextIntProvider> fireChargeCount = ContextIntProviders.between(1, 5);
+                Holder<ContextIntProvider> gravelCount = ContextIntProviders.between(8, 16);
+                Holder<ContextIntProvider> leatherCount = ContextIntProviders.between(4, 10);
+                Holder<ContextIntProvider> netherBrickCount = ContextIntProviders.between(4, 16);
+                Holder<ContextIntProvider> cryingObsidianCount = ContextIntProviders.between(1, 3);
+                Holder<ContextIntProvider> soulSandCount = ContextIntProviders.between(4, 16);
 
                 LootPool pool = LootPool.lootPool()
                         .add(LootItem.lootTableItem(Items.BOOK).apply(EnchantRandomlyFunction.randomEnchantment().withEnchantment(registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SOUL_SPEED))).setWeight(5))

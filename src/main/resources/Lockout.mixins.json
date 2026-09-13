@@ -54,7 +54,7 @@
   "client": [
     "client.HudMixin",
     "client.InputMixin",
-    "client.ItemInHandRendererMixin",
+    "client.ItemInHandLayerMixin",
     "client.integrated.IntegratedServerMixin",
     "client.toasts.AdvancementToastMixin",
     "client.toasts.RecipeToastMixin",

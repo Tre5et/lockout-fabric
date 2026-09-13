@@ -69,6 +69,10 @@ public class ItemUtil {
                 }).toList();
     }
 
+    public static List<Item> getAllItemsWithComponents(List<DataComponentType<?>> components) {
+        return getAllItemsWithComponents(BuiltInRegistries.ITEM.stream().toList(), components);
+    }
+
     public static <T> ItemStack applyComponent(ItemStack stack, DataComponentType<T> type, T value) {
         stack.set(type, value);
         return stack;

@@ -35,7 +35,6 @@ import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.util.*;
@@ -212,17 +211,17 @@ public class LockoutClient implements ClientModInitializer {
         
         openBoardKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.lockout.open_board", // The translation key of the keybinding's name
-                InputConstants.Type.KEYSYM, // The entity of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
-                GLFW.GLFW_KEY_B, // The keycode of the key
+                InputConstants.Type.KEYBOARD, // The entity of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
+                InputConstants.KEY_B, // The keycode of the key
                 LOCKOUT_CATEGORY // The translation key of the keybinding's category.
         ));
 
-        List<Integer> defaultHintKeys = List.of(GLFW.GLFW_KEY_1, GLFW.GLFW_KEY_2, GLFW.GLFW_KEY_3, GLFW.GLFW_KEY_4, GLFW.GLFW_KEY_5, GLFW.GLFW_KEY_6, GLFW.GLFW_KEY_7, GLFW.GLFW_KEY_8, GLFW.GLFW_KEY_9, GLFW.GLFW_KEY_0);
+        List<Integer> defaultHintKeys = List.of(InputConstants.KEY_1, InputConstants.KEY_2, InputConstants.KEY_3, InputConstants.KEY_4, InputConstants.KEY_5, InputConstants.KEY_6, InputConstants.KEY_7, InputConstants.KEY_8, InputConstants.KEY_9, InputConstants.KEY_0);
         List<KeyMapping> hintMappings = new ArrayList<>();
         for(int i = 0; i < defaultHintKeys.size(); i++) {
             hintMappings.add(KeyMappingHelper.registerKeyMapping(new KeyMapping(
                     "key.lockout.hint_" + i,
-                    InputConstants.Type.KEYSYM,
+                    InputConstants.Type.KEYBOARD,
                     defaultHintKeys.get(i),
                     LOCKOUT_CATEGORY
             )));
