@@ -2,6 +2,7 @@ package me.marin.lockout.lockout.goal.builder.item;
 
 import com.google.gson.reflect.TypeToken;
 import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
+import me.marin.lockout.lockout.goal.acceptance.AnyAcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.ItemWithComponentAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
@@ -12,6 +13,7 @@ import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.DyeColor;
@@ -128,6 +130,17 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
                         )), () -> Collections.nCopies(20, Items.SHIELD.getDefaultInstance())))
                 ).map(ItemUtil::collectStacks)
         );
+    }
+
+    public static GoalBuilder<ServerPlayer, Void> allDistinct() {
+        return new ObtainItemGoalBuilder<>(
+                GoalOptionSupplier.NONE,
+                GoalProgressSupplier.distinct(_ -> List.of(new AnyAcceptanceCondition<>(
+                        "ITMES",
+                        () -> "items in Inventory",
+                        () -> BuiltInRegistries.ITEM.stream().map(ItemTextureExtractor::item).collect(Collectors.toUnmodifiableList())
+                )), ItemStack::getItem).creationValue(36).map(ItemUtil::collectStacks)
+        ).customName(_ -> "Fill Inventory with unique Items");
     }
 
     public static ObtainItemGoalBuilder<Void> armorPiece(Item... items) {

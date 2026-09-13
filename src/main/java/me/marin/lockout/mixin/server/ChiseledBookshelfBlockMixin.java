@@ -1,9 +1,9 @@
 package me.marin.lockout.mixin.server;
 
-import me.marin.lockout.Lockout;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.goals.misc.FillChiseledBookshelfGoal;
+import me.marin.lockout.game.LockoutGame;
+import me.marin.lockout.lockout.goal.builder.inventory.InventoryUtil;
 import me.marin.lockout.server.LockoutServer;
+import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,21 +24,14 @@ public class ChiseledBookshelfBlockMixin {
 
     @Inject(method = "useItemOn", at = @At("RETURN"))
     public void onUseWithItem(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
+        if (cir.getReturnValue() != InteractionResult.SUCCESS) return;
         if (world.isClientSide()) return;
-        Lockout lockout = LockoutServer.lockout;
-        if (!Lockout.isLockoutRunning(lockout)) return;
+        ServerLockoutGame lockout = LockoutServer.lockout;
+        if (!LockoutGame.isActive(lockout)) return;
 
         ChiseledBookShelfBlockEntity blockEntity = (ChiseledBookShelfBlockEntity) world.getBlockEntity(pos);
-        if (cir.getReturnValue() != InteractionResult.SUCCESS || blockEntity.count() < 6) return;
 
-        for (Goal goal : lockout.getBoard().getGoals()) {
-            if (goal == null) continue;
-            if (goal.isCompleted()) continue;
-
-            if (goal instanceof FillChiseledBookshelfGoal) {
-                lockout.completeGoal(goal, player);
-            }
-        }
+        lockout.getBoard().update(new InventoryUtil.UpdatedInventory<>(blockEntity.getBlockState(), blockEntity.getItems(), 1), player);
     }
 
 }

@@ -1,9 +1,9 @@
 package me.marin.lockout.mixin.server;
 
-import me.marin.lockout.Lockout;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.goals.misc.FillCampfireWithFoodGoal;
+import me.marin.lockout.game.LockoutGame;
+import me.marin.lockout.lockout.goal.builder.inventory.InventoryUtil;
 import me.marin.lockout.server.LockoutServer;
+import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -20,29 +20,12 @@ public class CampfireBlockEntityMixin {
     @Inject(method = "placeFood", at = @At("RETURN"))
     public void addItem(ServerLevel world, LivingEntity entity, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
         if (world.isClientSide()) return;
-        Lockout lockout = LockoutServer.lockout;
-        if (!Lockout.isLockoutRunning(lockout)) return;
+        ServerLockoutGame lockout = LockoutServer.lockout;
+        if (!LockoutGame.isActive(lockout)) return;
         if (!(entity instanceof Player player) || !cir.getReturnValueZ()) return;
 
         CampfireBlockEntity campfire = (CampfireBlockEntity) (Object) this;
-
-        boolean filled = true;
-        for (ItemStack itemStack : campfire.getItems()) {
-            if (itemStack.isEmpty()) {
-                filled = false;
-                break;
-            }
-        }
-        if (!filled) return;
-
-        for (Goal goal : lockout.getBoard().getGoals()) {
-            if (goal == null) continue;
-            if (goal.isCompleted()) continue;
-
-            if (goal instanceof FillCampfireWithFoodGoal) {
-                lockout.completeGoal(goal, player);
-            }
-        }
+        lockout.getBoard().update(new InventoryUtil.UpdatedInventory<>(campfire.getBlockState(), campfire.getItems(), 1), player);
     }
 
 }

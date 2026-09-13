@@ -10,6 +10,7 @@ import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.KillEntityGoal;
 import me.marin.lockout.lockout.goal.builder.entity.*;
 import me.marin.lockout.lockout.goal.builder.experience.ReachExperienceLevelGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.inventory.UpdateInventoryGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.*;
 import me.marin.lockout.lockout.goal.builder.statistic.ChangeStatisticGoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
@@ -53,6 +54,7 @@ public class DefaultGoalRegister {
                 .customName(_ -> "Break any tool")
                 .group(GoalGroups.TOOLS));
 
+        INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.ALLAY).require(GoalRequirements.structure("Allay Structure", BuiltinStructures.PILLAGER_OUTPOST, BuiltinStructures.WOODLAND_MANSION)));
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.ARMADILLO).require(GoalRequirements.biome("Savanna", Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU)));
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.CAMEL).require(GoalRequirements.biome("Desert", Biomes.DESERT).or(GoalRequirements.structure("Desert Village", BuiltinStructures.VILLAGE_DESERT))));
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.CHICKEN));
@@ -83,6 +85,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(SpawnEntityGoalBuilder.any(EntityTypes.COPPER_GOLEM));
         INSTANCE.register(SpawnEntityGoalBuilder.any(EntityTypes.SNOW_GOLEM).require(GoalRequirements.SNOWY));
 
+        INSTANCE.register(CraftItemGoalBuilder.any(ItemUtil.ARMOR_TRIM.toArray(Item[]::new)).customName(_ -> "Duplicate any Armor Trim"));
         INSTANCE.register(CraftItemGoalBuilder.unique(20, 100, 10));
 
         INSTANCE.register(DealDamageGoalBuilder.total(100, 500, 25));
@@ -276,6 +279,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainItemGoalBuilder.atLeast(4, 7, ItemUtil.BUCKET.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Buckets"));
         INSTANCE.register(ObtainItemGoalBuilder.atLeast(3, 7, ItemUtil.FLOWER.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Flowers"));
         INSTANCE.register(ObtainItemGoalBuilder.atLeast(4, 7, ItemUtil.WORKSTATION.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Workstations"));
+        INSTANCE.register(ObtainItemGoalBuilder.allDistinct());
 
         INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.FLOWER_POT), Stats.POT_FLOWER).customName(_ -> "Pot any Flower"));
         INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.CAKE), Stats.EAT_CAKE_SLICE).customName(_ -> "Eat a slice of Cake"));
@@ -326,6 +330,14 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(LeashEntityGoalBuilder.any(EntityTypes.IRON_GOLEM));
         INSTANCE.register(LeashEntityGoalBuilder.unique(3, 8, 1));
+
+        INSTANCE.register(AgeLockMobGoalBuilder.any());
+
+        INSTANCE.register(UpdateInventoryGoalBuilder.fillBlock(Blocks.DECORATED_POT));
+        INSTANCE.register(UpdateInventoryGoalBuilder.fillBlock(Blocks.CAMPFIRE));
+        INSTANCE.register(UpdateInventoryGoalBuilder.fillBlock(Blocks.CHISELED_BOOKSHELF));
+        INSTANCE.register(UpdateInventoryGoalBuilder.fillBlock(Blocks.COMPOSTER));
+        INSTANCE.register(UpdateInventoryGoalBuilder.fillEntity(EntityTypes.ARMOR_STAND));
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));

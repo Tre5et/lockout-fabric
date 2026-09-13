@@ -1,5 +1,6 @@
 package me.marin.lockout.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.marin.lockout.Lockout;
 import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.client.goal.ClientGoal;
@@ -277,9 +278,9 @@ public class BoardBuilderScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean consumed) {
         Optional<Integer> hoveredIdx = BoardBuilderData.INSTANCE.getHoveredIndex((int) click.x(), (int) click.y(), boardX, boardY, GOAL_SIZE, GOAL_PADDING);
-        if ((click.button() == 0 || click.button() == 1) && hoveredIdx.isPresent()) {
+        if ((click.button() == InputConstants.MOUSE_BUTTON_LEFT || click.button() == InputConstants.MOUSE_BUTTON_RIGHT) && hoveredIdx.isPresent()) {
             ClientGoal goal = BoardBuilderData.INSTANCE.getGoals().get(hoveredIdx.get());
-            if (click.button() == 1 && goal != null && goal.getBuildData().option().isPresent()) {
+            if (click.button() == InputConstants.MOUSE_BUTTON_RIGHT && goal != null && goal.getBuildData().option().isPresent()) {
                 openEditData(hoveredIdx.get());
             } else {
                 openSearch(hoveredIdx.get());

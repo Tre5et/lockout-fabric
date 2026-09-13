@@ -159,7 +159,7 @@ public abstract class GoalBuilder<U,T> {
 
     public Component getName(T option) {
         if(customNameProvider != null) return customNameProvider.get(option);
-        return Component.literal(namePrefix + " " + progressSupplier.getName(option));
+        return Component.literal(formatName(namePrefix + " " + progressSupplier.getName(option)));
     }
 
     public TextureExtractor getTextureExtractor(T option) {
@@ -240,6 +240,10 @@ public abstract class GoalBuilder<U,T> {
     }
 
     public static String formatId(String string) {
-        return string.toUpperCase().replaceAll("__+", "_");
+        return string.toUpperCase().replaceAll("__+", "_").replaceAll("^_+", "").replaceAll("_+$", "");
+    }
+
+    public static String formatName(String string) {
+        return string.replaceAll("  +", " ").replaceAll("^ +", "").replaceAll(" +$", "");
     }
 }

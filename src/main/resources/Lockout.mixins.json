@@ -1,69 +1,47 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "me.marin.lockout.mixin",
-  "compatibilityLevel": "JAVA_25",
-  "mixins": [
-/*    "server.AgeableMobMixin",
-    "server.AnvilScreenHandlerMixin",
-    "server.ArmorStandMixin",*/
-    "server.BlockMixin",
-    "server.BredAnimalsTriggerMixin",
-    "server.BrewedPotionTriggerMixin",
-    "server.BrewingStandScreenHandlerPotionSlotMixin",
-    "server.BrushableBlockEntityMixin",/*
-    "server.BundleItemMixin",
-    "server.CampfireBlockEntityMixin",
-    "server.CampfireBlockEntityMixin",*/
-    "server.CarvedPumpkinBlockMixin",/*
-    "server.ChiseledBookshelfBlockMixin",
-    "server.CompassItemMixin",
-    "server.CompassItemUseOnBlockMixin",*/
-    "server.ComposterBlockMixin",/*
-    "server.ConsumeItemTriggerMixin",*/
-    "server.CraftingResultSlotMixin",/*
-    "server.CrossbowItemMixin",
-    "server.DecorationItemMixin",
-    "server.EndCrystalItemMixin",*/
-    "server.EndCrystalMixin",/*
-    "server.EntityMixin",
-    "server.FilledMapItemMixin",*/
-    "server.FoodComponentMixin",
-    "server.GlowInkSacItemMixin",/*
-    "server.GoatHornItemMixin",
-    "server.GrindstoneScreenHandlerOutputSlotMixin",
-    "server.ItemFrameEntityMixin",
-    "server.ItemMixin",*/
-    "server.LivingEntityMixin",
-    "server.PlayerAdvancementTrackerMixin",
-    "server.PlayerInventoryAccessor",
-    "server.PlayerMixin",/*
-    "server.PotentSulfurBlockEntityMixin",*/
-    "server.PotionContentsComponentMixin",/*
-    "server.RaidMixin",
-    "server.ServerPlayerEntityMixin",
-    "server.ShelfBlockMixin",
-    "server.SlotMixin",
-    "server.SmithingScreenHandlerMixin",
-    "server.StatusEffectMixin",*/
-    "server.TameAnimalTriggerMixin",/*
-    "server.WolfEntityMixin",
-    "server.ZombieEntityMixin"*/
-    "server.ZombifiedPiglinMixin"
-  ],
-  "client": [
-    "client.HudMixin",
-    "client.InputMixin",
-    "client.ItemInHandLayerMixin",
-    "client.integrated.IntegratedServerMixin",
-    "client.toasts.AdvancementToastMixin",
-    "client.toasts.RecipeToastMixin",
-    "client.toasts.SystemToastMixin",
-    "client.toasts.TutorialToastMixin",
-    "client.NetworkMixin",
-    "client.LocatorBarMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
+    "required": true,
+    "minVersion": "0.8",
+    "package": "me.marin.lockout.mixin",
+    "compatibilityLevel": "JAVA_25",
+    "mixins": [
+        "server.AgeableMobMixin",
+        "server.AllayMixin",
+        "server.ArmorStandMixin",
+        "server.BlockMixin",
+        "server.BredAnimalsTriggerMixin",
+        "server.BrewedPotionTriggerMixin",
+        "server.BrewingStandScreenHandlerPotionSlotMixin",
+        "server.BrushableBlockEntityMixin",
+        "server.CampfireBlockEntityMixin",
+        "server.CarvedPumpkinBlockMixin",
+        "server.ChiseledBookshelfBlockMixin",
+        "server.ComposterBlockMixin",
+        "server.CraftingResultSlotMixin",
+        "server.DecoratedPotBlockMixin",
+        "server.EndCrystalMixin",
+        "server.FoodComponentMixin",
+        "server.GlowInkSacItemMixin",
+        "server.LivingEntityMixin",
+        "server.PlayerAdvancementTrackerMixin",
+        "server.PlayerInventoryAccessor",
+        "server.PlayerMixin",
+        "server.PotionContentsComponentMixin",
+        "server.TameAnimalTriggerMixin",
+        "server.ZombifiedPiglinMixin"
+    ],
+    "client": [
+        "client.HudMixin",
+        "client.InputMixin",
+        "client.ItemInHandLayerMixin",
+        "client.LocatorBarMixin",
+        "client.NetworkMixin",
+        "client.integrated.IntegratedServerMixin",
+        "client.toasts.AdvancementToastMixin",
+        "client.toasts.RecipeToastMixin",
+        "client.toasts.SystemToastMixin",
+        "client.toasts.TutorialToastMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
   }
 }

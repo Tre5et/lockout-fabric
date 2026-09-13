@@ -23,8 +23,16 @@ public class EntityUtil {
         return Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/entity/" + entity.toShortString() + ".png");
     }
 
+    public static Identifier getBabyEntityTexture(EntityType<?> entity) {
+        return getEntityTexture(entity).withSuffix("_baby");
+    }
+
     public static TextureExtractor getEntityTextureExtractor(EntityType<?> entity) {
         return GenericTextureExtractor.texture(getEntityTexture(entity));
+    }
+
+    public static TextureExtractor getBabyEntityTextureExtractor(EntityType<?> entity) {
+        return GenericTextureExtractor.texture(getBabyEntityTexture(entity));
     }
 
     public static String getEntityId(EntityType<?> entity) {
@@ -89,6 +97,17 @@ public class EntityUtil {
             EntityTypes.CAMEL_HUSK, EntityTypes.ZOMBIE_HORSE
     );
 
+    public static final List<EntityType<?>> AGE_LOCKABLE = List.of(
+            EntityTypes.ARMADILLO, EntityTypes.AXOLOTL, EntityTypes.BEE, EntityTypes.CAMEL,
+            EntityTypes.CHICKEN, EntityTypes.COW, EntityTypes.DOLPHIN, EntityTypes.DONKEY,
+            EntityTypes.HORSE, EntityTypes.FOX, EntityTypes.HAPPY_GHAST, EntityTypes.GLOW_SQUID,
+            EntityTypes.GOAT, EntityTypes.CAT, EntityTypes.LLAMA, EntityTypes.MOOSHROOM,
+            EntityTypes.MULE, EntityTypes.NAUTILUS, EntityTypes.OCELOT, EntityTypes.PANDA,
+            EntityTypes.PIG, EntityTypes.POLAR_BEAR, EntityTypes.WOLF, EntityTypes.RABBIT,
+            EntityTypes.SHEEP, EntityTypes.SNIFFER, EntityTypes.SQUID, EntityTypes.STRIDER,
+            EntityTypes.TRADER_LLAMA, EntityTypes.FROG, EntityTypes.HOGLIN, EntityTypes.SULFUR_CUBE
+    );
+
     public record BredEntity(
             EntityType<?> entity
     ) {}
@@ -106,6 +125,10 @@ public class EntityUtil {
     ) {}
 
     public record TamedEntity(
+            EntityType<?> entity
+    ) {}
+
+    public record AgeLockedEntity(
             EntityType<?> entity
     ) {}
 }
