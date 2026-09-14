@@ -15,8 +15,10 @@ import me.marin.lockout.server.goal.progress.SimpleServerGoalProgress;
 import me.marin.lockout.server.goal.progress.TargetFloatServerGoalProgress;
 import me.marin.lockout.server.goal.progress.UniqueServerGoalProgress;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -52,6 +54,10 @@ public interface GoalProgressSupplier<T,U,E> {
 
     default MappedCreationGoalProgressSupplier<T,U,E,Void> creationValue(T value) {
         return mapCreation(_ -> value);
+    }
+
+    static <T,U,E> MappedFromPlayerGoalProgressSupplier<T,U,E> player(GoalProgressSupplier<T, ServerPlayer, E> original) {
+        return new MappedFromPlayerGoalProgressSupplier<>(original);
     }
 
     class MappedGoalProgressSupplier<T,U,E,M> implements GoalProgressSupplier<T,M,E> {
@@ -141,6 +147,44 @@ public interface GoalProgressSupplier<T,U,E> {
         @Override
         public TextureExtractor applyFinalTextureExtractor(TextureExtractor extractor, M data) {
             return original.applyFinalTextureExtractor(extractor, mapper.apply(data));
+        }
+    }
+
+    class MappedFromPlayerGoalProgressSupplier<T,U,E> implements GoalProgressSupplier<T, U, E> {
+        private final GoalProgressSupplier<T,ServerPlayer,E> original;
+
+        public MappedFromPlayerGoalProgressSupplier(GoalProgressSupplier<T, ServerPlayer, E> original) {
+            this.original = original;
+        }
+
+        @Override
+        public ClientGoalProgress<E> getClient(T data) {
+            return original.getClient(data);
+        }
+
+        @Override
+        public ServerGoalProgress<U, E> getServer(T data) {
+            return new ServerGoalProgress.MappedFromPlayerGoalProgress<>(original.getServer(data));
+        }
+
+        @Override
+        public String getStaticId() {
+            return original.getStaticId();
+        }
+
+        @Override
+        public String getId(T data) {
+            return original.getId(data);
+        }
+
+        @Override
+        public String getName(T data) {
+            return original.getName(data);
+        }
+
+        @Override
+        public TextureExtractor getTextureExtractor(T data) {
+            return original.getTextureExtractor(data);
         }
     }
 
@@ -278,8 +322,8 @@ public interface GoalProgressSupplier<T,U,E> {
 
             @Override
             public ServerGoalProgress<List<U>, Boolean> getServer(T data) {
-                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && conditions.apply(data).stream()
-                        .anyMatch(c -> d.stream().anyMatch(c::test)));
+                return new SimpleServerGoalProgress<>((d,p) -> !d.isEmpty() && conditions.apply(data).stream()
+                        .anyMatch(c -> d.stream().anyMatch(e -> c.test(e,p))));
             }
 
             @Override
@@ -316,8 +360,8 @@ public interface GoalProgressSupplier<T,U,E> {
 
             @Override
             public ServerGoalProgress<List<U>, Boolean> getServer(T data) {
-                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && conditions.apply(data).stream()
-                        .allMatch(c -> d.stream().anyMatch(c::test))
+                return new SimpleServerGoalProgress<>((d,p) -> !d.isEmpty() && conditions.apply(data).stream()
+                        .allMatch(c -> d.stream().anyMatch(e -> c.test(e, p)))
                 );
             }
 
@@ -364,8 +408,8 @@ public interface GoalProgressSupplier<T,U,E> {
 
             @Override
             public ServerGoalProgress<List<U>, Boolean> getServer(Integer data) {
-                return new SimpleServerGoalProgress<>(d -> !d.isEmpty() && conditions.apply(data).stream()
-                        .filter(c -> d.stream().anyMatch(c::test))
+                return new SimpleServerGoalProgress<>((d,p) -> !d.isEmpty() && conditions.apply(data).stream()
+                        .filter(c -> d.stream().anyMatch(e -> c.test(e, p)))
                         .count() >= data
                 );
             }
@@ -407,8 +451,8 @@ public interface GoalProgressSupplier<T,U,E> {
             @Override
             public ServerGoalProgress<List<U>, Boolean> getServer(Integer data) {
                 List<AcceptanceCondition<U>> resolvedConditions = conditions.apply(data);
-                return new SimpleServerGoalProgress<>(d -> d.stream()
-                        .filter(e -> resolvedConditions.stream().anyMatch(c -> c.test(e)))
+                return new SimpleServerGoalProgress<>((d, p) -> d.stream()
+                        .filter(e -> resolvedConditions.stream().anyMatch(c -> c.test(e,p)))
                         .count() >= data
                 );
             }
@@ -450,8 +494,8 @@ public interface GoalProgressSupplier<T,U,E> {
             @Override
             public ServerGoalProgress<List<U>, Boolean> getServer(Integer data) {
                 List<AcceptanceCondition<U>> resolvedConditions = conditions.apply(data);
-                return new SimpleServerGoalProgress<>(d -> d.stream()
-                            .filter(e -> resolvedConditions.stream().anyMatch(c -> c.test(e)))
+                return new SimpleServerGoalProgress<>((d,p) -> d.stream()
+                            .filter(e -> resolvedConditions.stream().anyMatch(c -> c.test(e,p)))
                             .map(keyExtractor)
                             .filter(Objects::nonNull)
                             .distinct()
@@ -498,7 +542,7 @@ public interface GoalProgressSupplier<T,U,E> {
             @Override
             public ServerGoalProgress<U, Number> getServer(Number data) {
                 AcceptanceCondition<U> resolvedCondition = condition.apply(data);
-                return new TargetFloatServerGoalProgress<>(data, u -> resolvedCondition.test(u) ? toNumber.apply(u) : 0);
+                return new TargetFloatServerGoalProgress<>(data, (u,p) -> resolvedCondition.test(u,p) ? toNumber.apply(u) : 0);
             }
 
             @Override

@@ -6,6 +6,7 @@ import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -31,7 +32,7 @@ public class ItemWithComponentAcceptanceCondition implements AcceptanceCondition
     }
 
     @Override
-    public boolean test(ItemStack value) {
+    public boolean test(ItemStack value, ServerPlayer player) {
         return components.stream().allMatch(c -> c.test(value));
     }
 

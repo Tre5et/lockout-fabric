@@ -1,9 +1,7 @@
 package me.marin.lockout.mixin.server;
 
-import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
 import me.marin.lockout.server.LockoutServer;
-import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityTypes;
@@ -18,10 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class AllayMixin {
     @Inject(method = "mobInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/allay/Allay;duplicateAllay()V"))
     public void onDuplicate(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        if (player.level().isClientSide()) return;
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if (!LockoutGame.isActive(lockout)) return;
-
-        lockout.getBoard().update(new EntityUtil.BredEntity(EntityTypes.ALLAY), player);
+        LockoutServer.updateLockout(player, _ -> new EntityUtil.BredEntity(EntityTypes.ALLAY));
     }
 }

@@ -1,9 +1,7 @@
 package me.marin.lockout.mixin.server;
 
-import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.builder.inventory.InventoryUtil;
 import me.marin.lockout.server.LockoutServer;
-import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -25,11 +23,9 @@ import java.util.List;
 public class DecoratedPotBlockMixin {
     @Inject(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/DecoratedPotBlockEntity;setChanged()V"))
     public void onAddItem(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> cir) {
-        if(player.level().isClientSide()) return;
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if(!LockoutGame.isActive(lockout)) return;
-
-        DecoratedPotBlockEntity blockEntity = (DecoratedPotBlockEntity) level.getBlockEntity(pos);
-        lockout.getBoard().update(new InventoryUtil.UpdatedInventory<>(state, List.of(blockEntity.getTheItem()), blockEntity.getTheItem().getMaxStackSize()), player);
+        LockoutServer.updateLockout(player, _ -> {
+            DecoratedPotBlockEntity blockEntity = (DecoratedPotBlockEntity) level.getBlockEntity(pos);
+            return new InventoryUtil.UpdatedInventory<>(state, List.of(blockEntity.getTheItem()), blockEntity.getTheItem().getMaxStackSize());
+        });
     }
 }

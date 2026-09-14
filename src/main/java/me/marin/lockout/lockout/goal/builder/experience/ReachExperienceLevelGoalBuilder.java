@@ -8,6 +8,7 @@ import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.TextTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class ReachExperienceLevelGoalBuilder<T> extends GoalBuilder<ExperienceUt
                 GoalOptionSupplier.integer("Level to reach", min, max, step),
                 GoalProgressSupplier.simple(l -> new AcceptanceCondition<>() {
                     @Override
-                    public boolean test(Integer value) {
+                    public boolean test(Integer value, ServerPlayer player) {
                         return value >= l;
                     }
 

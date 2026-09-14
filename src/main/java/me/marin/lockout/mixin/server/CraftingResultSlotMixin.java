@@ -1,9 +1,7 @@
 package me.marin.lockout.mixin.server;
 
-import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
 import me.marin.lockout.server.LockoutServer;
-import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -27,17 +25,11 @@ public class CraftingResultSlotMixin {
 
     @Inject(method = "checkTakeAchievements(Lnet/minecraft/world/item/ItemStack;)V", at = @At("HEAD"))
     public void onCraft(ItemStack stack, CallbackInfo ci) {
-        if (player.level().isClientSide()) return;
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if (!LockoutGame.isActive(lockout)) return;
-
-        if (removeCount < 0 || stack.isEmpty()) {
-            return;
-        }
-
-        if (!(player.containerMenu instanceof CraftingMenu || player.containerMenu instanceof InventoryMenu)) return;
-
-        lockout.getBoard().update(new ItemUtil.CraftedItem(stack), player);
+        LockoutServer.updateLockout(player, p -> {
+            if (removeCount < 0 || stack.isEmpty()) return null;
+            if (!(p.containerMenu instanceof CraftingMenu || p.containerMenu instanceof InventoryMenu)) return null;
+            return new ItemUtil.CraftedItem(stack);
+        });
     }
 
 }

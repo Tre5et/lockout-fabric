@@ -1,6 +1,7 @@
 package me.marin.lockout.lockout.goal.acceptance;
 
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -17,7 +18,7 @@ public class AnyAcceptanceCondition<T> implements AcceptanceCondition<T> {
     }
 
     @Override
-    public boolean test(T value) {
+    public boolean test(T value, ServerPlayer player) {
         return true;
     }
 

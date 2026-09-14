@@ -1,11 +1,9 @@
 package me.marin.lockout.mixin.server;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.builder.inventory.InventoryUtil;
 import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
 import me.marin.lockout.server.LockoutServer;
-import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -26,12 +24,8 @@ public class ComposterBlockMixin {
 
     @Inject(method = "useItemOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;consume(ILnet/minecraft/world/entity/LivingEntity;)V"))
     private void addItem(final ItemStack itemStack, final BlockState state, final Level level, final BlockPos pos, final Player player, final InteractionHand hand, final BlockHitResult hitResult, CallbackInfoReturnable<BlockState> ci, @Local(name = "fillLevel") int fillLevel, @Local(name = "newState") BlockState newState) {
-        if(player.level().isClientSide()) return;
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if(!LockoutGame.isActive(lockout)) return;
-
-        lockout.getBoard().update(new ItemUtil.CompostedItem(itemStack), player);
-        if(newState != state) lockout.getBoard().update(new InventoryUtil.UpdatedInventory<>(state, List.of(itemStack.copyWithCount(fillLevel + 1)), 7), player);
+        LockoutServer.updateLockout(player, _ -> new ItemUtil.CompostedItem(itemStack));
+        if(newState != state) LockoutServer.updateLockout(player, _ -> new InventoryUtil.UpdatedInventory<>(state, List.of(itemStack.copyWithCount(fillLevel + 1)), 7));
     }
 
 /*    @Inject(method = "extractProduce", at = @At("RETURN"))

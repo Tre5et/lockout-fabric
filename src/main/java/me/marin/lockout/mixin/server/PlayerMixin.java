@@ -1,13 +1,9 @@
 package me.marin.lockout.mixin.server;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import me.marin.lockout.game.LockoutGame;
-import me.marin.lockout.lockout.goal.builder.experience.ExperienceUtils;
 import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
-import me.marin.lockout.lockout.goal.builder.statistic.StatisticUtil;
 import me.marin.lockout.server.LockoutServer;
 import me.marin.lockout.server.game.ServerLockoutGame;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -107,44 +103,9 @@ public abstract class PlayerMixin {
         }
     }*/
 
-    @Inject(method = "awardStat(Lnet/minecraft/resources/Identifier;)V", at = @At("HEAD"))
-    public void onIncrementStat(Identifier stat, CallbackInfo ci) {
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if (!LockoutGame.isActive(lockout)) return;
-        Player player = (Player) (Object) this;
-        if (player.level().isClientSide()) return;
-
-        lockout.getBoard().update(new StatisticUtil.StatisticChanged(stat, 1), player);
-    }
-
-    @Inject(method = "awardStat(Lnet/minecraft/resources/Identifier;I)V", at = @At("HEAD"))
-    public void onIncreaseStat(Identifier stat, int amount, CallbackInfo ci) {
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if (!LockoutGame.isActive(lockout)) return;
-        Player player = (Player) (Object) this;
-        if (player.level().isClientSide()) return;
-
-        lockout.getBoard().update(new StatisticUtil.StatisticChanged(stat, amount), player);
-    }
-
-    @Inject(method = "giveExperienceLevels", at = @At("TAIL"))
-    public void onExperienceLevelUp(int levels, CallbackInfo ci) {
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if (!LockoutGame.isActive(lockout)) return;
-        Player player = (Player) (Object) this;
-        if (player.level().isClientSide()) return;
-
-        lockout.getBoard().update(new ExperienceUtils.ReachedExperienceLevel(player.experienceLevel), player);
-    }
-
     @Inject(method = "blockUsingItem", at = @At(value = "TAIL"))
     public void onTakeShieldHit(ServerLevel level, LivingEntity attacker, DamageSource source, float damage, boolean fullyBlocked, CallbackInfo ci, @Local(name = "itemBlockingWith") ItemStack itemBlockingWith, @Local(name = "blocksAttacks") BlocksAttacks blockingData, @Local(name = "secondsToDisableBlocking") float secondsToDisableBlocking) {
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if (!LockoutGame.isActive(lockout)) return;
-        Player player = (Player) (Object) this;
-        if (player.level().isClientSide()) return;
-
-        lockout.getBoard().update(new ItemUtil.BlockedWithItem(itemBlockingWith, blockingData, secondsToDisableBlocking), player);
+        LockoutServer.updateLockout((Player)(Object)this, _ -> new ItemUtil.BlockedWithItem(itemBlockingWith, blockingData, secondsToDisableBlocking));
     }
 
 

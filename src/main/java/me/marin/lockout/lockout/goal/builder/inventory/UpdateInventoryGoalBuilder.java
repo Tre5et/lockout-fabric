@@ -8,6 +8,7 @@ import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,7 +28,7 @@ public class UpdateInventoryGoalBuilder<T,H> extends GoalBuilder<InventoryUtil.U
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                             @Override
-                            public boolean test(InventoryUtil.UpdatedInventory<BlockState> value) {
+                            public boolean test(InventoryUtil.UpdatedInventory<BlockState> value, ServerPlayer player) {
                                 return value.inventoryHolder() instanceof BlockState && value.inventoryHolder().getBlock().equals(block) &&
                                         value.items().stream().allMatch(s -> !s.isEmpty() && s.count() == value.maxSlotSize());
                             }
@@ -56,7 +57,7 @@ public class UpdateInventoryGoalBuilder<T,H> extends GoalBuilder<InventoryUtil.U
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                             @Override
-                            public boolean test(InventoryUtil.UpdatedInventory<EntityType<?>> value) {
+                            public boolean test(InventoryUtil.UpdatedInventory<EntityType<?>> value, ServerPlayer player) {
                                 return value.inventoryHolder() instanceof EntityType<?> && value.inventoryHolder().equals(entity) &&
                                         value.items().stream().allMatch(s -> !s.isEmpty() && s.count() == value.maxSlotSize());
                             }

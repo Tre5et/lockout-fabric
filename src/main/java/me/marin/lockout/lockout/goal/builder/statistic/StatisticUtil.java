@@ -1,10 +1,10 @@
 package me.marin.lockout.lockout.goal.builder.statistic;
 
-import net.minecraft.resources.Identifier;
+import net.minecraft.stats.Stat;
 
 public class StatisticUtil {
     public record StatisticChanged(
-            Identifier statistic,
+            Stat<?> statistic,
             int amount
     ) {}
 }

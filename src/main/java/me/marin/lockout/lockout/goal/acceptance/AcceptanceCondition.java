@@ -1,13 +1,15 @@
 package me.marin.lockout.lockout.goal.acceptance;
 
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public interface AcceptanceCondition<T> {
-    boolean test(T value);
+    boolean test(T value, ServerPlayer player);
 
     String getId();
 
@@ -15,12 +17,16 @@ public interface AcceptanceCondition<T> {
 
     List<TextureExtractor> getExamples();
 
-    default AndAcceptanceCondition<T> and(AcceptanceCondition<T> condition) {
-        return new AndAcceptanceCondition<>(this, condition);
-    }
-
     default <M> MappedAcceptanceCondition<T,M> map(Function<M,T> mapper) {
         return new MappedAcceptanceCondition<>(this, mapper);
+    }
+
+    default PlayerRequirementAcceptanceCondition<T> withPlayerRequirement(Predicate<ServerPlayer> playerRequirement) {
+        return new PlayerRequirementAcceptanceCondition<>(this, playerRequirement);
+    }
+
+    default AndAcceptanceCondition<T> and(AcceptanceCondition<T> condition) {
+        return new AndAcceptanceCondition<>(this, condition);
     }
 
     class MappedAcceptanceCondition<T,M> implements AcceptanceCondition<M> {
@@ -33,8 +39,38 @@ public interface AcceptanceCondition<T> {
         }
 
         @Override
-        public boolean test(M value) {
-            return original.test(mapper.apply(value));
+        public boolean test(M value, ServerPlayer player) {
+            return original.test(mapper.apply(value), player);
+        }
+
+        @Override
+        public String getId() {
+            return original.getId();
+        }
+
+        @Override
+        public String getName() {
+            return original.getName();
+        }
+
+        @Override
+        public List<TextureExtractor> getExamples() {
+            return original.getExamples();
+        }
+    }
+
+    class PlayerRequirementAcceptanceCondition<T> implements AcceptanceCondition<T> {
+        private final AcceptanceCondition<T> original;
+        private final Predicate<ServerPlayer> playerPredicate;
+
+        public PlayerRequirementAcceptanceCondition(AcceptanceCondition<T> original, Predicate<ServerPlayer> playerPredicate) {
+            this.original = original;
+            this.playerPredicate = playerPredicate;
+        }
+
+        @Override
+        public boolean test(T value, ServerPlayer player) {
+            return original.test(value, player) && playerPredicate.test(player);
         }
 
         @Override
@@ -63,8 +99,8 @@ public interface AcceptanceCondition<T> {
         }
 
         @Override
-        public boolean test(T value) {
-            return a.test(value) && b.test(value);
+        public boolean test(T value, ServerPlayer player) {
+            return a.test(value, player) && b.test(value, player);
         }
 
         @Override

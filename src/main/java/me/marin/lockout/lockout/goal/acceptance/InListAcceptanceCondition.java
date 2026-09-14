@@ -13,6 +13,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stat;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.FallLocation;
 import net.minecraft.world.effect.MobEffect;
@@ -57,7 +59,7 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
     }
 
     @Override
-    public boolean test(T value) {
+    public boolean test(T value, ServerPlayer player) {
         return acceptableElements.stream().anyMatch(e -> equalsFunction.test(value, e));
     }
 
@@ -176,16 +178,17 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
         );
     }
 
-    public static InListAcceptanceCondition<Identifier, Identifier> statistic(Supplier<TextureExtractor> extractor, Identifier... statistics) {
+    public static InListAcceptanceCondition<Stat<?>, Stat<?>> statistic(Supplier<TextureExtractor> extractor, Stat<?>... statistics) {
         return new InListAcceptanceCondition<>(
                 Arrays.asList(statistics),
                 a -> a,
-                BuilderUtil::identifierToId,
-                BuilderUtil::identifierToName,
+                s -> s.getName().toUpperCase(),
+                s -> BuilderUtil.idToName(s.getName()),
                 _ -> extractor.get()
         );
     }
 
+    @SafeVarargs
     public static InListAcceptanceCondition<ResourceKey<DamageType>, ResourceKey<DamageType>> damageType(Supplier<TextureExtractor> extractor, ResourceKey<DamageType>... types) {
         return new InListAcceptanceCondition<>(
                 Arrays.asList(types),

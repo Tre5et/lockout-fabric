@@ -1,9 +1,7 @@
 package me.marin.lockout.mixin.server;
 
-import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.builder.block.BlockUtil;
 import me.marin.lockout.server.LockoutServer;
-import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -19,11 +17,7 @@ public class BlockMixin {
 
     @Inject(method = "playerWillDestroy", at = @At("HEAD"))
     public void onBreak(Level world, BlockPos pos, BlockState state, Player player, CallbackInfoReturnable<BlockState> cir) {
-        if (player.level().isClientSide()) return;
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if (!LockoutGame.isActive(lockout)) return;
-
-        lockout.getBoard().update(new BlockUtil.MinedBlock(state), player);
+        LockoutServer.updateLockout(player, _ -> new BlockUtil.MinedBlock(state));
     }
 
 }

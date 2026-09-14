@@ -18,7 +18,7 @@ import java.util.function.Function;
 public interface ServerGoalProgress<U,T> extends GoalProgress<T> {
     Gson GSON = new GsonBuilder().create();
 
-    T update(T current, U update);
+    T update(T current, U update, ServerPlayer player);
 
     default <M> MappedServerGoalProgress<U,T,M> map(Function<M,U> mapper) {
         return new MappedServerGoalProgress<>(this, mapper);
@@ -34,8 +34,53 @@ public interface ServerGoalProgress<U,T> extends GoalProgress<T> {
         }
 
         @Override
-        public T update(T current, M update) {
-            return original.update(current, mapper.apply(update));
+        public T update(T current, M update, ServerPlayer player) {
+            U value = mapper.apply(update);
+            if(value == null) return current;
+            return original.update(current, value, player);
+        }
+
+        @Override
+        public Map<Integer, T> getProgress() {
+            return original.getProgress();
+        }
+
+        @Override
+        public T getDefaultProgress() {
+            return original.getDefaultProgress();
+        }
+
+        @Override
+        public T getCompletedProgress() {
+            return original.getCompletedProgress();
+        }
+
+        @Override
+        public boolean isCompleted(T value) {
+            return original.isCompleted(value);
+        }
+
+        @Override
+        public JsonElement serializeData(T value) {
+            return original.serializeData(value);
+        }
+
+        @Override
+        public T deserializeData(JsonElement element) throws IllegalArgumentException {
+            return original.deserializeData(element);
+        }
+    }
+
+    class MappedFromPlayerGoalProgress<M,T> implements ServerGoalProgress<M,T> {
+        private final ServerGoalProgress<ServerPlayer,T> original;
+
+        public MappedFromPlayerGoalProgress(ServerGoalProgress<ServerPlayer, T> original) {
+            this.original = original;
+        }
+
+        @Override
+        public T update(T current, M update, ServerPlayer player) {
+            return original.update(current, player, player);
         }
 
         @Override
@@ -74,10 +119,10 @@ public interface ServerGoalProgress<U,T> extends GoalProgress<T> {
         getProgress().put(teamIndex, getCompletedProgress());
     }
 
-    default boolean update(LockoutTeam team, U update, ServerLockoutGame lockout) {
+    default boolean update(LockoutTeam team, U update, ServerPlayer player, ServerLockoutGame lockout) {
         int teamIndex = lockout.getTeams().indexOf(team);
         T previousProgress = getProgress(teamIndex);
-        T newProgress = update(previousProgress, update);
+        T newProgress = update(previousProgress, update, player);
         if(previousProgress.equals(newProgress)) return false;
         getProgress().put(teamIndex, newProgress);
         return true;

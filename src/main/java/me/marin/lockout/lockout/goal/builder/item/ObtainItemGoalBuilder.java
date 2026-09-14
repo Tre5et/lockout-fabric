@@ -33,9 +33,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
+public class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick,T> {
     public ObtainItemGoalBuilder(String idPrefix, String namePrefix, GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Inventory, ?> progressSupplier) {
-        super(idPrefix, namePrefix, category, optionSupplier, progressSupplier.map(ServerPlayer::getInventory));
+        super(idPrefix, namePrefix, category, optionSupplier, GoalProgressSupplier.player(progressSupplier.map(ServerPlayer::getInventory)));
     }
 
     public ObtainItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Inventory, ?> progressSupplier) {
@@ -43,7 +43,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
     }
 
     @Override
-    public void reifiedUpdater(ServerPlayer update) {}
+    public void reifiedUpdater(BuilderUtil.Tick update) {}
 
     public static ObtainItemGoalBuilder<Void> all(Item... items) {
         return new ObtainItemGoalBuilder<>(
@@ -83,7 +83,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.<Void,ItemStack>any(_ -> List.of(new AcceptanceCondition<>() {
                     @Override
-                    public boolean test(ItemStack value) {
+                    public boolean test(ItemStack value, ServerPlayer player) {
                         return value.isStackable() && value.count() == value.getMaxStackSize();
                     }
 
@@ -132,7 +132,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
         );
     }
 
-    public static GoalBuilder<ServerPlayer, Void> allDistinct() {
+    public static GoalBuilder<BuilderUtil.Tick, Void> allDistinct() {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.distinct(_ -> List.of(new AnyAcceptanceCondition<>(
@@ -150,7 +150,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
         );
     }
 
-    public static GoalBuilder<ServerPlayer,DyeColor> dyedArmorPiece(Item item) {
+    public static GoalBuilder<BuilderUtil.Tick,DyeColor> dyedArmorPiece(Item item) {
         return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
                 GoalOptionSupplier.list("Color", DyeColor.VALUES, new TypeToken<>() {}, "COLORED", DyeColor::getName),
                 GoalProgressSupplier.<DyeColor,ItemStack>any(c -> List.of(new ItemWithComponentAcceptanceCondition(
@@ -175,7 +175,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
         );
     }
 
-    public static GoalBuilder<ServerPlayer,Void> allEnchantedArmor() {
+    public static GoalBuilder<BuilderUtil.Tick,Void> allEnchantedArmor() {
         return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.countMatching(_ -> List.of(new ItemWithComponentAcceptanceCondition(List.of(new ItemUtil.DataComponentCondition<>(
@@ -189,7 +189,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
         );
     }
 
-    public static GoalBuilder<ServerPlayer,Void> allDifferentArmorMaterial() {
+    public static GoalBuilder<BuilderUtil.Tick,Void> allDifferentArmorMaterial() {
         return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.distinct(_ -> List.of(InListAcceptanceCondition.item(ItemUtil.ARMOR_PIECE.toArray(Item[]::new))), v -> ItemUtil.getArmorMaterial(v.getItem()).orElse(null))
@@ -209,7 +209,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<ServerPlayer,T> {
                 );
     }
 
-    public static GoalBuilder<ServerPlayer,Void> allDifferentDyedLeatherArmor() {
+    public static GoalBuilder<BuilderUtil.Tick,Void> allDifferentDyedLeatherArmor() {
         return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.distinct(_ -> List.of(InListAcceptanceCondition.item(ItemUtil.ARMORS.get(ArmorMaterials.LEATHER).toArray(Item[]::new))), v -> {

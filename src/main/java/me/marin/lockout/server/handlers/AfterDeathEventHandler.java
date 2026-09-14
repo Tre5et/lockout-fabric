@@ -1,31 +1,18 @@
 package me.marin.lockout.server.handlers;
 
-import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.builder.damage.DamageUtil;
 import me.marin.lockout.server.LockoutServer;
-import me.marin.lockout.server.game.ServerLockoutGame;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.NonNull;
 
 
 public class AfterDeathEventHandler implements ServerLivingEntityEvents.AfterDeath {
     @Override
     public void afterDeath(@NonNull LivingEntity entity, @NonNull DamageSource source) {
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if (!LockoutGame.isActive(lockout)) return;
-        if (entity instanceof Player player && !lockout.isLockoutPlayer(player)) return;
-
-        if(entity instanceof Player player) {
-            lockout.getBoard().update(new DamageUtil.PlayerDied(source, player), player);
-        } else {
-            Entity killer = source.getEntity() == null ? source.getEntity() : source.getDirectEntity();
-            if(!(killer instanceof Player player) || !lockout.isLockoutPlayer(player)) return;
-            lockout.getBoard().update(new DamageUtil.KilledEntity(entity, source), player);
-        }
+        LockoutServer.updateLockout(entity, p -> new DamageUtil.PlayerDied(source, p));
+        LockoutServer.updateLockout(source.getEntity() == null ? source.getEntity() : source.getDirectEntity(), _ -> new DamageUtil.KilledEntity(entity, source));
 
         /*if (playerDied) {
             LockoutTeam team = lockout.getPlayerTeam(entity.getUUID());

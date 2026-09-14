@@ -13,6 +13,7 @@ import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
@@ -67,7 +68,7 @@ public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
                 GoalOptionSupplier.list("Color", DyeColor.VALUES, new TypeToken<>() {}, "Color", DyeColor::toString),
                 GoalProgressSupplier.simple(c -> new AcceptanceCondition<>() {
                     @Override
-                    public boolean test(DamageUtil.KilledEntity value) {
+                    public boolean test(DamageUtil.KilledEntity value, ServerPlayer player) {
                         return value.entity().getType() == EntityTypes.SHEEP && ((Sheep) value.entity()).getColor() == c;
                     }
 
@@ -98,8 +99,8 @@ public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
                     private final InListAcceptanceCondition<EntityType<?>, EntityType<?>> condition = InListAcceptanceCondition.entity(entities);
 
                     @Override
-                    public boolean test(DamageUtil.KilledEntity value) {
-                        return condition.test(value.entity().getType()) && value.source().typeHolder().is(type);
+                    public boolean test(DamageUtil.KilledEntity value, ServerPlayer player) {
+                        return condition.test(value.entity().getType(), player) && value.source().typeHolder().is(type);
                     }
 
                     @Override
@@ -129,8 +130,8 @@ public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
                     private final InListAcceptanceCondition<EntityType<?>, EntityType<?>> condition = InListAcceptanceCondition.entity(entities);
 
                     @Override
-                    public boolean test(DamageUtil.KilledEntity value) {
-                        return condition.test(value.entity().getType()) && value.entity().level().dimension() == dimension;
+                    public boolean test(DamageUtil.KilledEntity value, ServerPlayer player) {
+                        return condition.test(value.entity().getType(), player) && value.entity().level().dimension() == dimension;
                     }
 
                     @Override

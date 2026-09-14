@@ -2,6 +2,7 @@ package me.marin.lockout.server;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.*;
 import me.marin.lockout.game.GameState;
 import me.marin.lockout.game.LockoutGame;
@@ -17,7 +18,6 @@ import me.marin.lockout.server.goal.ServerGoal;
 import me.marin.lockout.server.goal.hint.ServerHint;
 import me.marin.lockout.server.handlers.*;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.minecraft.advancements.AdvancementHolder;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -25,9 +25,11 @@ import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -41,13 +43,15 @@ import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.TeamColor;
-import me.lucko.fabric.api.permissions.v0.Permissions;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -841,4 +845,27 @@ public class LockoutServer {
         return 1;
     }
 
+    public static void updateLockoutWithNearestPlayer(Level level, BlockPos position, LockoutUpdateFunction function) {
+        if(level.isClientSide()) return;
+        Optional<? extends Player> nearestPlayer = level.players().stream()
+                .min((p1, p2) -> {
+                    double dist1 = p1.blockPosition().distSqr(position);
+                    double dist2 = p2.blockPosition().distSqr(position);
+                    return Double.compare(dist1, dist2);
+                });
+        if(nearestPlayer.isEmpty()) return;
+        updateLockout(nearestPlayer.get(), function);
+    }
+
+    public static void updateLockout(Entity possiblePlayer, LockoutUpdateFunction function) {
+        if(!(possiblePlayer instanceof ServerPlayer player)) return;
+        ServerLockoutGame game = lockout;
+        if(!LockoutGame.isActive(game)) return;
+        Object update = function.update(player);
+        if(update != null) game.getBoard().update(update, player);
+    }
+
+    public interface LockoutUpdateFunction {
+        Object update(ServerPlayer player);
+    }
 }

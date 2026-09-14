@@ -8,6 +8,7 @@ import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureAnchor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.item.Item;
 
@@ -26,7 +27,7 @@ public class BlockWithItemGoalBuilder<T> extends GoalBuilder<ItemUtil.BlockedWit
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                     @Override
-                    public boolean test(ItemUtil.BlockedWithItem value) {
+                    public boolean test(ItemUtil.BlockedWithItem value, ServerPlayer player) {
                         return value.item().getItem().equals(item) && value.blockingData() != null && value.secondsToDisable() > 0;
                     }
 

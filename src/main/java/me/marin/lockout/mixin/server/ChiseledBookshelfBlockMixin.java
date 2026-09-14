@@ -1,9 +1,7 @@
 package me.marin.lockout.mixin.server;
 
-import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.builder.inventory.InventoryUtil;
 import me.marin.lockout.server.LockoutServer;
-import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,14 +22,11 @@ public class ChiseledBookshelfBlockMixin {
 
     @Inject(method = "useItemOn", at = @At("RETURN"))
     public void onUseWithItem(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
-        if (cir.getReturnValue() != InteractionResult.SUCCESS) return;
-        if (world.isClientSide()) return;
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if (!LockoutGame.isActive(lockout)) return;
-
-        ChiseledBookShelfBlockEntity blockEntity = (ChiseledBookShelfBlockEntity) world.getBlockEntity(pos);
-
-        lockout.getBoard().update(new InventoryUtil.UpdatedInventory<>(blockEntity.getBlockState(), blockEntity.getItems(), 1), player);
+        LockoutServer.updateLockout(player, _ -> {
+            if(!(cir.getReturnValue() instanceof InteractionResult.Success)) return null;
+            ChiseledBookShelfBlockEntity blockEntity = (ChiseledBookShelfBlockEntity) world.getBlockEntity(pos);
+            return new InventoryUtil.UpdatedInventory<>(blockEntity.getBlockState(), blockEntity.getItems(), 1);
+        });
     }
 
 }

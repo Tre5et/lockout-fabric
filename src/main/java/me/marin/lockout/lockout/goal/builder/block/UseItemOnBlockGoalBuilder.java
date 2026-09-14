@@ -10,6 +10,7 @@ import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.CornerIconTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -33,8 +34,8 @@ public class UseItemOnBlockGoalBuilder<T> extends GoalBuilder<BlockUtil.UsedItem
                     private final InListAcceptanceCondition<BlockState, Block> condition = InListAcceptanceCondition.block(blocks);
 
                     @Override
-                    public boolean test(BlockUtil.UsedItemOnBlock value) {
-                        return value.item().getItem() == item && condition.test(value.block());
+                    public boolean test(BlockUtil.UsedItemOnBlock value, ServerPlayer player) {
+                        return value.item().getItem() == item && condition.test(value.block(), player);
                     }
 
                     @Override
@@ -66,8 +67,8 @@ public class UseItemOnBlockGoalBuilder<T> extends GoalBuilder<BlockUtil.UsedItem
                     private final InListAcceptanceCondition<ItemStack, Item> condition = InListAcceptanceCondition.item(items);
 
                     @Override
-                    public boolean test(BlockUtil.UsedItemOnBlock value) {
-                        return value.block().getBlock().equals(block) && condition.test(value.item());
+                    public boolean test(BlockUtil.UsedItemOnBlock value, ServerPlayer player) {
+                        return value.block().getBlock().equals(block) && condition.test(value.item(), player);
                     }
 
                     @Override

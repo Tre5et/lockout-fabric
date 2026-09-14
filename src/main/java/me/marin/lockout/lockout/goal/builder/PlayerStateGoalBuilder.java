@@ -13,20 +13,20 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class PlayerStateGoalBuilder<T> extends GoalBuilder<ServerPlayer, T> {
+public class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> {
     public PlayerStateGoalBuilder(GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ServerPlayer, ?> progressSupplier) {
-        super("PLAYER", "", category, optionSupplier, progressSupplier);
+        super("PLAYER", "", category, optionSupplier, GoalProgressSupplier.player(progressSupplier));
     }
 
     @Override
-    public void reifiedUpdater(ServerPlayer update) {}
+    public void reifiedUpdater(BuilderUtil.Tick update) {}
 
     public static PlayerStateGoalBuilder<Void> emptyHungerBar() {
         return new PlayerStateGoalBuilder<>(GoalCategory.MISC_ACTIONS,
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                     @Override
-                    public boolean test(ServerPlayer value) {
+                    public boolean test(ServerPlayer value, ServerPlayer player) {
                         return value.getFoodData().getFoodLevel() == 0;
                     }
 
@@ -56,7 +56,7 @@ public class PlayerStateGoalBuilder<T> extends GoalBuilder<ServerPlayer, T> {
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                     @Override
-                    public boolean test(ServerPlayer value) {
+                    public boolean test(ServerPlayer value, ServerPlayer player) {
                         return value.getY() > height && value.level().dimension() == dimension;
                     }
 

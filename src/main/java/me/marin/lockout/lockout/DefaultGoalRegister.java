@@ -2,9 +2,8 @@ package me.marin.lockout.lockout;
 
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.builder.PlayerStateGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.advancement.ObtainAdvancementGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.block.UseItemOnBlockGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.block.MineBlockGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.block.UseItemOnBlockGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.KillEntityGoal;
@@ -12,6 +11,8 @@ import me.marin.lockout.lockout.goal.builder.entity.*;
 import me.marin.lockout.lockout.goal.builder.experience.ReachExperienceLevelGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.inventory.UpdateInventoryGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.*;
+import me.marin.lockout.lockout.goal.builder.miscellanious.ObtainAdvancementGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.miscellanious.RideEntityGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.statistic.ChangeStatisticGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.statistic.HaveStatusEffectGoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
@@ -19,6 +20,7 @@ import me.marin.lockout.lockout.goal.group.GoalGroups;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
@@ -33,6 +35,7 @@ import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import oshi.util.tuples.Pair;
@@ -143,6 +146,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(ConsumeItemGoalBuilder.any(Items.PUMPKIN_PIE).customName(_ -> "Eat Pumpkin Pie"));
         INSTANCE.register(ConsumeItemGoalBuilder.any(Items.RABBIT_STEW).customName(_ -> "Eat Rabbit Stew"));
         INSTANCE.register(ConsumeItemGoalBuilder.any(Items.SUSPICIOUS_STEW).customName(_ -> "Eat Suspicious Stew"));
+        INSTANCE.register(ConsumeItemGoalBuilder.whileHavingEffect(Items.MILK_BUCKET).customName(_ -> "Remove Effect using Milk Bucket"));
 
         INSTANCE.register(PlayerStateGoalBuilder.emptyHungerBar());
         INSTANCE.register(PlayerStateGoalBuilder.heightAbove(320, ServerLevel.OVERWORLD).customName(_ -> "Reach height limit"));
@@ -283,19 +287,21 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainItemGoalBuilder.atLeast(4, 7, ItemUtil.WORKSTATION.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Workstations"));
         INSTANCE.register(ObtainItemGoalBuilder.allDistinct());
 
-        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.FLOWER_POT), Stats.POT_FLOWER).customName(_ -> "Pot any Flower"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.CAKE), Stats.EAT_CAKE_SLICE).customName(_ -> "Eat a slice of Cake"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.NOTE_BLOCK), Stats.TUNE_NOTEBLOCK).customName(_ -> "Tune a Note Block"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.JUKEBOX), Stats.PLAY_RECORD).customName(_ -> "Play a Music Disk in a Jukebox"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.CAULDRON), Stats.FILL_CAULDRON).customName(_ -> "Fill a Cauldron with Water"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.LOOM), Stats.INTERACT_WITH_LOOM).customName(_ -> "Use a Loom"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.GRINDSTONE), Stats.INTERACT_WITH_GRINDSTONE).customName(_ -> "Use a Grindstone"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.STONECUTTER), Stats.INTERACT_WITH_STONECUTTER).customName(_ -> "Use a Stonecutter"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.SMITHING_TABLE), Stats.INTERACT_WITH_SMITHING_TABLE).customName(_ -> "Use a Smithing Table"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.ANVIL), Stats.INTERACT_WITH_ANVIL).customName(_ -> "Use an Anvil"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.count(500, 3000, 100, i -> i*100, i -> i / 100, "Distance to Boat", "Distance Boated", () -> ItemTextureExtractor.item(Items.OAK_BOAT), Stats.BOAT_ONE_CM).customName(d -> "Boat " + d + "m"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.count(500, 2000, 100, i -> i*100, i -> i / 100, "Distance to Sprint", "Distance Sprinted", () -> GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/mob_effect/speed.png")), Stats.SPRINT_ONE_CM).customName(d -> "Sprint " + d + "m"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.any(() -> ItemTextureExtractor.item(Items.CAULDRON), Stats.CLEAN_ARMOR, Stats.CLEAN_BANNER, Stats.CLEAN_SHULKER_BOX).customName(_ -> "Clean an Item in a Cauldron"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.custom(() -> ItemTextureExtractor.item(Items.FLOWER_POT), Stats.POT_FLOWER).customName(_ -> "Pot any Flower"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.custom(() -> ItemTextureExtractor.item(Items.CAKE), Stats.EAT_CAKE_SLICE).customName(_ -> "Eat a slice of Cake"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.custom(() -> ItemTextureExtractor.item(Items.NOTE_BLOCK), Stats.TUNE_NOTEBLOCK).customName(_ -> "Tune a Note Block"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.custom(() -> ItemTextureExtractor.item(Items.JUKEBOX), Stats.PLAY_RECORD).customName(_ -> "Play a Music Disk in a Jukebox"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.custom(() -> ItemTextureExtractor.item(Items.CAULDRON), Stats.FILL_CAULDRON).customName(_ -> "Fill a Cauldron with Water"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.custom(() -> ItemTextureExtractor.item(Items.LOOM), Stats.INTERACT_WITH_LOOM).customName(_ -> "Use a Loom"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.custom(() -> ItemTextureExtractor.item(Items.GRINDSTONE), Stats.INTERACT_WITH_GRINDSTONE).customName(_ -> "Use a Grindstone"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.custom(() -> ItemTextureExtractor.item(Items.STONECUTTER), Stats.INTERACT_WITH_STONECUTTER).customName(_ -> "Use a Stonecutter"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.custom(() -> ItemTextureExtractor.item(Items.SMITHING_TABLE), Stats.INTERACT_WITH_SMITHING_TABLE).customName(_ -> "Use a Smithing Table"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.custom(() -> ItemTextureExtractor.item(Items.ANVIL), Stats.INTERACT_WITH_ANVIL).customName(_ -> "Use an Anvil"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.countCustom(500, 3000, 100, i -> i*100, i -> i / 100, "Distance to Boat", "Distance Boated", () -> ItemTextureExtractor.item(Items.OAK_BOAT), Stats.BOAT_ONE_CM).customName(d -> "Boat " + d + "m"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.countCustom(500, 2000, 100, i -> i*100, i -> i / 100, "Distance to Sprint", "Distance Sprinted", () -> GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/mob_effect/speed.png")), Stats.SPRINT_ONE_CM).customName(d -> "Sprint " + d + "m"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.custom(() -> ItemTextureExtractor.item(Items.CAULDRON), Stats.CLEAN_ARMOR, Stats.CLEAN_BANNER, Stats.CLEAN_SHULKER_BOX).customName(_ -> "Clean an Item in a Cauldron"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.item(Stats.ITEM_USED, Items.GOAT_HORN).customName(_ -> "Toot a Goat Horn"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.itemWhileRiding(Stats.ITEM_USED, Items.CARROT_ON_A_STICK, EntityTypes.PIG).customName(_ -> "Use Carrot on a Stick to boost a Pig"));
 
         INSTANCE.register(MineBlockGoalBuilder.any(Blocks.SPAWNER, Blocks.TRIAL_SPAWNER).customName(_ -> "Mine a Spawner")
                 .require(GoalRequirements.structure("Spawner Structure", BuiltinStructures.MINESHAFT, BuiltinStructures.MINESHAFT_MESA, BuiltinStructures.STRONGHOLD, BuiltinStructures.TRIAL_CHAMBERS)));
@@ -317,6 +323,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.BRUSH, Blocks.SUSPICIOUS_GRAVEL, Blocks.SUSPICIOUS_SAND).customName(_ -> "Brush Suspicious Block").require(GoalRequirements.SUSPICIOUS));
         INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.GLOW_INK_SAC, Blocks.CRIMSON_SIGN, Blocks.WARPED_SIGN).customName(_ -> "Make a Nether Wood Sign Glow"));
         INSTANCE.register(UseItemOnBlockGoalBuilder.anyItem(Blocks.CANDLE, Items.FLINT_AND_STEEL, Items.FIRE_CHARGE).customName(_ -> "Light a Candle"));
+        INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.PAINTING, BuiltInRegistries.BLOCK.stream().toArray(Block[]::new)).customName(_ -> "Light a Candle"));
 
         INSTANCE.register(ObtainItemGoalBuilder.armorPiece(ItemUtil.ARMORS.get(ArmorMaterials.CHAINMAIL).toArray(Item[]::new)).customName(_ -> "Wear a Chain Armor Piece"));
         INSTANCE.register(ObtainItemGoalBuilder.dyedArmorPiece(Items.LEATHER_HELMET));
@@ -352,8 +359,12 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(BlockWithItemGoalBuilder.disabled(Items.SHIELD));
 
+        INSTANCE.register(UseItemOnEntityGoalBuilder.of(Items.ITEM_FRAME, EntityTypes.ITEM_FRAME));
+        INSTANCE.register(UseItemOnEntityGoalBuilder.of(Items.WOLF_ARMOR, EntityTypes.WOLF));
         INSTANCE.register(UseItemOnEntityGoalBuilder.nameTag("Dinnerbone", EntityTypes.GHAST));
         INSTANCE.register(UseItemOnEntityGoalBuilder.nameTag("jeb_", EntityTypes.SHEEP));
+
+        INSTANCE.register(RideEntityGoalBuilder.any(EntityTypes.MINECART));
 
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));

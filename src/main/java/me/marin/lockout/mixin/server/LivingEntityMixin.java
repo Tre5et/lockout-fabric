@@ -1,16 +1,12 @@
 package me.marin.lockout.mixin.server;
 
-import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.builder.damage.DamageUtil;
 import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
 import me.marin.lockout.server.LockoutServer;
-import me.marin.lockout.server.game.ServerLockoutGame;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,23 +19,15 @@ public class LivingEntityMixin {
 
     @Inject(method = "hurtServer", at = @At("RETURN"))
     public void onDamage(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if (!LockoutGame.isActive(lockout)) return;
-        if (!(source.getEntity() instanceof Player player) || !cir.getReturnValue()) return;
-        if (player.level().isClientSide()) return;
-
-        lockout.getBoard().update(new DamageUtil.DealtDamage(amount), player);
+        LockoutServer.updateLockout(source.getEntity(), _ -> {
+            if(!cir.getReturnValue()) return null;
+            return new DamageUtil.DealtDamage(amount);
+        });
     }
 
     @Inject(method = "onEquippedItemBroken", at = @At("HEAD"))
     public void onEquipmentBreak(ItemStack brokenItem, EquipmentSlot inSlot, CallbackInfo ci) {
-        if (!((Object)this instanceof ServerPlayer player)) return;
-        if (player.level().isClientSide()) return;
-
-        ServerLockoutGame lockout = LockoutServer.lockout;
-        if (!LockoutGame.isActive(lockout)) return;
-
-        lockout.getBoard().update(new ItemUtil.BrokenItem(brokenItem.getItem()), player);
+        LockoutServer.updateLockout((LivingEntity)(Object)this, _ -> new ItemUtil.BrokenItem(brokenItem.getItem()));
     }
 
 }

@@ -14,6 +14,7 @@ import me.marin.lockout.server.game.ServerLockoutGame;
 import me.marin.lockout.server.goal.builder.ServerGoalBuildParameters;
 import me.marin.lockout.server.goal.hint.ServerHint;
 import me.marin.lockout.server.goal.progress.ServerGoalProgress;
+import net.minecraft.server.level.ServerPlayer;
 import oshi.util.tuples.Pair;
 
 import java.util.ArrayList;
@@ -38,8 +39,8 @@ public class ServerGoal<U> extends Goal {
         this.reifiedUpdater = parameters.getReifiedUpdater();
     }
 
-    public void updateProgress(LockoutTeam team, U update, ServerLockoutGame lockout) {
-        handlingProgress(team, lockout, () -> progress.update(team, update, lockout));
+    public void updateProgress(LockoutTeam team, U update, ServerPlayer player, ServerLockoutGame lockout) {
+        handlingProgress(team, lockout, () -> progress.update(team, update, player, lockout));
     }
 
     @SuppressWarnings("unchecked")
@@ -49,9 +50,9 @@ public class ServerGoal<U> extends Goal {
         return update;
     }
 
-    public void updateProgressUnchecked(LockoutTeam team, Object update, ServerLockoutGame lockout) {
+    public void updateProgressUnchecked(LockoutTeam team, Object update, ServerPlayer player, ServerLockoutGame lockout) {
         try {
-            updateProgress(team, convertUpdate(update), lockout);
+            updateProgress(team, convertUpdate(update), player, lockout);
         } catch (ClassCastException ignored) {}
     }
 

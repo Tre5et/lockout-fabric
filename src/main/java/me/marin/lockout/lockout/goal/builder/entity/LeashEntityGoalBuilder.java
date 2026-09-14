@@ -2,6 +2,7 @@ package me.marin.lockout.lockout.goal.builder.entity;
 
 import me.marin.lockout.lockout.goal.acceptance.AnyAcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
+import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
@@ -9,7 +10,6 @@ import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureAnchor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Leashable;
@@ -18,9 +18,9 @@ import net.minecraft.world.item.Items;
 import java.util.List;
 import java.util.Objects;
 
-public class LeashEntityGoalBuilder<T> extends GoalBuilder<ServerPlayer, T> {
+public class LeashEntityGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> {
     public LeashEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, List<Leashable>, ?> progressSupplier) {
-        super("LEASH", "Leash", GoalCategory.LEASHING, optionSupplier, progressSupplier.map(Leashable::leashableLeashedTo));
+        super("LEASH", "Leash", GoalCategory.LEASHING, optionSupplier, GoalProgressSupplier.player(progressSupplier.map(Leashable::leashableLeashedTo)));
     }
 
     @Override
@@ -29,7 +29,7 @@ public class LeashEntityGoalBuilder<T> extends GoalBuilder<ServerPlayer, T> {
     }
 
     @Override
-    public void reifiedUpdater(ServerPlayer update) {}
+    public void reifiedUpdater(BuilderUtil.Tick update) {}
 
     public static LeashEntityGoalBuilder<Void> any(EntityType<?>... entities) {
         return new LeashEntityGoalBuilder<>(

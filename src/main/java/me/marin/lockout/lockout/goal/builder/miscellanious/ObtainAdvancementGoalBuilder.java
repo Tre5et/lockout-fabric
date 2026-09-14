@@ -1,4 +1,4 @@
-package me.marin.lockout.lockout.goal.builder.advancement;
+package me.marin.lockout.lockout.goal.builder.miscellanious;
 
 import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
@@ -10,6 +10,7 @@ import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +40,7 @@ public class ObtainAdvancementGoalBuilder<T> extends GoalBuilder<AdvancementHold
                 GoalOptionSupplier.integer("Advancements to obtain", min, max, step),
                 GoalProgressSupplier.unique("Advancements obtained", _ -> new AcceptanceCondition<>() {
                     @Override
-                    public boolean test(Identifier value) {
+                    public boolean test(Identifier value, ServerPlayer player) {
                         return !value.getPath().startsWith("recipes/") && !value.getPath().endsWith("/root");
                     }
 

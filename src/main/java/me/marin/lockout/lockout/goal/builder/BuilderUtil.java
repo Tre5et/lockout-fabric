@@ -43,4 +43,6 @@ public class BuilderUtil {
     public static <T> List<T> getDistinctRandomElements(List<T> list, int count) {
         return shuffled(list).subList(0,count);
     }
+
+    public record Tick() {}
 }

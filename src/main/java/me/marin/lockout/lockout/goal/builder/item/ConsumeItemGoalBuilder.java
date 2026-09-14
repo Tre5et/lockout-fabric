@@ -15,6 +15,9 @@ public class ConsumeItemGoalBuilder<T> extends GoalBuilder<ItemUtil.ConsumedItem
         super("CONSUME", "Consume", GoalCategory.EATING_DRINKING, optionSupplier, progressSupplier.map(ItemUtil.ConsumedItem::itemStack));
     }
 
+    @Override
+    public void reifiedUpdater(ItemUtil.ConsumedItem update) {}
+
     public static ConsumeItemGoalBuilder<Void> any(Item... items) {
         return new ConsumeItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
@@ -43,6 +46,10 @@ public class ConsumeItemGoalBuilder<T> extends GoalBuilder<ItemUtil.ConsumedItem
         );
     }
 
-    @Override
-    public void reifiedUpdater(ItemUtil.ConsumedItem update) {}
+    public static ConsumeItemGoalBuilder<Void> whileHavingEffect(Item... items) {
+        return new ConsumeItemGoalBuilder<>(
+                GoalOptionSupplier.NONE,
+                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.item(items).withPlayerRequirement(p -> !p.getActiveEffects().isEmpty()))
+        );
+    }
 }

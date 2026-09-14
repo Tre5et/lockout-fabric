@@ -23,13 +23,17 @@
         "server.FlintAndSteelItemMixin",
         "server.FoodComponentMixin",
         "server.GlowInkSacItemMixin",
+        "server.HangingEntityItem",
+        "server.ItemFrameMixin",
         "server.LivingEntityMixin",
         "server.NameTagItemMixin",
         "server.PlayerAdvancementTrackerMixin",
         "server.PlayerInventoryAccessor",
         "server.PlayerMixin",
         "server.PotionContentsComponentMixin",
+        "server.ServerPlayerMixin",
         "server.TameAnimalTriggerMixin",
+        "server.WolfMixin",
         "server.ZombifiedPiglinMixin"
     ],
     "client": [
