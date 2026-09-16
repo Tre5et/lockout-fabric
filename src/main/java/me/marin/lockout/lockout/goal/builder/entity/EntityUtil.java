@@ -73,7 +73,7 @@ public class EntityUtil {
     }
 
     public static Identifier getBabyEntityTexture(EntityType<?> entity) {
-        return getEntityTexture(entity).withSuffix("_baby");
+        return Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/entity/" + entity.toShortString() + "_baby.png");
     }
 
     public static TextureExtractor getEntityTextureExtractor(EntityType<?> entity) {
