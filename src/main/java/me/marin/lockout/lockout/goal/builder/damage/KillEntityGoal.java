@@ -1,17 +1,16 @@
 package me.marin.lockout.lockout.goal.builder.damage;
 
 import com.google.gson.reflect.TypeToken;
-import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
+import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageType;
@@ -84,7 +83,7 @@ public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
 
                     @Override
                     public List<TextureExtractor> getExamples() {
-                        return List.of(GenericTextureExtractor.texture(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/entity/sheep_" + c.getName() + ".png")));
+                        return List.of(EntityUtil.getEntityTextureExtractor(EntityTypes.SHEEP).overlay(ItemTextureExtractor.item(Items.DYE.pick(c)), TextureAnchor.BOTTOM_RIGHT, 10));
                     }
                 })
         );
@@ -115,9 +114,7 @@ public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
 
                     @Override
                     public List<TextureExtractor> getExamples() {
-                        return condition.getExamples().stream().map(e -> new StackingTextureExtractor(
-                                List.of(e, icon.get()), 6
-                        )).collect(Collectors.toUnmodifiableList());
+                        return condition.getExamples().stream().map(e -> e.overlay(icon.get(), TextureAnchor.BOTTOM_RIGHT, 10)).toList();
                     }
                 })
         );

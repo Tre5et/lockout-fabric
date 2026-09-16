@@ -3,7 +3,9 @@ package me.marin.lockout.lockout.goal.builder.entity;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -11,11 +13,57 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class EntityUtil {
+    public static final Map<EntityType<?>, Item> ENTITY_ITEM_OVERRIDES = Map.ofEntries(
+            Map.entry(EntityTypes.ARMOR_STAND, Items.ARMOR_STAND),
+            Map.entry(EntityTypes.CUSHION, Items.CUSHION.red()),
+            Map.entry(EntityTypes.ITEM_FRAME, Items.ITEM_FRAME),
+            Map.entry(EntityTypes.GLOW_ITEM_FRAME, Items.ITEM_FRAME),
+            Map.entry(EntityTypes.PAINTING, Items.PAINTING),
+            Map.entry(EntityTypes.ARROW, Items.ARROW),
+            Map.entry(EntityTypes.BLOCK_DISPLAY, Items.BARRIER),
+            Map.entry(EntityTypes.EGG, Items.EGG),
+            Map.entry(EntityTypes.ITEM, Items.STRUCTURE_VOID),
+            Map.entry(EntityTypes.ITEM_DISPLAY, Items.STRUCTURE_VOID),
+            Map.entry(EntityTypes.MINECART, Items.MINECART),
+            Map.entry(EntityTypes.SNOWBALL, Items.SNOWBALL),
+            Map.entry(EntityTypes.CHEST_MINECART, Items.CHEST_MINECART),
+            Map.entry(EntityTypes.FURNACE_MINECART, Items.FURNACE_MINECART),
+            Map.entry(EntityTypes.HOPPER_MINECART, Items.HOPPER_MINECART),
+            Map.entry(EntityTypes.COMMAND_BLOCK_MINECART, Items.COMMAND_BLOCK_MINECART),
+            Map.entry(EntityTypes.TNT_MINECART, Items.TNT_MINECART),
+            Map.entry(EntityTypes.WIND_CHARGE, Items.WIND_CHARGE),
+            Map.entry(EntityTypes.OAK_BOAT, Items.OAK_BOAT),
+            Map.entry(EntityTypes.OAK_CHEST_BOAT, Items.OAK_CHEST_BOAT),
+            Map.entry(EntityTypes.SPRUCE_BOAT, Items.SPRUCE_BOAT),
+            Map.entry(EntityTypes.SPRUCE_CHEST_BOAT, Items.SPRUCE_CHEST_BOAT),
+            Map.entry(EntityTypes.BIRCH_BOAT, Items.BIRCH_BOAT),
+            Map.entry(EntityTypes.BIRCH_CHEST_BOAT, Items.BIRCH_CHEST_BOAT),
+            Map.entry(EntityTypes.JUNGLE_BOAT, Items.JUNGLE_BOAT),
+            Map.entry(EntityTypes.JUNGLE_CHEST_BOAT, Items.JUNGLE_CHEST_BOAT),
+            Map.entry(EntityTypes.ACACIA_BOAT, Items.ACACIA_BOAT),
+            Map.entry(EntityTypes.ACACIA_CHEST_BOAT, Items.ACACIA_CHEST_BOAT),
+            Map.entry(EntityTypes.DARK_OAK_BOAT, Items.DARK_OAK_BOAT),
+            Map.entry(EntityTypes.DARK_OAK_CHEST_BOAT, Items.DARK_OAK_CHEST_BOAT),
+            Map.entry(EntityTypes.MANGROVE_BOAT, Items.MANGROVE_BOAT),
+            Map.entry(EntityTypes.MANGROVE_CHEST_BOAT, Items.MANGROVE_CHEST_BOAT),
+            Map.entry(EntityTypes.CHERRY_BOAT, Items.CHERRY_BOAT),
+            Map.entry(EntityTypes.CHERRY_CHEST_BOAT, Items.CHERRY_CHEST_BOAT),
+            Map.entry(EntityTypes.PALE_OAK_BOAT, Items.PALE_OAK_BOAT),
+            Map.entry(EntityTypes.PALE_OAK_CHEST_BOAT, Items.PALE_OAK_CHEST_BOAT),
+            Map.entry(EntityTypes.POPLAR_BOAT, Items.POPLAR_BOAT),
+            Map.entry(EntityTypes.POPLAR_CHEST_BOAT, Items.POPLAR_CHEST_BOAT),
+            Map.entry(EntityTypes.BAMBOO_RAFT, Items.BAMBOO_RAFT),
+            Map.entry(EntityTypes.BAMBOO_CHEST_RAFT, Items.BAMBOO_CHEST_RAFT)
+    );
+
     public static String getEntityName(EntityType<?> entity) {
         return BuilderUtil.idToName(entity.toShortString());
     }
@@ -29,7 +77,15 @@ public class EntityUtil {
     }
 
     public static TextureExtractor getEntityTextureExtractor(EntityType<?> entity) {
-        return GenericTextureExtractor.texture(getEntityTexture(entity));
+        if(ENTITY_ITEM_OVERRIDES.containsKey(entity)) return ItemTextureExtractor.item(ENTITY_ITEM_OVERRIDES.get(entity));
+        Identifier custom = getEntityTexture(entity);
+        try {
+            Minecraft.getInstance().getResourceManager().getResourceOrThrow(custom);
+        } catch (IOException e) {
+            Optional<Item> egg = getSpawnEgg(entity);
+            if(egg.isPresent()) return ItemTextureExtractor.item(egg.get());
+        }
+        return GenericTextureExtractor.texture(custom);
     }
 
     public static TextureExtractor getBabyEntityTextureExtractor(EntityType<?> entity) {

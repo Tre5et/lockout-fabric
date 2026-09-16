@@ -6,16 +6,25 @@ import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
+import me.marin.lockout.lockout.goal.rendering.texture.*;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.*;
 
 public class BreakItemGoalBuilder<T> extends GoalBuilder<ItemUtil.BrokenItem, T> {
     public BreakItemGoalBuilder(GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier) {
         super("BREAK", "Break", category, optionSupplier, progressSupplier.map(i -> i.item().getDefaultInstance()));
+    }
+
+    @Override
+    public TextureExtractor applyTextureExtractor(TextureExtractor textureExtractor, T option) {
+        ItemStack stack = Items.GOLDEN_SWORD.getDefaultInstance();
+        stack.set(DataComponents.DAMAGE, 27);
+        return new StackingTextureExtractor(List.of(textureExtractor, new ItemDecorationTextureExtractor(stack)), 0);
     }
 
     public static BreakItemGoalBuilder<Void> any(Item... items) {
@@ -32,12 +41,7 @@ public class BreakItemGoalBuilder<T> extends GoalBuilder<ItemUtil.BrokenItem, T>
         return new BreakItemGoalBuilder<>(
                 category,
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> ItemWithComponentAcceptanceCondition.hasComponents(finalComponents.toArray(DataComponentType[]::new)).applyAdditional(s -> {
-                    if(s.has(DataComponents.MAX_DAMAGE)) {
-                        int target = (int)(s.get(DataComponents.MAX_DAMAGE) * 0.85f);
-                        s.set(DataComponents.DAMAGE, target);
-                    }
-                }))
+                GoalProgressSupplier.simple(_ -> ItemWithComponentAcceptanceCondition.hasComponents(finalComponents.toArray(DataComponentType[]::new)))
         );
     }
 
