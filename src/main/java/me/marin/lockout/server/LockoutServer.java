@@ -154,18 +154,7 @@ public class LockoutServer {
         ServerLifecycleEvents.SERVER_STOPPING.register((_) -> isInitialized = false);
 
         ServerLifecycleEvents.AFTER_SAVE.register((server, _, _) -> {
-            Path worldPath = server.getWorldPath(LevelResource.DATA);
-            Path filePath = Path.of(worldPath.toAbsolutePath().toString(), "lockout", "game.json");
-            try {
-                if(lockout == null) {
-                    Files.delete(filePath);
-                } else {
-                    lockout.save(filePath);
-                }
-                Lockout.log("Saved lockout state.");
-            } catch (IOException e) {
-                Lockout.log("Failed to save current lockout state: " + e.getMessage());
-            }
+            saveLockout(server);
         });
 
         ServerLivingEntityEvents.AFTER_DEATH.register(new AfterDeathEventHandler());
@@ -186,10 +175,14 @@ public class LockoutServer {
 
             sendAllAdvancements(player);
 
-            if (!LockoutGame.isActive(lockout)) return;
+            if (lockout == null || !lockout.getState().isShouldSave()) return;
 
             if (lockout.isLockoutPlayer(player.getUUID())) {
-                player.setGameMode(GameType.SURVIVAL);
+                if(lockout.getState().isShouldTick()) {
+                    player.setGameMode(GameType.SURVIVAL);
+                } else {
+                    player.setGameMode(GameType.ADVENTURE);
+                }
             } else {
                 player.setGameMode(GameType.SPECTATOR);
                 player.sendSystemMessage(Component.literal("You are spectating this match.").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
@@ -200,7 +193,6 @@ public class LockoutServer {
             for(ServerGoal<?> goal : lockout.getBoard().getGoals()) {
                 goal.getProgress().send(goal.getId(), List.of(player));
             }
-            ServerPlayNetworking.send(player, StartLockoutPayload.INSTANCE);
             ServerLockoutTeam team = lockout.getPlayerTeam(player.getUUID());
             if (team != null) {
                 team.sendStoredHints(player);
@@ -286,6 +278,57 @@ public class LockoutServer {
         startLockout(teams);
 
         return 1;
+    }
+
+    public static int pause(CommandContext<CommandSourceStack> context) {
+        if(!lockout.getState().isActive()) {
+            context.getSource().sendFailure(Component.literal("Lockout is not running."));
+            return 0;
+        }
+        lockout.setState(GameState.PAUSED);
+        server.tickRateManager().setFrozen(true);
+        server.getPlayerList().getPlayers().forEach(player -> {
+            if (lockout.isLockoutPlayer(player.getUUID())) {
+                player.setGameMode(GameType.ADVENTURE);
+            }
+        });
+        server.getPlayerList().broadcastSystemMessage(Component.literal("Paused the game."), false);
+        lockout.syncGameState();
+        saveLockout(server);
+        return 1;
+    }
+
+    public static int unpause(CommandContext<CommandSourceStack> context) {
+        if(lockout.getState() != GameState.PAUSED) {
+            context.getSource().sendFailure(Component.literal("Lockout is not paused."));
+            return 0;
+        }
+        lockout.setState(GameState.RUNNING);
+        server.tickRateManager().setFrozen(false);
+        server.getPlayerList().getPlayers().forEach(player -> {
+            if (lockout.isLockoutPlayer(player.getUUID())) {
+                player.setGameMode(GameType.SURVIVAL);
+            }
+        });
+        server.getPlayerList().broadcastSystemMessage(Component.literal("Unpaused the game."), false);
+        lockout.syncGameState();
+        saveLockout(server);
+        return 1;
+    }
+
+    public static void saveLockout(MinecraftServer server) {
+        Path worldPath = server.getWorldPath(LevelResource.DATA);
+        Path filePath = Path.of(worldPath.toAbsolutePath().toString(), "lockout", "game.json");
+        try {
+            if(lockout == null) {
+                Files.delete(filePath);
+            } else {
+                lockout.save(filePath);
+            }
+            Lockout.log("Saved lockout state.");
+        } catch (IOException e) {
+            Lockout.log("Failed to save current lockout state: " + e.getMessage());
+        }
     }
 
     private static void startLockout(List<ServerLockoutTeam> teams) {

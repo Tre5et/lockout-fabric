@@ -1,7 +1,6 @@
 package me.marin.lockout.server.handlers;
 
 import me.marin.lockout.Lockout;
-import me.marin.lockout.LockoutRunnable;
 import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
@@ -44,11 +43,7 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
                 ServerLockoutGame lockout = ServerLockoutGame.load(Path.of(server.getWorldPath(LevelResource.DATA).toAbsolutePath().toString(), "lockout", "game.json"));
                 if(lockout != null) {
                     LockoutServer.lockout = lockout;
-                    if(lockout.getTicks() >= 0) {
-                        server.tickRateManager().setFrozen(false);
-                    } else {
-                        ((LockoutRunnable)LockoutServer::startLockoutRunning).runTaskAfter(-lockout.getTicks());
-                    }
+                    server.tickRateManager().setFrozen(lockout.getState().isShouldTick());
                 }
                 Lockout.log("Loaded lockout game state.");
             } catch (IOException e) {

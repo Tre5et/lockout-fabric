@@ -1,7 +1,6 @@
 package me.marin.lockout.server.handlers;
 
 import me.marin.lockout.LockoutRunnable;
-import me.marin.lockout.game.GameState;
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -33,7 +32,7 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
             lockout.getBoard().update(new BuilderUtil.Tick(), player);
         }
 
-        if(lockout.getState() != GameState.FINISHED) {
+        if(lockout.getState().isShouldTick()) {
             lockout.tick();
             if (lockout.getTicks() % 20 == 0) {
                 for (ServerPlayer player : server.getPlayerList().getPlayers()) {

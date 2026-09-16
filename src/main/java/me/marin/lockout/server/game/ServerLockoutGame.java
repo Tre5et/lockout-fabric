@@ -127,6 +127,12 @@ public class ServerLockoutGame extends LockoutGame<ServerLockoutBoard> {
         return new UpdateTimerPayload(ticks);
     }
 
+    public void syncGameState() {
+        for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
+            ServerPlayNetworking.send(serverPlayer, getTeamsGoalsPacket());
+        }
+    }
+
     public LockoutGamePayload getTeamsGoalsPacket() {
         return new LockoutGamePayload(
                 teams.stream().collect(Collectors.toUnmodifiableList()),
@@ -160,9 +166,7 @@ public class ServerLockoutGame extends LockoutGame<ServerLockoutBoard> {
         }
 
         // Update clients with new team list (includes (Forfeited) text)
-        for (ServerPlayer serverPlayer : LockoutServer.server.getPlayerList().getPlayers()) {
-            ServerPlayNetworking.send(serverPlayer, getTeamsGoalsPacket());
-        }
+        syncGameState();
     }
 
     public List<? extends LockoutTeam> getNonForfeitedTeams() {
@@ -174,7 +178,7 @@ public class ServerLockoutGame extends LockoutGame<ServerLockoutBoard> {
     }
 
     public void save(Path path) throws IOException {
-        if(!getState().isActive()) {
+        if(!getState().isShouldSave()) {
             Files.delete(path);
         } else {
             if(!Files.exists(path)) {

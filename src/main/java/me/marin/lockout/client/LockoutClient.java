@@ -16,6 +16,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -87,7 +88,7 @@ public class LockoutClient implements ClientModInitializer {
                     .filter(t -> t.getPlayerIds().stream().anyMatch(id -> id.equals(Minecraft.getInstance().player.getUUID())))
                     .findAny().orElse(null);
 
-            boolean previouslyStarted = lockout != null && lockout.getState().isActive();
+            boolean previouslyStarted = lockout != null && lockout.getState().isShouldSave();
             long previousTicks = lockout != null ? lockout.getTicks() : 0;
 
             Minecraft client = context.client();
@@ -228,8 +229,16 @@ public class LockoutClient implements ClientModInitializer {
         }
         hintKeys = hintMappings;
 
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((client, _) -> {
+            client.gui.hud.setTimes(0, 2, 0);
+        });
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             CURRENT_TICK++;
+
+            if (lockout != null && lockout.getState() == GameState.PAUSED) {
+                client.gui.hud.setTitle(Component.literal("The game is paused."));
+            }
 
             boolean wasPressed = false;
             while (openBoardKey.consumeClick()) {

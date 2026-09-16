@@ -53,6 +53,18 @@ public interface Command {
                 );
     }
 
+    static ArgumentBuilder<CommandSourceStack,?> pause() {
+        return Commands.literal("pause")
+                .requires(PERMISSIONS)
+                .executes(LockoutServer::pause);
+    }
+
+    static ArgumentBuilder<CommandSourceStack,?> unpause() {
+        return Commands.literal("unpause")
+                .requires(PERMISSIONS)
+                .executes(LockoutServer::unpause);
+    }
+
     static ArgumentBuilder<CommandSourceStack,?> board() {
         return Commands.literal("board")
                 .requires(PERMISSIONS)
@@ -133,6 +145,8 @@ public interface Command {
 
     CommandNode<CommandSourceStack> SERVER_COMMAND = Commands.literal("lockout")
             .then(start())
+            .then(pause())
+            .then(unpause())
             .then(board())
             .then(goals())
             .then(giveCompasses())
