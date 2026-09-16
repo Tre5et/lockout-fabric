@@ -30,6 +30,7 @@
         "server.PlayerAdvancementTrackerMixin",
         "server.PlayerInventoryAccessor",
         "server.PlayerMixin",
+        "server.PlayerPredicateMixin",
         "server.PotionContentsComponentMixin",
         "server.ServerPlayerMixin",
         "server.TameAnimalTriggerMixin",

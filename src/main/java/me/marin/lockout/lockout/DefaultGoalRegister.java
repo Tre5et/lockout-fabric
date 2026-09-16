@@ -7,6 +7,7 @@ import me.marin.lockout.lockout.goal.builder.block.UseItemOnBlockGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.KillEntityGoal;
+import me.marin.lockout.lockout.goal.builder.damage.TakeDamageGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.*;
 import me.marin.lockout.lockout.goal.builder.experience.ReachExperienceLevelGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.inventory.UpdateInventoryGoalBuilder;
@@ -58,6 +59,8 @@ public class DefaultGoalRegister {
         INSTANCE.register(BreakItemGoalBuilder.withComponent(GoalCategory.TOOLS, DataComponents.TOOL)
                 .customName(_ -> "Break any tool")
                 .group(GoalGroups.TOOLS));
+        INSTANCE.register(BreakItemGoalBuilder.any(Items.FISHING_ROD));
+        INSTANCE.register(BreakItemGoalBuilder.any(Items.SHIELD));
 
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.ALLAY).require(GoalRequirements.structure("Allay Structure", BuiltinStructures.PILLAGER_OUTPOST, BuiltinStructures.WOODLAND_MANSION)));
         INSTANCE.register(BreedAnimalGoalBuilder.any(EntityTypes.ARMADILLO).require(GoalRequirements.biome("Savanna", Biomes.SAVANNA, Biomes.SAVANNA_PLATEAU)));
@@ -94,6 +97,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(CraftItemGoalBuilder.unique(20, 100, 10));
 
         INSTANCE.register(DealDamageGoalBuilder.total(100, 500, 25));
+        INSTANCE.register(TakeDamageGoalBuilder.total(50, 300, 10));
 
         INSTANCE.register(ObtainItemGoalBuilder.shieldWithBanner());
 
@@ -217,9 +221,11 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(ObtainItemGoalBuilder.colored(Items.CONCRETE, 64, "CONCRETE"));
         INSTANCE.register(ObtainItemGoalBuilder.colored(Items.WOOL, 64, "WOOL"));
+        INSTANCE.register(ObtainItemGoalBuilder.colored(Items.HARNESS, 1, "HARNESS"));
         INSTANCE.register(ObtainItemGoalBuilder.withCount(Items.COARSE_DIRT, 64));
         INSTANCE.register(ObtainItemGoalBuilder.anyFullStack());
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.ACTIVATOR_RAIL));
+        INSTANCE.register(ObtainItemGoalBuilder.withCount(Items.GLOW_LICHEN, 16));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.GOLDEN_SWORD, Items.GOLDEN_AXE, Items.GOLDEN_PICKAXE, Items.GOLDEN_SHOVEL, Items.GOLDEN_HOE, Items.GOLDEN_SPEAR).customName(_ -> "Obtain all Gold Tools"));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.IRON_SWORD, Items.IRON_AXE, Items.IRON_PICKAXE, Items.IRON_SHOVEL, Items.IRON_HOE, Items.IRON_SPEAR).customName(_ -> "Obtain all Iron Tools"));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.STONE_SWORD, Items.STONE_AXE, Items.STONE_PICKAXE, Items.STONE_SHOVEL, Items.STONE_HOE, Items.STONE_SPEAR).customName(_ -> "Obtain all Stone Tools"));
@@ -323,7 +329,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.BRUSH, Blocks.SUSPICIOUS_GRAVEL, Blocks.SUSPICIOUS_SAND).customName(_ -> "Brush Suspicious Block").require(GoalRequirements.SUSPICIOUS));
         INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.GLOW_INK_SAC, Blocks.CRIMSON_SIGN, Blocks.WARPED_SIGN).customName(_ -> "Make a Nether Wood Sign Glow"));
         INSTANCE.register(UseItemOnBlockGoalBuilder.anyItem(Blocks.CANDLE, Items.FLINT_AND_STEEL, Items.FIRE_CHARGE).customName(_ -> "Light a Candle"));
-        INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.PAINTING, BuiltInRegistries.BLOCK.stream().toArray(Block[]::new)).customName(_ -> "Light a Candle"));
+        INSTANCE.register(UseItemOnBlockGoalBuilder.anyBlock(Items.PAINTING, BuiltInRegistries.BLOCK.stream().toArray(Block[]::new)).customName(_ -> "Place a Painting").customId(_ -> "USE_PAINTING_ON_BLOCK").customTextureExtractor(_ -> ItemTextureExtractor.item(Items.PAINTING)));
 
         INSTANCE.register(ObtainItemGoalBuilder.armorPiece(ItemUtil.ARMORS.get(ArmorMaterials.CHAINMAIL).toArray(Item[]::new)).customName(_ -> "Wear a Chain Armor Piece"));
         INSTANCE.register(ObtainItemGoalBuilder.dyedArmorPiece(Items.LEATHER_HELMET));
@@ -359,10 +365,13 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(BlockWithItemGoalBuilder.disabled(Items.SHIELD));
 
-        INSTANCE.register(UseItemOnEntityGoalBuilder.of(Items.ITEM_FRAME, EntityTypes.ITEM_FRAME));
-        INSTANCE.register(UseItemOnEntityGoalBuilder.of(Items.WOLF_ARMOR, EntityTypes.WOLF));
+        INSTANCE.register(UseItemOnEntityGoalBuilder.of(Items.ITEM_FRAME, EntityTypes.ITEM_FRAME).customName(_ -> "Place Item Frame in Item Frame"));
+        INSTANCE.register(UseItemOnEntityGoalBuilder.of(Items.WOLF_ARMOR, EntityTypes.WOLF).customName(_ -> "Put Wolf Armor on Wolf"));
         INSTANCE.register(UseItemOnEntityGoalBuilder.nameTag("Dinnerbone", EntityTypes.GHAST));
         INSTANCE.register(UseItemOnEntityGoalBuilder.nameTag("jeb_", EntityTypes.SHEEP));
+        INSTANCE.register(UseItemOnEntityGoalBuilder.unique(5, 20, 1, Items.SPYGLASS).customName(n -> "Spy on " + n + " Unique Mobs"));
+        INSTANCE.register(UseItemOnEntityGoalBuilder.of(Items.SPYGLASS, EntityTypes.IRON_GOLEM).customName(_ -> "Spy on Iron Golem"));
+        INSTANCE.register(UseItemOnEntityGoalBuilder.of(Items.SPYGLASS, EntityTypes.PIGLIN_BRUTE).customName(_ -> "Spy on Piglin Brute"));
 
         INSTANCE.register(RideEntityGoalBuilder.any(EntityTypes.MINECART));
 

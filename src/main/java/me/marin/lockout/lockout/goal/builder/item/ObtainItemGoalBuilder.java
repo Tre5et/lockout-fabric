@@ -108,7 +108,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick,T> {
     public static ObtainItemGoalBuilder<DyeColor> colored(ColorCollection<Item> item, Integer count, String id) {
         ObtainItemGoalBuilder<DyeColor> builder = new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.list("Color", DyeColor.VALUES, new TypeToken<>() {}, "COLORED", DyeColor::getName),
-                GoalProgressSupplier.<DyeColor,Pair<Item,Integer>>any(c -> List.of(InListAcceptanceCondition.itemWithCount(new Pair<>(c == null ? null : item.white(), count)))).map(ItemUtil::collectCounts).withStaticId(id)
+                GoalProgressSupplier.<DyeColor,Pair<Item,Integer>>any(c -> List.of(InListAcceptanceCondition.itemWithCount(new Pair<>(c == null ? null : item.pick(c), count)))).map(ItemUtil::collectCounts).withStaticId(id)
         );
         builder.require(GoalRequirements.COLORS);
         return builder;

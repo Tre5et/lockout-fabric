@@ -23,6 +23,11 @@ public class LivingEntityMixin {
             if(!cir.getReturnValue()) return null;
             return new DamageUtil.DealtDamage(amount);
         });
+
+        LockoutServer.updateLockout((LivingEntity)(Object)this, _ -> {
+            if(!cir.getReturnValue()) return null;
+            return new DamageUtil.TakenDamage(amount);
+        });
     }
 
     @Inject(method = "onEquippedItemBroken", at = @At("HEAD"))

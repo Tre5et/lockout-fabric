@@ -14,7 +14,7 @@ import net.minecraft.world.item.Items;
 
 public class RideEntityGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> {
     public RideEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityType<?>, ?> progressSupplier) {
-        super("RIDE", "Ride", GoalCategory.RIDING, optionSupplier, GoalProgressSupplier.player(progressSupplier.map(p -> p.getControlledVehicle() == null ? null : p.getControlledVehicle().getType())));
+        super("RIDE", "Ride", GoalCategory.RIDING, optionSupplier, GoalProgressSupplier.player(progressSupplier.map(p -> p.getVehicle() == null ? null : p.getVehicle().getType())));
     }
 
     @Override

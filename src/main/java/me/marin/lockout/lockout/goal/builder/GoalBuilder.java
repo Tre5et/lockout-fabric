@@ -149,6 +149,7 @@ public abstract class GoalBuilder<U,T> {
     }
 
     public String getStaticId() {
+        if(customIdProvider != null) return customIdProvider.get(null);
         return formatId(idPrefix + "_" + optionSupplier.getStaticId() + "_" + progressSupplier.getStaticId());
     }
 

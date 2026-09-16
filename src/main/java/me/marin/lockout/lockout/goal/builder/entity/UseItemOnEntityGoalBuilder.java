@@ -85,4 +85,11 @@ public class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUtil.UsedIt
                 })
         ).customName(_ -> "Name " + InListAcceptanceCondition.entity(entities).getName() + " '" + name + "'");
     }
+
+    public static UseItemOnEntityGoalBuilder<Integer> unique(int min, int max, int step, Item... items) {
+        return new UseItemOnEntityGoalBuilder<>(
+                GoalOptionSupplier.integer("Entities to use on", min, max, step),
+                GoalProgressSupplier.unique("Entities used on", _ -> InListAcceptanceCondition.item(items).map(EntityUtil.UsedItemOnEntity::item), EntityUtil.UsedItemOnEntity::entity)
+        );
+    }
 }
