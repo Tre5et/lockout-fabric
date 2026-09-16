@@ -1,9 +1,7 @@
 package me.marin.lockout.mixin.server;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import me.marin.lockout.Lockout;
-import me.marin.lockout.lockout.Goal;
-import me.marin.lockout.lockout.goals.misc.GetLaunchedByGeyserGoal;
+import me.marin.lockout.lockout.goal.builder.miscellanious.CustomEvent;
 import me.marin.lockout.server.LockoutServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -20,15 +18,6 @@ public abstract class PotentSulfurBlockEntityMixin {
     // Inject into LAUNCH_ENTITY_TICKER
     @Inject(method = "lambda$static$5", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getAbilities()Lnet/minecraft/world/entity/player/Abilities;"))
     private static void onLaunchPlayer(Level level, BlockPos pos, BlockState state, PotentSulfurBlockEntity entity, CallbackInfo ci, @Local(name = "player") Player player) {
-        Lockout lockout = LockoutServer.lockout;
-        if (!Lockout.isLockoutRunning(lockout)) return;
-
-        for (Goal goal : lockout.getBoard().getGoals()) {
-            if (goal == null) continue;
-            if (goal.isCompleted()) continue;
-            if (goal instanceof GetLaunchedByGeyserGoal) {
-                lockout.completeGoal(goal, player);
-            }
-        }
+        LockoutServer.updateLockout(player, _ -> CustomEvent.GEYSER_LAUNCH);
     }
 }

@@ -149,7 +149,8 @@ public class ItemUtil {
             Items.MANGROVE_HANGING_SIGN,
             Items.BAMBOO_HANGING_SIGN,
             Items.CRIMSON_HANGING_SIGN,
-            Items.WARPED_HANGING_SIGN
+            Items.WARPED_HANGING_SIGN,
+            Items.POPLAR_HANGING_SIGN
     );
 
     public static final List<Item> ARMOR_TRIM = List.of(
@@ -204,7 +205,8 @@ public class ItemUtil {
             Items.CHERRY_SAPLING,
             Items.DARK_OAK_SAPLING,
             Items.PALE_OAK_SAPLING,
-            Items.MANGROVE_PROPAGULE
+            Items.MANGROVE_PROPAGULE,
+            Items.POPLAR_SAPLING
     );
 
     public static final List<Item> SEED = List.of(

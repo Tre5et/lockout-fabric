@@ -1,7 +1,7 @@
 package me.marin.lockout.lockout;
 
 import me.marin.lockout.Constants;
-import me.marin.lockout.lockout.goal.builder.PlayerStateGoalBuilder;
+import me.marin.lockout.lockout.goal.builder.miscellanious.PlayerStateGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.block.MineBlockGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.block.UseItemOnBlockGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
@@ -12,6 +12,8 @@ import me.marin.lockout.lockout.goal.builder.entity.*;
 import me.marin.lockout.lockout.goal.builder.experience.ReachExperienceLevelGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.inventory.UpdateInventoryGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.*;
+import me.marin.lockout.lockout.goal.builder.miscellanious.CustomEvent;
+import me.marin.lockout.lockout.goal.builder.miscellanious.CustomEventGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.miscellanious.ObtainAdvancementGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.miscellanious.RideEntityGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.statistic.ChangeStatisticGoalBuilder;
@@ -277,6 +279,8 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.SMOOTH_BASALT));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.SMOOTH_QUARTZ_STAIRS));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.SOUL_LANTERN));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.SULFUR_CUBE_BUCKET).require(GoalRequirements.biome("Sulfur Caves", Biomes.SULFUR_CAVES)));
+        INSTANCE.register(ObtainItemGoalBuilder.all(Items.SHELF_MUSHROOM).require(GoalRequirements.biome("Dappled Forest", Biomes.DAPPLED_FOREST)));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.SPONGE).require(GoalRequirements.structure("Ocean Monument", BuiltinStructures.OCEAN_MONUMENT)));
         INSTANCE.register(ObtainItemGoalBuilder.all(Items.WRITTEN_BOOK).customName(_ -> "Write a Book"));
         INSTANCE.register(ObtainItemGoalBuilder.any(Items.SUSPICIOUS_SAND, Items.SUSPICIOUS_GRAVEL).customName(_ -> "Obtain Suspicious Block")
@@ -374,7 +378,11 @@ public class DefaultGoalRegister {
         INSTANCE.register(UseItemOnEntityGoalBuilder.of(Items.SPYGLASS, EntityTypes.PIGLIN_BRUTE).customName(_ -> "Spy on Piglin Brute"));
 
         INSTANCE.register(RideEntityGoalBuilder.any(EntityTypes.MINECART));
+        INSTANCE.register(RideEntityGoalBuilder.any(EntityTypes.CUSHION).customName(_ -> "Sit on a Cushion"));
 
+        INSTANCE.register(CustomEventGoalBuilder.of(CustomEvent.GEYSER_LAUNCH).require(GoalRequirements.biome("Sulfur Caves", Biomes.SULFUR_CAVES)));
+
+        INSTANCE.register(PlayerStateGoalBuilder.sleepIn(Blocks.STRAW_BED));
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));

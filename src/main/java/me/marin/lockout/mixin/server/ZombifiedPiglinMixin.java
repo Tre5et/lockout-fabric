@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ZombifiedPiglinMixin {
     @Inject(method = "setPersistentAngerTarget", at = @At("HEAD"))
     public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> angryAt, CallbackInfo ci) {
+        if(angryAt == null) return;
         LockoutServer.updateLockout(angryAt.getEntity(((ZombifiedPiglin)(Object)this).level(), LivingEntity.class), _ -> new EntityUtil.AngeredEntity(EntityTypes.ZOMBIFIED_PIGLIN));
     }
 }

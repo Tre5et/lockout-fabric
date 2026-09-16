@@ -1,7 +1,10 @@
-package me.marin.lockout.lockout.goal.builder;
+package me.marin.lockout.lockout.goal.builder.miscellanious;
 
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
+import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
+import me.marin.lockout.lockout.goal.builder.BuilderUtil;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
@@ -10,6 +13,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 
@@ -81,6 +86,38 @@ public class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> 
                     }
                 })
 
+        );
+    }
+
+    public static PlayerStateGoalBuilder<Void> sleepIn(Block... blocks) {
+        return new PlayerStateGoalBuilder<>(
+                GoalCategory.MISC_ACTIONS,
+                GoalOptionSupplier.NONE,
+                GoalProgressSupplier.simple(_ -> new AcceptanceCondition<ServerPlayer>() {
+                    private final InListAcceptanceCondition<BlockState, Block> condition = InListAcceptanceCondition.block(blocks);
+
+                    @Override
+                    public boolean test(ServerPlayer value, ServerPlayer player) {
+                        if(!value.isSleeping() || value.getSleepingPos().isEmpty()) return false;
+                        BlockState block = value.level().getBlockState(value.getSleepingPos().get());
+                        return condition.test(block, player);
+                    }
+
+                    @Override
+                    public String getId() {
+                        return "SLEEP_" + condition.getId();
+                    }
+
+                    @Override
+                    public String getName() {
+                        return "Sleep in " + condition.getName();
+                    }
+
+                    @Override
+                    public List<TextureExtractor> getExamples() {
+                        return condition.getExamples();
+                    }
+                })
         );
     }
 }
