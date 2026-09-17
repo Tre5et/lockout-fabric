@@ -32,7 +32,7 @@ public class EndServerTickEventHandler implements ServerTickEvents.EndTick {
             lockout.getBoard().update(new BuilderUtil.Tick(), player);
         }
 
-        if(lockout.getState().isShouldTick()) {
+        if(lockout.getState().isShouldTrackTime()) {
             lockout.tick();
             if (lockout.getTicks() % 20 == 0) {
                 for (ServerPlayer player : server.getPlayerList().getPlayers()) {

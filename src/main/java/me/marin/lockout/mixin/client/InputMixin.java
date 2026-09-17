@@ -1,9 +1,11 @@
 package me.marin.lockout.mixin.client;
 
 import me.marin.lockout.client.LockoutClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.ClientInput;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec2;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,9 +19,10 @@ public class InputMixin extends ClientInput {
     public void tick(CallbackInfo ci) {
         if (LockoutClient.lockout == null) return;
         if (LockoutClient.playerTeam == null) return;
+        if (Minecraft.getInstance().player == null) return;
 
         KeyboardInput input = (KeyboardInput) (Object) this;
-        if (!LockoutClient.lockout.getState().isActive()) {
+        if (!LockoutClient.lockout.getState().isShouldTick() && Minecraft.getInstance().player.gameMode() == GameType.ADVENTURE) {
             input.keyPresses = new Input(false, false, false, false, false, input.keyPresses.shift(), false);
             moveVector = new Vec2(0, 0);
         }

@@ -60,6 +60,17 @@ public class ServerLockoutGame extends LockoutGame<ServerLockoutBoard> {
         return (ServerLockoutTeam) super.getPlayerTeam(playerId);
     }
 
+    @Override
+    public void setState(GameState state) {
+        setState(state, false);
+    }
+
+    public void setState(GameState state, boolean broadcast) {
+        super.setState(state);
+        getState().applyServer(LockoutServer.server, this, broadcast);
+        syncGameState();
+    }
+
     public boolean isLockoutPlayer(Player player) {
         return isLockoutPlayer(player.getUUID());
     }

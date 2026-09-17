@@ -175,18 +175,12 @@ public class LockoutServer {
 
             sendAllAdvancements(player);
 
-            if (lockout == null || !lockout.getState().isShouldSave()) return;
-
-            if (lockout.isLockoutPlayer(player.getUUID())) {
-                if(lockout.getState().isShouldTick()) {
-                    player.setGameMode(GameType.SURVIVAL);
-                } else {
-                    player.setGameMode(GameType.ADVENTURE);
-                }
-            } else {
+            if (lockout == null) {
                 player.setGameMode(GameType.SPECTATOR);
-                player.sendSystemMessage(Component.literal("You are spectating this match.").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-            }
+                return;
+            };
+
+            lockout.getState().applyPlayer(player, lockout, true);
 
             ServerPlayNetworking.send(player, lockout.getTeamsGoalsPacket());
             ServerPlayNetworking.send(player, lockout.getUpdateTimerPacket());
@@ -281,19 +275,12 @@ public class LockoutServer {
     }
 
     public static int pause(CommandContext<CommandSourceStack> context) {
-        if(!lockout.getState().isActive()) {
+        if(!lockout.getState().isShouldTick()) {
             context.getSource().sendFailure(Component.literal("Lockout is not running."));
             return 0;
         }
         lockout.setState(GameState.PAUSED);
-        server.tickRateManager().setFrozen(true);
-        server.getPlayerList().getPlayers().forEach(player -> {
-            if (lockout.isLockoutPlayer(player.getUUID())) {
-                player.setGameMode(GameType.ADVENTURE);
-            }
-        });
         server.getPlayerList().broadcastSystemMessage(Component.literal("Paused the game."), false);
-        lockout.syncGameState();
         saveLockout(server);
         return 1;
     }
@@ -304,14 +291,7 @@ public class LockoutServer {
             return 0;
         }
         lockout.setState(GameState.RUNNING);
-        server.tickRateManager().setFrozen(false);
-        server.getPlayerList().getPlayers().forEach(player -> {
-            if (lockout.isLockoutPlayer(player.getUUID())) {
-                player.setGameMode(GameType.SURVIVAL);
-            }
-        });
         server.getPlayerList().broadcastSystemMessage(Component.literal("Unpaused the game."), false);
-        lockout.syncGameState();
         saveLockout(server);
         return 1;
     }
@@ -361,13 +341,6 @@ public class LockoutServer {
             serverPlayer.getStats().sendStats(serverPlayer);
             // Clear all advancements
             AdvancementCommands.Action.REVOKE.perform(serverPlayer, server.getAdvancements().getAllAdvancements(), false);
-
-            if (allLockoutPlayers.contains(serverPlayer.getUUID())) {
-                serverPlayer.setGameMode(GameType.ADVENTURE);
-            } else {
-                serverPlayer.setGameMode(GameType.SPECTATOR);
-                serverPlayer.sendSystemMessage(Component.literal("You are spectating this match.").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-            }
         }
 
         ServerLevel world = server.getLevel(ServerLevel.OVERWORLD);
@@ -403,6 +376,7 @@ public class LockoutServer {
 
         lockout = new ServerLockoutGame(lockoutBoard, teams);
         lockout.setTicks(-20L * LockoutConfig.getInstance().startTime); // see Lockout#ticks
+        lockout.setState(GameState.STARTING, true);
 
         compassHandler = new CompassItemHandler(allLockoutPlayers, playerManager);
 
@@ -432,15 +406,11 @@ public class LockoutServer {
 
     public static void startLockoutRunning() {
         if(lockout == null) return;
-        server.tickRateManager().setFrozen(false);
         lockout.setState(GameState.RUNNING);
 
-        List<UUID> playing = lockout.getTeams().stream().flatMap(t -> t.getPlayerIds().stream()).toList();
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             ServerPlayNetworking.send(player, StartLockoutPayload.INSTANCE);
-            if (playing.contains(player.getUUID())) {
-                player.setGameMode(GameType.SURVIVAL);
-
+            if (lockout.isLockoutPlayer(player)) {
                 // Update waypoint color to match team color with variation for team members
                 LockoutTeam playerTeam = lockout.getPlayerTeam(player.getUUID());
                 if (playerTeam != null) {

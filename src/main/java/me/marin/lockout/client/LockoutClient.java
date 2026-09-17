@@ -16,7 +16,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -31,6 +30,7 @@ import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.sounds.SoundEvents;
@@ -157,10 +157,17 @@ public class LockoutClient implements ClientModInitializer {
                             break;
                         }
                     }
+                    client.gui.hud.resetTitleTimes();
                     if (didIWin) {
                         client.player.playSound(SoundEvents.PILLAGER_CELEBRATE, 2f, 1f);
+                        if(payload.winners().length > 1) {
+                            client.gui.hud.setTitle(Component.literal("Its a Tie!").withColor(TextColor.AQUA));
+                        } else {
+                            client.gui.hud.setTitle(Component.literal("You Win!").withColor(TextColor.GREEN));
+                        }
                     } else {
                         client.player.playSound(SoundEvents.WARDEN_DEATH, 2f, 1f);
+                        client.gui.hud.setTitle(Component.literal("You Lost!").withColor(TextColor.DARK_RED));
                     }
                 }
             });
@@ -229,14 +236,11 @@ public class LockoutClient implements ClientModInitializer {
         }
         hintKeys = hintMappings;
 
-        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register((client, _) -> {
-            client.gui.hud.setTimes(0, 2, 0);
-        });
-
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             CURRENT_TICK++;
 
             if (lockout != null && lockout.getState() == GameState.PAUSED) {
+                client.gui.hud.setTimes(0, 2, 0);
                 client.gui.hud.setTitle(Component.literal("The game is paused."));
             }
 

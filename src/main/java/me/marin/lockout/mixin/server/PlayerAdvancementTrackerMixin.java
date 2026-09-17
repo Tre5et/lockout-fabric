@@ -28,7 +28,7 @@ public abstract class PlayerAdvancementTrackerMixin {
         ServerLockoutGame lockout = LockoutServer.lockout;
 
         // Prevent spectator advancements from showing in chat
-        if (lockout == null || !lockout.getState().isActive() || lockout.isLockoutPlayer(player.getUUID())) {
+        if (lockout == null || !lockout.getState().isShouldTick() || lockout.isLockoutPlayer(player.getUUID())) {
             instance.broadcastSystemMessage(message, overlay);
         }
     }
@@ -43,7 +43,7 @@ public abstract class PlayerAdvancementTrackerMixin {
     @Inject(method = "award", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/AdvancementProgress;isDone()Z", ordinal = 1, shift = At.Shift.BEFORE) )
     public void onAdvancementProgress(AdvancementHolder advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) {
         ServerLockoutGame lockout = LockoutServer.lockout;
-        if (lockout == null || !lockout.getState().isActive()) return;
+        if (lockout == null || !lockout.getState().isShouldTick()) return;
 
         if (!advancement.id().equals(ADVENTURING_TIME)) return;
         Identifier biomeId = Identifier.parse(criterionName);

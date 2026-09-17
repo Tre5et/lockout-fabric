@@ -53,7 +53,7 @@ public abstract class PlayerMixin {
         ServerLockoutGame lockout = LockoutServer.lockout;
         if (lockout == null) return;
         if (world.isClientSide()) return;
-        if (!lockout.getState().isActive()) {
+        if (!lockout.getState().isShouldTick()) {
             cir.setReturnValue(false);
         }
     }

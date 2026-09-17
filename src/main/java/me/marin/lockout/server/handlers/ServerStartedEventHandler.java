@@ -43,7 +43,7 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
                 ServerLockoutGame lockout = ServerLockoutGame.load(Path.of(server.getWorldPath(LevelResource.DATA).toAbsolutePath().toString(), "lockout", "game.json"));
                 if(lockout != null) {
                     LockoutServer.lockout = lockout;
-                    server.tickRateManager().setFrozen(lockout.getState().isShouldTick());
+                    lockout.getState().applyServer(server, lockout, false);
                 }
                 Lockout.log("Loaded lockout game state.");
             } catch (IOException e) {

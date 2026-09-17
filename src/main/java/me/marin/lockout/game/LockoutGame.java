@@ -45,7 +45,7 @@ public abstract class LockoutGame<T extends LockoutBoard<?>> {
     }
 
     public static boolean isActive(LockoutGame<?> game) {
-        return game != null && game.getState().isActive();
+        return game != null && game.getState().isShouldTick();
     }
 
     public Map<LockoutTeam, Integer> getPoints() {
