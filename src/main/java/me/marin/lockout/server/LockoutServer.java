@@ -178,7 +178,7 @@ public class LockoutServer {
             if (lockout == null) {
                 player.setGameMode(GameType.SPECTATOR);
                 return;
-            };
+            }
 
             lockout.getState().applyPlayer(player, lockout, true);
 
@@ -244,6 +244,7 @@ public class LockoutServer {
                     ServerPlayer teamMember = server.getPlayerList().getPlayer(memberId);
                     if (teamMember != null) {
                         ServerPlayNetworking.send(teamMember, resultPayload);
+                        hint.onPropagateToPlayerPayload(resultPayload, server, teamMember);
                     }
                 }
             } else {

@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import java.util.UUID;
 
 import static me.marin.lockout.server.LockoutServer.waitingForVersionPacketPlayersMap;
 

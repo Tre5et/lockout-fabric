@@ -10,7 +10,6 @@ import net.minecraft.network.chat.TextColor;
 
 public interface ClientHint<T> extends Hint<T> {
     Component getTitle();
-    Component extractData(T data);
     T getData();
     void setData(T data);
     String getError();
@@ -33,7 +32,7 @@ public interface ClientHint<T> extends Hint<T> {
         if(error != null) return extractError(error);
         T data = getData();
         if(data == null) return extractUnresolved(key);
-        return extractResolved(data);
+        return Component.empty().withColor(TextColor.AQUA).append(extractResolved(data, key));
     }
 
     default Component extractUnresolved(KeyMapping key) {
@@ -44,7 +43,5 @@ public interface ClientHint<T> extends Hint<T> {
         return Component.empty().withColor(TextColor.RED).append(getTitle()).append(" ERROR: ").append(error);
     }
 
-    default Component extractResolved(T data) {
-        return Component.empty().withColor(TextColor.AQUA).append(getTitle()).append(" ").append(extractData(data));
-    }
+    Component extractResolved(T data, KeyMapping key);
 }

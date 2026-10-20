@@ -45,8 +45,13 @@ public class ServerLockoutTeam extends LockoutTeam {
 
     public void sendStoredHints(ServerPlayer player) {
         resolvedHints.forEach((goalId, hints) ->
-                hints.forEach((hintIndex, data) ->
-                        ServerPlayNetworking.send(player, new HintResultPayload(goalId, hintIndex, Optional.ofNullable(data), Optional.empty()))));
+                hints.forEach((hintIndex, data) -> {
+                    HintResultPayload payload = new HintResultPayload(goalId, hintIndex, Optional.ofNullable(data), Optional.empty());
+                    ServerPlayNetworking.send(player, payload);
+                    LockoutServer.lockout.getBoard().getGoals().stream().filter(g -> Objects.equals(g.getId(), goalId)).findAny()
+                            .ifPresent(g -> g.getHints().get(hintIndex).onPropagateToPlayerPayload(payload, LockoutServer.server, player));
+                }
+        ));
     }
 
     @Override
