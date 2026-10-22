@@ -4,6 +4,7 @@ import me.marin.lockout.client.goal.hint.PositionClientHint;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.server.goal.hint.BiomeServerHint;
 import me.marin.lockout.server.goal.hint.StructureServerHint;
+import me.marin.lockout.util.LockoutMapDecorationTypes;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.DyeColor;
@@ -72,18 +73,18 @@ public class GoalRequirements {
     );
 
     public static final GoalRequirement<Object> JUNGLE = biome(
-            "Jungle", MapDecorationTypes.LIME_BANNER, Biomes.JUNGLE, Biomes.BAMBOO_JUNGLE, Biomes.SPARSE_JUNGLE
+            "Jungle", LockoutMapDecorationTypes.JUNGLE, Biomes.JUNGLE, Biomes.BAMBOO_JUNGLE, Biomes.SPARSE_JUNGLE
     );
 
     public static final GoalRequirement<Object> DESERT_LIKE = biome(
-            "Desert-like Biome", MapDecorationTypes.YELLOW_BANNER, Biomes.DESERT, Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS
+            "Desert-like Biome", LockoutMapDecorationTypes.DESERT, Biomes.DESERT, Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS
     );
 
-    public static final GoalRequirement<Object> TAIGA = biome("Taiga", MapDecorationTypes.BROWN_BANNER,
+    public static final GoalRequirement<Object> TAIGA = biome("Taiga", LockoutMapDecorationTypes.TAIGA,
             Biomes.TAIGA, Biomes.OLD_GROWTH_PINE_TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA, Biomes.SNOWY_TAIGA, Biomes.GROVE
     );
 
-    public static final GoalRequirement<Object> SWAMP = biome("Swamp", MapDecorationTypes.GREEN_BANNER,
+    public static final GoalRequirement<Object> SWAMP = biome("Swamp", LockoutMapDecorationTypes.SWAMP,
             Biomes.SWAMP, Biomes.MANGROVE_SWAMP
     );
 
@@ -94,6 +95,10 @@ public class GoalRequirements {
     public static final GoalRequirement<Object> SNOWY = biome(
             "Snowy Biome", MapDecorationTypes.WHITE_BANNER, Biomes.SNOWY_PLAINS, Biomes.ICE_SPIKES, Biomes.SNOWY_TAIGA, Biomes.GROVE, Biomes.SNOWY_SLOPES, Biomes.FROZEN_PEAKS,
             Biomes.FROZEN_RIVER, Biomes.SNOWY_BEACH, Biomes.FROZEN_OCEAN, Biomes.DEEP_FROZEN_OCEAN
+    );
+
+    public static final GoalRequirement<Object> POLAR = biome("Polar Biome", MapDecorationTypes.WHITE_BANNER,
+            Biomes.FROZEN_OCEAN, Biomes.DEEP_FROZEN_OCEAN, Biomes.SNOWY_PLAINS
     );
 
     public static final GoalRequirement<Object> OCEAN = biome("Ocean", MapDecorationTypes.BLUE_BANNER,
@@ -125,7 +130,7 @@ public class GoalRequirements {
     public static final GoalRequirement<Object> DEEP_DARK = biome("Deep Dark", MapDecorationTypes.ANCIENT_CITY, Biomes.DEEP_DARK);
     public static final GoalRequirement<Object> LUSH_CAVES = biome("Lush Caves", MapDecorationTypes.GREEN_BANNER, Biomes.LUSH_CAVES);
     public static final GoalRequirement<Object> PALE_GARDEN = biome("Pale Garden", MapDecorationTypes.LIGHT_GRAY_BANNER, Biomes.PALE_GARDEN);
-    public static final GoalRequirement<Object> SULFUR_CAVES = biome("Sulfur Caves", MapDecorationTypes.YELLOW_BANNER, Biomes.SULFUR_CAVES);
+    public static final GoalRequirement<Object> SULFUR_CAVES = biome("Sulfur Caves", LockoutMapDecorationTypes.SULFUR_CAVE, Biomes.SULFUR_CAVES);
     public static final GoalRequirement<Object> DEAD_BIOME = biome("Dead Biome", MapDecorationTypes.ORANGE_BANNER,
             Biomes.DESERT, Biomes.BADLANDS, Biomes.ERODED_BADLANDS, Biomes.WOODED_BADLANDS, Biomes.SWAMP, Biomes.MANGROVE_SWAMP,
             Biomes.OLD_GROWTH_PINE_TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA
@@ -175,6 +180,6 @@ public class GoalRequirements {
 
     public static final GoalRequirement.AndCombined<DyeColor> COLORS = DESERT_LIKE.forOptions(DyeColor.GREEN, DyeColor.CYAN)
             .and(JUNGLE.forOptions(DyeColor.BROWN))
-            .and(DESERT_LIKE.or(biome("Sea-pickle Biome", MapDecorationTypes.CYAN_BANNER, Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN)).forOptions(DyeColor.LIME)
+            .and(DESERT_LIKE.or(biome("Sea-pickle Biome", MapDecorationTypes.CYAN_BANNER, Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN).forOptions(DyeColor.LIME))
     );
 }

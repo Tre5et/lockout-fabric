@@ -68,7 +68,7 @@ public abstract class PositionServerHint extends PositionHint implements ServerH
         BlockPos position = result.getA();
         MapItem.applyNewSavedData(level, itemStack, position.getX(), position.getZ(), (byte)2, true, true);
         MapItem.renderBiomePreviewMap(level, itemStack);
-        MapItemSavedData.addTargetDecoration(itemStack, position, "+", decoration);
+        MapItemSavedData.addTargetDecoration(itemStack, position, "hint_target", decoration);
         itemStack.set(DataComponents.ITEM_NAME, name);
         return itemStack;
     }

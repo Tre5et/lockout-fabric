@@ -4,6 +4,7 @@ import me.marin.lockout.lockout.DefaultGoalRegister;
 import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.network.Networking;
 import me.marin.lockout.server.Command;
+import me.marin.lockout.util.LockoutMapDecorationTypes;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
@@ -83,6 +84,7 @@ public class LockoutInitializer implements ModInitializer {
             return null;
         }));
 
+        LockoutMapDecorationTypes.bootstrap();
     }
 
 }

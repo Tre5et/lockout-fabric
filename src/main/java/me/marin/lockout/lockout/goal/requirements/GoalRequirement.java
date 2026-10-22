@@ -30,11 +30,11 @@ public abstract class GoalRequirement<T> {
     }
 
     public List<ServerHint<?>> getServerHints(T option) {
-        return getHints().stream().map(HintCombination::constructServer).collect(Collectors.toUnmodifiableList());
+        return getHints(option).stream().map(HintCombination::constructServer).collect(Collectors.toUnmodifiableList());
     }
 
     public List<ClientHint<?>> getClientHints(T option) {
-        return getHints().stream().map(HintCombination::constructClient).collect(Collectors.toUnmodifiableList());
+        return getHints(option).stream().map(HintCombination::constructClient).collect(Collectors.toUnmodifiableList());
     }
 
     public GoalRequirement<T> withHint(HintCombination<?>... hint) {
@@ -222,6 +222,11 @@ public abstract class GoalRequirement<T> {
         @Override
         public boolean optionSatisfiedBy(GoalRequirementContext context, T option) {
             return requirements.stream().allMatch(r -> r.optionSatisfiedBy(context, option));
+        }
+
+        @Override
+        public List<HintCombination<?>> getHints(T option) {
+            return requirements.stream().flatMap(r -> r.getHints(option).stream()).toList();
         }
     }
 

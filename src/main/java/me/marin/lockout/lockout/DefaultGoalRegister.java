@@ -130,7 +130,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(DeathGoalBuilder.type(() -> ItemTextureExtractor.item(Items.FIREWORK_ROCKET), DamageTypes.FIREWORKS)
                 .customName(_ -> "Die to Firework Rocket"));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.IRON_GOLEM).require(GoalRequirements.VILLAGE));
-        INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.POLAR_BEAR).require(GoalRequirements.SNOWY));
+        INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.POLAR_BEAR).require(GoalRequirements.POLAR));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.PUFFERFISH).require(GoalRequirements.WARM_OCEAN));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.TNT_MINECART).customName(_ -> "Die to TNT Minecart"));
         INSTANCE.register(DeathGoalBuilder.entity(EntityTypes.WARDEN).require(GoalRequirements.DEEP_DARK));
