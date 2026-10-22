@@ -11,10 +11,16 @@ import net.minecraft.world.item.component.CustomData;
 
 public class CompassItemHandler {
 
-    public static boolean isCompass(ItemStack item) {
+    public static boolean isPlayerCompass(ItemStack item) {
         return item != null &&
                 item.getItem() == Items.COMPASS &&
                 Optional.ofNullable(item.get(DataComponents.CUSTOM_DATA)).filter(customData -> customData.copyTag().contains("PlayerTracker")).isPresent();
+    }
+
+    public static boolean isHintCompass(ItemStack item) {
+        return item != null &&
+                item.getItem() == Items.COMPASS &&
+                Optional.ofNullable(item.get(DataComponents.CUSTOM_DATA)).filter(customData -> customData.copyTag().contains("hint_name")).isPresent();
     }
 
     public final List<UUID> players = new ArrayList<>();

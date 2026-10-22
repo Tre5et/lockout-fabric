@@ -23,7 +23,7 @@ public class ItemInHandLayerMixin<S extends ArmedEntityRenderState> {
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
         ItemStack stack = arm == player.getMainArm() ? player.getMainHandItem() : player.getOffhandItem();
-        if (!CompassItemHandler.isCompass(stack)) return;
+        if (!CompassItemHandler.isPlayerCompass(stack)) return;
 
         ci.cancel();
         int i = arm == HumanoidArm.RIGHT ? 1 : -1;

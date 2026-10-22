@@ -2,6 +2,7 @@ package me.marin.lockout.client.goal.hint;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.marin.lockout.client.ClientConfig;
 import me.marin.lockout.lockout.goal.hint.PositionHint;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.core.BlockPos;
@@ -29,6 +30,10 @@ public class PositionClientHint extends PositionHint implements ClientHint<Pair<
 
     @Override
     public Component extractResolved(Pair<BlockPos,Identifier> data, KeyMapping key) {
-        return Component.literal("Your Team received maps for ").append(getTitle()).append(Component.literal(": Press ")).append(key.getTranslatedKeyMessage()).append(" to get updated maps");
+        return switch(ClientConfig.getInstance().getServerConfig().getHintMode()) {
+            case COMPASS -> Component.literal("Your Team received compasses for ").append(getTitle()).append(Component.literal(": Press ")).append(key.getTranslatedKeyMessage()).append(" to get updated compasses");
+            case MAP -> Component.literal("Your Team received maps for ").append(getTitle()).append(Component.literal(": Press ")).append(key.getTranslatedKeyMessage()).append(" to get updated maps");
+            default -> Component.empty().append(getTitle()).append(": ").append(data.getA().toShortString()).append("; Press ").append(key.getTranslatedKeyMessage()).append(" to update");
+        };
     }
 }

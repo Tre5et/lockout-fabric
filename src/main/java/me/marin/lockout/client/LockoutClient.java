@@ -71,6 +71,8 @@ public class LockoutClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        ClientConfig.load();
+
         Registry.register(BuiltInRegistries.MENU, Constants.BOARD_SCREEN_ID, BOARD_SCREEN_HANDLER);
 
         ClientPlayNetworking.registerGlobalReceiver(AllAdvancementsPayload.ID, (payload, context) ->
@@ -171,6 +173,10 @@ public class LockoutClient implements ClientModInitializer {
                     }
                 }
             });
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(ServerConfigPayload.ID, (payload, context) -> {
+            ClientConfig.getInstance().setServerConfig(payload.config());
         });
 
         ArgumentTypeRegistry.registerArgumentType(Constants.BOARD_FILE_ARGUMENT_TYPE, CustomBoardFileArgumentType.class, SingletonArgumentInfo.contextFree(CustomBoardFileArgumentType::newInstance));
@@ -326,22 +332,21 @@ public class LockoutClient implements ClientModInitializer {
     }
 
     public static int getBoardPosition(CommandContext<FabricClientCommandSource> context) {
-        context.getSource().sendFeedback(Component.literal("The current board position is " + LockoutConfig.getInstance().boardPosition.name().toLowerCase() + "."));
+        context.getSource().sendFeedback(Component.literal("The current board position is " + ClientConfig.getInstance().getBoardPosition().name().toLowerCase() + "."));
         return 1;
     }
 
     public static int setBoardPosition(CommandContext<FabricClientCommandSource> context) {
         String position = context.getArgument("position", String.class);
 
-        LockoutConfig.BoardPosition boardPosition = LockoutConfig.BoardPosition.match(position);
+        ClientConfig.BoardPosition boardPosition = ClientConfig.BoardPosition.match(position);
         if (boardPosition == null) {
             context.getSource().sendError(Component.literal("Invalid board position: " + position + "."));
             return 0;
         }
-        LockoutConfig.getInstance().boardPosition = boardPosition;
-        LockoutConfig.save();
+        ClientConfig.getInstance().setBoardPosition(boardPosition);
 
-        context.getSource().sendFeedback(Component.literal("Updated board position." + (boardPosition == LockoutConfig.BoardPosition.LEFT ? " Note: Opening debug hud (F3) will hide the board." : "")));
+        context.getSource().sendFeedback(Component.literal("Updated board position." + (boardPosition == ClientConfig.BoardPosition.LEFT ? " Note: Opening debug hud (F3) will hide the board." : "")));
 
         return 1;
     }

@@ -36,7 +36,6 @@ public class LockoutInitializer implements ModInitializer {
     public void onInitialize() {
         MOD_VERSION = FabricLoader.getInstance().getModContainer(NAMESPACE).get().getMetadata().getVersion();
 
-        LockoutConfig.load();
         Networking.registerPayloads();
         DefaultGoalRegister.registerGoals();
         GoalPoolConfig.load();

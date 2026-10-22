@@ -1,34 +1,33 @@
-package me.marin.lockout;
+package me.marin.lockout.client;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
+import lombok.Setter;
+import me.marin.lockout.Lockout;
+import me.marin.lockout.server.ServerConfig;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class LockoutConfig {
-
-    private static final Path CONFIG_PATH = new File("./config/lockout.json").toPath();
-
-    @Getter
-    private static LockoutConfig instance;
-
+public class ClientConfig {
+    private static final Path CONFIG_PATH = new File("./config/lockout/client.json").toPath();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    @SerializedName("boardSize")
-    public int boardSize = 5;
+    @Getter
+    private static ClientConfig instance = new ClientConfig();
 
-    @SerializedName("boardPosition")
-    public BoardPosition boardPosition = BoardPosition.RIGHT;
+    @Getter
+    private BoardPosition boardPosition = BoardPosition.RIGHT;
+    @Getter
+    @Setter
+    private transient ServerConfig serverConfig = ServerConfig.getInstance();
 
-    @SerializedName("startTime")
-    public int startTime = 60;
-
-    @SerializedName("giveCompasses")
-    public boolean giveCompasses = false;
+    public void setBoardPosition(BoardPosition boardPosition) {
+        this.boardPosition = boardPosition;
+        save();
+    }
 
     public static void load() {
         if (!Files.exists(CONFIG_PATH)) {
@@ -38,7 +37,7 @@ public class LockoutConfig {
         } else {
             try {
                 String s = Files.readString(CONFIG_PATH);
-                instance = GSON.fromJson(s, LockoutConfig.class);
+                instance = GSON.fromJson(s, ClientConfig.class);
                 save(); // saves "new" config values (from updates)
             } catch (Exception e) {
                 Lockout.log("Invalid config file, using default values.");
@@ -48,16 +47,12 @@ public class LockoutConfig {
     }
 
     public static void loadDefaultConfig() {
-        instance = new LockoutConfig();
-        instance.boardSize = 5;
-        instance.boardPosition = BoardPosition.RIGHT;
-        instance.startTime = 60;
-        instance.giveCompasses = false;
+        instance = new ClientConfig();
     }
 
     private static void createConfigDir() {
         try {
-            Files.createDirectories(Path.of("./config"));
+            Files.createDirectories(Path.of("./config/lockout"));
         } catch (Exception e) {
             Lockout.error(e);
         }
@@ -72,9 +67,7 @@ public class LockoutConfig {
     }
 
     public enum BoardPosition {
-        @SerializedName("left")
         LEFT,
-        @SerializedName("right")
         RIGHT;
 
         public static BoardPosition match(String boardPosition) {
@@ -85,6 +78,4 @@ public class LockoutConfig {
             };
         }
     }
-
-
 }

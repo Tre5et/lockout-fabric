@@ -1,8 +1,8 @@
 package me.marin.lockout.client.game;
 
 import me.marin.lockout.Constants;
-import me.marin.lockout.LockoutConfig;
 import me.marin.lockout.LockoutTeam;
+import me.marin.lockout.client.ClientConfig;
 import me.marin.lockout.game.LockoutGame;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -28,13 +28,13 @@ public class ClientLockoutGame extends LockoutGame<ClientLockoutBoard> {
         super(board, teams);
     }
 
-    public void extractHud(GuiGraphicsExtractor extractor, Font font, LockoutConfig.BoardPosition position) {
+    public void extractHud(GuiGraphicsExtractor extractor, Font font, ClientConfig.BoardPosition position) {
         extractBoard(extractor, font, position);
         extractPlayerList(extractor, font, position);
     }
 
-    private void extractBoard(GuiGraphicsExtractor extractor, Font font, LockoutConfig.BoardPosition position) {
-        if (position == LockoutConfig.BoardPosition.LEFT && Minecraft.getInstance().gui.hud.getDebugOverlay().showDebugScreen()) {
+    private void extractBoard(GuiGraphicsExtractor extractor, Font font, ClientConfig.BoardPosition position) {
+        if (position == ClientConfig.BoardPosition.LEFT && Minecraft.getInstance().gui.hud.getDebugOverlay().showDebugScreen()) {
             return;
         }
 
@@ -57,7 +57,7 @@ public class ClientLockoutGame extends LockoutGame<ClientLockoutBoard> {
 
     }
 
-    private void extractPlayerList(GuiGraphicsExtractor extractor, Font font, LockoutConfig.BoardPosition position) {
+    private void extractPlayerList(GuiGraphicsExtractor extractor, Font font, ClientConfig.BoardPosition position) {
         Pair<List<Component>, Integer> data = getPlayerNames(font);
         List<Component> names = data.getA();
         int maxWidth = data.getB();

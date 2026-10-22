@@ -104,6 +104,26 @@ public interface Command {
                 );
     }
 
+    static ArgumentBuilder<CommandSourceStack,?> hintMode() {
+        return Commands.literal("hint-mode")
+                .requires(PERMISSIONS)
+                .executes(LockoutServer::getHintMode)
+                .then(Commands.literal("get")
+                        .executes(LockoutServer::getHintMode)
+                )
+                .then(Commands.literal("set")
+                        .then(Commands.literal("text")
+                                .executes(c -> LockoutServer.setHintMode(c, ServerConfig.HintMode.TEXT))
+                        )
+                        .then(Commands.literal("compass")
+                                .executes(c -> LockoutServer.setHintMode(c, ServerConfig.HintMode.COMPASS))
+                        )
+                        .then(Commands.literal("map")
+                                .executes(c -> LockoutServer.setHintMode(c, ServerConfig.HintMode.MAP))
+                        )
+                );
+    }
+
     static ArgumentBuilder<CommandSourceStack,?> giveCompasses() {
         return Commands.literal("give-compasses")
                 .requires(PERMISSIONS)
@@ -149,6 +169,7 @@ public interface Command {
             .then(unpause())
             .then(board())
             .then(goals())
+            .then(hintMode())
             .then(giveCompasses())
             .then(nearby())
             .then(chat())

@@ -1,9 +1,9 @@
 package me.marin.lockout.server.handlers;
 
-import me.marin.lockout.LockoutConfig;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.server.LockoutServer;
+import me.marin.lockout.server.ServerConfig;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -18,7 +18,7 @@ public class AfterRespawnEventHandler implements ServerPlayerEvents.AfterRespawn
         if (lockout.isSoloBlackout()) return;
         if (!lockout.isLockoutPlayer(newPlayer.getUUID())) return;
         if (alive) return; // end exit portal
-        if (!LockoutConfig.getInstance().giveCompasses) return;
+        if (!ServerConfig.getInstance().isGiveCompasses()) return;
 
         int slot = compassHandler.compassSlots.getOrDefault(newPlayer.getUUID(), 0);
         if (slot == 40) {

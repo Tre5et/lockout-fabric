@@ -1,6 +1,6 @@
 package me.marin.lockout.mixin.client;
 
-import me.marin.lockout.LockoutConfig;
+import me.marin.lockout.client.ClientConfig;
 import me.marin.lockout.client.LockoutClient;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -25,7 +25,7 @@ public abstract class HudMixin {
             return;
         }
 
-        LockoutClient.lockout.extractHud(context, Minecraft.getInstance().font, LockoutConfig.getInstance().boardPosition);
+        LockoutClient.lockout.extractHud(context, Minecraft.getInstance().font, ClientConfig.getInstance().getBoardPosition());
     }
 
     // If lockout board is visible, render effects to the left of it.
@@ -37,7 +37,7 @@ public abstract class HudMixin {
             return width;
         }
 
-        if (LockoutConfig.getInstance().boardPosition != LockoutConfig.BoardPosition.RIGHT) {
+        if (ClientConfig.getInstance().getBoardPosition() != ClientConfig.BoardPosition.RIGHT) {
             return width;
         }
 

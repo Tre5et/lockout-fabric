@@ -111,7 +111,7 @@ public class LockoutServer {
         gameStartRunnables.clear();
         waitingForVersionPacketPlayersMap.clear();
 
-        LockoutConfig.load(); // reload config every time the server starts
+        ServerConfig.load(); // reload config every time the server starts
         GoalPoolConfig.load(); // reload goal pool config every time the server starts
 
         if (isInitialized) return;
@@ -175,6 +175,8 @@ public class LockoutServer {
 
             sendAllAdvancements(player);
 
+            Network.send(player, new ServerConfigPayload(ServerConfig.getInstance()));
+
             if (lockout == null) {
                 player.setGameMode(GameType.SPECTATOR);
                 return;
@@ -182,8 +184,8 @@ public class LockoutServer {
 
             lockout.getState().applyPlayer(player, lockout, true);
 
-            ServerPlayNetworking.send(player, lockout.getTeamsGoalsPacket());
-            ServerPlayNetworking.send(player, lockout.getUpdateTimerPacket());
+            Network.send(player, lockout.getTeamsGoalsPacket());
+            Network.send(player, lockout.getUpdateTimerPacket());
             for(ServerGoal<?> goal : lockout.getBoard().getGoals()) {
                 goal.getProgress().send(goal.getId(), List.of(player));
             }
@@ -354,7 +356,7 @@ public class LockoutServer {
                     CONTEXT.structures(),
                     teams
             ));
-            lockoutBoard = boardGenerator.generateBoard(LockoutConfig.getInstance().boardSize);
+            lockoutBoard = boardGenerator.generateBoard(ServerConfig.getInstance().getBoardSize());
             
             // Check if board generation failed due to insufficient goals
             if (lockoutBoard == null) {
@@ -376,7 +378,7 @@ public class LockoutServer {
         }
 
         lockout = new ServerLockoutGame(lockoutBoard, teams);
-        lockout.setTicks(-20L * LockoutConfig.getInstance().startTime); // see Lockout#ticks
+        lockout.setTicks(-20L * ServerConfig.getInstance().getStartTime()); // see Lockout#ticks
         lockout.setState(GameState.STARTING, true);
 
         compassHandler = new CompassItemHandler(allLockoutPlayers, playerManager);
@@ -385,7 +387,7 @@ public class LockoutServer {
             ServerPlayNetworking.send(player, lockout.getTeamsGoalsPacket());
             ServerPlayNetworking.send(player, lockout.getUpdateTimerPacket());
 
-            if (!lockout.isSoloBlackout() && lockout.isLockoutPlayer(player.getUUID()) && LockoutConfig.getInstance().giveCompasses) {
+            if (!lockout.isSoloBlackout() && lockout.isLockoutPlayer(player.getUUID()) && ServerConfig.getInstance().isGiveCompasses()) {
                 player.addItem(compassHandler.newCompass());
             }
         }
@@ -398,9 +400,9 @@ public class LockoutServer {
         for (int i = 3; i >= 0; i--) {
             if (i > 0) {
                 final int secs = i;
-                ((LockoutRunnable) () -> playerManager.broadcastSystemMessage(Component.literal("Starting in " + secs + "..."), false)).runTaskAfter(20L * (LockoutConfig.getInstance().startTime - i));
+                ((LockoutRunnable) () -> playerManager.broadcastSystemMessage(Component.literal("Starting in " + secs + "..."), false)).runTaskAfter(20L * (ServerConfig.getInstance().getStartTime() - i));
             } else {
-                ((LockoutRunnable) LockoutServer::startLockoutRunning).runTaskAfter(20L * LockoutConfig.getInstance().startTime);
+                ((LockoutRunnable) LockoutServer::startLockoutRunning).runTaskAfter(20L * ServerConfig.getInstance().getStartTime());
             }
         }
     }
@@ -755,15 +757,14 @@ public class LockoutServer {
     }
 
     public static int getStartTime(CommandContext<CommandSourceStack> context) {
-        context.getSource().sendSystemMessage(Component.literal("The current start time is " + LockoutConfig.getInstance().startTime + "s."));
+        context.getSource().sendSystemMessage(Component.literal("The current start time is " + ServerConfig.getInstance().getStartTime() + "s."));
         return 1;
     }
 
     public static int setStartTime(CommandContext<CommandSourceStack> context) {
         int seconds = context.getArgument("seconds", Integer.class);
 
-        LockoutConfig.getInstance().startTime = seconds;
-        LockoutConfig.save();
+        ServerConfig.getInstance().setStartTime(seconds);
 
         context.getSource().sendSystemMessage(Component.nullToEmpty("Updated start time to " + seconds + "s."));
         return 1;
@@ -780,15 +781,14 @@ public class LockoutServer {
     }
 
     public static int getBoardSize(CommandContext<CommandSourceStack> context) {
-        context.getSource().sendSystemMessage(Component.literal("The current board size is " + LockoutConfig.getInstance().boardSize + "x" + LockoutConfig.getInstance().boardSize + "."));
+        context.getSource().sendSystemMessage(Component.literal("The current board size is " + ServerConfig.getInstance().getBoardSize() + "x" + ServerConfig.getInstance().getBoardSize() + "."));
         return 1;
     }
 
     public static int setBoardSize(CommandContext<CommandSourceStack> context) {
         int size = context.getArgument("size", Integer.class);
 
-        LockoutConfig.getInstance().boardSize = size;
-        LockoutConfig.save();
+        ServerConfig.getInstance().setBoardSize(size);
 
         context.getSource().sendSystemMessage(Component.nullToEmpty("Updated board size to " + size + "x" + size + "."));
         return 1;
@@ -804,7 +804,7 @@ public class LockoutServer {
     }
 
     public static int getGiveCompasses(CommandContext<CommandSourceStack> context) {
-        String message = LockoutConfig.getInstance().giveCompasses
+        String message = ServerConfig.getInstance().isGiveCompasses()
                 ? "Compasses will be given to players."
                 : "Compasses will not be given to players.";
         context.getSource().sendSystemMessage(Component.literal(message));
@@ -813,12 +813,24 @@ public class LockoutServer {
 
     public static int setGiveCompasses(CommandContext<CommandSourceStack> context) {
         boolean giveCompasses = context.getArgument("give", Boolean.class);
-        LockoutConfig.getInstance().giveCompasses = giveCompasses;
-        LockoutConfig.save();
+        ServerConfig.getInstance().setGiveCompasses(giveCompasses);
 
         String message = giveCompasses
                 ? "Compasses will now be given to players."
                 : "Compasses will no longer be given to players.";
+        context.getSource().sendSuccess(() -> Component.literal(message), true);
+        return 1;
+    }
+
+    public static int getHintMode(CommandContext<CommandSourceStack> context) {
+        String message = "The current hint mode is " + ServerConfig.getInstance().getHintMode().name().toLowerCase(Locale.ROOT) + ".";
+        context.getSource().sendSystemMessage(Component.literal(message));
+        return 1;
+    }
+
+    public static int setHintMode(CommandContext<CommandSourceStack> context, ServerConfig.HintMode mode) {
+        ServerConfig.getInstance().setHintMode(mode);
+        String message = "Set hint mode to " + ServerConfig.getInstance().getHintMode().name().toLowerCase(Locale.ROOT) + ".";
         context.getSource().sendSuccess(() -> Component.literal(message), true);
         return 1;
     }
