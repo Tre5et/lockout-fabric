@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import me.marin.lockout.Lockout;
+import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.network.Network;
 import me.marin.lockout.network.ServerConfigPayload;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -27,6 +28,8 @@ public class ServerConfig {
             c -> c.giveCompasses,
             HintMode.CODEC,
             c -> c.hintMode,
+            GameDifficulty.CODEC,
+            c -> c.difficulty,
             ServerConfig::new
     );
 
@@ -44,12 +47,15 @@ public class ServerConfig {
     private boolean giveCompasses = false;
     @Getter
     private HintMode hintMode = HintMode.MAP;
+    @Getter
+    private GameDifficulty difficulty = GameDifficulty.MEDIUM;
 
-    public ServerConfig(int boardSize, int startTime, boolean giveCompasses, HintMode hintMode) {
+    public ServerConfig(int boardSize, int startTime, boolean giveCompasses, HintMode hintMode, GameDifficulty difficulty) {
         this.boardSize = boardSize;
         this.startTime = startTime;
         this.giveCompasses = giveCompasses;
         this.hintMode = hintMode;
+        this.difficulty = difficulty;
     }
 
     public ServerConfig() {
@@ -75,6 +81,12 @@ public class ServerConfig {
 
     public void setHintMode(HintMode hintMode) {
         this.hintMode = hintMode;
+        save();
+        broadcast();
+    }
+
+    public void setDifficulty(GameDifficulty difficulty) {
+        this.difficulty = difficulty;
         save();
         broadcast();
     }

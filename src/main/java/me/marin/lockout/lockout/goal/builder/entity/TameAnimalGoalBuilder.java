@@ -4,6 +4,7 @@ import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.CornerIconTextureExtractor;
@@ -13,8 +14,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
 public class TameAnimalGoalBuilder<T> extends GoalBuilder<EntityUtil.TamedEntity, T> {
-    public TameAnimalGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityType<?>, ?> progressSupplier) {
-        super("TAME", "Tame", GoalCategory.TAMING, optionSupplier, progressSupplier.map(EntityUtil.TamedEntity::entity));
+    public TameAnimalGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityType<?>, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("TAME", "Tame", GoalCategory.TAMING, optionSupplier, progressSupplier.map(EntityUtil.TamedEntity::entity), difficultySupplier);
     }
 
     @Override
@@ -28,10 +29,11 @@ public class TameAnimalGoalBuilder<T> extends GoalBuilder<EntityUtil.TamedEntity
     @Override
     public void reifiedUpdater(EntityUtil.TamedEntity update) {}
 
-    public static TameAnimalGoalBuilder<Void> any(EntityType<?>... entities) {
+    public static TameAnimalGoalBuilder<Void> any(GoalDifficultySupplier<Void> difficultySupplier, EntityType<?>... entities) {
         return new TameAnimalGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.entity(entities))
+                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.entity(entities)),
+                difficultySupplier
         );
     }
 }

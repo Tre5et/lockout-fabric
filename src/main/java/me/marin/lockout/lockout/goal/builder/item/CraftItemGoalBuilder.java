@@ -4,6 +4,7 @@ import me.marin.lockout.lockout.goal.acceptance.AnyAcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
@@ -14,24 +15,26 @@ import net.minecraft.world.item.Items;
 import java.util.Collections;
 
 public class CraftItemGoalBuilder<T> extends GoalBuilder<ItemUtil.CraftedItem, T> {
-    public CraftItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier) {
-        super("CRAFT", "Craft", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier.map(ItemUtil.CraftedItem::itemStack));
+    public CraftItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("CRAFT", "Craft", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier.map(ItemUtil.CraftedItem::itemStack), difficultySupplier);
     }
 
     @Override
     public void reifiedUpdater(ItemUtil.CraftedItem update) {}
 
-    public static CraftItemGoalBuilder<Void> any(Item... items) {
+    public static CraftItemGoalBuilder<Void> any(GoalDifficultySupplier<Void> difficultySupplier, Item... items) {
         return new CraftItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.item(items))
+                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.item(items)),
+                difficultySupplier
         );
     }
 
-    public static CraftItemGoalBuilder<Integer> unique(int min, int max, int step) {
+    public static CraftItemGoalBuilder<Integer> unique(GoalDifficultySupplier<Integer> difficultySupplier, int min, int max, int step) {
         return new CraftItemGoalBuilder<>(
                 GoalOptionSupplier.integer("Items to craft", min, max, step),
-                GoalProgressSupplier.unique("Items crafted", _ -> new AnyAcceptanceCondition<>("ITEMS", () -> "Items", () -> Collections.singletonList(ItemTextureExtractor.item(Items.CRAFTING_TABLE))), ItemStack::getItem)
+                GoalProgressSupplier.unique("Items crafted", _ -> new AnyAcceptanceCondition<>("ITEMS", () -> "Items", () -> Collections.singletonList(ItemTextureExtractor.item(Items.CRAFTING_TABLE))), ItemStack::getItem),
+                difficultySupplier
         );
     }
 }

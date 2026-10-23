@@ -5,6 +5,7 @@ import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
@@ -19,8 +20,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class LeashEntityGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> {
-    public LeashEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, List<Leashable>, ?> progressSupplier) {
-        super("LEASH", "Leash", GoalCategory.LEASHING, optionSupplier, GoalProgressSupplier.player(progressSupplier.map(Leashable::leashableLeashedTo)));
+    public LeashEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, List<Leashable>, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("LEASH", "Leash", GoalCategory.LEASHING, optionSupplier, GoalProgressSupplier.player(progressSupplier.map(Leashable::leashableLeashedTo)), difficultySupplier);
     }
 
     @Override
@@ -31,18 +32,19 @@ public class LeashEntityGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> 
     @Override
     public void reifiedUpdater(BuilderUtil.Tick update) {}
 
-    public static LeashEntityGoalBuilder<Void> any(EntityType<?>... entities) {
+    public static LeashEntityGoalBuilder<Void> any(GoalDifficultySupplier<Void> difficultySupplier, EntityType<?>... entities) {
         return new LeashEntityGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.countMatching(_ -> List.of(InListAcceptanceCondition.entity(entities))).creationValue(1)
                         .map(l -> l.stream().<EntityType<?>>map(i -> {
                             if(i instanceof Entity entity) return entity.getType();
                             return null;
-                        }).filter(Objects::nonNull).toList())
+                        }).filter(Objects::nonNull).toList()),
+                difficultySupplier
         );
     }
 
-    public static LeashEntityGoalBuilder<Integer> unique(int min, int max, int step) {
+    public static LeashEntityGoalBuilder<Integer> unique(GoalDifficultySupplier<Integer> difficultySupplier, int min, int max, int step) {
         return new LeashEntityGoalBuilder<>(
                 GoalOptionSupplier.integer("Entities to leash", min, max, step),
                 GoalProgressSupplier.distinct(_ -> List.of(new AnyAcceptanceCondition<>(
@@ -51,7 +53,8 @@ public class LeashEntityGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> 
                 ), l -> {
                     if(l instanceof Entity e) return e.getType();
                     return null;
-                })
+                }),
+                difficultySupplier
         );
     }
 }

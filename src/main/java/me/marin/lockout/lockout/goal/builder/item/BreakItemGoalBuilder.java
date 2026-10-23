@@ -4,6 +4,7 @@ import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.ItemWithComponentAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
@@ -16,8 +17,8 @@ import net.minecraft.world.item.Items;
 import java.util.*;
 
 public class BreakItemGoalBuilder<T> extends GoalBuilder<ItemUtil.BrokenItem, T> {
-    public BreakItemGoalBuilder(GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier) {
-        super("BREAK", "Break", category, optionSupplier, progressSupplier.map(i -> i.item().getDefaultInstance()));
+    public BreakItemGoalBuilder(GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("BREAK", "Break", category, optionSupplier, progressSupplier.map(i -> i.item().getDefaultInstance()), difficultySupplier);
     }
 
     @Override
@@ -27,21 +28,23 @@ public class BreakItemGoalBuilder<T> extends GoalBuilder<ItemUtil.BrokenItem, T>
         return new StackingTextureExtractor(List.of(textureExtractor, new ItemDecorationTextureExtractor(stack)), 0);
     }
 
-    public static BreakItemGoalBuilder<Void> any(Item... items) {
+    public static BreakItemGoalBuilder<Void> any(GoalDifficultySupplier<Void> difficultySupplier, Item... items) {
         return new BreakItemGoalBuilder<>(
                 GoalCategory.MISC_ACTIONS,
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.item(items))
+                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.item(items)),
+                difficultySupplier
         );
     }
 
-    public static BreakItemGoalBuilder<Void> withComponent(GoalCategory category, DataComponentType<?>... components) {
+    public static BreakItemGoalBuilder<Void> withComponent(GoalDifficultySupplier<Void> difficultySupplier, GoalCategory category, DataComponentType<?>... components) {
         List<DataComponentType<?>> finalComponents = new ArrayList<>(Arrays.stream(components).toList());
         finalComponents.add(DataComponents.MAX_DAMAGE);
         return new BreakItemGoalBuilder<>(
                 category,
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> ItemWithComponentAcceptanceCondition.hasComponents(finalComponents.toArray(DataComponentType[]::new)))
+                GoalProgressSupplier.simple(_ -> ItemWithComponentAcceptanceCondition.hasComponents(finalComponents.toArray(DataComponentType[]::new))),
+                difficultySupplier
         );
     }
 

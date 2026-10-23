@@ -3,6 +3,7 @@ package me.marin.lockout.lockout.goal.builder.item;
 import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
@@ -15,14 +16,14 @@ import net.minecraft.world.item.Item;
 import java.util.List;
 
 public class BlockWithItemGoalBuilder<T> extends GoalBuilder<ItemUtil.BlockedWithItem, T> {
-    public BlockWithItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemUtil.BlockedWithItem, ?> progressSupplier) {
-        super("BLOCK", "Block", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier);
+    public BlockWithItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemUtil.BlockedWithItem, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("BLOCK", "Block", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier, difficultySupplier);
     }
 
     @Override
     public void reifiedUpdater(ItemUtil.BlockedWithItem update) {}
 
-    public static GoalBuilder<ItemUtil.BlockedWithItem, Void> disabled(Item item) {
+    public static GoalBuilder<ItemUtil.BlockedWithItem, Void> disabled(GoalDifficultySupplier<Void> difficultySupplier, Item item) {
         return new BlockWithItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
@@ -46,6 +47,6 @@ public class BlockWithItemGoalBuilder<T> extends GoalBuilder<ItemUtil.BlockedWit
                         return List.of(ItemTextureExtractor.item(item).overlay((extractor, _, x, y, width, height, _) -> extractor.fill(x, y, x+width, y+height, ARGB.white(100)), TextureAnchor.BOTTOM_LEFT, 16, 8));
                     }
                 })
-        ).customName(_ -> "Have your " + ItemUtil.getItemName(item) + " disabled");
+        , difficultySupplier).customName(_ -> "Have your " + ItemUtil.getItemName(item) + " disabled");
     }
 }

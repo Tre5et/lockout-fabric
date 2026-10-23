@@ -5,6 +5,7 @@ import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
 import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
@@ -16,14 +17,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.List;
 
 public class UpdateInventoryGoalBuilder<T,H> extends GoalBuilder<InventoryUtil.UpdatedInventory<H>, T> {
-    public UpdateInventoryGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, InventoryUtil.UpdatedInventory<H>, ?> progressSupplier) {
-        super("INVENTORY", "", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier);
+    public UpdateInventoryGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, InventoryUtil.UpdatedInventory<H>, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("INVENTORY", "", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier, difficultySupplier);
     }
 
     @Override
     public void reifiedUpdater(InventoryUtil.UpdatedInventory<H> update) {}
 
-    public static UpdateInventoryGoalBuilder<Void, BlockState> fillBlock(Block block) {
+    public static UpdateInventoryGoalBuilder<Void, BlockState> fillBlock(GoalDifficultySupplier<Void> difficultySupplier, Block block) {
         return new UpdateInventoryGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
@@ -48,11 +49,12 @@ public class UpdateInventoryGoalBuilder<T,H> extends GoalBuilder<InventoryUtil.U
                                 return List.of(ItemUtil.getItemTextureExtractor(block.asItem()));
                             }
                         }
-                )
+                ),
+                difficultySupplier
         );
     }
 
-    public static UpdateInventoryGoalBuilder<Void, EntityType<?>> fillEntity(EntityType<?> entity) {
+    public static UpdateInventoryGoalBuilder<Void, EntityType<?>> fillEntity(GoalDifficultySupplier<Void> difficultySupplier, EntityType<?> entity) {
         return new UpdateInventoryGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
@@ -77,7 +79,8 @@ public class UpdateInventoryGoalBuilder<T,H> extends GoalBuilder<InventoryUtil.U
                                 return List.of(EntityUtil.getEntityTextureExtractor(entity));
                             }
                         }
-                )
+                ),
+                difficultySupplier
         );
     }
 }

@@ -3,6 +3,7 @@ package me.marin.lockout.lockout.goal.builder.item;
 import me.marin.lockout.lockout.goal.acceptance.ItemWithComponentAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
@@ -17,8 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CompostItemsGoalBuilder<T> extends GoalBuilder<ItemUtil.CompostedItem, T> {
-    public CompostItemsGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier) {
-        super("COMPOST", "Compost", GoalCategory.WORKSTATIONS, optionSupplier, progressSupplier.map(ItemUtil.CompostedItem::itemStack));
+    public CompostItemsGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("COMPOST", "Compost", GoalCategory.WORKSTATIONS, optionSupplier, progressSupplier.map(ItemUtil.CompostedItem::itemStack), difficultySupplier);
     }
 
     @Override
@@ -32,14 +33,15 @@ public class CompostItemsGoalBuilder<T> extends GoalBuilder<ItemUtil.CompostedIt
     @Override
     public void reifiedUpdater(ItemUtil.CompostedItem update) {}
 
-    public static CompostItemsGoalBuilder<Integer> uniqueWithComponent(int min, int max, DataComponentType<?>... components) {
+    public static CompostItemsGoalBuilder<Integer> uniqueWithComponent(GoalDifficultySupplier<Integer> difficultySupplier, int min, int max, DataComponentType<?>... components) {
         return new CompostItemsGoalBuilder<>(
                 GoalOptionSupplier.integer("Items to compose", min, max, 1),
                 GoalProgressSupplier.unique("Items composted", _ -> {
                     List<DataComponentType<?>> itemComponents = new ArrayList<>(Arrays.stream(components).toList());
                     itemComponents.add(DataComponents.COMPOSTABLE);
                     return ItemWithComponentAcceptanceCondition.hasComponents(BuiltInRegistries.ITEM.stream().toList(), itemComponents.toArray(DataComponentType[]::new));
-                }, ItemStack::getItem)
+                }, ItemStack::getItem),
+                difficultySupplier
         );
     }
 }

@@ -5,6 +5,7 @@ import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.CornerIconTextureExtractor;
@@ -20,14 +21,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class UseItemOnBlockGoalBuilder<T> extends GoalBuilder<BlockUtil.UsedItemOnBlock, T> {
-    public UseItemOnBlockGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, BlockUtil.UsedItemOnBlock, ?> progressSupplier) {
-        super("USE", "Use", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier);
+    public UseItemOnBlockGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, BlockUtil.UsedItemOnBlock, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("USE", "Use", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier, difficultySupplier);
     }
 
     @Override
     public void reifiedUpdater(BlockUtil.UsedItemOnBlock update) {}
 
-    public static UseItemOnBlockGoalBuilder<Void> anyBlock(Item item, Block... blocks) {
+    public static UseItemOnBlockGoalBuilder<Void> anyBlock(GoalDifficultySupplier<Void> difficultySupplier, Item item, Block... blocks) {
         return new UseItemOnBlockGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
@@ -56,11 +57,12 @@ public class UseItemOnBlockGoalBuilder<T> extends GoalBuilder<BlockUtil.UsedItem
                                 10)
                         ).collect(Collectors.toUnmodifiableList());
                     }
-                })
+                }),
+                difficultySupplier
         );
     }
 
-    public static UseItemOnBlockGoalBuilder<Void> anyItem(Block block, Item... items) {
+    public static UseItemOnBlockGoalBuilder<Void> anyItem(GoalDifficultySupplier<Void> difficultySupplier, Block block, Item... items) {
         return new UseItemOnBlockGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
@@ -89,7 +91,8 @@ public class UseItemOnBlockGoalBuilder<T> extends GoalBuilder<BlockUtil.UsedItem
                                 10)
                         ).collect(Collectors.toUnmodifiableList());
                     }
-                })
+                }),
+                difficultySupplier
         );
     }
 }

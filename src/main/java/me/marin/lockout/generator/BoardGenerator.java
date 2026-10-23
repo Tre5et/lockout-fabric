@@ -2,6 +2,7 @@ package me.marin.lockout.generator;
 
 import me.marin.lockout.Lockout;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
+import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.server.game.ServerLockoutBoard;
 import me.marin.lockout.server.goal.ServerGoal;
@@ -19,11 +20,11 @@ public class BoardGenerator {
         this.context = context;
     }
 
-    public ServerLockoutBoard generateBoard(int size) {
-        return generateBoard(size, 0);
+    public ServerLockoutBoard generateBoard(int size, GameDifficulty difficulty) {
+        return generateBoard(size, 0, difficulty);
     }
 
-    private ServerLockoutBoard generateBoard(int size, int recursionDepth) {
+    private ServerLockoutBoard generateBoard(int size, int recursionDepth, GameDifficulty difficulty) {
         // Prevent infinite recursion
         if (recursionDepth >= MAX_RECURSION_DEPTH) {
             Lockout.log("Board generation failed: max recursion depth (" + MAX_RECURSION_DEPTH + ") reached");
@@ -49,7 +50,7 @@ public class BoardGenerator {
                 continue;
             }
 
-            var constructed = goal.buildGeneratedServer(context);
+            var constructed = goal.buildGeneratedServer(context, difficulty.getProbabilityFunction());
             if(constructed.isPresent()) {
                 goalBuilders.add(goal);
                 goals.add(constructed.get());
@@ -59,7 +60,7 @@ public class BoardGenerator {
         // If we didn't get enough goals, try again with a new shuffle
         if (goals.size() < size * size) {
             Lockout.log("Board generation attempt " + (recursionDepth + 1) + ": only got " + goals.size() + " goals, need " + (size * size));
-            return generateBoard(size, recursionDepth + 1);
+            return generateBoard(size, recursionDepth + 1, difficulty);
         }
 
         Collections.shuffle(goals);

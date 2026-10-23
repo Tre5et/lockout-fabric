@@ -7,6 +7,7 @@ import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
@@ -25,9 +26,9 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
-    public KillEntityGoal(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, DamageUtil.KilledEntity, ?> progressSupplier) {
-        super("KILL", "Kill", GoalCategory.KILLING, optionSupplier, progressSupplier);
+public class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
+    public KillEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, DamageUtil.KilledEntity, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("KILL", "Kill", GoalCategory.KILLING, optionSupplier, progressSupplier, difficultySupplier);
     }
 
     @Override
@@ -41,29 +42,32 @@ public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
     @Override
     public void reifiedUpdater(DamageUtil.KilledEntity update) {}
 
-    public static KillEntityGoal<Void> any(EntityType<?>... entities) {
-        return new KillEntityGoal<>(
+    public static KillEntityGoalBuilder<Void> any(GoalDifficultySupplier<Void> difficultySupplier, EntityType<?>... entities) {
+        return new KillEntityGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.entity(entities).map(e -> e.entity().getType()))
+                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.entity(entities).map(e -> e.entity().getType())),
+                difficultySupplier
         );
     }
 
-    public static KillEntityGoal<Integer> unique(int min, int max, EntityType<?>... entities) {
-        return new KillEntityGoal<>(
+    public static KillEntityGoalBuilder<Integer> unique(GoalDifficultySupplier<Integer> difficultySupplier, int min, int max, EntityType<?>... entities) {
+        return new KillEntityGoalBuilder<>(
                 GoalOptionSupplier.integer("Mobs to kill", min, max, 1),
-                GoalProgressSupplier.unique("Mobs killed", _ -> InListAcceptanceCondition.entity(entities).map(e -> e.entity().getType()), e -> e.entity().getType())
+                GoalProgressSupplier.unique("Mobs killed", _ -> InListAcceptanceCondition.entity(entities).map(e -> e.entity().getType()), e -> e.entity().getType()),
+                difficultySupplier
         );
     }
 
-    public static KillEntityGoal<Integer> total(int min, int max, int step, EntityType<?>... entities) {
-        return new KillEntityGoal<>(
+    public static KillEntityGoalBuilder<Integer> total(GoalDifficultySupplier<Integer> difficultySupplier, int min, int max, int step, EntityType<?>... entities) {
+        return new KillEntityGoalBuilder<>(
                 GoalOptionSupplier.integer("Mobs to kill", min, max, step),
-                GoalProgressSupplier.countTotal("Mobs killed", _ -> InListAcceptanceCondition.entity(entities).map(e -> e.entity().getType()))
+                GoalProgressSupplier.countTotal("Mobs killed", _ -> InListAcceptanceCondition.entity(entities).map(e -> e.entity().getType())),
+                difficultySupplier
         );
     }
 
-    public static KillEntityGoal<DyeColor> coloredSheep() {
-        KillEntityGoal<DyeColor> goal = new KillEntityGoal<>(
+    public static KillEntityGoalBuilder<DyeColor> coloredSheep(GoalDifficultySupplier<DyeColor> difficultySupplier) {
+        KillEntityGoalBuilder<DyeColor> goal = new KillEntityGoalBuilder<>(
                 GoalOptionSupplier.list("Color", DyeColor.VALUES, new TypeToken<>() {}, "Color", DyeColor::toString),
                 GoalProgressSupplier.simple(c -> new AcceptanceCondition<>() {
                     @Override
@@ -85,14 +89,15 @@ public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
                     public List<TextureExtractor> getExamples() {
                         return List.of(EntityUtil.getEntityTextureExtractor(EntityTypes.SHEEP).overlay(ItemTextureExtractor.item(Items.DYE.pick(c)), TextureAnchor.BOTTOM_RIGHT, 10));
                     }
-                })
+                }),
+                difficultySupplier
         );
         goal.require(GoalRequirements.COLORS);
         return goal;
     }
 
-    public static KillEntityGoal<Void> deathType(ResourceKey<DamageType> type, Supplier<TextureExtractor> icon, EntityType<?>... entities) {
-        return new KillEntityGoal<>(
+    public static KillEntityGoalBuilder<Void> deathType(GoalDifficultySupplier<Void> difficultySupplier, ResourceKey<DamageType> type, Supplier<TextureExtractor> icon, EntityType<?>... entities) {
+        return new KillEntityGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                     private final InListAcceptanceCondition<EntityType<?>, EntityType<?>> condition = InListAcceptanceCondition.entity(entities);
@@ -116,12 +121,13 @@ public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
                     public List<TextureExtractor> getExamples() {
                         return condition.getExamples().stream().map(e -> e.overlay(icon.get(), TextureAnchor.BOTTOM_RIGHT, 10)).toList();
                     }
-                })
+                }),
+                difficultySupplier
         );
     }
 
-    public static KillEntityGoal<Void> dimension(ResourceKey<Level> dimension, Supplier<TextureExtractor> icon, EntityType<?>... entities) {
-        return new KillEntityGoal<>(
+    public static KillEntityGoalBuilder<Void> dimension(GoalDifficultySupplier<Void> difficultySupplier, ResourceKey<Level> dimension, Supplier<TextureExtractor> icon, EntityType<?>... entities) {
+        return new KillEntityGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                     private final InListAcceptanceCondition<EntityType<?>, EntityType<?>> condition = InListAcceptanceCondition.entity(entities);
@@ -147,7 +153,8 @@ public class KillEntityGoal<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
                                 List.of(e, icon.get()), 6
                         )).collect(Collectors.toUnmodifiableList());
                     }
-                })
+                }),
+                difficultySupplier
         );
     }
 }

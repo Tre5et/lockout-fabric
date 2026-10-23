@@ -9,6 +9,7 @@ import me.marin.lockout.generator.BoardGenerator;
 import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
+import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.network.*;
 import me.marin.lockout.server.game.ServerLockoutBoard;
@@ -265,6 +266,9 @@ public class LockoutServer {
             if(payload.hintMode().isPresent()) {
                 setHintMode(payload.hintMode().get(), context);
             }
+            if(payload.difficulty().isPresent()) {
+                setDifficulty(payload.difficulty().get(), context);
+            }
             if(payload.chatMode().isPresent()) {
                 setChat(payload.chatMode().get(), context);
             }
@@ -380,7 +384,7 @@ public class LockoutServer {
                     CONTEXT.structures(),
                     teams
             ));
-            lockoutBoard = boardGenerator.generateBoard(ServerConfig.getInstance().getBoardSize());
+            lockoutBoard = boardGenerator.generateBoard(ServerConfig.getInstance().getBoardSize(), ServerConfig.getInstance().getDifficulty());
             
             // Check if board generation failed due to insufficient goals
             if (lockoutBoard == null) {
@@ -792,6 +796,13 @@ public class LockoutServer {
     public static int setHintMode(ServerConfig.HintMode hintMode, ServerPlayNetworking.Context context) {
         ServerConfig.getInstance().setHintMode(hintMode);
         String message = "Set hint mode to " + ServerConfig.getInstance().getHintMode().name().toLowerCase(Locale.ROOT) + ".";
+        context.player().sendSystemMessage(Component.literal(message));
+        return 1;
+    }
+
+    public static int setDifficulty(GameDifficulty difficulty, ServerPlayNetworking.Context context) {
+        ServerConfig.getInstance().setDifficulty(difficulty);
+        String message = "Set difficulty to " + ServerConfig.getInstance().getDifficulty().name().toLowerCase(Locale.ROOT) + ".";
         context.player().sendSystemMessage(Component.literal(message));
         return 1;
     }

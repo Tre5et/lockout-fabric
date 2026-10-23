@@ -8,6 +8,7 @@ import me.marin.lockout.lockout.goal.acceptance.ItemWithComponentAcceptanceCondi
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
@@ -34,51 +35,55 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick,T> {
-    public ObtainItemGoalBuilder(String idPrefix, String namePrefix, GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Inventory, ?> progressSupplier) {
-        super(idPrefix, namePrefix, category, optionSupplier, GoalProgressSupplier.player(progressSupplier.map(ServerPlayer::getInventory)));
+    public ObtainItemGoalBuilder(String idPrefix, String namePrefix, GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Inventory, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super(idPrefix, namePrefix, category, optionSupplier, GoalProgressSupplier.player(progressSupplier.map(ServerPlayer::getInventory)), difficultySupplier);
     }
 
-    public ObtainItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Inventory, ?> progressSupplier) {
-        this("OBTAIN", "Obtain", GoalCategory.OBTAINING_ITEMS, optionSupplier, progressSupplier);
+    public ObtainItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Inventory, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        this("OBTAIN", "Obtain", GoalCategory.OBTAINING_ITEMS, optionSupplier, progressSupplier, difficultySupplier);
     }
 
     @Override
     public void reifiedUpdater(BuilderUtil.Tick update) {}
 
-    public static ObtainItemGoalBuilder<Void> all(Item... items) {
+    public static ObtainItemGoalBuilder<Void> all(GoalDifficultySupplier<Void> difficultySupplier, Item... items) {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.<Void,ItemStack>all(_ -> Arrays.stream(items).map(InListAcceptanceCondition::item).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectStacks)
+                GoalProgressSupplier.<Void,ItemStack>all(_ -> Arrays.stream(items).map(InListAcceptanceCondition::item).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectStacks),
+                difficultySupplier
         );
     }
 
-    public static ObtainItemGoalBuilder<Void> any(Item... items) {
+    public static ObtainItemGoalBuilder<Void> any(GoalDifficultySupplier<Void> difficultySupplier, Item... items) {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.<Void,ItemStack>any(_ -> List.of(InListAcceptanceCondition.item(items))).map(ItemUtil::collectStacks)
+                GoalProgressSupplier.<Void,ItemStack>any(_ -> List.of(InListAcceptanceCondition.item(items))).map(ItemUtil::collectStacks),
+                difficultySupplier
         );
     }
 
-    public static ObtainItemGoalBuilder<Integer> atLeast(int min, int max, Item... items) {
+    public static ObtainItemGoalBuilder<Integer> atLeast(GoalDifficultySupplier<Integer> difficultySupplier, int min, int max, Item... items) {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.integer("Items to obtain", min, max, 1),
-                GoalProgressSupplier.atLeast(_ -> Arrays.stream(items).map(InListAcceptanceCondition::item).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectStacks)
+                GoalProgressSupplier.atLeast(_ -> Arrays.stream(items).map(InListAcceptanceCondition::item).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectStacks),
+                difficultySupplier
         );
     }
 
     @SafeVarargs
-    public static ObtainItemGoalBuilder<Void> allWithCount(Pair<Item, Integer>... items) {
+    public static ObtainItemGoalBuilder<Void> allWithCount(GoalDifficultySupplier<Void> difficultySupplier, Pair<Item, Integer>... items) {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.<Void,Pair<Item,Integer>>all(_ -> Arrays.stream(items).map(InListAcceptanceCondition::itemWithCount).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectCounts)
+                GoalProgressSupplier.<Void,Pair<Item,Integer>>all(_ -> Arrays.stream(items).map(InListAcceptanceCondition::itemWithCount).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectCounts),
+                difficultySupplier
         );
     }
 
-    public static ObtainItemGoalBuilder<Void> withCount(Item item, Integer integer) {
-        return allWithCount(new Pair<>(item, integer));
+    public static ObtainItemGoalBuilder<Void> withCount(GoalDifficultySupplier<Void> difficultySupplier, Item item, Integer integer) {
+        return allWithCount(difficultySupplier, new Pair<>(item, integer));
     }
 
-    public static ObtainItemGoalBuilder<Void> anyFullStack() {
+    public static ObtainItemGoalBuilder<Void> anyFullStack(GoalDifficultySupplier<Void> difficultySupplier) {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.<Void,ItemStack>any(_ -> List.of(new AcceptanceCondition<>() {
@@ -101,20 +106,22 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick,T> {
                     public List<TextureExtractor> getExamples() {
                         return List.of(TextTextureExtractor.text("64"));
                     }
-                })).map(ItemUtil::collectStacks)
+                })).map(ItemUtil::collectStacks),
+                difficultySupplier
         );
     }
 
-    public static ObtainItemGoalBuilder<DyeColor> colored(ColorCollection<Item> item, Integer count, String id) {
+    public static ObtainItemGoalBuilder<DyeColor> colored(GoalDifficultySupplier<DyeColor> difficultySupplier, ColorCollection<Item> item, Integer count, String id) {
         ObtainItemGoalBuilder<DyeColor> builder = new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.list("Color", DyeColor.VALUES, new TypeToken<>() {}, "COLORED", DyeColor::getName),
-                GoalProgressSupplier.<DyeColor,Pair<Item,Integer>>any(c -> List.of(InListAcceptanceCondition.itemWithCount(new Pair<>(c == null ? null : item.pick(c), count)))).map(ItemUtil::collectCounts).withStaticId(id)
+                GoalProgressSupplier.<DyeColor,Pair<Item,Integer>>any(c -> List.of(InListAcceptanceCondition.itemWithCount(new Pair<>(c == null ? null : item.pick(c), count)))).map(ItemUtil::collectCounts).withStaticId(id),
+                difficultySupplier
         );
         builder.require(GoalRequirements.COLORS);
         return builder;
     }
 
-    public static ObtainItemGoalBuilder<Void> shieldWithBanner() {
+    public static ObtainItemGoalBuilder<Void> shieldWithBanner(GoalDifficultySupplier<Void> difficultySupplier) {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.<Void,ItemStack>any(_ -> List.of(new ItemWithComponentAcceptanceCondition(List.of(new ItemUtil.DataComponentCondition<>(
@@ -128,11 +135,12 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick,T> {
                                 () -> "SHIELD_WITH_BANNER",
                                 () -> "Shield with Banner"
                         )), () -> Collections.nCopies(20, Items.SHIELD.getDefaultInstance())))
-                ).map(ItemUtil::collectStacks)
+                ).map(ItemUtil::collectStacks),
+                difficultySupplier
         );
     }
 
-    public static GoalBuilder<BuilderUtil.Tick, Void> allDistinct() {
+    public static GoalBuilder<BuilderUtil.Tick, Void> allDistinct(GoalDifficultySupplier<Void> difficultySupplier) {
         return new ObtainItemGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.distinct(_ -> List.of(new AnyAcceptanceCondition<>(
@@ -140,17 +148,18 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick,T> {
                         () -> "items in Inventory",
                         () -> BuiltInRegistries.ITEM.stream().map(ItemTextureExtractor::item).collect(Collectors.toUnmodifiableList())
                 )), ItemStack::getItem).creationValue(36).map(ItemUtil::collectStacks)
-        ).customName(_ -> "Fill Inventory with unique Items");
+        , difficultySupplier).customName(_ -> "Fill Inventory with unique Items");
     }
 
-    public static ObtainItemGoalBuilder<Void> armorPiece(Item... items) {
+    public static ObtainItemGoalBuilder<Void> armorPiece(GoalDifficultySupplier<Void> difficultySupplier, Item... items) {
         return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.<Void,ItemStack>any(_ -> List.of(InListAcceptanceCondition.item(items))).map(ItemUtil::collectArmorPieces)
+                GoalProgressSupplier.<Void,ItemStack>any(_ -> List.of(InListAcceptanceCondition.item(items))).map(ItemUtil::collectArmorPieces),
+                difficultySupplier
         );
     }
 
-    public static GoalBuilder<BuilderUtil.Tick,DyeColor> dyedArmorPiece(Item item) {
+    public static GoalBuilder<BuilderUtil.Tick,DyeColor> dyedArmorPiece(GoalDifficultySupplier<DyeColor> difficultySupplier, Item item) {
         return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
                 GoalOptionSupplier.list("Color", DyeColor.VALUES, new TypeToken<>() {}, "COLORED", DyeColor::getName),
                 GoalProgressSupplier.<DyeColor,ItemStack>any(c -> List.of(new ItemWithComponentAcceptanceCondition(
@@ -161,21 +170,22 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick,T> {
                         )),
                         () -> List.of(item.getDefaultInstance())
                 ).and(InListAcceptanceCondition.item(item)))).map(ItemUtil::collectArmorPieces)
-        ).customTextureExtractor(c -> {
+        , difficultySupplier).customTextureExtractor(c -> {
             ItemStack stack = item.getDefaultInstance();
             stack.set(DataComponents.DYED_COLOR, new DyedItemColor(c.getTextureDiffuseColor() & 0xFFFFFF));
             return new ItemTextureExtractor(stack);
         }).require(GoalRequirements.COLORS);
     }
 
-    public static ObtainItemGoalBuilder<Void> allArmorOfMaterial(ArmorMaterial material) {
+    public static ObtainItemGoalBuilder<Void> allArmorOfMaterial(GoalDifficultySupplier<Void> difficultySupplier, ArmorMaterial material) {
         return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.<Void,ItemStack>all(_ -> ItemUtil.ARMORS.getOrDefault(material, List.of()).stream().map(InListAcceptanceCondition::item).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectArmorPieces)
+                GoalProgressSupplier.<Void,ItemStack>all(_ -> ItemUtil.ARMORS.getOrDefault(material, List.of()).stream().map(InListAcceptanceCondition::item).collect(Collectors.toUnmodifiableList())).map(ItemUtil::collectArmorPieces),
+                difficultySupplier
         );
     }
 
-    public static GoalBuilder<BuilderUtil.Tick,Void> allEnchantedArmor() {
+    public static GoalBuilder<BuilderUtil.Tick,Void> allEnchantedArmor(GoalDifficultySupplier<Void> difficultySupplier) {
         return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.countMatching(_ -> List.of(new ItemWithComponentAcceptanceCondition(List.of(new ItemUtil.DataComponentCondition<>(
@@ -185,16 +195,17 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick,T> {
                         () -> "FULL_ENCHANTED_ARMOR",
                         () -> "full Enchanted Armor"
                 )), () -> ItemUtil.ARMOR_PIECE.stream().map(Item::getDefaultInstance).toList()))
-                ).creationValue(4).map(ItemUtil::collectArmorPieces)
+                ).creationValue(4).map(ItemUtil::collectArmorPieces),
+                difficultySupplier
         );
     }
 
-    public static GoalBuilder<BuilderUtil.Tick,Void> allDifferentArmorMaterial() {
+    public static GoalBuilder<BuilderUtil.Tick,Void> allDifferentArmorMaterial(GoalDifficultySupplier<Void> difficultySupplier) {
         return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.distinct(_ -> List.of(InListAcceptanceCondition.item(ItemUtil.ARMOR_PIECE.toArray(Item[]::new))), v -> ItemUtil.getArmorMaterial(v.getItem()).orElse(null))
                         .creationValue(4).map(ItemUtil::collectArmorPieces)
-        ).customName(_ -> "Wear full Armor of different Materials")
+        , difficultySupplier).customName(_ -> "Wear full Armor of different Materials")
                 .customTextureExtractor(_ -> new CycleTextureExtractor(Stream.generate(() -> BuilderUtil.getDistinctRandomElements(
                                 ItemUtil.FULL_ARMOR_MATERIALS,
                                 4
@@ -209,14 +220,14 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick,T> {
                 );
     }
 
-    public static GoalBuilder<BuilderUtil.Tick,Void> allDifferentDyedLeatherArmor() {
+    public static GoalBuilder<BuilderUtil.Tick,Void> allDifferentDyedLeatherArmor(GoalDifficultySupplier<Void> difficultySupplier) {
         return new ObtainItemGoalBuilder<>("WEAR", "Wear", GoalCategory.ARMOR,
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.distinct(_ -> List.of(InListAcceptanceCondition.item(ItemUtil.ARMORS.get(ArmorMaterials.LEATHER).toArray(Item[]::new))), v -> {
                         if(!v.has(DataComponents.DYED_COLOR)) return null;
                         return v.get(DataComponents.DYED_COLOR).rgb();
                 }).creationValue(4).map(ItemUtil::collectArmorPieces)
-        ).customName(_ -> "Wear full Leather Armor in different Colors")
+        , difficultySupplier).customName(_ -> "Wear full Leather Armor in different Colors")
                 .customTextureExtractor(_ -> new CycleTextureExtractor(Stream.generate(() -> BuilderUtil.getDistinctRandomElements(DyeColor.VALUES, 4)
                                         .stream().<Function<Item,ItemStack>>map(c -> i -> {
                                             ItemStack stack = i.getDefaultInstance();

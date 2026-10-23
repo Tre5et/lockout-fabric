@@ -2,6 +2,7 @@ package me.marin.lockout.lockout.goal.builder.damage;
 
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
@@ -9,8 +10,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 
 public class DealDamageGoalBuilder<T> extends GoalBuilder<DamageUtil.DealtDamage, T> {
-    public DealDamageGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Float, ?> progressSupplier) {
-        super("DEAL_DAMAGE", "Deal", GoalCategory.DEATH_DAMAGE, optionSupplier, progressSupplier.map(DamageUtil.DealtDamage::damage));
+    public DealDamageGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Float, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("DEAL_DAMAGE", "Deal", GoalCategory.DEATH_DAMAGE, optionSupplier, progressSupplier.map(DamageUtil.DealtDamage::damage), difficultySupplier);
     }
 
     @Override
@@ -24,12 +25,13 @@ public class DealDamageGoalBuilder<T> extends GoalBuilder<DamageUtil.DealtDamage
     @Override
     public void reifiedUpdater(DamageUtil.DealtDamage update) {}
 
-    public static DealDamageGoalBuilder<Integer> total(int min, int max, int step) {
+    public static DealDamageGoalBuilder<Integer> total(GoalDifficultySupplier<Integer> difficultySupplier, int min, int max, int step) {
         return new DealDamageGoalBuilder<>(
                 GoalOptionSupplier.integer("Amount of damage to deal", min, max, step),
                 GoalProgressSupplier.rawTotal("Damage dealt", () -> "Damage",
                         () -> GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/gui/sprites/hud/heart/half.png"))
-                ).mapCreation(i -> (float)i)
+                ).mapCreation(i -> (float)i),
+                difficultySupplier
         );
     }
 }

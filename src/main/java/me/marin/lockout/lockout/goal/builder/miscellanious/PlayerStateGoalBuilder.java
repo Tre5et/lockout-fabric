@@ -6,6 +6,7 @@ import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
@@ -19,14 +20,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.List;
 
 public class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> {
-    public PlayerStateGoalBuilder(GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ServerPlayer, ?> progressSupplier) {
-        super("PLAYER", "", category, optionSupplier, GoalProgressSupplier.player(progressSupplier));
+    public PlayerStateGoalBuilder(GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ServerPlayer, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("PLAYER", "", category, optionSupplier, GoalProgressSupplier.player(progressSupplier), difficultySupplier);
     }
 
     @Override
     public void reifiedUpdater(BuilderUtil.Tick update) {}
 
-    public static PlayerStateGoalBuilder<Void> emptyHungerBar() {
+    public static PlayerStateGoalBuilder<Void> emptyHungerBar(GoalDifficultySupplier<Void> difficultySupplier) {
         return new PlayerStateGoalBuilder<>(GoalCategory.MISC_ACTIONS,
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
@@ -52,11 +53,12 @@ public class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> 
                                 SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/food_half_hunger"))
                         ), 0));
                     }
-                })
+                }),
+                difficultySupplier
         );
     }
 
-    public static PlayerStateGoalBuilder<Void> heightAbove(int height, ResourceKey<Level> dimension) {
+    public static PlayerStateGoalBuilder<Void> heightAbove(GoalDifficultySupplier<Void> difficultySupplier, int height, ResourceKey<Level> dimension) {
         return new PlayerStateGoalBuilder<>(GoalCategory.MISC_ACTIONS,
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
@@ -85,11 +87,12 @@ public class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> 
                         );
                     }
                 })
-
+,
+                difficultySupplier
         );
     }
 
-    public static PlayerStateGoalBuilder<Void> sleepIn(Block... blocks) {
+    public static PlayerStateGoalBuilder<Void> sleepIn(GoalDifficultySupplier<Void> difficultySupplier, Block... blocks) {
         return new PlayerStateGoalBuilder<>(
                 GoalCategory.MISC_ACTIONS,
                 GoalOptionSupplier.NONE,
@@ -117,7 +120,8 @@ public class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> 
                     public List<TextureExtractor> getExamples() {
                         return condition.getExamples();
                     }
-                })
+                }),
+                difficultySupplier
         );
     }
 }

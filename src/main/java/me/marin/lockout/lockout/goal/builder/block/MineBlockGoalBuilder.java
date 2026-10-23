@@ -3,6 +3,7 @@ package me.marin.lockout.lockout.goal.builder.block;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.CornerIconTextureExtractor;
@@ -13,8 +14,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class MineBlockGoalBuilder<T> extends GoalBuilder<BlockUtil.MinedBlock, T> {
-    public MineBlockGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, BlockState, ?> progressSupplier) {
-        super("MINE", "Mine", GoalCategory.MINING, optionSupplier, progressSupplier.map(BlockUtil.MinedBlock::block));
+    public MineBlockGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, BlockState, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("MINE", "Mine", GoalCategory.MINING, optionSupplier, progressSupplier.map(BlockUtil.MinedBlock::block), difficultySupplier);
     }
 
     @Override
@@ -28,17 +29,19 @@ public class MineBlockGoalBuilder<T> extends GoalBuilder<BlockUtil.MinedBlock, T
     @Override
     public void reifiedUpdater(BlockUtil.MinedBlock update) {}
 
-    public static MineBlockGoalBuilder<Void> any(Block... blocks) {
+    public static MineBlockGoalBuilder<Void> any(GoalDifficultySupplier<Void> difficultySupplier, Block... blocks) {
         return new MineBlockGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.block(blocks))
+                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.block(blocks)),
+                difficultySupplier
         );
     }
 
-    public static MineBlockGoalBuilder<Void> unique(int count, Block... blocks) {
+    public static MineBlockGoalBuilder<Void> unique(int count, GoalDifficultySupplier<Void> difficultySupplier, Block... blocks) {
         return new MineBlockGoalBuilder<>(
                 GoalOptionSupplier.NONE,
-                GoalProgressSupplier.unique("Blocks mined", _ -> InListAcceptanceCondition.block(blocks)).mapCreation(_ -> count)
+                GoalProgressSupplier.unique("Blocks mined", _ -> InListAcceptanceCondition.block(blocks)).mapCreation(_ -> count),
+                difficultySupplier
         );
     }
 }

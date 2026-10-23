@@ -11,6 +11,7 @@ import me.marin.lockout.client.gui.*;
 import me.marin.lockout.game.GameMode;
 import me.marin.lockout.game.GameState;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
+import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.network.*;
 import me.marin.lockout.server.ServerConfig;
 import net.fabricmc.api.ClientModInitializer;
@@ -368,6 +369,16 @@ public class LockoutClient implements ClientModInitializer {
 
     public static int setHintMode(ServerConfig.HintMode mode, CommandContext<FabricClientCommandSource> context) {
         Network.send(UpdateSettingsPayload.hintMode(mode));
+        return 1;
+    }
+
+    public static int getDifficulty(CommandContext<FabricClientCommandSource> context) {
+        context.getSource().sendFeedback(Component.literal("The current difficulty is " + ClientConfig.getInstance().getServerConfig().getDifficulty().name().toLowerCase(Locale.ROOT) + "."));
+        return 1;
+    }
+
+    public static int setDifficulty(GameDifficulty difficulty, CommandContext<FabricClientCommandSource> context) {
+        Network.send(UpdateSettingsPayload.difficulty(difficulty));
         return 1;
     }
 

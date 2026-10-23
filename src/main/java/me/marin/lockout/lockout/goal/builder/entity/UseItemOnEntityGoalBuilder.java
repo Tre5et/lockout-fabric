@@ -5,6 +5,7 @@ import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
@@ -19,14 +20,14 @@ import net.minecraft.world.item.Items;
 import java.util.List;
 
 public class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUtil.UsedItemOnEntity, T> {
-    public UseItemOnEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityUtil.UsedItemOnEntity, ?> progressSupplier) {
-        super("USE", "Use", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier);
+    public UseItemOnEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityUtil.UsedItemOnEntity, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
+        super("USE", "Use", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier, difficultySupplier);
     }
 
     @Override
     public void reifiedUpdater(EntityUtil.UsedItemOnEntity update) {}
 
-    public static UseItemOnEntityGoalBuilder<Void> of(Item item, EntityType<?> entity) {
+    public static UseItemOnEntityGoalBuilder<Void> of(GoalDifficultySupplier<Void> difficultySupplier, Item item, EntityType<?> entity) {
         return new UseItemOnEntityGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
@@ -49,11 +50,12 @@ public class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUtil.UsedIt
                     public List<TextureExtractor> getExamples() {
                         return List.of(EntityUtil.getEntityTextureExtractor(entity).overlay(ItemTextureExtractor.item(item), TextureAnchor.TOP_RIGHT, 10));
                     }
-                })
+                }),
+                difficultySupplier
         );
     }
 
-    public static GoalBuilder<EntityUtil.UsedItemOnEntity, Void> nameTag(String name, EntityType<?>... entities) {
+    public static GoalBuilder<EntityUtil.UsedItemOnEntity, Void> nameTag(GoalDifficultySupplier<Void> difficultySupplier, String name, EntityType<?>... entities) {
         return new UseItemOnEntityGoalBuilder<>(
                 GoalOptionSupplier.NONE,
                 GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
@@ -83,13 +85,14 @@ public class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUtil.UsedIt
                                 .toList();
                     }
                 })
-        ).customName(_ -> "Name " + InListAcceptanceCondition.entity(entities).getName() + " '" + name + "'");
+        , difficultySupplier).customName(_ -> "Name " + InListAcceptanceCondition.entity(entities).getName() + " '" + name + "'");
     }
 
-    public static UseItemOnEntityGoalBuilder<Integer> unique(int min, int max, int step, Item... items) {
+    public static UseItemOnEntityGoalBuilder<Integer> unique(GoalDifficultySupplier<Integer> difficultySupplier, int min, int max, int step, Item... items) {
         return new UseItemOnEntityGoalBuilder<>(
                 GoalOptionSupplier.integer("Entities to use on", min, max, step),
-                GoalProgressSupplier.unique("Entities used on", _ -> InListAcceptanceCondition.item(items).map(EntityUtil.UsedItemOnEntity::item), EntityUtil.UsedItemOnEntity::entity)
+                GoalProgressSupplier.unique("Entities used on", _ -> InListAcceptanceCondition.item(items).map(EntityUtil.UsedItemOnEntity::item), EntityUtil.UsedItemOnEntity::entity),
+                difficultySupplier
         );
     }
 }

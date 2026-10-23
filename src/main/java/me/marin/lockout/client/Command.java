@@ -9,6 +9,7 @@ import com.mojang.brigadier.tree.CommandNode;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.ChatManager;
 import me.marin.lockout.game.GameMode;
+import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.server.ServerConfig;
 import me.marin.lockout.util.PlayerListSuggestionProvider;
 import me.marin.lockout.util.TeamListSuggestionProvider;
@@ -67,12 +68,26 @@ public interface Command {
                     .then(ClientCommands.literal("set")
                             .then(ClientCommands.literal("text")
                                     .executes(c -> LockoutClient.setHintMode(ServerConfig.HintMode.TEXT, c))
-                            )
-                            .then(ClientCommands.literal("compass")
+                            ).then(ClientCommands.literal("compass")
                                     .executes(c -> LockoutClient.setHintMode(ServerConfig.HintMode.COMPASS, c))
-                            )
-                            .then(ClientCommands.literal("map")
+                            ).then(ClientCommands.literal("map")
                                     .executes(c -> LockoutClient.setHintMode(ServerConfig.HintMode.MAP, c))
+                            )
+                    )
+            ).then(ClientCommands.literal("difficulty")
+                    .executes(LockoutClient::getDifficulty)
+                    .then(ClientCommands.literal("get")
+                            .executes(LockoutClient::getDifficulty)
+                    )
+                    .then(ClientCommands.literal("set")
+                            .then(ClientCommands.literal("random")
+                                    .executes(c -> LockoutClient.setDifficulty(GameDifficulty.RANDOM, c))
+                            ).then(ClientCommands.literal("easy")
+                                    .executes(c -> LockoutClient.setDifficulty(GameDifficulty.EASY, c))
+                            ).then(ClientCommands.literal("medium")
+                                    .executes(c -> LockoutClient.setDifficulty(GameDifficulty.MEDIUM, c))
+                            ).then(ClientCommands.literal("hard")
+                                    .executes(c -> LockoutClient.setDifficulty(GameDifficulty.HARD, c))
                             )
                     )
             ).then(ClientCommands.literal("custom-board")

@@ -6,6 +6,8 @@ import me.marin.lockout.client.goal.ClientGoal;
 import me.marin.lockout.client.goal.builder.ClientGoalBuildParameters;
 import me.marin.lockout.client.goal.hint.ClientHint;
 import me.marin.lockout.lockout.goal.Goal;
+import me.marin.lockout.lockout.goal.difficulty.DifficultyProbabilityFunction;
+import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
@@ -24,17 +26,18 @@ import me.marin.lockout.server.goal.builder.ServerGoalBuildParameters;
 import me.marin.lockout.server.goal.hint.ServerHint;
 import net.minecraft.network.chat.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 public abstract class GoalBuilder<U,T> {
+    private static final Random RANDOM = new Random();
+
     protected final String idPrefix;
     protected final String namePrefix;
     @Getter
     protected final GoalCategory category;
+    @Getter
+    protected final GoalDifficultySupplier<T> difficultySupplier;
     @Getter
     protected final GoalOptionSupplier<T> optionSupplier;
     @Getter
@@ -51,12 +54,13 @@ public abstract class GoalBuilder<U,T> {
     @Setter
     protected boolean enabled = true;
 
-    public GoalBuilder(String idPrefix, String namePrefix, GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T,U,?> progressSupplier) {
+    public GoalBuilder(String idPrefix, String namePrefix, GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T,U,?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
         this.idPrefix = idPrefix;
         this.namePrefix = namePrefix;
         this.category = category;
         this.optionSupplier = optionSupplier;
         this.progressSupplier = progressSupplier;
+        this.difficultySupplier = difficultySupplier;
     }
 
     public TextureExtractor applyTextureExtractor(TextureExtractor textureExtractor, T option) {
@@ -89,9 +93,11 @@ public abstract class GoalBuilder<U,T> {
         ));
     }
 
-    public <G extends Goal> Optional<G> buildGenerated(GoalRequirementContext context, Function<T,G> builder) {
+    public <G extends Goal> Optional<G> buildGenerated(GoalRequirementContext context, Function<T,G> builder, DifficultyProbabilityFunction difficultyProbability) {
         GoalOptionGenerator<T> optionGenerator = optionSupplier.get();
         if(optionGenerator == null) {
+            float probability = difficultyProbability.getProbability(difficultySupplier.get(null));
+            if(probability < RANDOM.nextFloat()) return Optional.empty();
             if(requirements.stream().allMatch(r -> r.optionSatisfiedBy(context, null))) {
                 return Optional.of(builder.apply(null));
             }
@@ -99,11 +105,14 @@ public abstract class GoalBuilder<U,T> {
         }
         Optional<T> option = optionGenerator.generate((o) -> requirements.stream()
                 .allMatch(r -> r.optionSatisfiedBy(context, o)));
+        if(option.isEmpty()) return Optional.empty();
+        float probability = difficultyProbability.getProbability(difficultySupplier.get(option.get()));
+        if(probability < RANDOM.nextFloat()) return Optional.empty();
         return option.map(builder);
     }
 
-    public Optional<ServerGoal<U>> buildGeneratedServer(GoalRequirementContext context) {
-        return buildGenerated(context, this::buildServer);
+    public Optional<ServerGoal<U>> buildGeneratedServer(GoalRequirementContext context, DifficultyProbabilityFunction probabilityFunction) {
+        return buildGenerated(context, this::buildServer, probabilityFunction);
     }
 
     public <G extends Goal> List<G> buildExamples(Function<T,G> builder) {
