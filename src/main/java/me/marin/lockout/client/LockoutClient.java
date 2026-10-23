@@ -2,18 +2,18 @@ package me.marin.lockout.client;
 
 import com.mojang.brigadier.context.CommandContext;
 import lombok.Getter;
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.*;
 import me.marin.lockout.client.game.ClientLockoutBoard;
 import me.marin.lockout.client.game.ClientLockoutGame;
 import me.marin.lockout.client.goal.ClientGoal;
 import me.marin.lockout.client.goal.hint.ClientHint;
 import me.marin.lockout.client.gui.*;
+import me.marin.lockout.game.GameMode;
 import me.marin.lockout.game.GameState;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.network.*;
+import me.marin.lockout.server.ServerConfig;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -32,7 +32,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
@@ -182,34 +181,7 @@ public class LockoutClient implements ClientModInitializer {
         ArgumentTypeRegistry.registerArgumentType(Constants.BOARD_FILE_ARGUMENT_TYPE, CustomBoardFileArgumentType.class, SingletonArgumentInfo.contextFree(CustomBoardFileArgumentType::newInstance));
         ArgumentTypeRegistry.registerArgumentType(Constants.BOARD_POSITION_ARGUMENT_TYPE, BoardPositionArgumentType.class, SingletonArgumentInfo.contextFree(BoardPositionArgumentType::newInstance));
 
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, _) -> dispatcher.getRoot().addChild(ClientCommands.literal("lockoutc")
-                .then(ClientCommands.literal("board")
-                        .then(ClientCommands.literal("set")
-                                .requires(ccs -> {
-                                    if (Minecraft.getInstance().isLocalServer()) {
-                                        return true;
-                                    }
-                                    return Permissions.check(ccs, PLACEHOLDER_PERM_STRING, LevelBasedPermissionSet.GAMEMASTER.level());
-                                }).then(ClientCommands.argument("name", CustomBoardFileArgumentType.newInstance())
-                                        .executes(LockoutClient::setCustomBoard)
-                                )
-                        )
-                        .then(ClientCommands.literal("builder")
-                                .executes(LockoutClient::openBoardBuilder)
-                                .then(ClientCommands.argument("board", CustomBoardFileArgumentType.newInstance())
-                                        .executes(LockoutClient::openBoardBuilder)
-                                )
-                        )
-                        .then(ClientCommands.literal("position")
-                                .executes(LockoutClient::getBoardPosition)
-                                .then(ClientCommands.literal("set")
-                                        .then(ClientCommands.argument("position", BoardPositionArgumentType.newInstance())
-                                                .executes(LockoutClient::setBoardPosition)
-                                        )
-                                )
-                        )
-                ).build()
-        ));
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, _) -> dispatcher.getRoot().addChild(Command.COMMAND));
 
         ClientPlayNetworking.registerGlobalReceiver(LockoutVersionPayload.ID, (payload, _) -> {
             // Compare Lockout versions, disconnect if invalid.
@@ -278,7 +250,7 @@ public class LockoutClient implements ClientModInitializer {
     }
 
     public static int setCustomBoard(CommandContext<FabricClientCommandSource> context) {
-        String boardName = context.getArgument("name", String.class);
+        String boardName = context.getArgument("board", String.class);
 
         List<ClientGoal> goals;
         try {
@@ -295,8 +267,13 @@ public class LockoutClient implements ClientModInitializer {
             return 0;
         }
 
-        ClientPlayNetworking.send(new CustomBoardPayload(Optional.of(goals.stream()
+        Network.send(new CustomBoardPayload(Optional.of(goals.stream()
                 .map(ClientGoal::getBuildData).toList())));
+        return 1;
+    }
+
+    public static int clearCustomBoard(CommandContext<FabricClientCommandSource> context) {
+        Network.send(new CustomBoardPayload(Optional.empty()));
         return 1;
     }
 
@@ -351,4 +328,116 @@ public class LockoutClient implements ClientModInitializer {
         return 1;
     }
 
+    public static int getBoardSize(CommandContext<FabricClientCommandSource> context) {
+        context.getSource().sendFeedback(Component.literal("The current board size is " + ClientConfig.getInstance().getServerConfig().getBoardSize() + "x" + ClientConfig.getInstance().getServerConfig().getBoardSize() + "."));
+        return 1;
+    }
+
+    public static int setBoardSize(CommandContext<FabricClientCommandSource> context) {
+        int size = context.getArgument("size", Integer.class);
+        Network.send(UpdateSettingsPayload.boardSize(size));
+        return 1;
+    }
+
+    public static int getStartTime(CommandContext<FabricClientCommandSource> context) {
+        context.getSource().sendFeedback(Component.literal("The current start time is " + ClientConfig.getInstance().getServerConfig().getStartTime() + "s."));
+        return 1;
+    }
+
+    public static int setStartTime(CommandContext<FabricClientCommandSource> context) {
+        int size = context.getArgument("seconds", Integer.class);
+        Network.send(UpdateSettingsPayload.startTime(size));
+        return 1;
+    }
+
+    public static int getGiveCompasses(CommandContext<FabricClientCommandSource> context) {
+        context.getSource().sendFeedback(Component.literal("Compasses are currently " + (ClientConfig.getInstance().getServerConfig().isGiveCompasses() ? "" : "not ") + "given out."));
+        return 1;
+    }
+
+    public static int setGiveCompasses(CommandContext<FabricClientCommandSource> context) {
+        boolean size = context.getArgument("give", Boolean.class);
+        Network.send(UpdateSettingsPayload.giveCompasses(size));
+        return 1;
+    }
+
+    public static int getHintMode(CommandContext<FabricClientCommandSource> context) {
+        context.getSource().sendFeedback(Component.literal("The current hint mode is " + ClientConfig.getInstance().getServerConfig().getHintMode().name().toLowerCase(Locale.ROOT) + "."));
+        return 1;
+    }
+
+    public static int setHintMode(ServerConfig.HintMode mode, CommandContext<FabricClientCommandSource> context) {
+        Network.send(UpdateSettingsPayload.hintMode(mode));
+        return 1;
+    }
+
+    public static int getChatMode(CommandContext<FabricClientCommandSource> context) {
+        Network.send(RequestActionPayload.simple(RequestActionPayload.Action.GET_CHAT_MODE));
+        return 1;
+    }
+
+    public static int setChatMode(ChatManager.Type mode, CommandContext<FabricClientCommandSource> context) {
+        Network.send(UpdateSettingsPayload.chatMode(mode));
+        return 1;
+    }
+
+    public static int reloadGoals(CommandContext<FabricClientCommandSource> context) {
+        Network.send(RequestActionPayload.simple(RequestActionPayload.Action.RELOAD_GOALS));
+        return 1;
+    }
+
+    public static int start(GameMode gameMode, CommandContext<FabricClientCommandSource> context) {
+        String players = null;
+        try {
+            players = context.getArgument("players", String.class);
+        } catch (Exception ignored) {}
+
+        String teams = null;
+        try {
+            teams = context.getArgument("teams", String.class);
+        } catch (Exception ignored) {}
+
+        if(players == null && teams == null) {
+            context.getSource().sendError(Component.literal("No players or teams specified."));
+            return 0;
+        }
+
+        Network.send(RequestActionPayload.start(gameMode, players, teams));
+        return 1;
+    }
+
+    public static int pause(CommandContext<FabricClientCommandSource> context) {
+        Network.send(RequestActionPayload.simple(RequestActionPayload.Action.PAUSE));
+        return 1;
+    }
+
+    public static int unpause(CommandContext<FabricClientCommandSource> context) {
+        Network.send(RequestActionPayload.simple(RequestActionPayload.Action.UNPAUSE));
+        return 1;
+    }
+
+    public static int forfeit(CommandContext<FabricClientCommandSource> context) {
+        Network.send(RequestActionPayload.simple(RequestActionPayload.Action.FORFEIT));
+        return 1;
+    }
+
+    public static int grantGoal(CommandContext<FabricClientCommandSource> context) {
+        Network.send(RequestActionPayload.goal(RequestActionPayload.Action.GRANT_GOAL, context.getArgument("goal", Integer.class), context.getArgument("team", String.class)));
+        return 1;
+    }
+
+    public static int revokeGoal(CommandContext<FabricClientCommandSource> context) {
+        Network.send(RequestActionPayload.goal(RequestActionPayload.Action.REVOKE_GOAL, context.getArgument("goal", Integer.class), context.getArgument("team", String.class)));
+        return 1;
+    }
+
+    public static int getNearbyStructures(CommandContext<FabricClientCommandSource> context) {
+        Network.send(RequestActionPayload.simple(RequestActionPayload.Action.NEARBY_STRUCTURES));
+        return 1;
+    }
+
+    public static int getNearbyBiomes(CommandContext<FabricClientCommandSource> context) {
+        Network.send(RequestActionPayload.simple(RequestActionPayload.Action.NEARBY_BIOMES));
+        return 1;
+    }
 }

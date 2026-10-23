@@ -25,6 +25,8 @@ public class Constants {
 
     public static final Identifier GOAL_PROGRESS_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "goal_progress");
 
+    public static final Identifier UPDATE_SETTINGS_PACKET = Identifier.fromNamespaceAndPath(NAMESPACE, "update_settings");
+
     public static final Identifier BOARD_SCREEN_ID = Identifier.fromNamespaceAndPath(NAMESPACE, "board");
 
     public static final Identifier BOARD_FILE_ARGUMENT_TYPE = Identifier.fromNamespaceAndPath(NAMESPACE, "board_file");

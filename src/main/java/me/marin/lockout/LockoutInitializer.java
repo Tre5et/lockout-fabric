@@ -3,10 +3,8 @@ package me.marin.lockout;
 import me.marin.lockout.lockout.DefaultGoalRegister;
 import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.network.Networking;
-import me.marin.lockout.server.Command;
 import me.marin.lockout.util.LockoutMapDecorationTypes;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
@@ -39,10 +37,6 @@ public class LockoutInitializer implements ModInitializer {
         Networking.registerPayloads();
         DefaultGoalRegister.registerGoals();
         GoalPoolConfig.load();
-
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            dispatcher.getRoot().addChild(Command.SERVER_COMMAND);
-        });
 
         LootTableEvents.REPLACE.register(((key, original, source, registries) -> {
             if (Objects.equals(key, BuiltInLootTables.PIGLIN_BARTERING)) {

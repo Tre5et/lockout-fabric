@@ -1,7 +1,6 @@
 package me.marin.lockout.server;
 
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.marin.lockout.*;
 import me.marin.lockout.game.GameState;
@@ -28,9 +27,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -39,7 +38,6 @@ import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
-import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
@@ -63,12 +61,12 @@ import static me.marin.lockout.Constants.PLACEHOLDER_PERM_STRING;
 
 public class LockoutServer {
 
-    public static int forfeitCommand(CommandContext<CommandSourceStack> context) {
+    public static int forfeit(ServerPlayNetworking.Context context) {
         if (!LockoutGame.isActive(lockout)) return 0;
         
-        ServerPlayer player = context.getSource().getPlayer();
-        if (player == null || !lockout.isLockoutPlayer(player)) {
-            context.getSource().sendFailure(Component.literal("You are not participating in the Lockout match."));
+        ServerPlayer player = context.player();
+        if (!LockoutGame.isActive(lockout) || !lockout.isLockoutPlayer(player)) {
+            context.player().sendSystemMessage(Component.literal("You are not participating in the Lockout match.").withColor(TextColor.RED));
             return 0;
         }
 
@@ -253,33 +251,59 @@ public class LockoutServer {
                 ServerPlayNetworking.send(player, resultPayload);
             }
         });
+
+        ServerPlayNetworking.registerGlobalReceiver(UpdateSettingsPayload.ID, (payload, context) -> {
+            if(payload.boardSize().isPresent()) {
+                setBoardSize(payload.boardSize().get(), context);
+            }
+            if(payload.startTime().isPresent()) {
+                setStartTime(payload.startTime().get(), context);
+            }
+            if(payload.giveCompasses().isPresent()) {
+                setGiveCompasses(payload.giveCompasses().get(), context);
+            }
+            if(payload.hintMode().isPresent()) {
+                setHintMode(payload.hintMode().get(), context);
+            }
+            if(payload.chatMode().isPresent()) {
+                setChat(payload.chatMode().get(), context);
+            }
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(RequestActionPayload.ID, (payload, context) -> {
+           switch (payload.action()) {
+               case GET_CHAT_MODE -> getChat(context);
+               case RELOAD_GOALS -> reloadGoals(context);
+               case START -> start(payload, context);
+               case PAUSE -> pause(context);
+               case UNPAUSE -> unpause(context);
+               case FORFEIT -> forfeit(context);
+               case GRANT_GOAL -> grantGoal(payload, context);
+               case REVOKE_GOAL -> revokeGoal(payload, context);
+               case NEARBY_STRUCTURES -> getNearbyStructures(context);
+               case NEARBY_BIOMES -> getNearbyBiomes(context);
+           }
+        });
     }
 
-    public static int lockoutCommandLogic(CommandContext<CommandSourceStack> context) {
+    public static int start(RequestActionPayload payload, ServerPlayNetworking.Context context) {
+        if(payload.mode().isEmpty()) {
+            context.player().sendSystemMessage(Component.literal("No game mode selected.").withColor(TextColor.RED));
+            return 0;
+        }
+
         List<ServerLockoutTeam> teams = new ArrayList<>();
 
-        int ret = parseArgumentsIntoTeams(teams, context, false);
-        if (ret == 0) return 0;
+        int ret = parseArgumentsIntoTeams(teams, payload, context, payload.mode().get().isCoop());
+        if (ret != 1) return 0;
 
         startLockout(teams);
-
         return 1;
     }
 
-    public static int blackoutCommandLogic(CommandContext<CommandSourceStack> context) {
-        List<ServerLockoutTeam> teams = new ArrayList<>();
-
-        int ret = parseArgumentsIntoTeams(teams, context, true);
-        if (ret == 0) return 0;
-
-        startLockout(teams);
-
-        return 1;
-    }
-
-    public static int pause(CommandContext<CommandSourceStack> context) {
+    public static int pause(ServerPlayNetworking.Context context) {
         if(!lockout.getState().isShouldTick()) {
-            context.getSource().sendFailure(Component.literal("Lockout is not running."));
+            context.player().sendSystemMessage(Component.literal("Lockout is not running.").withColor(TextColor.RED));
             return 0;
         }
         lockout.setState(GameState.PAUSED);
@@ -288,9 +312,9 @@ public class LockoutServer {
         return 1;
     }
 
-    public static int unpause(CommandContext<CommandSourceStack> context) {
+    public static int unpause(ServerPlayNetworking.Context context) {
         if(lockout.getState() != GameState.PAUSED) {
-            context.getSource().sendFailure(Component.literal("Lockout is not paused."));
+            context.player().sendSystemMessage(Component.literal("Lockout is not paused.").withColor(TextColor.RED));
             return 0;
         }
         lockout.setState(GameState.RUNNING);
@@ -505,24 +529,21 @@ public class LockoutServer {
         return (r << 16) | (g << 8) | b;
     }
 
-    private static int parseArgumentsIntoTeams(List<ServerLockoutTeam> teams, CommandContext<CommandSourceStack> context, boolean isBlackout) {
-        String argument = null;
-
+    private static int parseArgumentsIntoTeams(List<ServerLockoutTeam> teams, RequestActionPayload payload, ServerPlayNetworking.Context context, boolean isCoopMode) {
         PlayerList playerManager = server.getPlayerList();
 
-        try {
-            argument = context.getArgument("players", String.class);
-            String[] players = argument.split(" +");
+        if(payload.players().isPresent()) {
+            String[] players = payload.players().get().split(" +");
             if (players.length < 1) {
-                context.getSource().sendFailure(Component.literal("Not enough players listed."));
+                context.player().sendSystemMessage(Component.literal("Not enough players listed.").withColor(TextColor.RED));
                 return 0;
             }
 
-            if (isBlackout) {
+            if (isCoopMode) {
                 List<String> playerNames = new ArrayList<>();
                 for (String player : players) {
                     if (playerManager.getPlayerByName(player) == null) {
-                        context.getSource().sendFailure(Component.literal("Player " + player + " is invalid."));
+                        context.player().sendSystemMessage(Component.literal("Player " + player + " is invalid.").withColor(TextColor.RED));
                         return 0;
                     }
                     playerNames.add(playerManager.getPlayerByName(player).getName().getString());
@@ -531,94 +552,91 @@ public class LockoutServer {
 
             } else {
                 if (players.length > 16) {
-                    context.getSource().sendFailure(Component.literal("Too many players listed."));
+                    context.player().sendSystemMessage(Component.literal("Too many players listed.").withColor(TextColor.RED));
                     return 0;
                 }
 
                 for (int i = 0; i < players.length; i++) {
                     String player = players[i];
                     if (playerManager.getPlayerByName(player) == null) {
-                        context.getSource().sendFailure(Component.literal("Player " + player + " is invalid."));
+                        context.player().sendSystemMessage(Component.literal("Player " + player + " is invalid.").withColor(TextColor.RED));
                         return 0;
                     }
                     teams.add(new ServerLockoutTeam(List.of(playerManager.getPlayerByName(player).getName().getString()), Lockout.COLOR_ORDERS[i], server));
                 }
             }
 
-        } catch (Exception ignored) {}
+            return 1;
+        }
 
-        if (argument == null) {
-            try {
-                ServerScoreboard scoreboard = server.getScoreboard();
+        if(payload.teams().isPresent()) {
+            ServerScoreboard scoreboard = server.getScoreboard();
 
-                argument = context.getArgument("teams", String.class);
-                String[] teamNames = argument.split(" +");
-                if (teamNames.length < 1) {
-                    context.getSource().sendFailure(Component.literal("Not enough teams listed."));
+            String[] teamNames = payload.teams().get().split(" +");
+            if (teamNames.length < 1) {
+                context.player().sendSystemMessage(Component.literal("Not enough teams listed.").withColor(TextColor.RED));
+                return 0;
+            }
+            if (isCoopMode) {
+                if (teamNames.length > 1) {
+                    context.player().sendSystemMessage(Component.literal("Only one team can play Blackout.").withColor(TextColor.RED));
                     return 0;
                 }
-                if (isBlackout) {
-                    if (teamNames.length > 1) {
-                        context.getSource().sendFailure(Component.literal("Only one team can play Blackout."));
-                        return 0;
-                    }
-                } else {
-                    if (teamNames.length > 16) {
-                        context.getSource().sendFailure(Component.literal("Too many teams listed."));
-                        return 0;
-                    }
+            } else {
+                if (teamNames.length > 16) {
+                    context.player().sendSystemMessage(Component.literal("Too many teams listed.").withColor(TextColor.RED));
+                    return 0;
                 }
+            }
 
-                List<PlayerTeam> scoreboardTeams = new ArrayList<>();
-                for (String teamName : teamNames) {
-                    PlayerTeam team = scoreboard.getPlayerTeam(teamName);
-                    if (team == null) {
-                        context.getSource().sendFailure(Component.literal("Team " + teamName + " is invalid."));
+            List<PlayerTeam> scoreboardTeams = new ArrayList<>();
+            for (String teamName : teamNames) {
+                PlayerTeam team = scoreboard.getPlayerTeam(teamName);
+                if (team == null) {
+                    context.player().sendSystemMessage(Component.literal("Team " + teamName + " is invalid.").withColor(TextColor.RED));
+                    return 0;
+                }
+                for (String player : team.getPlayers()) {
+                    if (playerManager.getPlayerByName(player) == null) {
+                        context.player().sendSystemMessage(Component.literal("Player " + player + " on team " + teamName + " is invalid. Remove them from the team and try again.").withColor(TextColor.RED));
                         return 0;
                     }
-                    for (String player : team.getPlayers()) {
-                        if (playerManager.getPlayerByName(player) == null) {
-                            context.getSource().sendFailure(Component.literal("Player " + player + " on team " + teamName + " is invalid. Remove them from the team and try again."));
-                            return 0;
+                }
+                scoreboardTeams.add(team);
+            }
+            for (PlayerTeam team : scoreboardTeams) {
+                if (team.getPlayers().isEmpty()) {
+                    context.player().sendSystemMessage(Component.literal("Team " + team.getName() + " doesn't have any players.").withColor(TextColor.RED));
+                    return 0;
+                }
+                Optional<TeamColor> teamColor = team.getColor();
+                if (teamColor.isEmpty() || teamHasColor(teams, teamColor.get())) {
+                    // Select an available color.
+                    boolean found = false;
+                    for (TeamColor colorOrder : Lockout.COLOR_ORDERS) {
+                        if (!teamHasColor(teams, colorOrder)) {
+                            found = true;
+                            team.setColor(Optional.of(colorOrder));
+                            break;
                         }
                     }
-                    scoreboardTeams.add(team);
-                }
-                for (PlayerTeam team : scoreboardTeams) {
-                    if (team.getPlayers().isEmpty()) {
-                        context.getSource().sendFailure(Component.literal("Team " + team.getName() + " doesn't have any players."));
+                    if (!found) {
+                        context.player().sendSystemMessage(Component.literal("Could not find assignable color for team " + team.getName() + ". Try recreating teams.").withColor(TextColor.RED));
                         return 0;
                     }
-                    Optional<TeamColor> teamColor = team.getColor();
-                    if (teamColor.isEmpty() || teamHasColor(teams, teamColor.get())) {
-                        // Select an available color.
-                        boolean found = false;
-                        for (TeamColor colorOrder : Lockout.COLOR_ORDERS) {
-                            if (!teamHasColor(teams, colorOrder)) {
-                                found = true;
-                                team.setColor(Optional.of(colorOrder));
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            context.getSource().sendFailure(Component.literal("Could not find assignable color for team " + team.getName() + ". Try recreating teams."));
-                            return 0;
-                        }
-                    }
-                    List<String> actualPlayerNames = new ArrayList<>();
-                    for (String playerName : team.getPlayers()) {
-                        actualPlayerNames.add(playerManager.getPlayerByName(playerName).getName().getString());
-                    }
-                    teams.add(new ServerLockoutTeam(new ArrayList<>(actualPlayerNames), team.getColor().orElse(TeamColor.BLACK), server));
                 }
-            } catch (Exception ignored) {}
+                List<String> actualPlayerNames = new ArrayList<>();
+                for (String playerName : team.getPlayers()) {
+                    actualPlayerNames.add(playerManager.getPlayerByName(playerName).getName().getString());
+                }
+                teams.add(new ServerLockoutTeam(new ArrayList<>(actualPlayerNames), team.getColor().orElse(TeamColor.BLACK), server));
+            }
+
+            return 1;
         }
 
-        if (argument == null) {
-            context.getSource().sendFailure(Component.literal("Illegal argument."));
-            return 0;
-        }
-        return 1;
+        context.player().sendSystemMessage(Component.literal("No players or teams provided.").withColor(TextColor.RED));
+        return 0;
     }
 
     private static boolean teamHasColor(List<ServerLockoutTeam> teams, TeamColor color) {
@@ -630,24 +648,16 @@ public class LockoutServer {
         return false;
     }
 
-    public static int getChat(CommandContext<CommandSourceStack> context) {
-        ServerPlayer player = context.getSource().getPlayer();
-        if (player == null) {
-            context.getSource().sendFailure(Component.literal("This is a player-only command."));
-            return 0;
-        }
+    public static int getChat(ServerPlayNetworking.Context context) {
+        ServerPlayer player = context.player();
 
         ChatManager.Type curr = ChatManager.getChat(player);
-        context.getSource().sendSystemMessage(Component.literal("You are currently chatting in " + curr.name() + "."));
+        player.sendSystemMessage(Component.literal("You are currently chatting in " + curr.name() + "."));
         return 1;
     }
 
-    public static int setChat(CommandContext<CommandSourceStack> context, ChatManager.Type type) {
-        ServerPlayer player = context.getSource().getPlayer();
-        if (player == null) {
-            context.getSource().sendFailure(Component.literal("This is a player-only command."));
-            return 0;
-        }
+    public static int setChat(ChatManager.Type type, ServerPlayNetworking.Context context) {
+        ServerPlayer player = context.player();
 
         ChatManager.Type curr = ChatManager.getChat(player);
         if (curr == type) {
@@ -672,41 +682,36 @@ public class LockoutServer {
         return 1;
     }
 
-    public static int grantGoal(CommandContext<CommandSourceStack> context) {
+    public static int grantGoal(RequestActionPayload payload, ServerPlayNetworking.Context context) {
         try {
             if (!LockoutGame.isActive(lockout)) {
-                context.getSource().sendFailure(Component.literal("There's no active lockout match."));
+                context.player().sendSystemMessage(Component.literal("There's no active lockout match.").withColor(TextColor.RED));
                 return 0;
             }
 
-            int idx = context.getArgument("goal", Integer.class);
-
-            Collection<NameAndId> playerConfigs;
-            try {
-                playerConfigs = GameProfileArgument.getGameProfiles(context, "player");
-            } catch (CommandSyntaxException e) {
-                context.getSource().sendFailure(Component.literal("Invalid target."));
+            if(payload.goal().isEmpty() || payload.teams().isEmpty()) {
+                context.player().sendSystemMessage(Component.literal("No goal or teams specified.").withColor(TextColor.RED));
                 return 0;
             }
 
-            if (playerConfigs.size() != 1) {
-                context.getSource().sendFailure(Component.literal("Invalid number of targets."));
-                return 0;
-            }
-            NameAndId playerConfig = playerConfigs.stream().findFirst().get();
-            if (!lockout.isLockoutPlayer(playerConfig.id())) {
-                context.getSource().sendFailure(Component.literal("Player " + playerConfig.name() + " is not playing Lockout."));
-                return 0;
-            }
+            int idx = payload.goal().get();
 
             if (idx > lockout.getBoard().getGoals().size()) {
-                context.getSource().sendFailure(Component.literal("Goal number does not exist on the board."));
+                context.player().sendSystemMessage(Component.literal("Goal number does not exist on the board.").withColor(TextColor.RED));
                 return 0;
             }
             ServerGoal<?> goal = lockout.getBoard().getGoals().get(idx - 1);
 
-            context.getSource().sendSystemMessage(Component.nullToEmpty("Granted a goal to " + playerConfig.name() + "."));
-            goal.grant(lockout.getPlayerTeam(playerConfig.id()), lockout);
+            String teamName = payload.teams().get();
+
+            Optional<ServerLockoutTeam> team = lockout.getTeams().stream().filter(t -> Objects.equals(t.getDisplayName(), teamName)).findAny();
+            if(team.isEmpty()) {
+                context.player().sendSystemMessage(Component.literal("The team " + teamName + " does not exist.").withColor(TextColor.RED));
+                return 0;
+            }
+
+            goal.grant(team.get(), lockout);
+            context.player().sendSystemMessage(Component.nullToEmpty("Granted a goal to " + team.get().getDisplayName() + "."));
             return 1;
         } catch (RuntimeException e) {
             Lockout.error(e);
@@ -714,41 +719,36 @@ public class LockoutServer {
         }
     }
 
-    public static int revokeGoal(CommandContext<CommandSourceStack> context) {
+    public static int revokeGoal(RequestActionPayload payload, ServerPlayNetworking.Context context) {
         try {
             if (!LockoutGame.isActive(lockout)) {
-                context.getSource().sendFailure(Component.literal("There's no active lockout match."));
+                context.player().sendSystemMessage(Component.literal("There's no active lockout match.").withColor(TextColor.RED));
                 return 0;
             }
 
-            int idx = context.getArgument("goal", Integer.class);
-
-            Collection<NameAndId> playerConfigs;
-            try {
-                playerConfigs = GameProfileArgument.getGameProfiles(context, "player");
-            } catch (CommandSyntaxException e) {
-                context.getSource().sendFailure(Component.literal("Invalid target."));
+            if(payload.goal().isEmpty() || payload.teams().isEmpty()) {
+                context.player().sendSystemMessage(Component.literal("No goal or teams specified.").withColor(TextColor.RED));
                 return 0;
             }
 
-            if (playerConfigs.size() != 1) {
-                context.getSource().sendFailure(Component.literal("Invalid number of targets."));
-                return 0;
-            }
-            NameAndId playerConfig = playerConfigs.stream().findFirst().get();
-            if (!lockout.isLockoutPlayer(playerConfig.id())) {
-                context.getSource().sendFailure(Component.literal("Player " + playerConfig.name() + " is not playing Lockout."));
-                return 0;
-            }
+            int idx = payload.goal().get();
 
             if (idx > lockout.getBoard().getGoals().size()) {
-                context.getSource().sendFailure(Component.literal("Goal number does not exist on the board."));
+                context.player().sendSystemMessage(Component.literal("Goal number does not exist on the board.").withColor(TextColor.RED));
                 return 0;
             }
             ServerGoal<?> goal = lockout.getBoard().getGoals().get(idx - 1);
 
-            context.getSource().sendSystemMessage(Component.nullToEmpty("Revoked a goal from " + playerConfig.name() + "."));
-            goal.revoke(lockout.getPlayerTeam(playerConfig.id()), lockout);
+            String teamName = payload.teams().get();
+
+            Optional<ServerLockoutTeam> team = lockout.getTeams().stream().filter(t -> Objects.equals(t.getDisplayName(), teamName)).findAny();
+            if(team.isEmpty()) {
+                context.player().sendSystemMessage(Component.literal("The team " + teamName + " does not exist.").withColor(TextColor.RED));
+                return 0;
+            }
+
+            goal.revoke(team.get(), lockout);
+            context.player().sendSystemMessage(Component.nullToEmpty("Revoked a goal from " + team.get().getDisplayName() + "."));
             return 1;
         } catch (RuntimeException e) {
             Lockout.error(e);
@@ -756,41 +756,17 @@ public class LockoutServer {
         }
     }
 
-    public static int getStartTime(CommandContext<CommandSourceStack> context) {
-        context.getSource().sendSystemMessage(Component.literal("The current start time is " + ServerConfig.getInstance().getStartTime() + "s."));
+    public static int setStartTime(int startTime, ServerPlayNetworking.Context context) {
+        ServerConfig.getInstance().setStartTime(startTime);
+
+        context.player().sendSystemMessage(Component.nullToEmpty("Updated start time to " + startTime + "s."));
         return 1;
     }
 
-    public static int setStartTime(CommandContext<CommandSourceStack> context) {
-        int seconds = context.getArgument("seconds", Integer.class);
-
-        ServerConfig.getInstance().setStartTime(seconds);
-
-        context.getSource().sendSystemMessage(Component.nullToEmpty("Updated start time to " + seconds + "s."));
-        return 1;
-    }
-
-    public static int clearCustomBoard(CommandContext<CommandSourceStack> context) {
-        if(CUSTOM_BOARD == null) {
-            context.getSource().sendSystemMessage(Component.literal("There is no custom board registered."));
-            return 1;
-        }
-        CUSTOM_BOARD = null;
-        context.getSource().sendSystemMessage(Component.literal("Cleared custom board."));
-        return 1;
-    }
-
-    public static int getBoardSize(CommandContext<CommandSourceStack> context) {
-        context.getSource().sendSystemMessage(Component.literal("The current board size is " + ServerConfig.getInstance().getBoardSize() + "x" + ServerConfig.getInstance().getBoardSize() + "."));
-        return 1;
-    }
-
-    public static int setBoardSize(CommandContext<CommandSourceStack> context) {
-        int size = context.getArgument("size", Integer.class);
-
+    public static int setBoardSize(int size, ServerPlayNetworking.Context context) {
         ServerConfig.getInstance().setBoardSize(size);
 
-        context.getSource().sendSystemMessage(Component.nullToEmpty("Updated board size to " + size + "x" + size + "."));
+        context.player().sendSystemMessage(Component.nullToEmpty("Updated board size to " + size + "x" + size + "."));
         return 1;
     }
 
@@ -803,51 +779,36 @@ public class LockoutServer {
         ServerPlayNetworking.send(player, new AllAdvancementsPayload(advancements));
     }
 
-    public static int getGiveCompasses(CommandContext<CommandSourceStack> context) {
-        String message = ServerConfig.getInstance().isGiveCompasses()
-                ? "Compasses will be given to players."
-                : "Compasses will not be given to players.";
-        context.getSource().sendSystemMessage(Component.literal(message));
-        return 1;
-    }
-
-    public static int setGiveCompasses(CommandContext<CommandSourceStack> context) {
-        boolean giveCompasses = context.getArgument("give", Boolean.class);
+    public static int setGiveCompasses(boolean giveCompasses, ServerPlayNetworking.Context context) {
         ServerConfig.getInstance().setGiveCompasses(giveCompasses);
 
         String message = giveCompasses
                 ? "Compasses will now be given to players."
                 : "Compasses will no longer be given to players.";
-        context.getSource().sendSuccess(() -> Component.literal(message), true);
+        context.player().sendSystemMessage(Component.literal(message));
         return 1;
     }
 
-    public static int getHintMode(CommandContext<CommandSourceStack> context) {
-        String message = "The current hint mode is " + ServerConfig.getInstance().getHintMode().name().toLowerCase(Locale.ROOT) + ".";
-        context.getSource().sendSystemMessage(Component.literal(message));
-        return 1;
-    }
-
-    public static int setHintMode(CommandContext<CommandSourceStack> context, ServerConfig.HintMode mode) {
-        ServerConfig.getInstance().setHintMode(mode);
+    public static int setHintMode(ServerConfig.HintMode hintMode, ServerPlayNetworking.Context context) {
+        ServerConfig.getInstance().setHintMode(hintMode);
         String message = "Set hint mode to " + ServerConfig.getInstance().getHintMode().name().toLowerCase(Locale.ROOT) + ".";
-        context.getSource().sendSuccess(() -> Component.literal(message), true);
+        context.player().sendSystemMessage(Component.literal(message));
         return 1;
     }
 
-    public static int reloadGoals(CommandContext<CommandSourceStack> context) {
+    public static int reloadGoals(ServerPlayNetworking.Context context) {
         try {
             GoalPoolConfig.load();
-            context.getSource().sendSuccess(() -> Component.literal("Goal pool configuration reloaded successfully."), true);
+            context.player().sendSystemMessage(Component.literal("Goal pool configuration reloaded successfully."));
             return 1;
         } catch (Exception e) {
             Lockout.error(e);
-            context.getSource().sendFailure(Component.literal("Failed to reload goal pool configuration. Check the server logs for details."));
+            context.player().sendSystemMessage(Component.literal("Failed to reload goal pool configuration. Check the server logs for details.").withColor(TextColor.RED));
             return 0;
         }
     }
 
-    public static int getNearbyStructures(CommandContext<CommandSourceStack> context) {
+    public static int getNearbyStructures(ServerPlayNetworking.Context context) {
         List<String> found = new ArrayList<>();
         for (Map.Entry<ResourceKey<Structure>, LocateData> entry : CONTEXT.structures().entrySet()) {
             if (entry.getValue().wasLocated()) {
@@ -855,11 +816,11 @@ public class LockoutServer {
             }
         }
         Collections.sort(found);
-        server.getPlayerList().broadcastSystemMessage(Component.empty().append(Component.literal("Found Structures:").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(Component.literal("\n" + String.join("\n", found))), false);
+        context.player().sendSystemMessage(Component.empty().append(Component.literal("Found Structures:").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(Component.literal("\n" + String.join("\n", found))), false);
         return 1;
     }
 
-    public static int getNearbyBiomes(CommandContext<CommandSourceStack> context) {
+    public static int getNearbyBiomes(ServerPlayNetworking.Context context) {
         List<String> found = new ArrayList<>();
         for (Map.Entry<ResourceKey<Biome>, LocateData> entry : CONTEXT.biomes().entrySet()) {
             if (entry.getValue().wasLocated()) {
@@ -867,7 +828,7 @@ public class LockoutServer {
             }
         }
         Collections.sort(found);
-        server.getPlayerList().broadcastSystemMessage(Component.empty().append(Component.literal("Found Biomes:").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(Component.literal("\n" + String.join("\n", found))), false);
+        context.player().sendSystemMessage(Component.empty().append(Component.literal("Found Biomes:").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(Component.literal("\n" + String.join("\n", found))), false);
         return 1;
     }
 

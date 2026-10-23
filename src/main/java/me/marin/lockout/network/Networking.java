@@ -20,5 +20,8 @@ public class Networking {
         PayloadTypeRegistry.clientboundPlay().register(HintResultPayload.ID, HintResultPayload.CODEC);
 
         PayloadTypeRegistry.clientboundPlay().register(GoalProgressPayload.ID, GoalProgressPayload.CODEC);
+
+        PayloadTypeRegistry.serverboundPlay().register(UpdateSettingsPayload.ID, UpdateSettingsPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(RequestActionPayload.ID, RequestActionPayload.CODEC);
     }
 }
