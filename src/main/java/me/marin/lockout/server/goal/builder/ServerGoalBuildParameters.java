@@ -16,11 +16,14 @@ public class ServerGoalBuildParameters<U> extends GoalBuildParameters {
     private final List<ServerHint<?>> hints;
     @Getter
     private final Consumer<U> reifiedUpdater;
+    @Getter
+    private final float difficulty;
 
-    public ServerGoalBuildParameters(String id, BuildData buildData, ServerGoalProgress<U, ?> progress, List<ServerHint<?>> hints, Consumer<U> reifiedUpdater) {
+    public ServerGoalBuildParameters(String id, BuildData buildData, ServerGoalProgress<U, ?> progress, List<ServerHint<?>> hints, Consumer<U> reifiedUpdater, float difficulty) {
         super(id, buildData);
         this.progress = progress;
         this.hints = hints;
         this.reifiedUpdater = reifiedUpdater;
+        this.difficulty = difficulty;
     }
 }

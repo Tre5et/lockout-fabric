@@ -31,12 +31,15 @@ public class ServerGoal<U> extends Goal {
     private final List<ServerHint<?>> hints;
     @Getter
     private final Consumer<U> reifiedUpdater;
+    @Getter
+    private final float difficulty;
 
     public ServerGoal(ServerGoalBuildParameters<U> parameters) {
         super(parameters);
         this.progress = parameters.getProgress();
         this.hints = parameters.getHints();
         this.reifiedUpdater = parameters.getReifiedUpdater();
+        this.difficulty = parameters.getDifficulty();
     }
 
     public void updateProgress(LockoutTeam team, U update, ServerPlayer player, ServerLockoutGame lockout) {

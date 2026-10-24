@@ -6,7 +6,6 @@ import me.marin.lockout.client.goal.ClientGoal;
 import me.marin.lockout.client.goal.builder.ClientGoalBuildParameters;
 import me.marin.lockout.client.goal.hint.ClientHint;
 import me.marin.lockout.lockout.goal.Goal;
-import me.marin.lockout.lockout.goal.difficulty.DifficultyProbabilityFunction;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
@@ -30,8 +29,6 @@ import java.util.*;
 import java.util.function.Function;
 
 public abstract class GoalBuilder<U,T> {
-    private static final Random RANDOM = new Random();
-
     protected final String idPrefix;
     protected final String namePrefix;
     @Getter
@@ -78,7 +75,8 @@ public abstract class GoalBuilder<U,T> {
                 getBuildData(option),
                 progressSupplier.getServer(option),
                 getServerHints(option),
-                this::reifiedUpdater
+                this::reifiedUpdater,
+                difficultySupplier.get(option)
         ));
     }
 
@@ -93,11 +91,9 @@ public abstract class GoalBuilder<U,T> {
         ));
     }
 
-    public <G extends Goal> Optional<G> buildGenerated(GoalRequirementContext context, Function<T,G> builder, DifficultyProbabilityFunction difficultyProbability) {
+    public <G extends Goal> Optional<G> buildGenerated(GoalRequirementContext context, Function<T,G> builder) {
         GoalOptionGenerator<T> optionGenerator = optionSupplier.get();
         if(optionGenerator == null) {
-            float probability = difficultyProbability.getProbability(difficultySupplier.get(null));
-            if(probability < RANDOM.nextFloat()) return Optional.empty();
             if(requirements.stream().allMatch(r -> r.optionSatisfiedBy(context, null))) {
                 return Optional.of(builder.apply(null));
             }
@@ -106,13 +102,11 @@ public abstract class GoalBuilder<U,T> {
         Optional<T> option = optionGenerator.generate((o) -> requirements.stream()
                 .allMatch(r -> r.optionSatisfiedBy(context, o)));
         if(option.isEmpty()) return Optional.empty();
-        float probability = difficultyProbability.getProbability(difficultySupplier.get(option.get()));
-        if(probability < RANDOM.nextFloat()) return Optional.empty();
         return option.map(builder);
     }
 
-    public Optional<ServerGoal<U>> buildGeneratedServer(GoalRequirementContext context, DifficultyProbabilityFunction probabilityFunction) {
-        return buildGenerated(context, this::buildServer, probabilityFunction);
+    public Optional<ServerGoal<U>> buildGeneratedServer(GoalRequirementContext context) {
+        return buildGenerated(context, this::buildServer);
     }
 
     public <G extends Goal> List<G> buildExamples(Function<T,G> builder) {
