@@ -1,5 +1,8 @@
 package me.marin.lockout.lockout.goal.rendering.texture;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.Item;
@@ -9,6 +12,11 @@ import oshi.util.tuples.Pair;
 import java.util.List;
 
 public class ItemTextureExtractor implements TextureExtractor {
+    public static final MapCodec<ItemTextureExtractor> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Item.CODEC.fieldOf("item").forGetter(e -> e.item.getItem().builtInRegistryHolder()),
+            Codec.INT.optionalFieldOf("count", 1).forGetter(e -> e.item.count())
+    ).apply(instance, (i,c) -> ItemTextureExtractor.stack(i.value(), c)));
+
     private final ItemStack item;
 
     public ItemTextureExtractor(ItemStack item) {
@@ -22,6 +30,11 @@ public class ItemTextureExtractor implements TextureExtractor {
             extractor.fakeItem(item, x, y);
             extractor.itemDecorations(font, item, x, y);
         });
+    }
+
+    @Override
+    public MapCodec<? extends TextureExtractor> codec() {
+        return MAP_CODEC;
     }
 
     public static ItemTextureExtractor item(Item item) {

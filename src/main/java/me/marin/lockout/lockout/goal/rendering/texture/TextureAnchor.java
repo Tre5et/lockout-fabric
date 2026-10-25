@@ -1,6 +1,9 @@
 package me.marin.lockout.lockout.goal.rendering.texture;
 
+import com.mojang.serialization.Codec;
 import oshi.util.tuples.Pair;
+
+import java.util.Locale;
 
 public enum TextureAnchor {
     TOP_LEFT(TextureAnchorTransformer.START, TextureAnchorTransformer.START),
@@ -12,6 +15,8 @@ public enum TextureAnchor {
     BOTTOM_LEFT(TextureAnchorTransformer.START, TextureAnchorTransformer.END),
     BOTTOM_CENTER(TextureAnchorTransformer.CENTER, TextureAnchorTransformer.END),
     BOTTOM_RIGHT(TextureAnchorTransformer.END, TextureAnchorTransformer.END);
+
+    public static Codec<TextureAnchor> CODEC = Codec.stringResolver(t -> t.name().toLowerCase(Locale.ROOT), s -> TextureAnchor.valueOf(s.toUpperCase(Locale.ROOT)));
 
     private final TextureAnchorTransformer xTransformer;
     private final TextureAnchorTransformer yTransformer;

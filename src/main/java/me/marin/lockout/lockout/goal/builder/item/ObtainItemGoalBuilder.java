@@ -211,7 +211,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick,T> {
                                 4
                         ))
                         .limit(10)
-                        .map(a -> TextureExtractor.BLANK
+                        .map(a -> TextureExtractor.blank()
                                 .overlay(ItemTextureExtractor.item(ItemUtil.ARMORS.get(a.getFirst()).getFirst()), TextureAnchor.TOP_LEFT)
                                 .overlay(ItemTextureExtractor.item(ItemUtil.ARMORS.get(a.get(1)).get(1)), TextureAnchor.TOP_RIGHT)
                                 .overlay(ItemTextureExtractor.item(ItemUtil.ARMORS.get(a.get(2)).get(2)), TextureAnchor.BOTTOM_LEFT)
@@ -236,7 +236,7 @@ public class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick,T> {
                                         }).toList()
                         )
                         .limit(10)
-                        .map(a -> TextureExtractor.BLANK
+                        .map(a -> TextureExtractor.blank()
                                 .overlay(new ItemTextureExtractor(a.getFirst().apply(Items.LEATHER_HELMET)), TextureAnchor.TOP_LEFT)
                                 .overlay(new ItemTextureExtractor(a.get(1).apply(Items.LEATHER_CHESTPLATE)), TextureAnchor.TOP_RIGHT)
                                 .overlay(new ItemTextureExtractor(a.get(2).apply(Items.LEATHER_LEGGINGS)), TextureAnchor.BOTTOM_LEFT)

@@ -6,6 +6,7 @@ import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
+import me.marin.lockout.lockout.goal.rendering.texture.FillTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureAnchor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
@@ -44,7 +45,7 @@ public class BlockWithItemGoalBuilder<T> extends GoalBuilder<ItemUtil.BlockedWit
 
                     @Override
                     public List<TextureExtractor> getExamples() {
-                        return List.of(ItemTextureExtractor.item(item).overlay((extractor, _, x, y, width, height, _) -> extractor.fill(x, y, x+width, y+height, ARGB.white(100)), TextureAnchor.BOTTOM_LEFT, 16, 8));
+                        return List.of(ItemTextureExtractor.item(item).overlay(new FillTextureExtractor(ARGB.white(100)), TextureAnchor.BOTTOM_LEFT, 16, 8));
                     }
                 })
         , difficultySupplier).customName(_ -> "Have your " + ItemUtil.getItemName(item) + " disabled");

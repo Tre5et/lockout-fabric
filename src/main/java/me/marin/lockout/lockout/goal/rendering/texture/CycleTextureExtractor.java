@@ -1,5 +1,9 @@
 package me.marin.lockout.lockout.goal.rendering.texture;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import lombok.Getter;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
@@ -8,11 +12,17 @@ import oshi.util.tuples.Pair;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CycleTextureExtractor implements TextureExtractor {
-    private final List<? extends TextureExtractor> renderers;
+    public static final MapCodec<CycleTextureExtractor> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Codec.list(TextureExtractor.CODEC).fieldOf("textures").forGetter(CycleTextureExtractor::getRenderers)
+    ).apply(instance, CycleTextureExtractor::new));
 
-    public CycleTextureExtractor(List<? extends TextureExtractor> renderers) {
+    @Getter
+    private final List<TextureExtractor> renderers;
+
+    public CycleTextureExtractor(List<TextureExtractor> renderers) {
         this.renderers = renderers;
     }
 
@@ -22,11 +32,16 @@ public class CycleTextureExtractor implements TextureExtractor {
         renderers.get(mod / 60).extract(extractor, font, x, y, width, height, tick);
     }
 
+    @Override
+    public MapCodec<? extends TextureExtractor> codec() {
+        return MAP_CODEC;
+    }
+
     public static CycleTextureExtractor item(List<Item> items) {
         return new CycleTextureExtractor(
                 items.stream()
                         .map(ItemTextureExtractor::item)
-                        .toList()
+                        .collect(Collectors.toUnmodifiableList())
         );
     }
 
@@ -34,7 +49,7 @@ public class CycleTextureExtractor implements TextureExtractor {
         return new CycleTextureExtractor(
                 items.stream()
                         .map(e -> ItemTextureExtractor.stack(e.getA(), e.getB()))
-                        .toList()
+                        .collect(Collectors.toUnmodifiableList())
         );
     }
 
@@ -42,7 +57,7 @@ public class CycleTextureExtractor implements TextureExtractor {
         return new CycleTextureExtractor(
                 textures.stream()
                         .map(GenericTextureExtractor::texture)
-                        .toList()
+                        .collect(Collectors.toUnmodifiableList())
         );
     }
 
