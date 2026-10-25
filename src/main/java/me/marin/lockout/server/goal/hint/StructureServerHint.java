@@ -1,5 +1,9 @@
 package me.marin.lockout.server.goal.hint;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import lombok.Getter;
 import me.marin.lockout.lockout.goal.hint.GoalHintResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -18,6 +22,14 @@ import oshi.util.tuples.Pair;
 import java.util.List;
 
 public class StructureServerHint extends PositionServerHint {
+    public static final MapCodec<StructureServerHint> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Codec.STRING.fieldOf("name").forGetter(StructureServerHint::getName),
+            MapDecorationType.CODEC.fieldOf("decoration").forGetter(StructureServerHint::getDecoration),
+            Codec.list(Level.RESOURCE_KEY_CODEC).optionalFieldOf("levels", List.of(Level.OVERWORLD)).forGetter(StructureServerHint::getApplicableLevels),
+            Codec.list(ResourceKey.codec(Registries.STRUCTURE)).fieldOf("structures").forGetter(StructureServerHint::getAcceptableStructures)
+    ).apply(instance, StructureServerHint::new));
+
+    @Getter
     private final List<ResourceKey<Structure>> acceptableStructures;
 
     public StructureServerHint(String name, Holder<MapDecorationType> decoration, List<ResourceKey<Level>> applicableLevels, List<ResourceKey<Structure>> acceptableStructures) {
@@ -40,5 +52,10 @@ public class StructureServerHint extends PositionServerHint {
         }
 
         return GoalHintResult.result(new Pair<>(found.getFirst(), level.dimension().identifier()));
+    }
+
+    @Override
+    public MapCodec<? extends ServerHint<?>> codec() {
+        return MAP_CODEC;
     }
 }

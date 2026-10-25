@@ -1,5 +1,8 @@
 package me.marin.lockout.client.goal.hint;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import me.marin.lockout.client.ClientConfig;
@@ -11,6 +14,11 @@ import net.minecraft.resources.Identifier;
 import oshi.util.tuples.Pair;
 
 public class PositionClientHint extends PositionHint implements ClientHint<Pair<BlockPos, Identifier>> {
+    public static final MapCodec<PositionClientHint> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Codec.STRING.fieldOf("name").forGetter(PositionClientHint::getName)
+    ).apply(instance, PositionClientHint::new));
+
+    @Getter
     private final String name;
     @Getter
     @Setter
@@ -26,6 +34,11 @@ public class PositionClientHint extends PositionHint implements ClientHint<Pair<
     @Override
     public Component getTitle() {
         return Component.literal("Nearest " + name);
+    }
+
+    @Override
+    public MapCodec<? extends ClientHint<?>> codec() {
+        return MAP_CODEC;
     }
 
     @Override

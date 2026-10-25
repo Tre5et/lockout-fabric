@@ -1,5 +1,6 @@
 package me.marin.lockout.server.goal.hint;
 
+import lombok.Getter;
 import me.marin.lockout.lockout.goal.hint.GoalHintResult;
 import me.marin.lockout.lockout.goal.hint.PositionHint;
 import me.marin.lockout.server.ServerConfig;
@@ -32,8 +33,11 @@ import java.util.List;
 import java.util.Optional;
 
 public abstract class PositionServerHint extends PositionHint implements ServerHint<Pair<BlockPos,Identifier>> {
+    @Getter
     private final String name;
+    @Getter
     private final Holder<MapDecorationType> decoration;
+    @Getter
     private final List<ResourceKey<Level>> applicableLevels;
 
     public PositionServerHint(String name, Holder<MapDecorationType> decoration, List<ResourceKey<Level>> applicableLevels) {

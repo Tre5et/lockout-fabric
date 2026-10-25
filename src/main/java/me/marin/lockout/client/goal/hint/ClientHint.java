@@ -1,19 +1,31 @@
 package me.marin.lockout.client.goal.hint;
 
 import com.google.gson.JsonParser;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import me.marin.lockout.lockout.goal.hint.GoalHintResult;
 import me.marin.lockout.lockout.goal.hint.Hint;
 import me.marin.lockout.network.HintResultPayload;
+import me.marin.lockout.registries.LockoutRegistries;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 
 public interface ClientHint<T> extends Hint<T> {
+    Codec<ClientHint<?>> CODEC = LockoutRegistries.CLIENT_HINT_TYPE.byNameCodec().dispatch(ClientHint::codec, c -> c);
+
     Component getTitle();
     T getData();
     void setData(T data);
     String getError();
     void setError(String message);
+
+    MapCodec<? extends ClientHint<?>> codec();
+
+    static void bootstrap(Registry<MapCodec<? extends ClientHint<?>>> registry) {
+        LockoutRegistries.register(registry, "position", PositionClientHint.MAP_CODEC);
+    }
 
     default void update(GoalHintResult<T> result) {
         setError(result.getError());
