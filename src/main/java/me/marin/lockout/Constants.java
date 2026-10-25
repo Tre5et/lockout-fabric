@@ -6,6 +6,10 @@ public class Constants {
 
     public static final String NAMESPACE = "lockout";
 
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(NAMESPACE, path);
+    }
+
     public static final int MIN_BOARD_SIZE = 3;
     public static final int MAX_BOARD_SIZE = 7;
 

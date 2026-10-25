@@ -1,0 +1,28 @@
+{
+    "name": "normal",
+    "individual": {
+        "type": "lockout:absolute_distance",
+        "target": 0.5,
+        "steepness": 3,
+        "modifiers": [
+            {
+                "type": "lockout:allow_between",
+                "min": 0.2,
+                "max": 0.8
+            }
+        ]
+    },
+    "total": {
+        "type": "lockout:absolute_distance",
+        "target": 0.5,
+        "steepness": 5,
+        "exponent": 0.5,
+        "modifiers": [
+            {
+                "type": "lockout:allow_between",
+                "min": 0.35,
+                "max": 0.65
+            }
+        ]
+    }
+}

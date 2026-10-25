@@ -2,7 +2,6 @@ package me.marin.lockout.network;
 
 import me.marin.lockout.ChatManager;
 import me.marin.lockout.Constants;
-import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.server.ServerConfig;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -19,7 +18,7 @@ public record UpdateSettingsPayload(
         Optional<Boolean> giveCompasses,
         Optional<ServerConfig.HintMode> hintMode,
         Optional<ChatManager.Type> chatMode,
-        Optional<GameDifficulty> difficulty
+        Optional<Identifier> difficulty
 ) implements CustomPacketPayload {
     public static final Type<UpdateSettingsPayload> ID = new Type<>(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "update_settings"));
     public static final StreamCodec<RegistryFriendlyByteBuf, UpdateSettingsPayload> CODEC = StreamCodec.composite(
@@ -33,7 +32,7 @@ public record UpdateSettingsPayload(
             UpdateSettingsPayload::hintMode,
             ByteBufCodecs.optional(ChatManager.Type.CODEC),
             UpdateSettingsPayload::chatMode,
-            ByteBufCodecs.optional(GameDifficulty.CODEC),
+            ByteBufCodecs.optional(Identifier.STREAM_CODEC),
             UpdateSettingsPayload::difficulty,
             UpdateSettingsPayload::new
     );
@@ -63,7 +62,7 @@ public record UpdateSettingsPayload(
         return new UpdateSettingsPayload(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(chatMode), Optional.empty());
     }
 
-    public static UpdateSettingsPayload difficulty(GameDifficulty difficulty) {
+    public static UpdateSettingsPayload difficulty(Identifier difficulty) {
         return new UpdateSettingsPayload(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(difficulty));
     }
 }

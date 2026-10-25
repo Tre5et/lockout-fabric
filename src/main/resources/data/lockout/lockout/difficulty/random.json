@@ -1,0 +1,9 @@
+{
+    "name": "random",
+    "individual": {
+        "type": "lockout:allow_all"
+    },
+    "total": {
+        "type": "lockout:allow_all"
+    }
+}

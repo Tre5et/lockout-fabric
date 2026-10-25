@@ -5,18 +5,24 @@ import com.google.gson.GsonBuilder;
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
+import me.marin.lockout.Constants;
 import me.marin.lockout.Lockout;
 import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.network.Network;
 import me.marin.lockout.network.ServerConfigPayload;
+import me.marin.lockout.registries.LockoutRegistryKeys;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class ServerConfig {
     public static final StreamCodec<ByteBuf, ServerConfig> CODEC = StreamCodec.composite(
@@ -28,7 +34,7 @@ public class ServerConfig {
             c -> c.giveCompasses,
             HintMode.CODEC,
             c -> c.hintMode,
-            GameDifficulty.CODEC,
+            Identifier.STREAM_CODEC,
             c -> c.difficulty,
             ServerConfig::new
     );
@@ -48,9 +54,9 @@ public class ServerConfig {
     @Getter
     private HintMode hintMode = HintMode.MAP;
     @Getter
-    private GameDifficulty difficulty = GameDifficulty.NORMAL;
+    private Identifier difficulty = Constants.id("random");
 
-    public ServerConfig(int boardSize, int startTime, boolean giveCompasses, HintMode hintMode, GameDifficulty difficulty) {
+    public ServerConfig(int boardSize, int startTime, boolean giveCompasses, HintMode hintMode, Identifier difficulty) {
         this.boardSize = boardSize;
         this.startTime = startTime;
         this.giveCompasses = giveCompasses;
@@ -85,8 +91,12 @@ public class ServerConfig {
         broadcast();
     }
 
-    public void setDifficulty(GameDifficulty difficulty) {
-        this.difficulty = difficulty;
+    public Optional<Holder.Reference<GameDifficulty>> getDifficulty(RegistryAccess registryAccess) {
+        return registryAccess.lookup(LockoutRegistryKeys.DIFFICULTY).flatMap(r -> r.get(this.difficulty));
+    }
+
+    public void setDifficulty(Holder.Reference<GameDifficulty> difficulty) {
+        this.difficulty = difficulty.key().identifier();
         save();
         broadcast();
     }

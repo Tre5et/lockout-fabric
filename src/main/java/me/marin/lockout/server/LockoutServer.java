@@ -12,6 +12,7 @@ import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.network.*;
+import me.marin.lockout.registries.LockoutRegistryKeys;
 import me.marin.lockout.server.game.ServerLockoutBoard;
 import me.marin.lockout.server.game.ServerLockoutGame;
 import me.marin.lockout.server.goal.ServerGoal;
@@ -29,6 +30,7 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
@@ -288,6 +290,8 @@ public class LockoutServer {
                case NEARBY_BIOMES -> getNearbyBiomes(context);
            }
         });
+
+        //System.out.println(server.registryAccess().lookup(LockoutRegistryKeys.DIFFICULTY).get().entrySet());
     }
 
     public static int start(RequestActionPayload payload, ServerPlayNetworking.Context context) {
@@ -384,7 +388,18 @@ public class LockoutServer {
                     CONTEXT.structures(),
                     teams
             ));
-            lockoutBoard = boardGenerator.generateBoard(ServerConfig.getInstance().getBoardSize(), ServerConfig.getInstance().getDifficulty());
+            Optional<Holder.Reference<GameDifficulty>> difficulty = ServerConfig.getInstance().getDifficulty(server.registryAccess());
+            if(difficulty.isEmpty()) {
+                String errorMessage = "Cannot determine difficulty.";
+                for (UUID playerUuid : allLockoutPlayers) {
+                    ServerPlayer player = playerManager.getPlayer(playerUuid);
+                    if (player != null) {
+                        player.sendOverlayMessage(Component.literal(errorMessage).withStyle(ChatFormatting.RED));
+                    }
+                }
+                return;
+            }
+            lockoutBoard = boardGenerator.generateBoard(ServerConfig.getInstance().getBoardSize(), difficulty.get().value());
             
             // Check if board generation failed due to insufficient goals
             if (lockoutBoard == null) {
@@ -800,9 +815,15 @@ public class LockoutServer {
         return 1;
     }
 
-    public static int setDifficulty(GameDifficulty difficulty, ServerPlayNetworking.Context context) {
-        ServerConfig.getInstance().setDifficulty(difficulty);
-        String message = "Set difficulty to " + ServerConfig.getInstance().getDifficulty().name().toLowerCase(Locale.ROOT) + ".";
+    public static int setDifficulty(Identifier difficultyKey, ServerPlayNetworking.Context context) {
+        Optional<Holder.Reference<GameDifficulty>> difficulty = server.registryAccess().lookup(LockoutRegistryKeys.DIFFICULTY).flatMap(r -> r.get(difficultyKey));
+        if(difficulty.isEmpty()) {
+            context.player().sendSystemMessage(Component.literal("Unable to find difficulty " + difficultyKey.toString() + "."));
+            return 1;
+        }
+
+        ServerConfig.getInstance().setDifficulty(difficulty.get());
+        String message = "Set difficulty to " + difficulty.get().value().getName() + ".";
         context.player().sendSystemMessage(Component.literal(message));
         return 1;
     }

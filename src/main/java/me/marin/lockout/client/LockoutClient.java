@@ -28,6 +28,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -373,11 +374,22 @@ public class LockoutClient implements ClientModInitializer {
     }
 
     public static int getDifficulty(CommandContext<FabricClientCommandSource> context) {
-        context.getSource().sendFeedback(Component.literal("The current difficulty is " + ClientConfig.getInstance().getServerConfig().getDifficulty().name().toLowerCase(Locale.ROOT) + "."));
+        if(Minecraft.getInstance().level == null) {
+            context.getSource().sendError(Component.literal("No world is open."));
+            return 0;
+        }
+        Optional<Holder.Reference<GameDifficulty>> difficulty = ClientConfig.getInstance().getServerConfig().getDifficulty(Minecraft.getInstance().level.registryAccess());
+        if(difficulty.isEmpty()) {
+            context.getSource().sendError(Component.literal("Unable to find difficulty: " + ClientConfig.getInstance().getServerConfig().getDifficulty().toString()  + "."));
+            return 0;
+        }
+
+        context.getSource().sendFeedback(Component.literal("The current difficulty is " + difficulty.get().value().getName() + "."));
         return 1;
     }
 
-    public static int setDifficulty(GameDifficulty difficulty, CommandContext<FabricClientCommandSource> context) {
+    public static int setDifficulty(CommandContext<FabricClientCommandSource> context) {
+        Identifier difficulty = context.getArgument("difficulty", Identifier.class);
         Network.send(UpdateSettingsPayload.difficulty(difficulty));
         return 1;
     }
