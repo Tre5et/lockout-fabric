@@ -45,18 +45,18 @@ public class BoardGenerator {
         int maxAdjustmentAttempts = 100;
         for(int i = 0; i < maxAdjustmentAttempts; i++) {
             double totalDifficulty = board.stream().mapToDouble(g -> g.getB().getDifficulty()).average().getAsDouble();
-            DifficultyCheckFunction.DifficultyStatus status = difficulty.getProbabilityFunction().checkDifficulty((float) totalDifficulty);
+            DifficultyCheckFunction.DifficultyStatus status = difficulty.getTotal().check((float) totalDifficulty);
             if(status.isAllowed()) {
-                Lockout.log("Board generation finished.");
+                Lockout.log("Board generation finished. (difficulty: " + totalDifficulty + ")");
                 Collections.shuffle(board);
                 return new ServerLockoutBoard(board.stream().map(Pair::getB).collect(Collectors.toUnmodifiableList()));
             }
             Pair<GoalBuilder<?,?>, ServerGoal<?>> replaced;
             if(status == DifficultyCheckFunction.DifficultyStatus.TOO_HARD) {
-                Lockout.log("Board too hard, replacing hardest goal.");
+                Lockout.log("Board too hard (difficulty: " + totalDifficulty + "), replacing hardest goal.");
                 replaced = board.stream().max(Comparator.comparing(g -> g.getB().getDifficulty())).get();
             } else {
-                Lockout.log("Board too easy, replacing easiest goal.");
+                Lockout.log("Board too easy (difficulty: " + totalDifficulty + "), replacing easiest goal.");
                 replaced = board.stream().min(Comparator.comparing(g -> g.getB().getDifficulty())).get();
             }
             board.remove(replaced);
@@ -84,7 +84,7 @@ public class BoardGenerator {
             }
             var goal = builder.buildGeneratedServer(context);
             if(goal.isEmpty()) continue;
-            if(!difficulty.getProbabilityFunction().checkDifficulty(goal.get().getDifficulty()).isAllowed()) continue;
+            if(!difficulty.getIndividual().check(goal.get().getDifficulty()).isAllowed()) continue;
             availableGoals.remove(index);
             currentGoals.add(new Pair<>(builder, goal.get()));
             Lockout.log("Generated goal in " + i + " attempts.");

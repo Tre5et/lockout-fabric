@@ -16,7 +16,7 @@ public class DifficultyCheckFunction {
         this.probabilityFunction = probabilityFunction;
     }
 
-    public DifficultyStatus checkDifficulty(float difficulty) {
+    public DifficultyStatus check(float difficulty) {
         if(this.probabilityFunction.apply(difficulty) > RANDOM.nextFloat()) return DifficultyStatus.ACCEPTED;
         if(difficulty > target) return DifficultyStatus.TOO_HARD;
         return DifficultyStatus.TOO_EASY;
@@ -30,12 +30,16 @@ public class DifficultyCheckFunction {
         return new DifficultyCheckFunction(this.target, d -> (d >= min && d <= max) ? this.probabilityFunction.apply(d) : 0);
     }
 
-    static DifficultyCheckFunction random() {
+    public static DifficultyCheckFunction allowAll() {
         return new DifficultyCheckFunction(0.5f, _ -> 1f);
     }
 
-    static DifficultyCheckFunction absoluteDistance(float target, float steepness) {
-        return new DifficultyCheckFunction(target, d -> Math.clamp(1 - Math.abs(target - d) * steepness, 0, 1));
+    public static DifficultyCheckFunction absoluteDistance(float target, float steepness, float exponent) {
+        return new DifficultyCheckFunction(target, d -> (float)Math.clamp(1 - Math.pow(Math.abs(target - d) * steepness, exponent), 0, 1));
+    }
+
+    public static DifficultyCheckFunction absoluteDistance(float target, float steepness) {
+        return absoluteDistance(target, steepness, 1);
     }
 
     public enum DifficultyStatus {

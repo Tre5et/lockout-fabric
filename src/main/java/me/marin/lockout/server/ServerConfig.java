@@ -48,7 +48,7 @@ public class ServerConfig {
     @Getter
     private HintMode hintMode = HintMode.MAP;
     @Getter
-    private GameDifficulty difficulty = GameDifficulty.MEDIUM;
+    private GameDifficulty difficulty = GameDifficulty.NORMAL;
 
     public ServerConfig(int boardSize, int startTime, boolean giveCompasses, HintMode hintMode, GameDifficulty difficulty) {
         this.boardSize = boardSize;
