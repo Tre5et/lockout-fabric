@@ -1,0 +1,11 @@
+{
+    "type": "lockout:structure",
+    "name": "Suspicious Structure",
+    "decoration": "minecraft:banner_purple",
+    "structures": [
+        "minecraft:trail_ruins",
+        "minecraft:ocean_ruin_warm",
+        "minecraft:ocean_ruin_cold",
+        "minecraft:desert_pyramid"
+    ]
+}

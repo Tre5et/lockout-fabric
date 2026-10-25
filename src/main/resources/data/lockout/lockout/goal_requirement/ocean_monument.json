@@ -1,0 +1,8 @@
+{
+    "type": "lockout:structure",
+    "name": "Ocean Monument",
+    "decoration": "minecraft:monument",
+    "structures": [
+        "minecraft:ocean_monument"
+    ]
+}

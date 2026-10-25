@@ -1,0 +1,10 @@
+{
+    "type": "lockout:biome",
+    "name": "Warm Ocean",
+    "decoration": "minecraft:banner_cyan",
+    "biomes": [
+        "minecraft:warm_ocean",
+        "minecraft:lukewarm_ocean",
+        "minecraft:deep_lukewarm_ocean"
+    ]
+}

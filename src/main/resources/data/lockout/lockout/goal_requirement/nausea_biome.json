@@ -1,0 +1,12 @@
+{
+    "type": "lockout:biome",
+    "name": "Nausea Biome",
+    "decoration": "minecraft:banner_blue",
+    "biomes": [
+        "minecraft:warm_ocean",
+        "minecraft:lukewarm_ocean",
+        "minecraft:deep_lukewarm_ocean",
+        "minecraft:pale_garden",
+        "lockout:sulfur_caves"
+    ]
+}

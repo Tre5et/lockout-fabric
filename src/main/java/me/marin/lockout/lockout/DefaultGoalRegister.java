@@ -76,7 +76,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(BreedAnimalGoalBuilder.any(GoalDifficultySupplier.of(0.32f), EntityTypes.RABBIT));
         INSTANCE.register(BreedAnimalGoalBuilder.any(GoalDifficultySupplier.of(0.18f), EntityTypes.SHEEP));
         INSTANCE.register(BreedAnimalGoalBuilder.any(GoalDifficultySupplier.of(0.68f), EntityTypes.STRIDER));
-        INSTANCE.register(BreedAnimalGoalBuilder.unique(n -> GoalDifficultySupplier.linear(4, 8).scale(0.3f, 0.55f).get(n), 4,8));
+        INSTANCE.register(BreedAnimalGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(4, 8).inRange(0.3f, 0.55f), 4,8));
 
         INSTANCE.register(BrewPotionGoalBuilder.effect(GoalDifficultySupplier.of(0.68f), Potions.HEALING, Potions.STRONG_HEALING));
         INSTANCE.register(BrewPotionGoalBuilder.effect(GoalDifficultySupplier.of(0.72f), Potions.INVISIBILITY, Potions.LONG_INVISIBILITY));
@@ -86,7 +86,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(BrewPotionGoalBuilder.effect(GoalDifficultySupplier.of(0.68f), Potions.WEAKNESS, Potions.LONG_WEAKNESS));
         INSTANCE.register(BrewPotionGoalBuilder.type(GoalDifficultySupplier.of(0.99f), Items.LINGERING_POTION).customName(_ -> "Brew any Lingering Potion"));
 
-        INSTANCE.register(CompostItemsGoalBuilder.uniqueWithComponent(n -> GoalDifficultySupplier.linear(3, 7).scale(0.25f, 0.55f).get(n), 3, 7, DataComponents.FOOD)
+        INSTANCE.register(CompostItemsGoalBuilder.uniqueWithComponent(GoalDifficultySupplier.<Integer>linear(3, 7).inRange(0.25f, 0.55f), 3, 7, DataComponents.FOOD)
                 .customName(n -> "Compost " + n + " Unique Foods")
         );
 
@@ -95,10 +95,10 @@ public class DefaultGoalRegister {
         INSTANCE.register(SpawnEntityGoalBuilder.any(GoalDifficultySupplier.of(0.3f), EntityTypes.SNOW_GOLEM).require(GoalRequirements.SNOWY));
 
         INSTANCE.register(CraftItemGoalBuilder.any(GoalDifficultySupplier.of(0.72f), ItemUtil.ARMOR_TRIM.toArray(Item[]::new)).customName(_ -> "Duplicate any Armor Trim"));
-        INSTANCE.register(CraftItemGoalBuilder.unique(n -> GoalDifficultySupplier.linear(20, 100).scale(0.5f, 0.9f).get(n), 20, 100, 10));
+        INSTANCE.register(CraftItemGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(20, 100).inRange(0.5f, 0.9f), 20, 100, 10));
 
-        INSTANCE.register(DealDamageGoalBuilder.total(n -> GoalDifficultySupplier.linear(100, 500).scale(0.45f, 0.8f).get(n), 100, 500, 25));
-        INSTANCE.register(TakeDamageGoalBuilder.total(n -> GoalDifficultySupplier.linear(50, 300).scale(0.3f, 0.65f).get(n), 50, 300, 10));
+        INSTANCE.register(DealDamageGoalBuilder.total(GoalDifficultySupplier.<Integer>linear(100, 500).inRange(0.45f, 0.8f), 100, 500, 25));
+        INSTANCE.register(TakeDamageGoalBuilder.total(GoalDifficultySupplier.<Integer>linear(50, 300).inRange(0.3f, 0.65f), 50, 300, 10));
 
         INSTANCE.register(ObtainItemGoalBuilder.shieldWithBanner(GoalDifficultySupplier.of(0.4f)));
 
@@ -139,13 +139,13 @@ public class DefaultGoalRegister {
         INSTANCE.register(ConsumeItemGoalBuilder.any(GoalDifficultySupplier.of(0.18f), Items.HONEY_BOTTLE).customName(_ -> "Drink Honey Bottle"));
         INSTANCE.register(ConsumeItemGoalBuilder.anyWithComponent(GoalDifficultySupplier.of(0.15f), DataComponents.POTION_CONTENTS, new PotionContents(Potions.WATER), "WATER_BOTTLE", "Water Bottle", Items.POTION)
                 .customName(_ -> "Drink Water Bottle"));
-        INSTANCE.register(ConsumeItemGoalBuilder.uniqueWithComponent(n -> GoalDifficultySupplier.linear(5, 25).scale(0.25f, 0.55f).get(n), 5, 25, DataComponents.FOOD)
+        INSTANCE.register(ConsumeItemGoalBuilder.uniqueWithComponent(GoalDifficultySupplier.<Integer>linear(5, 25).inRange(0.25f, 0.55f), 5, 25, DataComponents.FOOD)
                 .customName(n -> "Eat " + n + " Unique Foods"));
         INSTANCE.register(ConsumeItemGoalBuilder.any(GoalDifficultySupplier.of(0.18f), Items.GLOW_BERRIES).require(GoalRequirements.LUSH_CAVES)
                 .customName(_ -> "Eat a Glow Berry"));
         INSTANCE.register(ConsumeItemGoalBuilder.any(GoalDifficultySupplier.of(0.18f), Items.POISONOUS_POTATO).customName(_ -> "Eat a Poisonous Potato"));
         INSTANCE.register(ConsumeItemGoalBuilder.any(GoalDifficultySupplier.of(0.18f), Items.COOKIE).require(GoalRequirements.JUNGLE).customName(_ -> "Eat a Cookie"));
-        INSTANCE.register(ConsumeItemGoalBuilder.unique(n -> GoalDifficultySupplier.linear(2, 4).scale(0.3f, 0.55f).get(n), 2, 4, Items.RABBIT_STEW, Items.BEETROOT_SOUP, Items.MUSHROOM_STEW, Items.SUSPICIOUS_STEW)
+        INSTANCE.register(ConsumeItemGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(2, 4).inRange(0.3f, 0.55f), 2, 4, Items.RABBIT_STEW, Items.BEETROOT_SOUP, Items.MUSHROOM_STEW, Items.SUSPICIOUS_STEW)
                 .customName(n -> "Eat " + n + " Unique Soups"));
         INSTANCE.register(ConsumeItemGoalBuilder.any(GoalDifficultySupplier.of(0.35f), Items.BEETROOT_SOUP).customName(_ -> "Eat Beetroot Soup"));
         INSTANCE.register(ConsumeItemGoalBuilder.any(GoalDifficultySupplier.of(0.18f), Items.PUMPKIN_PIE).customName(_ -> "Eat Pumpkin Pie"));
@@ -178,7 +178,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.66f), "nether/ride_strider"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.2f), "husbandry/wax_on"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.2f), "husbandry/wax_off"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.unique(n -> GoalDifficultySupplier.linear(5, 30).scale(0.4f, 0.8f).get(n), 5, 30, 1));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(5, 30).inRange(0.4f, 0.8f), 5, 30, 1));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.78f), "adventure/spyglass_at_parrot", "adventure/spyglass_at_ghast", "adventure/spyglass_at_dragon").customName(_ -> "Obtain any Spyglass Advancement"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.32f), "adventure/trade").customName(_ -> "Trade with Villager"));
         INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.68f), "nether/brew_potion").customName(_ -> "Brew a Potion"));
@@ -188,11 +188,11 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(KillEntityGoalBuilder.any(GoalDifficultySupplier.of(0.82f), EntityTypes.END_CRYSTAL).customName(_ -> "Explode End Crystal").customTextureExtractor(_ -> ItemTextureExtractor.item(Items.END_CRYSTAL)));
 
-        INSTANCE.register(KillEntityGoalBuilder.unique(n -> GoalDifficultySupplier.linear(5, 15).scale(0.45f, 0.75f).get(n), 5,15, EntityUtil.HOSTILE.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Unique Hostile Mobs"));
-        INSTANCE.register(KillEntityGoalBuilder.total(n -> GoalDifficultySupplier.linear(10, 30).scale(0.3f, 0.6f).get(n), 10, 30, 1, EntityUtil.ARTHROPODS.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Arthropods"));
-        INSTANCE.register(KillEntityGoalBuilder.total(n -> GoalDifficultySupplier.linear(10, 30).scale(0.3f, 0.6f).get(n), 10, 30, 1, EntityUtil.UNDEAD.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Undead Mobs"));
-        INSTANCE.register(KillEntityGoalBuilder.unique(n -> GoalDifficultySupplier.linear(3, 6).scale(0.6f, 0.85f).get(n), 3,6, EntityUtil.RAID.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Raid Mobs"));
-        INSTANCE.register(KillEntityGoalBuilder.total(n -> GoalDifficultySupplier.linear(50, 150).scale(0.5f, 0.82f).get(n), 50,150, 5, EntityUtil.HOSTILE.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Hostile Mobs"));
+        INSTANCE.register(KillEntityGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(5, 15).inRange(0.45f, 0.75f), 5,15, EntityUtil.HOSTILE.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Unique Hostile Mobs"));
+        INSTANCE.register(KillEntityGoalBuilder.total(GoalDifficultySupplier.<Integer>linear(10, 30).inRange(0.3f, 0.6f), 10, 30, 1, EntityUtil.ARTHROPODS.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Arthropods"));
+        INSTANCE.register(KillEntityGoalBuilder.total(GoalDifficultySupplier.<Integer>linear(10, 30).inRange(0.3f, 0.6f), 10, 30, 1, EntityUtil.UNDEAD.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Undead Mobs"));
+        INSTANCE.register(KillEntityGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(3, 6).inRange(0.6f, 0.85f), 3,6, EntityUtil.RAID.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Raid Mobs"));
+        INSTANCE.register(KillEntityGoalBuilder.total(GoalDifficultySupplier.<Integer>linear(50, 150).inRange(0.5f, 0.82f), 50,150, 5, EntityUtil.HOSTILE.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Hostile Mobs"));
         INSTANCE.register(KillEntityGoalBuilder.any(GoalDifficultySupplier.of(0.22f), EntityTypes.BAT));
         INSTANCE.register(KillEntityGoalBuilder.coloredSheep(GoalDifficultySupplier.of(0.22f)));
         INSTANCE.register(KillEntityGoalBuilder.deathType(GoalDifficultySupplier.of(0.78f), DamageTypes.WIND_CHARGE, () -> ItemTextureExtractor.item(Items.WIND_CHARGE), EntityTypes.BREEZE)
@@ -286,14 +286,14 @@ public class DefaultGoalRegister {
                 .require(GoalRequirements.SUSPICIOUS));
         INSTANCE.register(ObtainItemGoalBuilder.all(GoalDifficultySupplier.of(0.22f), Items.TNT));
         INSTANCE.register(ObtainItemGoalBuilder.any(GoalDifficultySupplier.of(0.35f), ItemUtil.HANGING_SIGN.toArray(Item[]::new)).customName(_ -> "Obtain Hanging Sign"));
-        INSTANCE.register(ObtainItemGoalBuilder.atLeast(n -> GoalDifficultySupplier.linear(2, 4).scale(0.55f, 0.85f).get(n), 2, 4, ItemUtil.ARMOR_TRIM.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Armor Trims"));
-        INSTANCE.register(ObtainItemGoalBuilder.atLeast(n -> GoalDifficultySupplier.linear(2, 5).scale(0.4f, 0.72f).get(n), 2, 5, ItemUtil.HORSE_ARMOR.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Horse Armor"));
-        INSTANCE.register(ObtainItemGoalBuilder.atLeast(n -> GoalDifficultySupplier.linear(2, 5).scale(0.4f, 0.72f).get(n), 2, 5, ItemUtil.BANNER_PATTERN.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Banner Patterns"));
-        INSTANCE.register(ObtainItemGoalBuilder.atLeast(n -> GoalDifficultySupplier.linear(2, 5).scale(0.25f, 0.55f).get(n), 2, 5, ItemUtil.SAPLING.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Saplings"));
-        INSTANCE.register(ObtainItemGoalBuilder.atLeast(n -> GoalDifficultySupplier.linear(2, 5).scale(0.25f, 0.55f).get(n), 2, 5, ItemUtil.SEED.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Seeds"));
-        INSTANCE.register(ObtainItemGoalBuilder.atLeast(n -> GoalDifficultySupplier.linear(4, 7).scale(0.4f, 0.7f).get(n), 4, 7, ItemUtil.BUCKET.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Buckets"));
-        INSTANCE.register(ObtainItemGoalBuilder.atLeast(n -> GoalDifficultySupplier.linear(3, 7).scale(0.25f, 0.55f).get(n), 3, 7, ItemUtil.FLOWER.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Flowers"));
-        INSTANCE.register(ObtainItemGoalBuilder.atLeast(n -> GoalDifficultySupplier.linear(4, 7).scale(0.4f, 0.7f).get(n), 4, 7, ItemUtil.WORKSTATION.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Workstations"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(GoalDifficultySupplier.<Integer>linear(2, 4).inRange(0.55f, 0.85f), 2, 4, ItemUtil.ARMOR_TRIM.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Armor Trims"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(GoalDifficultySupplier.<Integer>linear(2, 5).inRange(0.4f, 0.72f), 2, 5, ItemUtil.HORSE_ARMOR.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Horse Armor"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(GoalDifficultySupplier.<Integer>linear(2, 5).inRange(0.4f, 0.72f), 2, 5, ItemUtil.BANNER_PATTERN.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Banner Patterns"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(GoalDifficultySupplier.<Integer>linear(2, 5).inRange(0.25f, 0.55f), 2, 5, ItemUtil.SAPLING.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Saplings"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(GoalDifficultySupplier.<Integer>linear(2, 5).inRange(0.25f, 0.55f), 2, 5, ItemUtil.SEED.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Seeds"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(GoalDifficultySupplier.<Integer>linear(4, 7).inRange(0.4f, 0.7f), 4, 7, ItemUtil.BUCKET.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Buckets"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(GoalDifficultySupplier.<Integer>linear(3, 7).inRange(0.25f, 0.55f), 3, 7, ItemUtil.FLOWER.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Flowers"));
+        INSTANCE.register(ObtainItemGoalBuilder.atLeast(GoalDifficultySupplier.<Integer>linear(4, 7).inRange(0.4f, 0.7f), 4, 7, ItemUtil.WORKSTATION.toArray(Item[]::new)).customName(n -> "Obtain " + n + " Unique Workstations"));
         INSTANCE.register(ObtainItemGoalBuilder.allDistinct(GoalDifficultySupplier.of(0.85f)));
 
         INSTANCE.register(ChangeStatisticGoalBuilder.custom(GoalDifficultySupplier.of(0.1f), () -> ItemTextureExtractor.item(Items.FLOWER_POT), Stats.POT_FLOWER).customName(_ -> "Pot any Flower"));
@@ -306,8 +306,8 @@ public class DefaultGoalRegister {
         INSTANCE.register(ChangeStatisticGoalBuilder.custom(GoalDifficultySupplier.of(0.1f), () -> ItemTextureExtractor.item(Items.STONECUTTER), Stats.INTERACT_WITH_STONECUTTER).customName(_ -> "Use a Stonecutter"));
         INSTANCE.register(ChangeStatisticGoalBuilder.custom(GoalDifficultySupplier.of(0.32f), () -> ItemTextureExtractor.item(Items.SMITHING_TABLE), Stats.INTERACT_WITH_SMITHING_TABLE).customName(_ -> "Use a Smithing Table"));
         INSTANCE.register(ChangeStatisticGoalBuilder.custom(GoalDifficultySupplier.of(0.7f), () -> ItemTextureExtractor.item(Items.ANVIL), Stats.INTERACT_WITH_ANVIL).customName(_ -> "Use an Anvil"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.countCustom(n -> GoalDifficultySupplier.linear(50000, 300000).scale(0.3f, 0.75f).get(n), 500, 3000, 100, i -> i*100, i -> i / 100, "Distance to Boat", "Distance Boated", () -> ItemTextureExtractor.item(Items.OAK_BOAT), Stats.BOAT_ONE_CM).customName(d -> "Boat " + d + "m"));
-        INSTANCE.register(ChangeStatisticGoalBuilder.countCustom(n -> GoalDifficultySupplier.linear(50000, 200000).scale(0.2f, 0.58f).get(n), 500, 2000, 100, i -> i*100, i -> i / 100, "Distance to Sprint", "Distance Sprinted", () -> GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/mob_effect/speed.png")), Stats.SPRINT_ONE_CM).customName(d -> "Sprint " + d + "m"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.countCustom(GoalDifficultySupplier.<Integer>linear(50000, 300000).inRange(0.3f, 0.75f), 500, 3000, 100, i -> i*100, i -> i / 100, "Distance to Boat", "Distance Boated", () -> ItemTextureExtractor.item(Items.OAK_BOAT), Stats.BOAT_ONE_CM).customName(d -> "Boat " + d + "m"));
+        INSTANCE.register(ChangeStatisticGoalBuilder.countCustom(GoalDifficultySupplier.<Integer>linear(50000, 200000).inRange(0.2f, 0.58f), 500, 2000, 100, i -> i*100, i -> i / 100, "Distance to Sprint", "Distance Sprinted", () -> GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/mob_effect/speed.png")), Stats.SPRINT_ONE_CM).customName(d -> "Sprint " + d + "m"));
         INSTANCE.register(ChangeStatisticGoalBuilder.custom(GoalDifficultySupplier.of(0.15f), () -> ItemTextureExtractor.item(Items.CAULDRON), Stats.CLEAN_ARMOR, Stats.CLEAN_BANNER, Stats.CLEAN_SHULKER_BOX).customName(_ -> "Clean an Item in a Cauldron"));
         INSTANCE.register(ChangeStatisticGoalBuilder.item(GoalDifficultySupplier.of(0.25f), Stats.ITEM_USED, Items.GOAT_HORN).customName(_ -> "Toot a Goat Horn"));
         INSTANCE.register(ChangeStatisticGoalBuilder.itemWhileRiding(GoalDifficultySupplier.of(0.4f), Stats.ITEM_USED, Items.CARROT_ON_A_STICK, EntityTypes.PIG).customName(_ -> "Use Carrot on a Stick to boost a Pig"));
@@ -321,7 +321,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(MineBlockGoalBuilder.unique(3, GoalDifficultySupplier.of(0.48f), Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE, Blocks.FROSTED_ICE).customName(_ -> "Mine 3 types of Ice")
                 .require(GoalRequirements.SNOWY).customTextureExtractor(_ -> new CornerIconTextureExtractor(ItemTextureExtractor.cycleItems(List.of(Items.ICE, Items.PACKED_ICE, Items.BLUE_ICE)), ItemTextureExtractor.item(Items.IRON_PICKAXE), 10)));
 
-        INSTANCE.register(ReachExperienceLevelGoalBuilder.of(n -> GoalDifficultySupplier.linear(10, 30).scale(0.3f, 0.65f).get(n), 10, 30, 1));
+        INSTANCE.register(ReachExperienceLevelGoalBuilder.of(GoalDifficultySupplier.<Integer>linear(10, 30).inRange(0.3f, 0.65f), 10, 30, 1));
 
         INSTANCE.register(TameAnimalGoalBuilder.any(GoalDifficultySupplier.of(0.3f), EntityTypes.CAT).require(GoalRequirements.VILLAGE.or(GoalRequirements.SWAMP_HUT)));
         INSTANCE.register(TameAnimalGoalBuilder.any(GoalDifficultySupplier.of(0.3f), EntityTypes.HORSE).require(GoalRequirements.HORSE_BIOME));
@@ -348,7 +348,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(ObtainItemGoalBuilder.allDifferentDyedLeatherArmor(GoalDifficultySupplier.of(0.65f)));
 
         INSTANCE.register(LeashEntityGoalBuilder.any(GoalDifficultySupplier.of(0.45f), EntityTypes.IRON_GOLEM));
-        INSTANCE.register(LeashEntityGoalBuilder.unique(n -> GoalDifficultySupplier.linear(3, 8).scale(0.35f, 0.62f).get(n), 3, 8, 1));
+        INSTANCE.register(LeashEntityGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(3, 8).inRange(0.35f, 0.62f), 3, 8, 1));
 
         INSTANCE.register(AgeLockMobGoalBuilder.any(GoalDifficultySupplier.of(0.22f)));
 
@@ -372,7 +372,7 @@ public class DefaultGoalRegister {
         INSTANCE.register(UseItemOnEntityGoalBuilder.of(GoalDifficultySupplier.of(0.4f), Items.WOLF_ARMOR, EntityTypes.WOLF).customName(_ -> "Put Wolf Armor on Wolf"));
         INSTANCE.register(UseItemOnEntityGoalBuilder.nameTag(GoalDifficultySupplier.of(0.68f), "Dinnerbone", EntityTypes.GHAST));
         INSTANCE.register(UseItemOnEntityGoalBuilder.nameTag(GoalDifficultySupplier.of(0.25f), "jeb_", EntityTypes.SHEEP));
-        INSTANCE.register(UseItemOnEntityGoalBuilder.unique(n -> GoalDifficultySupplier.linear(5, 20).scale(0.35f, 0.7f).get(n), 5, 20, 1, Items.SPYGLASS).customName(n -> "Spy on " + n + " Unique Mobs"));
+        INSTANCE.register(UseItemOnEntityGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(5, 20).inRange(0.35f, 0.7f), 5, 20, 1, Items.SPYGLASS).customName(n -> "Spy on " + n + " Unique Mobs"));
         INSTANCE.register(UseItemOnEntityGoalBuilder.of(GoalDifficultySupplier.of(0.2f), Items.SPYGLASS, EntityTypes.IRON_GOLEM).customName(_ -> "Spy on Iron Golem"));
         INSTANCE.register(UseItemOnEntityGoalBuilder.of(GoalDifficultySupplier.of(0.68f), Items.SPYGLASS, EntityTypes.PIGLIN_BRUTE).customName(_ -> "Spy on Piglin Brute"));
 

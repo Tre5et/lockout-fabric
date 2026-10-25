@@ -1,0 +1,9 @@
+{
+    "type": "lockout:structure",
+    "name": "Bad Omen Structure",
+    "decoration": "minecraft:banner_red",
+    "structures": [
+        "minecraft:pillager_outpost",
+        "minecraft:trial_chambers"
+    ]
+}

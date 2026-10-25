@@ -1,0 +1,16 @@
+{
+    "type": "lockout:biome",
+    "name": "Wolf Biome",
+    "decoration": "minecraft:banner_white",
+    "biomes": [
+        "minecraft:forest",
+        "minecraft:grove",
+        "minecraft:taiga",
+        "minecraft:snowy_taiga",
+        "minecraft:old_growth_spruce_taiga",
+        "minecraft:old_growth_pine_taiga",
+        "minecraft:sparse_jungle",
+        "minecraft:savanna_plateau",
+        "minecraft:wooded_badlands"
+    ]
+}

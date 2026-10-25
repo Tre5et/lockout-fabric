@@ -1,0 +1,10 @@
+{
+    "type": "lockout:biome",
+    "name": "Polar Biome",
+    "decoration": "minecraft:banner_white",
+    "biomes": [
+        "minecraft:frozen_ocean",
+        "minecraft:deep_frozen_ocean",
+        "minecraft:snowy_plains"
+    ]
+}

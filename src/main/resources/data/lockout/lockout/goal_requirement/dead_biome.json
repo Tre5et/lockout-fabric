@@ -1,0 +1,15 @@
+{
+    "type": "lockout:biome",
+    "name": "Dead Biome",
+    "decoration": "minecraft:banner_orange",
+    "biomes": [
+        "minecraft:desert",
+        "minecraft:badlands",
+        "minecraft:eroded_badlands",
+        "minecraft:wooded_badlands",
+        "minecraft:swamp",
+        "minecraft:mangrove_swamp",
+        "minecraft:old_growth_pine_taiga",
+        "minecraft:old_growth_spruce_taiga"
+    ]
+}

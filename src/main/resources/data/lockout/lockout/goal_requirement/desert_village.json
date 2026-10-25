@@ -1,0 +1,8 @@
+{
+    "type": "lockout:structure",
+    "name": "Desert Village",
+    "decoration": "minecraft:village_desert",
+    "structures": [
+        "minecraft:village_desert"
+    ]
+}

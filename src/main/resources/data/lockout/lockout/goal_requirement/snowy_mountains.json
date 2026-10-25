@@ -1,0 +1,10 @@
+{
+    "type": "lockout:biome",
+    "name": "Snowy Mountains",
+    "decoration": "minecraft:banner_white",
+    "biomes": [
+        "minecraft:jagged_peaks",
+        "minecraft:frozen_peaks",
+        "minecraft:snowy_slopes"
+    ]
+}

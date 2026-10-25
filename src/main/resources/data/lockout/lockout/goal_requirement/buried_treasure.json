@@ -1,0 +1,8 @@
+{
+    "type": "lockout:structure",
+    "name": "Buried Treasure",
+    "decoration": "minecraft:red_x",
+    "structures": [
+        "minecraft:buried_treasure"
+    ]
+}

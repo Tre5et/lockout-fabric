@@ -1,0 +1,9 @@
+{
+    "type": "lockout:biome",
+    "name": "Swamp",
+    "decoration": "lockout:swamp",
+    "biomes": [
+        "minecraft:swamp",
+        "minecraft:mangrove_swamp"
+    ]
+}

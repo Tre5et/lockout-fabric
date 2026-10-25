@@ -1,0 +1,8 @@
+{
+    "type": "lockout:biome",
+    "name": "Dappled Forest",
+    "decoration": "minecraft:banner_orange",
+    "biomes": [
+        "lockout:dappled_forest"
+    ]
+}

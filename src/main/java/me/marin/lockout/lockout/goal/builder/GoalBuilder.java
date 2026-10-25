@@ -40,7 +40,7 @@ public abstract class GoalBuilder<U,T> {
     @Getter
     protected final GoalProgressSupplier<T,U,?> progressSupplier;
     @Getter
-    protected List<GoalRequirement<? super T>> requirements = new ArrayList<>();
+    protected List<GoalRequirement> requirements = new ArrayList<>();
     private IdProvider<T> customIdProvider = null;
     private NameProvider<T> customNameProvider = null;
     private TextureExtractorProvider<T> cutomTextureExtractorProvider = null;
@@ -173,7 +173,7 @@ public abstract class GoalBuilder<U,T> {
 
     public List<ServerHint<?>> getServerHints(T option) {
         List<ServerHint<?>> hints = new ArrayList<>(this.hints.stream().map(HintCombination::constructServer).toList());
-        for(GoalRequirement<? super T> requirement : requirements) {
+        for(GoalRequirement requirement : requirements) {
             hints.addAll(requirement.getServerHints(option));
         }
         return hints;
@@ -181,7 +181,7 @@ public abstract class GoalBuilder<U,T> {
 
     public List<ClientHint<?>> getClientHints(T option) {
         List<ClientHint<?>> hints = new ArrayList<>(this.hints.stream().map(HintCombination::constructClient).toList());
-        for(GoalRequirement<? super T> requirement : requirements) {
+        for(GoalRequirement requirement : requirements) {
             hints.addAll(requirement.getClientHints(option));
         }
         return hints;
@@ -194,7 +194,7 @@ public abstract class GoalBuilder<U,T> {
         return new BuildData(getStaticId(), Optional.ofNullable(optionSupplier.get().serialize(option)));
     }
 
-    public GoalBuilder<U,T> require(GoalRequirement<? super T> requirements) {
+    public GoalBuilder<U,T> require(GoalRequirement requirements) {
         getRequirements().add(requirements);
         return this;
     }

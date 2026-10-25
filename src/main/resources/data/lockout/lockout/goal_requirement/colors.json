@@ -1,0 +1,70 @@
+{
+    "type": "lockout:and",
+    "requirements": [
+        {
+            "type": "lockout:option_limited",
+            "options": [
+                "green",
+                "cyan"
+            ],
+            "requirement": {
+                "type": "lockout:biome",
+                "name": "Desert-like Biome",
+                "decoration": "lockout:desert",
+                "biomes": [
+                    "minecraft:desert",
+                    "minecraft:badlands",
+                    "minecraft:eroded_badlands",
+                    "minecraft:wooded_badlands"
+                ]
+            }
+        },
+        {
+            "type": "lockout:option_limited",
+            "options": [
+                "brown"
+            ],
+            "requirement": {
+                "type": "lockout:biome",
+                "name": "Jungle",
+                "decoration": "lockout:jungle",
+                "biomes": [
+                    "minecraft:jungle",
+                    "minecraft:bamboo_jungle",
+                    "minecraft:sparse_jungle"
+                ]
+            }
+        },
+        {
+            "type": "lockout:option_limited",
+            "options": [
+                "lime"
+            ],
+            "requirement": {
+                "type": "lockout:or",
+                "requirements": [
+                    {
+                        "type": "lockout:biome",
+                        "name": "Sea-pickle Biome",
+                        "decoration": "minecraft:banner_cyan",
+                        "biomes": [
+                            "minecraft:warm_ocean",
+                            "minecraft:lukewarm_ocean"
+                        ]
+                    },
+                    {
+                        "type": "lockout:biome",
+                        "name": "Desert-like Biome",
+                        "decoration": "lockout:desert",
+                        "biomes": [
+                            "minecraft:desert",
+                            "minecraft:badlands",
+                            "minecraft:eroded_badlands",
+                            "minecraft:wooded_badlands"
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

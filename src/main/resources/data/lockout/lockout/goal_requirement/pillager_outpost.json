@@ -1,0 +1,8 @@
+{
+    "type": "lockout:structure",
+    "name": "Pillager Outpost",
+    "decoration": "minecraft:banner_gray",
+    "structures": [
+        "minecraft:pillager_outpost"
+    ]
+}

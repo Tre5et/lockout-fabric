@@ -1,0 +1,10 @@
+{
+    "type": "lockout:biome",
+    "name": "Jungle",
+    "decoration": "lockout:jungle",
+    "biomes": [
+        "minecraft:jungle",
+        "minecraft:sparse_jungle",
+        "minecraft:bamboo_jungle"
+    ]
+}

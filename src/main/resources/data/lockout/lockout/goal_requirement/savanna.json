@@ -1,0 +1,9 @@
+{
+    "type": "lockout:biome",
+    "name": "Savanna",
+    "decoration": "minecraft:banner_orange",
+    "biomes": [
+        "minecraft:savanna",
+        "minecraft:savanna_plateau"
+    ]
+}

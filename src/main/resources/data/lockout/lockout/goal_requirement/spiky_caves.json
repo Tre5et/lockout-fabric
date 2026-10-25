@@ -1,0 +1,9 @@
+{
+    "type": "lockout:biome",
+    "name": "Spiky Caves",
+    "decoration": "minecraft:banner_brown",
+    "biomes": [
+        "minecraft:dripstone_caves",
+        "lockout:sulfur_caves"
+    ]
+}

@@ -1,0 +1,9 @@
+{
+    "type": "lockout:structure",
+    "name": "Allay Structure",
+    "decoration": "minecraft:banner_light_blue",
+    "structures": [
+        "minecraft:pillager_outpost",
+        "minecraft:woodland_mansion"
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "type": "lockout:structure",
+    "name": "Village",
+    "decoration": "minecraft:village_plains",
+    "structures": [
+        "minecraft:village_plains",
+        "minecraft:village_desert",
+        "minecraft:village_savanna",
+        "minecraft:village_snowy",
+        "minecraft:village_taiga"
+    ]
+}
