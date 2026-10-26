@@ -7,11 +7,11 @@ import me.marin.lockout.registries.LockoutRegistries;
 import net.minecraft.core.Registry;
 
 public interface GoalDifficultySupplier<T> {
-    Codec<GoalDifficultySupplier<?>> CODEC = LockoutRegistries.DIFFICULTY_SUPPLIER_TYPE.byNameCodec().dispatch(GoalDifficultySupplier::codec, c -> c);
+    Codec<GoalDifficultySupplier<? super Number>> CODEC = LockoutRegistries.DIFFICULTY_SUPPLIER_VOID_TYPE.byNameCodec().dispatch(GoalDifficultySupplier::codec, c -> c);
 
     float get(T option);
 
-    MapCodec<? extends GoalDifficultySupplier<?>> codec();
+    MapCodec<? extends GoalDifficultySupplier<? super Number>> codec();
 
     static <T> Simple<T> of(Number difficulty) {
         return new Simple<>(difficulty.floatValue());
@@ -21,13 +21,13 @@ public interface GoalDifficultySupplier<T> {
         return new Linear<>(minIn.floatValue(), maxIn.floatValue(), 0f, 1f);
     }
 
-    static void bootstrap(Registry<MapCodec<? extends GoalDifficultySupplier<?>>> registry) {
+    static void bootstrap(Registry<MapCodec<? extends GoalDifficultySupplier<? super Number>>> registry) {
         LockoutRegistries.register(registry, "simple", Simple.MAP_CODEC);
         LockoutRegistries.register(registry, "linear", Linear.MAP_CODEC);
     }
 
     record Simple<T>(float difficulty) implements GoalDifficultySupplier<T> {
-        public static final MapCodec<Simple<?>> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        public static final MapCodec<Simple<Object>> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.FLOAT.fieldOf("difficulty").forGetter(Simple::difficulty)
         ).apply(instance, Simple::new));
 
@@ -37,13 +37,13 @@ public interface GoalDifficultySupplier<T> {
         }
 
         @Override
-        public MapCodec<? extends GoalDifficultySupplier<?>> codec() {
+        public MapCodec<? extends GoalDifficultySupplier<? super Number>> codec() {
             return MAP_CODEC;
         }
     }
 
     record Linear<T extends Number>(float min, float max, float start, float end) implements GoalDifficultySupplier<T> {
-        public static final MapCodec<Linear<?>> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        public static final MapCodec<Linear<Number>> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.FLOAT.fieldOf("min").forGetter(Linear::min),
                 Codec.FLOAT.fieldOf("max").forGetter(Linear::max),
                 Codec.FLOAT.optionalFieldOf("start", 0f).forGetter(Linear::start),
@@ -56,7 +56,7 @@ public interface GoalDifficultySupplier<T> {
         }
 
         @Override
-        public MapCodec<? extends GoalDifficultySupplier<?>> codec() {
+        public MapCodec<? extends GoalDifficultySupplier<? super Number>> codec() {
             return MAP_CODEC;
         }
 

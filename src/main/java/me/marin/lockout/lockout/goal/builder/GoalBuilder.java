@@ -1,5 +1,7 @@
 package me.marin.lockout.lockout.goal.builder;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import lombok.Getter;
 import lombok.Setter;
 import me.marin.lockout.client.goal.ClientGoal;
@@ -20,15 +22,19 @@ import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
+import me.marin.lockout.registries.LockoutRegistries;
 import me.marin.lockout.server.goal.ServerGoal;
 import me.marin.lockout.server.goal.builder.ServerGoalBuildParameters;
 import me.marin.lockout.server.goal.hint.ServerHint;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 
 import java.util.*;
 import java.util.function.Function;
 
 public abstract class GoalBuilder<U,T> {
+    public static final Codec<GoalBuilder<?,?>> CODEC = LockoutRegistries.GOAL_BUILDER_TYPE.byNameCodec().dispatch(GoalBuilder::codec, c -> c);
+
     protected final String idPrefix;
     protected final String namePrefix;
     @Getter
@@ -58,6 +64,14 @@ public abstract class GoalBuilder<U,T> {
         this.optionSupplier = optionSupplier;
         this.progressSupplier = progressSupplier;
         this.difficultySupplier = difficultySupplier;
+    }
+
+    public MapCodec<? extends GoalBuilder<?,?>> codec() {
+        return null;
+    }
+
+    public static void bootstrap(Registry<MapCodec<? extends GoalBuilder<?,?>>> registry) {
+
     }
 
     public TextureExtractor applyTextureExtractor(TextureExtractor textureExtractor, T option) {

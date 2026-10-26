@@ -200,8 +200,12 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
     }
 
     public static InListAcceptanceCondition<BlockState, Block> block(Block... blocks) {
+        return block(Arrays.asList(blocks));
+    }
+
+    public static InListAcceptanceCondition<BlockState, Block> block(List<Block> blocks) {
         return new InListAcceptanceCondition<>(
-                Arrays.asList(blocks),
+                blocks,
                 BlockBehaviour.BlockStateBase::getBlock,
                 b -> ItemUtil.getItemId(b.asItem()),
                 b -> ItemUtil.getItemName(b.asItem()),
