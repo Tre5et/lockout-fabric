@@ -1,0 +1,6 @@
+{
+    "type": "lockout:break/any",
+    "difficulty": 0.28,
+    "category": "lockout:misc_actions",
+    "items": "minecraft:fishing_rod"
+}

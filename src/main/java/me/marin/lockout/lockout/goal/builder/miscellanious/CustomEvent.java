@@ -6,6 +6,8 @@ import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureAnchor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import me.marin.lockout.registries.LockoutRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Items;
@@ -56,4 +58,8 @@ public record CustomEvent(
             TextureAnchor.TOP_CENTER,
             12
     ));
+
+    public static void bootstrap(Registry<CustomEvent> registry) {
+        LockoutRegistries.register(registry, "geyser_launch", GEYSER_LAUNCH);
+    }
 }

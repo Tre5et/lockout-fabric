@@ -1,61 +1,144 @@
 package me.marin.lockout.lockout.goal.builder.item;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import lombok.Getter;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.ItemWithComponentAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
+import me.marin.lockout.lockout.goal.builder.NumericRange;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
+import me.marin.lockout.lockout.goal.group.GoalGroup;
+import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
+import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
+import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-public class ConsumeItemGoalBuilder<T> extends GoalBuilder<ItemUtil.ConsumedItem, T> {
-    public ConsumeItemGoalBuilder( GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
-        super("CONSUME", "Consume", GoalCategory.EATING_DRINKING, optionSupplier, progressSupplier.map(ItemUtil.ConsumedItem::itemStack), difficultySupplier);
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+public abstract class ConsumeItemGoalBuilder<T> extends GoalBuilder<ItemUtil.ConsumedItem, T> {
+
+    public ConsumeItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, progressSupplier.map(ItemUtil.ConsumedItem::itemStack), idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
     public void reifiedUpdater(ItemUtil.ConsumedItem update) {}
 
-    public static ConsumeItemGoalBuilder<Void> any(GoalDifficultySupplier<Void> difficultySupplier, Item... items) {
-        return new ConsumeItemGoalBuilder<>(
-                GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.item(items)),
-                difficultySupplier
-        );
+    public static class Any extends ConsumeItemGoalBuilder<Void> {
+        public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("CONSUME", "Consume", i)
+                .and(RegistryCodecs.holderSet(Registries.ITEM).fieldOf("items").forGetter(Any::getItems))
+                .apply(i, Any::new));
+
+        @Getter
+        private final HolderSet<Item> items;
+
+        public Any(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Item> items) {
+            super(GoalOptionSupplier.NONE,
+                    GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.item(items.stream().map(Holder::value).toList())),
+                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+            this.items = items;
+        }
+
+        @Override
+        public MapCodec<? extends GoalBuilder<?, ?>> codec() {
+            return MAP_CODEC;
+        }
     }
 
-    public static <T> ConsumeItemGoalBuilder<Void> anyWithComponent(GoalDifficultySupplier<Void> difficultySupplier, DataComponentType<T> component, T value, String id, String name, Item... items) {
-        return new ConsumeItemGoalBuilder<>(
-                GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> ItemWithComponentAcceptanceCondition.single(component, value, id, name, items)),
-                difficultySupplier
-        );
+    public static class Unique extends ConsumeItemGoalBuilder<Integer> implements NumericRange {
+        public static final MapCodec<Unique> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("CONSUME", "Consume", i)
+                .and(RegistryCodecs.holderSet(Registries.ITEM).fieldOf("items").forGetter(Unique::getItems))
+                .and(GoalBuilder.numericCodec(1, i))
+                .apply(i, Unique::new));
+
+        @Getter
+        private final HolderSet<Item> items;
+        @Getter
+        private final int min;
+        @Getter
+        private final int max;
+        @Getter
+        private final int step;
+
+        public Unique(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Item> items, int min, int max, int step) {
+            super(GoalOptionSupplier.integer("Items to consume", min, max, 1),
+                    GoalProgressSupplier.unique("Items consumed", _ -> InListAcceptanceCondition.item(items.stream().map(Holder::value).toList()), ItemStack::getItem),
+                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+            this.items = items;
+            this.min = min;
+            this.max = max;
+            this.step = step;
+        }
+
+        @Override
+        public MapCodec<? extends GoalBuilder<?, ?>> codec() {
+            return MAP_CODEC;
+        }
     }
 
-    public static ConsumeItemGoalBuilder<Integer> unique(GoalDifficultySupplier<Integer> difficultySupplier, int min, int max, Item... items) {
-        return new ConsumeItemGoalBuilder<>(
-                GoalOptionSupplier.integer("Items to consume", min, max, 1),
-                GoalProgressSupplier.unique("Items consumed", _ -> InListAcceptanceCondition.item(items), ItemStack::getItem),
-                difficultySupplier
-        );
+    public static class UniqueWithComponents extends ConsumeItemGoalBuilder<Integer> implements NumericRange {
+        public static final MapCodec<UniqueWithComponents> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("CONSUME", "Consume", i)
+                .and(RegistryCodecs.holderSet(Registries.DATA_COMPONENT_TYPE).fieldOf("components").forGetter(UniqueWithComponents::getComponents))
+                .and(GoalBuilder.numericCodec(1, i))
+                .apply(i, UniqueWithComponents::new));
+
+        @Getter
+        private final HolderSet<DataComponentType<?>> components;
+        @Getter
+        private final int min;
+        @Getter
+        private final int max;
+        @Getter
+        private final int step;
+
+        public UniqueWithComponents(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<DataComponentType<?>> components, int min, int max, int step) {
+            super(GoalOptionSupplier.integer("Items to consume", min, max, 1),
+                    GoalProgressSupplier.unique("Items consumed", _ -> ItemWithComponentAcceptanceCondition.hasComponents(components.stream().map(Holder::value).collect(Collectors.toUnmodifiableList())), ItemStack::getItem),
+                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+            this.components = components;
+            this.min = min;
+            this.max = max;
+            this.step = step;
+        }
+
+        @Override
+        public MapCodec<? extends GoalBuilder<?, ?>> codec() {
+            return MAP_CODEC;
+        }
     }
 
-    public static ConsumeItemGoalBuilder<Integer> uniqueWithComponent(GoalDifficultySupplier<Integer> difficultySupplier, int min, int max, DataComponentType<?>... components) {
-        return new ConsumeItemGoalBuilder<>(
-                GoalOptionSupplier.integer("Items to consume", min, max, 1),
-                GoalProgressSupplier.unique("Items consumed", _ -> ItemWithComponentAcceptanceCondition.hasComponents(components), ItemStack::getItem),
-                difficultySupplier
-        );
-    }
+    public static class WithStatusEffect extends ConsumeItemGoalBuilder<Void> {
+        public static final MapCodec<WithStatusEffect> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("CONSUME", "Consume", i)
+                .and(RegistryCodecs.holderSet(Registries.ITEM).fieldOf("items").forGetter(WithStatusEffect::getItems))
+                .apply(i, WithStatusEffect::new));
 
-    public static ConsumeItemGoalBuilder<Void> whileHavingEffect(GoalDifficultySupplier<Void> difficultySupplier, Item... items) {
-        return new ConsumeItemGoalBuilder<>(
-                GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.item(items).withPlayerRequirement(p -> !p.getActiveEffects().isEmpty())),
-                difficultySupplier
-        );
+        @Getter
+        private final HolderSet<Item> items;
+
+        public WithStatusEffect(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Item> items) {
+            super(GoalOptionSupplier.NONE,
+                    GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.item(items.stream().map(Holder::value).toList()).withPlayerRequirement(p -> !p.getActiveEffects().isEmpty())),
+                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+            this.items = items;
+        }
+
+        @Override
+        public MapCodec<? extends GoalBuilder<?, ?>> codec() {
+            return MAP_CODEC;
+        }
     }
 }

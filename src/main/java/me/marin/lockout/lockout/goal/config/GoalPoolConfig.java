@@ -115,10 +115,10 @@ public class GoalPoolConfig {
         Map<GoalCategory, List<GoalBuilder<?,?>>> categories = new LinkedHashMap<>();
 
         for(GoalBuilder<?,?> goal : GoalRegistry.INSTANCE.getRegisteredGoals()) {
-            if(!categories.containsKey(goal.getCategory())) {
-                categories.put(goal.getCategory(), new ArrayList<>(List.of(goal)));
+            if(!categories.containsKey(goal.getCategory().value())) {
+                categories.put(goal.getCategory().value(), new ArrayList<>(List.of(goal)));
             } else {
-                categories.get(goal.getCategory()).add(goal);
+                categories.get(goal.getCategory().value()).add(goal);
             }
         }
         

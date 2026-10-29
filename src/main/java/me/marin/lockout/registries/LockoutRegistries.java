@@ -4,6 +4,8 @@ import com.mojang.serialization.MapCodec;
 import me.marin.lockout.Constants;
 import me.marin.lockout.client.goal.hint.ClientHint;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
+import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
+import me.marin.lockout.lockout.goal.builder.miscellanious.CustomEvent;
 import me.marin.lockout.lockout.goal.difficulty.DifficultyCheckFunction;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
@@ -13,6 +15,9 @@ import me.marin.lockout.server.goal.hint.ServerHint;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.level.block.ColorCollection;
 
 public class LockoutRegistries {
     public static final Registry<MapCodec<? extends DifficultyCheckFunction>> DIFFICULTY_CHECK_TYPE = register(LockoutRegistryKeys.DIFFICULTY_CHECK_TYPE);
@@ -24,6 +29,9 @@ public class LockoutRegistries {
     public static final Registry<MapCodec<? extends ClientHint<?>>> CLIENT_HINT_TYPE = register(LockoutRegistryKeys.CLIENT_HINT_TYPE);
     public static final Registry<MapCodec<? extends GoalBuilder<?,?>>> GOAL_BUILDER_TYPE = register(LockoutRegistryKeys.GOAL_BUILDER_TYPE);
     public static final Registry<MapCodec<? extends GoalGroup>> GOAL_GROUP_TYPE = register(LockoutRegistryKeys.GOAL_GROUP_TYPE);
+    public static final Registry<ColorCollection<Item>> COLORED_ITEM = register(LockoutRegistryKeys.COLORED_ITEM);
+    public static final Registry<ArmorMaterial> ARMOR_MATERIAL = register(LockoutRegistryKeys.ARMOR_MATERIAL);
+    public static final Registry<CustomEvent> CUSTOM_EVENT = register(LockoutRegistryKeys.CUSTOM_EVENT);
 
     public static void initialize() {
         DifficultyCheckFunction.bootstrap(DIFFICULTY_CHECK_TYPE);
@@ -35,6 +43,9 @@ public class LockoutRegistries {
         ClientHint.bootstrap(CLIENT_HINT_TYPE);
         GoalBuilder.bootstrap(GOAL_BUILDER_TYPE);
         GoalGroup.bootstrap(GOAL_GROUP_TYPE);
+        ItemUtil.bootstrapColoredItems(COLORED_ITEM);
+        ItemUtil.bootstrapArmorMaterials(ARMOR_MATERIAL);
+        CustomEvent.bootstrap(CUSTOM_EVENT);
     }
 
     public static <T> T register(Registry<T> registry, String name, T value) {

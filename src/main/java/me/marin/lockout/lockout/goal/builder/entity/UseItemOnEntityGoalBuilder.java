@@ -1,98 +1,178 @@
 package me.marin.lockout.lockout.goal.builder.entity;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import lombok.Getter;
 import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
+import me.marin.lockout.lockout.goal.builder.NumericRange;
 import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
+import me.marin.lockout.lockout.goal.group.GoalGroup;
+import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
+import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
+import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureAnchor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUtil.UsedItemOnEntity, T> {
-    public UseItemOnEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityUtil.UsedItemOnEntity, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
-        super("USE", "Use", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier, difficultySupplier);
+public abstract class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUtil.UsedItemOnEntity, T> {
+
+    public UseItemOnEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityUtil.UsedItemOnEntity, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, progressSupplier, idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
     public void reifiedUpdater(EntityUtil.UsedItemOnEntity update) {}
 
-    public static UseItemOnEntityGoalBuilder<Void> of(GoalDifficultySupplier<Void> difficultySupplier, Item item, EntityType<?> entity) {
-        return new UseItemOnEntityGoalBuilder<>(
-                GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
-                    @Override
-                    public boolean test(EntityUtil.UsedItemOnEntity value, ServerPlayer player) {
-                        return value.entity().equals(entity) && value.item().getItem().equals(item);
-                    }
+    public static class Exactly extends UseItemOnEntityGoalBuilder<Void> {
+        public static final MapCodec<Exactly> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("USE", "Use", i)
+                .and(i.group(
+                        RegistryCodecs.holder(Registries.ITEM).fieldOf("item").forGetter(Exactly::getItem),
+                        RegistryCodecs.holder(Registries.ENTITY_TYPE).fieldOf("entity").forGetter(Exactly::getEntity)
+                )).apply(i, Exactly::new));
 
-                    @Override
-                    public String getId() {
-                        return ItemUtil.getItemId(item) + "_ON_" + EntityUtil.getEntityId(entity);
-                    }
+        @Getter
+        private final Holder<Item> item;
+        @Getter
+        private final Holder<EntityType<?>> entity;
 
-                    @Override
-                    public String getName() {
-                        return ItemUtil.getItemName(item) + " on " + EntityUtil.getEntityName(entity);
-                    }
+        public Exactly(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, Holder<Item> item, Holder<EntityType<?>> entity) {
+            super(GoalOptionSupplier.NONE,
+                    GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
+                        @Override
+                        public boolean test(EntityUtil.UsedItemOnEntity value, ServerPlayer player) {
+                            return value.entity().equals(entity.value()) && value.item().getItem().equals(item.value());
+                        }
 
-                    @Override
-                    public List<TextureExtractor> getExamples() {
-                        return List.of(EntityUtil.getEntityTextureExtractor(entity).overlay(ItemTextureExtractor.item(item), TextureAnchor.TOP_RIGHT, 10));
-                    }
-                }),
-                difficultySupplier
-        );
+                        @Override
+                        public String getId() {
+                            return ItemUtil.getItemId(item.value()) + "_ON_" + EntityUtil.getEntityId(entity.value());
+                        }
+
+                        @Override
+                        public String getName() {
+                            return ItemUtil.getItemName(item.value()) + " on " + EntityUtil.getEntityName(entity.value());
+                        }
+
+                        @Override
+                        public List<TextureExtractor> getExamples() {
+                            return List.of(EntityUtil.getEntityTextureExtractor(entity.value()).overlay(ItemTextureExtractor.item(item.value()), TextureAnchor.TOP_RIGHT, 10));
+                        }
+                    }),
+                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+            this.item = item;
+            this.entity = entity;
+        }
+
+        @Override
+        public MapCodec<? extends GoalBuilder<?, ?>> codec() {
+            return MAP_CODEC;
+        }
     }
 
-    public static GoalBuilder<EntityUtil.UsedItemOnEntity, Void> nameTag(GoalDifficultySupplier<Void> difficultySupplier, String name, EntityType<?>... entities) {
-        return new UseItemOnEntityGoalBuilder<>(
-                GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
-                    private final InListAcceptanceCondition<EntityType<?>, EntityType<?>> condition = InListAcceptanceCondition.entity(entities);
+    public static class NameTag extends UseItemOnEntityGoalBuilder<Void> {
+        public static final MapCodec<NameTag> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("USE", "Use", i)
+                .and(i.group(
+                        Codec.STRING.fieldOf("name").forGetter(NameTag::getName),
+                        RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("entities").forGetter(NameTag::getEntities)
+                )).apply(i, NameTag::new));
 
-                    @Override
-                    public boolean test(EntityUtil.UsedItemOnEntity value, ServerPlayer player) {
-                        return value.item().getItem().equals(Items.NAME_TAG) && value.item().has(DataComponents.CUSTOM_NAME)
-                                && value.item().get(DataComponents.CUSTOM_NAME).getString().equals(name)
-                                && condition.test(value.entity(), player);
-                    }
+        @Getter
+        private final String name;
+        @Getter
+        private final HolderSet<EntityType<?>> entities;
 
-                    @Override
-                    public String getId() {
-                        return "NAMETAG_" + name + "_ON_" + condition.getId();
-                    }
+        public NameTag(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, String name, HolderSet<EntityType<?>> entities) {
+            super(GoalOptionSupplier.NONE,
+                    GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
+                        private final InListAcceptanceCondition<EntityType<?>, EntityType<?>> condition = InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList()));
 
-                    @Override
-                    public String getName() {
-                        return "Nametag with name '" + name + "' on " + condition.getName();
-                    }
+                        @Override
+                        public boolean test(EntityUtil.UsedItemOnEntity value, ServerPlayer player) {
+                            return value.item().getItem().equals(Items.NAME_TAG) && value.item().has(DataComponents.CUSTOM_NAME)
+                                    && value.item().get(DataComponents.CUSTOM_NAME).getString().equals(name)
+                                    && condition.test(value.entity(), player);
+                        }
 
-                    @Override
-                    public List<TextureExtractor> getExamples() {
-                        return condition.getExamples().stream()
-                                .map(c -> c.overlay(ItemTextureExtractor.item(Items.NAME_TAG), TextureAnchor.TOP_RIGHT, 10))
-                                .toList();
-                    }
-                })
-        , difficultySupplier).customName(_ -> "Name " + InListAcceptanceCondition.entity(entities).getName() + " '" + name + "'");
+                        @Override
+                        public String getId() {
+                            return "NAMETAG_" + name + "_ON_" + condition.getId();
+                        }
+
+                        @Override
+                        public String getName() {
+                            return "Nametag with name '" + name + "' on " + condition.getName();
+                        }
+
+                        @Override
+                        public List<TextureExtractor> getExamples() {
+                            return condition.getExamples().stream()
+                                    .map(c -> c.overlay(ItemTextureExtractor.item(Items.NAME_TAG), TextureAnchor.TOP_RIGHT, 10))
+                                    .toList();
+                        }
+                    }),
+                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+            this.name = name;
+            this.entities = entities;
+
+            if(customNameProvider.isEmpty()) this.customName(_ -> "Name " + InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList())).getName() + " '" + name + "'");
+        }
+
+        @Override
+        public MapCodec<? extends GoalBuilder<?, ?>> codec() {
+            return MAP_CODEC;
+        }
     }
 
-    public static UseItemOnEntityGoalBuilder<Integer> unique(GoalDifficultySupplier<Integer> difficultySupplier, int min, int max, int step, Item... items) {
-        return new UseItemOnEntityGoalBuilder<>(
-                GoalOptionSupplier.integer("Entities to use on", min, max, step),
-                GoalProgressSupplier.unique("Entities used on", _ -> InListAcceptanceCondition.item(items).map(EntityUtil.UsedItemOnEntity::item), EntityUtil.UsedItemOnEntity::entity),
-                difficultySupplier
-        );
+    public static class Unique extends UseItemOnEntityGoalBuilder<Integer> implements NumericRange {
+        public static final MapCodec<Unique> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("USE", "Use", i)
+                .and(RegistryCodecs.holderSet(Registries.ITEM).fieldOf("items").forGetter(Unique::getItems))
+                .and(GoalBuilder.numericCodec(1, i))
+                .apply(i, Unique::new));
+
+        @Getter
+        private final HolderSet<Item> items;
+        @Getter
+        private final int min;
+        @Getter
+        private final int max;
+        @Getter
+        private final int step;
+
+        public Unique(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Item> items, int min, int max, int step) {
+            super(GoalOptionSupplier.integer("Entities to use on", min, max, step),
+                    GoalProgressSupplier.unique("Entities used on", _ -> InListAcceptanceCondition.item(items.stream().map(Holder::value).toList()).map(EntityUtil.UsedItemOnEntity::item), EntityUtil.UsedItemOnEntity::entity),
+                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+            this.items = items;
+            this.min = min;
+            this.max = max;
+            this.step = step;
+        }
+
+        @Override
+        public MapCodec<? extends GoalBuilder<?, ?>> codec() {
+            return MAP_CODEC;
+        }
     }
 }

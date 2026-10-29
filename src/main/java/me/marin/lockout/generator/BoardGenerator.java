@@ -78,7 +78,7 @@ public class BoardGenerator {
             int index = RANDOM.nextInt(availableGoals.size());
             GoalBuilder<?,?> builder = availableGoals.get(index);
             if(!builder.isEnabled()) continue;
-            if(!builder.getGroups().stream().allMatch(g -> g.canAdd(builder, currentGoals.stream().map(Pair::getA).collect(Collectors.toUnmodifiableList())))) {
+            if(!builder.getGroups().stream().allMatch(g -> g.value().canAdd(builder, currentGoals.stream().map(Pair::getA).collect(Collectors.toUnmodifiableList())))) {
                 // Group does not permit this goal to be added.
                 continue;
             }

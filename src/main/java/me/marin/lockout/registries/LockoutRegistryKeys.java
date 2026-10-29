@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import me.marin.lockout.Constants;
 import me.marin.lockout.client.goal.hint.ClientHint;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
+import me.marin.lockout.lockout.goal.builder.miscellanious.CustomEvent;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.DifficultyCheckFunction;
 import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
@@ -17,6 +18,9 @@ import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.level.block.ColorCollection;
 
 public class LockoutRegistryKeys {
     public static final ResourceKey<Registry<MapCodec<? extends DifficultyCheckFunction>>> DIFFICULTY_CHECK_TYPE = createRegistryKey("difficulty_check_type");
@@ -34,6 +38,9 @@ public class LockoutRegistryKeys {
     public static final ResourceKey<Registry<MapCodec<? extends GoalGroup>>> GOAL_GROUP_TYPE = createRegistryKey("goal_group_type");
     public static final ResourceKey<Registry<GoalGroup>> GOAL_GROUP = createRegistryKey("goal_group");
     public static final ResourceKey<Registry<GoalCategory>> GOAL_CATEGORY = createRegistryKey("goal_category");
+    public static final ResourceKey<Registry<ColorCollection<Item>>> COLORED_ITEM = createRegistryKey("colored_items");
+    public static final ResourceKey<Registry<ArmorMaterial>> ARMOR_MATERIAL = createRegistryKey("armor_material");
+    public static final ResourceKey<Registry<CustomEvent>> CUSTOM_EVENT = createRegistryKey("custom_event");
 
     public static void initialize() {
         DynamicRegistries.registerSynced(DIFFICULTY, GameDifficulty.CODEC);

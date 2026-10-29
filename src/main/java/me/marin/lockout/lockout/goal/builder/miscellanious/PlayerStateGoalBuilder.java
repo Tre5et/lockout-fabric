@@ -1,5 +1,9 @@
 package me.marin.lockout.lockout.goal.builder.miscellanious;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import lombok.Getter;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
@@ -7,121 +11,168 @@ import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
+import me.marin.lockout.lockout.goal.group.GoalGroup;
+import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
+import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
+import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
+import java.util.Optional;
 
-public class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> {
-    public PlayerStateGoalBuilder(GoalCategory category, GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ServerPlayer, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
-        super("PLAYER", "", category, optionSupplier, GoalProgressSupplier.player(progressSupplier), difficultySupplier);
+public abstract class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> {
+
+    public PlayerStateGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ServerPlayer, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, GoalProgressSupplier.player(progressSupplier), idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
     public void reifiedUpdater(BuilderUtil.Tick update) {}
 
-    public static PlayerStateGoalBuilder<Void> emptyHungerBar(GoalDifficultySupplier<Void> difficultySupplier) {
-        return new PlayerStateGoalBuilder<>(GoalCategory.MISC_ACTIONS,
-                GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
-                    @Override
-                    public boolean test(ServerPlayer value, ServerPlayer player) {
-                        return value.getFoodData().getFoodLevel() == 0;
-                    }
+    public static class EmptyHungerBar extends PlayerStateGoalBuilder<Void> {
+        public static final MapCodec<EmptyHungerBar> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("PLAYER", "", i)
+                .apply(i, EmptyHungerBar::new));
 
-                    @Override
-                    public String getId() {
-                        return "HUNGER_EMPTY";
-                    }
+        public EmptyHungerBar(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+            super(GoalOptionSupplier.NONE,
+                    GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
+                        @Override
+                        public boolean test(ServerPlayer value, ServerPlayer player) {
+                            return value.getFoodData().getFoodLevel() == 0;
+                        }
 
-                    @Override
-                    public String getName() {
-                        return "Empty Hunger Bar";
-                    }
+                        @Override
+                        public String getId() {
+                            return "HUNGER_EMPTY";
+                        }
 
-                    @Override
-                    public List<TextureExtractor> getExamples() {
-                        return List.of(new StackingTextureExtractor(List.of(
-                                SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/food_empty_hunger")),
-                                SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/food_half_hunger"))
-                        ), 0));
-                    }
-                }),
-                difficultySupplier
-        );
+                        @Override
+                        public String getName() {
+                            return "Empty Hunger Bar";
+                        }
+
+                        @Override
+                        public List<TextureExtractor> getExamples() {
+                            return List.of(new StackingTextureExtractor(List.of(
+                                    SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/food_empty_hunger")),
+                                    SpriteTextureExtractor.sprite(Identifier.withDefaultNamespace("hud/food_half_hunger"))
+                            ), 0));
+                        }
+                    }),
+                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+        }
+
+        @Override
+        public MapCodec<? extends GoalBuilder<?, ?>> codec() {
+            return MAP_CODEC;
+        }
     }
 
-    public static PlayerStateGoalBuilder<Void> heightAbove(GoalDifficultySupplier<Void> difficultySupplier, int height, ResourceKey<Level> dimension) {
-        return new PlayerStateGoalBuilder<>(GoalCategory.MISC_ACTIONS,
-                GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
-                    @Override
-                    public boolean test(ServerPlayer value, ServerPlayer player) {
-                        return value.getY() > height && value.level().dimension() == dimension;
-                    }
+    public static class HeightAbove extends PlayerStateGoalBuilder<Void> {
+        public static final MapCodec<HeightAbove> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("PLAYER", "", i)
+                .and(i.group(
+                        Codec.INT.fieldOf("height").forGetter(HeightAbove::getHeight),
+                        RegistryCodecs.holder(Registries.DIMENSION).fieldOf("height").forGetter(HeightAbove::getDimension)
+                )).apply(i, HeightAbove::new));
 
-                    @Override
-                    public String getId() {
-                        return "HEIGHT_" + height + "_" + BuilderUtil.identifierToId(dimension.identifier());
-                    }
+        @Getter
+        private final int height;
+        @Getter
+        private final Holder<Level> dimension;
 
-                    @Override
-                    public String getName() {
-                        return "Reach height " + height + " in " + BuilderUtil.identifierToName(dimension.identifier());
-                    }
+        public HeightAbove(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, int height, Holder<Level> dimension) {
+            super(GoalOptionSupplier.NONE,
+                    GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
+                        @Override
+                        public boolean test(ServerPlayer value, ServerPlayer player) {
+                            return value.getY() > height && value.level().dimension() == dimension.value().dimension();
+                        }
 
-                    @Override
-                    public List<TextureExtractor> getExamples() {
-                        return List.of(
-                                new CornerIconTextureExtractor(
-                                        GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/particle/geyser_plume_04.png")),
-                                        GenericTextureExtractor.texture(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/up_arrow.png")),
-                                8)
-                        );
-                    }
-                })
-,
-                difficultySupplier
-        );
+                        @Override
+                        public String getId() {
+                            return "HEIGHT_" + height + "_" + BuilderUtil.identifierToId(dimension.value().dimension().identifier());
+                        }
+
+                        @Override
+                        public String getName() {
+                            return "Reach height " + height + " in " + BuilderUtil.identifierToName(dimension.value().dimension().identifier());
+                        }
+
+                        @Override
+                        public List<TextureExtractor> getExamples() {
+                            return List.of(
+                                    new CornerIconTextureExtractor(
+                                            GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/particle/geyser_plume_04.png")),
+                                            GenericTextureExtractor.texture(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "textures/custom/up_arrow.png")),
+                                            8)
+                            );
+                        }
+                    }),
+                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+            this.height = height;
+            this.dimension = dimension;
+        }
+
+        @Override
+        public MapCodec<? extends GoalBuilder<?, ?>> codec() {
+            return MAP_CODEC;
+        }
     }
 
-    public static PlayerStateGoalBuilder<Void> sleepIn(GoalDifficultySupplier<Void> difficultySupplier, Block... blocks) {
-        return new PlayerStateGoalBuilder<>(
-                GoalCategory.MISC_ACTIONS,
-                GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> new AcceptanceCondition<ServerPlayer>() {
-                    private final InListAcceptanceCondition<BlockState, Block> condition = InListAcceptanceCondition.block(blocks);
+    public static class SleepIn extends PlayerStateGoalBuilder<Void> {
+        public static final MapCodec<SleepIn> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("PLAYER", "", i)
+                .and(RegistryCodecs.holderSet(Registries.BLOCK).fieldOf("blocks").forGetter(SleepIn::getBlocks))
+                .apply(i, SleepIn::new));
 
-                    @Override
-                    public boolean test(ServerPlayer value, ServerPlayer player) {
-                        if(!value.isSleeping() || value.getSleepingPos().isEmpty()) return false;
-                        BlockState block = value.level().getBlockState(value.getSleepingPos().get());
-                        return condition.test(block, player);
-                    }
+        @Getter
+        private final HolderSet<Block> blocks;
 
-                    @Override
-                    public String getId() {
-                        return "SLEEP_" + condition.getId();
-                    }
+        public SleepIn(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Block> blocks) {
+            super(GoalOptionSupplier.NONE,
+                    GoalProgressSupplier.simple(_ -> new AcceptanceCondition<ServerPlayer>() {
+                        private final InListAcceptanceCondition<BlockState, Block> condition = InListAcceptanceCondition.block(blocks.stream().map(Holder::value).toList());
 
-                    @Override
-                    public String getName() {
-                        return "Sleep in " + condition.getName();
-                    }
+                        @Override
+                        public boolean test(ServerPlayer value, ServerPlayer player) {
+                            if(!value.isSleeping() || value.getSleepingPos().isEmpty()) return false;
+                            BlockState block = value.level().getBlockState(value.getSleepingPos().get());
+                            return condition.test(block, player);
+                        }
 
-                    @Override
-                    public List<TextureExtractor> getExamples() {
-                        return condition.getExamples();
-                    }
-                }),
-                difficultySupplier
-        );
+                        @Override
+                        public String getId() {
+                            return "SLEEP_" + condition.getId();
+                        }
+
+                        @Override
+                        public String getName() {
+                            return "Sleep in " + condition.getName();
+                        }
+
+                        @Override
+                        public List<TextureExtractor> getExamples() {
+                            return condition.getExamples();
+                        }
+                    }),
+                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+            this.blocks = blocks;
+        }
+
+        @Override
+        public MapCodec<? extends GoalBuilder<?, ?>> codec() {
+            return MAP_CODEC;
+        }
     }
 }

@@ -1,51 +1,5 @@
 package me.marin.lockout.lockout;
 
-import me.marin.lockout.Constants;
-import me.marin.lockout.lockout.goal.builder.miscellanious.PlayerStateGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.block.MineBlockGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.block.UseItemOnBlockGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.damage.DealDamageGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.damage.DeathGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.damage.KillEntityGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.damage.TakeDamageGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.entity.*;
-import me.marin.lockout.lockout.goal.builder.experience.ReachExperienceLevelGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.inventory.UpdateInventoryGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.item.*;
-import me.marin.lockout.lockout.goal.builder.miscellanious.CustomEvent;
-import me.marin.lockout.lockout.goal.builder.miscellanious.CustomEventGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.miscellanious.ObtainAdvancementGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.miscellanious.RideEntityGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.statistic.ChangeStatisticGoalBuilder;
-import me.marin.lockout.lockout.goal.builder.statistic.HaveStatusEffectGoalBuilder;
-import me.marin.lockout.lockout.goal.config.GoalCategory;
-import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
-import me.marin.lockout.lockout.goal.group.GoalGroups;
-import me.marin.lockout.lockout.goal.rendering.texture.*;
-import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.stats.Stats;
-import net.minecraft.world.damagesource.DamageTypes;
-import net.minecraft.world.damagesource.FallLocation;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.item.equipment.ArmorMaterials;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import oshi.util.tuples.Pair;
-
-import java.util.List;
-
-import static me.marin.lockout.lockout.GoalRegistry.INSTANCE;
-
 public class DefaultGoalRegister {
     private static boolean goalsRegistered = false;
 
@@ -54,12 +8,12 @@ public class DefaultGoalRegister {
             return;
         }
 
-        INSTANCE.register(BreakItemGoalBuilder.withComponent(GoalDifficultySupplier.of(0.45f), GoalCategory.ARMOR, DataComponents.EQUIPPABLE)
+/*        INSTANCE.register(BreakItemGoalBuilder.withComponent(GoalDifficultySupplier.of(0.45f), GoalCategory.ARMOR, DataComponents.EQUIPPABLE)
                 .customName(_ -> "Break any armor piece")
-                .group(GoalGroups.ARMOR_SPECIAL));
+                *//*.group(GoalGroups.ARMOR_SPECIAL)*//*);
         INSTANCE.register(BreakItemGoalBuilder.withComponent(GoalDifficultySupplier.of(0.4f), GoalCategory.TOOLS, DataComponents.TOOL)
                 .customName(_ -> "Break any tool")
-                .group(GoalGroups.TOOLS));
+                *//*.group(GoalGroups.TOOLS)*//*);
         INSTANCE.register(BreakItemGoalBuilder.any(GoalDifficultySupplier.of(0.28f), Items.FISHING_ROD));
         INSTANCE.register(BreakItemGoalBuilder.any(GoalDifficultySupplier.of(0.25f), Items.SHIELD));
 
@@ -90,7 +44,7 @@ public class DefaultGoalRegister {
                 .customName(n -> "Compost " + n + " Unique Foods")
         );
 
-        INSTANCE.register(SpawnEntityGoalBuilder.any(GoalDifficultySupplier.of(0.82f), EntityTypes.IRON_GOLEM).group(GoalGroups.IRON_HEAVY));
+        INSTANCE.register(SpawnEntityGoalBuilder.any(GoalDifficultySupplier.of(0.82f), EntityTypes.IRON_GOLEM)*//*.group(GoalGroups.IRON_HEAVY)*//*);
         INSTANCE.register(SpawnEntityGoalBuilder.any(GoalDifficultySupplier.of(0.42f), EntityTypes.COPPER_GOLEM));
         INSTANCE.register(SpawnEntityGoalBuilder.any(GoalDifficultySupplier.of(0.3f), EntityTypes.SNOW_GOLEM).require(GoalRequirements.SNOWY));
 
@@ -124,7 +78,7 @@ public class DefaultGoalRegister {
                 .require(GoalRequirements.DESERT_LIKE));
         INSTANCE.register(DeathGoalBuilder.type(GoalDifficultySupplier.of(0.74f), () -> ItemTextureExtractor.item(Items.ANVIL), DamageTypes.FALLING_ANVIL)
                 .customName(_ -> "Die to falling Anvil")
-                .group(GoalGroups.IRON_HEAVY));
+                *//*.group(GoalGroups.IRON_HEAVY)*//*);
         INSTANCE.register(DeathGoalBuilder.type(GoalDifficultySupplier.of(0.28f), () -> ItemTextureExtractor.cycleItems(List.of(Items.POINTED_DRIPSTONE, Items.SULFUR_SPIKE)), DamageTypes.FALLING_STALACTITE)
                 .customName(_ -> "Die to falling Stalactite")
                 .require(GoalRequirements.SPIKY_CAVES));
@@ -381,7 +335,7 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(CustomEventGoalBuilder.of(GoalDifficultySupplier.of(0.45f), CustomEvent.GEYSER_LAUNCH).require(GoalRequirements.SULFUR_CAVES));
 
-        INSTANCE.register(PlayerStateGoalBuilder.sleepIn(GoalDifficultySupplier.of(0.12f), Blocks.STRAW_BED));
+        INSTANCE.register(PlayerStateGoalBuilder.sleepIn(GoalDifficultySupplier.of(0.12f), Blocks.STRAW_BED));*/
 /*        INSTANCE.register(ObtainAllItemGoalBuilder.simple("ALL_WOODEN_TOOLS", GoalCategory.TOOLS, Items.WOODEN_AXE, Items.WOODEN_PICKAXE, Items.WOODEN_HOE, Items.WOODEN_SHOVEL, Items.WOODEN_SWORD, Items.WOODEN_SPEAR)
                 .customName(_ -> "Obtain all Wooden Tools"));
         INSTANCE.register(ObtainColoredItemGoalBuilder.withCount("64_WOOL", GoalCategory.OBTAINING_ITEMS, Items.WOOL, 64));

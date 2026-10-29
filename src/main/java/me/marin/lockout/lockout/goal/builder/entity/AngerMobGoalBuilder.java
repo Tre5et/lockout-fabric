@@ -1,20 +1,38 @@
 package me.marin.lockout.lockout.goal.builder.entity;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import lombok.Getter;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
+import me.marin.lockout.lockout.goal.group.GoalGroup;
+import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
+import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
+import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.CornerIconTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
+import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
-public class AngerMobGoalBuilder<T> extends GoalBuilder<EntityUtil.AngeredEntity, T> {
-    public AngerMobGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityType<?>, ?> progressSupplier, GoalDifficultySupplier<T> difficultySupplier) {
-        super("ANGER_", "Anger", GoalCategory.MISC_ACTIONS, optionSupplier, progressSupplier.map(EntityUtil.AngeredEntity::entity), difficultySupplier);
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+public abstract class AngerMobGoalBuilder<T> extends GoalBuilder<EntityUtil.AngeredEntity, T> {
+
+    public AngerMobGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityType<?>, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, progressSupplier.map(EntityUtil.AngeredEntity::entity), idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
@@ -28,11 +46,24 @@ public class AngerMobGoalBuilder<T> extends GoalBuilder<EntityUtil.AngeredEntity
     @Override
     public void reifiedUpdater(EntityUtil.AngeredEntity update) {}
 
-    public static AngerMobGoalBuilder<Void> any(GoalDifficultySupplier<Void> difficultySupplier, EntityType<?>... entities) {
-        return new AngerMobGoalBuilder<>(
-                GoalOptionSupplier.NONE,
-                GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.entity(entities)),
-                difficultySupplier
-        );
+    public static class Any extends AngerMobGoalBuilder<Void> {
+        public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("ANGER", "Anger", i)
+                .and(RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("entities").forGetter(Any::getEntities))
+                .apply(i, Any::new));
+
+        @Getter
+        private final HolderSet<EntityType<?>> entities;
+
+        public Any(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<EntityType<?>> entities) {
+            super(GoalOptionSupplier.NONE,
+                    GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList()))),
+                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+            this.entities = entities;
+        }
+
+        @Override
+        public MapCodec<? extends GoalBuilder<?, ?>> codec() {
+            return MAP_CODEC;
+        }
     }
 }

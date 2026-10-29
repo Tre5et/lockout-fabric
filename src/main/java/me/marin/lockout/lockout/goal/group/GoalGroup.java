@@ -17,7 +17,7 @@ public interface GoalGroup {
     boolean canAdd(GoalBuilder<?,?> goal, List<GoalBuilder<?,?>> existingGoals);
 
     default List<GoalBuilder<?,?>> goalsMatching(List<GoalBuilder<?,?>> goalBuilders) {
-        return goalBuilders.stream().filter(g -> g.getGroups().contains(this)).toList();
+        return goalBuilders.stream().filter(g -> g.getGroups().stream().anyMatch(g1 -> this.equals(g1.value()))).toList();
     }
 
     static void bootstrap(Registry<MapCodec<? extends GoalGroup>> registry) {

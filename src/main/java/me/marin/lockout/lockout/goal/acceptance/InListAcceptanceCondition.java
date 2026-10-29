@@ -4,10 +4,7 @@ import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
 import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
-import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
-import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
-import me.marin.lockout.lockout.goal.rendering.texture.StackingTextureExtractor;
-import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import me.marin.lockout.lockout.goal.rendering.texture.*;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -89,8 +86,12 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
     }
 
     public static InListAcceptanceCondition<ItemStack, Item> item(Item... items) {
+        return item(Arrays.asList(items));
+    }
+
+    public static InListAcceptanceCondition<ItemStack, Item> item(List<Item> items) {
         return new InListAcceptanceCondition<>(
-                Arrays.asList(items),
+                items,
                 ItemStack::getItem,
                 ItemUtil::getItemId,
                 ItemUtil::getItemName,
@@ -110,8 +111,12 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
     }
 
     public static InListAcceptanceCondition<EntityType<?>, EntityType<?>> entity(EntityType<?>... entities) {
+        return entity(Arrays.asList(entities));
+    }
+
+    public static InListAcceptanceCondition<EntityType<?>, EntityType<?>> entity(List<EntityType<?>> entities) {
         return new InListAcceptanceCondition<>(
-                Arrays.asList(entities),
+                entities,
                 e -> e,
                 EntityUtil::getEntityId,
                 EntityUtil::getEntityName,
@@ -120,8 +125,12 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
     }
 
     public static InListAcceptanceCondition<EntityType<?>, EntityType<?>> spawnEgg(EntityType<?>... entities) {
+        return spawnEgg(Arrays.asList(entities));
+    }
+
+    public static InListAcceptanceCondition<EntityType<?>, EntityType<?>> spawnEgg(List<EntityType<?>> entities) {
         return new InListAcceptanceCondition<>(
-                Arrays.asList(entities),
+                entities,
                 e -> e,
                 EntityUtil::getEntityId,
                 EntityUtil::getEntityName,
@@ -131,8 +140,12 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
 
     @SafeVarargs
     public static InListAcceptanceCondition<ItemStack, Holder<Potion>> potionEffect(Holder<Potion>... potions) {
+        return potionEffect(Arrays.asList(potions));
+    }
+
+    public static InListAcceptanceCondition<ItemStack, Holder<Potion>> potionEffect(List<Holder<Potion>> potions) {
         return new InListAcceptanceCondition<>(
-                Arrays.asList(potions),
+                potions,
                 i -> {
                     PotionContents contents = i.get(DataComponents.POTION_CONTENTS);
                     return contents == null ? null : contents.potion().orElse(null);
@@ -154,8 +167,12 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
     }
 
     public static InListAcceptanceCondition<Identifier, Identifier> advancement(Identifier... identifiers) {
+        return advancement(Arrays.asList(identifiers));
+    }
+
+    public static InListAcceptanceCondition<Identifier, Identifier> advancement(List<Identifier> identifiers) {
         return new InListAcceptanceCondition<>(
-                Arrays.asList(identifiers),
+                identifiers,
                 e -> e,
                 BuilderUtil::identifierToId,
                 a -> {
@@ -178,24 +195,28 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
         );
     }
 
-    public static InListAcceptanceCondition<Stat<?>, Stat<?>> statistic(Supplier<TextureExtractor> extractor, Stat<?>... statistics) {
+    public static InListAcceptanceCondition<Stat<?>, Stat<?>> statistic(TextureExtractorProvider extractor, List<Stat<?>> statistics) {
         return new InListAcceptanceCondition<>(
-                Arrays.asList(statistics),
+                statistics,
                 a -> a,
                 s -> s.getName().toUpperCase(),
                 s -> BuilderUtil.idToName(s.getName()),
-                _ -> extractor.get()
+                _ -> extractor.get(null)
         );
     }
 
     @SafeVarargs
-    public static InListAcceptanceCondition<ResourceKey<DamageType>, ResourceKey<DamageType>> damageType(Supplier<TextureExtractor> extractor, ResourceKey<DamageType>... types) {
+    public static InListAcceptanceCondition<ResourceKey<DamageType>, ResourceKey<DamageType>> damageType(TextureExtractorProvider extractor, ResourceKey<DamageType>... types) {
+        return damageType(extractor, Arrays.asList(types));
+    }
+
+    public static InListAcceptanceCondition<ResourceKey<DamageType>, ResourceKey<DamageType>> damageType(TextureExtractorProvider extractor, List<ResourceKey<DamageType>> types) {
         return new InListAcceptanceCondition<>(
-                Arrays.asList(types),
+                types,
                 t -> t,
                 d -> BuilderUtil.identifierToId(d.identifier()),
                 d -> BuilderUtil.identifierToName(d.identifier()),
-                _ -> extractor.get()
+                _ -> extractor.get(null)
         );
     }
 
@@ -213,10 +234,9 @@ public class InListAcceptanceCondition<T,E> implements AcceptanceCondition<T> {
         );
     }
 
-    @SafeVarargs
-    public static InListAcceptanceCondition<MobEffectInstance, Holder<MobEffect>> statusEffect(Holder<MobEffect>... effects) {
+    public static InListAcceptanceCondition<MobEffectInstance, Holder<MobEffect>> statusEffect(List<Holder<MobEffect>> effects) {
         return new InListAcceptanceCondition<>(
-                Arrays.asList(effects),
+                effects,
                 MobEffectInstance::getEffect,
                 e -> BuilderUtil.identifierToId(Identifier.parse(e.getRegisteredName())),
                 e -> e.value().getDisplayName().getString(),

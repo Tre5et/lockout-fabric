@@ -8,6 +8,7 @@ import me.marin.lockout.lockout.goal.requirements.GoalRequirementContextInitiali
 import me.marin.lockout.server.LockoutServer;
 import me.marin.lockout.server.game.ServerLockoutGame;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.core.Holder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
@@ -27,7 +28,7 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
 
             GoalRequirementContext context = new GoalRequirementContextInitializer.Combined(
                     GoalRegistry.INSTANCE.getRegisteredGoals().stream()
-                            .flatMap(g -> g.getRequirements().stream().map(GoalRequirement::getInitializer))
+                            .flatMap(g -> g.getRequirements().stream().map(Holder::value).map(GoalRequirement::getInitializer))
                             .toList()
             ).initialize(server);
 

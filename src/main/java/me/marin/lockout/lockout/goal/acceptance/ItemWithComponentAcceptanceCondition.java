@@ -68,20 +68,24 @@ public class ItemWithComponentAcceptanceCondition implements AcceptanceCondition
         });
     }
 
-    public static ItemWithComponentAcceptanceCondition hasComponents(List<Item> items, DataComponentType<?>... components) {
+    public static ItemWithComponentAcceptanceCondition hasComponents(List<Item> items, List<DataComponentType<?>> components) {
         return new ItemWithComponentAcceptanceCondition(
-                Arrays.stream(components).map(c -> new ItemUtil.DataComponentCondition<>(
+                components.stream().map(c -> new ItemUtil.DataComponentCondition<>(
                         c,
                         _ -> true,
                         _ -> {},
                         () -> BuilderUtil.identifierToId(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(c)),
                         () -> BuilderUtil.identifierToName(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(c)) + "Item"
                 )).collect(Collectors.toUnmodifiableList()),
-                () -> ItemUtil.getAllItemsWithComponents(items, Arrays.asList(components)).stream().map(Item::getDefaultInstance).toList()
+                () -> ItemUtil.getAllItemsWithComponents(items, components).stream().map(Item::getDefaultInstance).toList()
         );
     }
 
     public static ItemWithComponentAcceptanceCondition hasComponents(DataComponentType<?>... components) {
+        return hasComponents(Arrays.asList(components));
+    }
+
+    public static ItemWithComponentAcceptanceCondition hasComponents(List<DataComponentType<?>> components) {
         return hasComponents(BuiltInRegistries.ITEM.stream().toList(), components);
     }
 
