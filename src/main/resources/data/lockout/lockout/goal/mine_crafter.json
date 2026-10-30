@@ -1,6 +1,5 @@
 {
     "type": "lockout:mine_block/any",
     "difficulty": 0.3,
-    "category": "lockout:mining",
     "blocks": "minecraft:crafter"
 }

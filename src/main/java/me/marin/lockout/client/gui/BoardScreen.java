@@ -82,7 +82,7 @@ public class BoardScreen extends AbstractContainerScreen<BoardScreenHandler> {
         }
         if (hintIndex != null && hoveredGoal.isPresent()) {
             if (hintIndex < hoveredGoal.get().getHints().size()) {
-                ClientPlayNetworking.send(new RequestHintPayload(hoveredGoal.get().getId(), hintIndex));
+                ClientPlayNetworking.send(new RequestHintPayload(hoveredGoal.get().getBuildData().id(), hintIndex));
                 return true;
             }
         }

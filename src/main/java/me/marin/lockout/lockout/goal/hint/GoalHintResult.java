@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import lombok.Getter;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.network.HintResultPayload;
+import net.minecraft.resources.ResourceKey;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -22,7 +24,7 @@ public class GoalHintResult<T>{
         this.error = error;
     }
 
-    public HintResultPayload getPayload(String goalId, int hintIndex, Function<T, JsonElement> serializer) {
+    public HintResultPayload getPayload(ResourceKey<GoalBuilder<?,?>> goalId, int hintIndex, Function<T, JsonElement> serializer) {
         String serializedData = data == null ? null : GSON.toJson(serializer.apply(data));
         return new HintResultPayload(goalId, hintIndex, Optional.ofNullable(serializedData), Optional.ofNullable(error));
     }

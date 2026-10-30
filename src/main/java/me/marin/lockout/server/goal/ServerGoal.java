@@ -79,7 +79,7 @@ public class ServerGoal<U> extends Goal {
         boolean prevCompleted = getProgress().isCompleted(team, lockout);
         if(updater.get()) {
             Optional<LockoutTeam> completedTeam = (!prevCompleted && getProgress().isCompleted(team, lockout)) ? Optional.of(team) : Optional.empty();
-            getProgress().send(getId(), LockoutServer.server.getPlayerList().getPlayers(), completedTeam, lockout);
+            getProgress().send(getBuildData().id(), LockoutServer.server.getPlayerList().getPlayers(), completedTeam, lockout);
             LockoutServer.lockout.evaluateWinnerAndEndGame();
         }
     }

@@ -1,7 +1,6 @@
 {
     "type": "lockout:obtain/colored",
     "difficulty": 0.28,
-    "category": "lockout:obtaining_items",
     "item_collection": "lockout:wool",
     "count": 64
 }

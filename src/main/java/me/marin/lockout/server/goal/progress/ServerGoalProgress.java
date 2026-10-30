@@ -4,10 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import me.marin.lockout.LockoutTeam;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.progress.GoalProgress;
 import me.marin.lockout.network.GoalProgressPayload;
 import me.marin.lockout.server.game.ServerLockoutGame;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
@@ -137,12 +139,12 @@ public interface ServerGoalProgress<U,T> extends GoalProgress<T> {
         getProgress().clear();
     }
 
-    default void send(String goalId, List<ServerPlayer> players, Optional<LockoutTeam> newCompletion, ServerLockoutGame lockout) {
+    default void send(ResourceKey<GoalBuilder<?,?>> goalId, List<ServerPlayer> players, Optional<LockoutTeam> newCompletion, ServerLockoutGame lockout) {
         GoalProgressPayload payload = new GoalProgressPayload(goalId, GSON.toJson(serialize()), newCompletion.map(t -> lockout.getTeams().indexOf(t)));
         players.forEach(p -> ServerPlayNetworking.send(p, payload));
     }
 
-    default void send(String goalId, List<ServerPlayer> players) {
+    default void send(ResourceKey<GoalBuilder<?,?>> goalId, List<ServerPlayer> players) {
         send(goalId, players, Optional.empty(), null);
     }
 }

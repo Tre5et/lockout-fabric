@@ -6,13 +6,11 @@ import lombok.Getter;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.ItemWithComponentAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
-import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
-import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
@@ -31,8 +29,8 @@ import java.util.stream.Stream;
 
 public abstract class BreakItemGoalBuilder<T> extends GoalBuilder<ItemUtil.BrokenItem, T> {
 
-    public BreakItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
-        super(optionSupplier, progressSupplier.map(i -> i.item().getDefaultInstance()), idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+    public BreakItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier, String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, progressSupplier.map(i -> i.item().getDefaultInstance()), namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
@@ -46,17 +44,17 @@ public abstract class BreakItemGoalBuilder<T> extends GoalBuilder<ItemUtil.Broke
     public void reifiedUpdater(ItemUtil.BrokenItem update) {}
 
     public static class Any extends BreakItemGoalBuilder<Void> {
-        public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("BREAK", "Break", i)
+        public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Break", i)
                 .and(RegistryCodecs.holderSet(Registries.ITEM).fieldOf("items").forGetter(Any::getItems))
                 .apply(i, Any::new));
 
         @Getter
         private final HolderSet<Item> items;
 
-        public Any(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Item> items) {
+        public Any(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Item> items) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.item(items.stream().map(Holder::value).toList())),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.items = items;
         }
         @Override
@@ -67,17 +65,17 @@ public abstract class BreakItemGoalBuilder<T> extends GoalBuilder<ItemUtil.Broke
     }
 
     public static class Component extends BreakItemGoalBuilder<Void> {
-        public static final MapCodec<Component> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("BREAK", "Break", i)
+        public static final MapCodec<Component> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Break", i)
                 .and(RegistryCodecs.holderSet(Registries.DATA_COMPONENT_TYPE).fieldOf("components").forGetter(Component::getComponents))
                 .apply(i, Component::new));
 
         @Getter
         private final HolderSet<DataComponentType<?>> components;
 
-        public Component(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<DataComponentType<?>> components) {
+        public Component(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<DataComponentType<?>> components) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> ItemWithComponentAcceptanceCondition.hasComponents(Stream.concat(components.stream().map(Holder::value), Stream.of((DataComponentType<?>)DataComponents.MAX_DAMAGE)).toList())),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.components = components;
         }
         @Override

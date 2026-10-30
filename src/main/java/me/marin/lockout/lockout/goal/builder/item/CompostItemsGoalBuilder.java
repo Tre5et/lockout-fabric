@@ -6,13 +6,11 @@ import lombok.Getter;
 import me.marin.lockout.lockout.goal.acceptance.ItemWithComponentAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.NumericRange;
-import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
-import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
@@ -32,8 +30,8 @@ import java.util.Optional;
 
 public abstract class CompostItemsGoalBuilder<T> extends GoalBuilder<ItemUtil.CompostedItem, T> {
 
-    public CompostItemsGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
-        super(optionSupplier, progressSupplier.map(ItemUtil.CompostedItem::itemStack), idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+    public CompostItemsGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemStack, ?> progressSupplier, String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, progressSupplier.map(ItemUtil.CompostedItem::itemStack), namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
@@ -48,7 +46,7 @@ public abstract class CompostItemsGoalBuilder<T> extends GoalBuilder<ItemUtil.Co
     public void reifiedUpdater(ItemUtil.CompostedItem update) {}
 
     public static class UniqueWithComponent extends CompostItemsGoalBuilder<Integer> implements NumericRange {
-        public static final MapCodec<UniqueWithComponent> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("COMPOST", "Compost", i)
+        public static final MapCodec<UniqueWithComponent> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Compost", i)
                 .and(RegistryCodecs.holderSet(Registries.DATA_COMPONENT_TYPE).fieldOf("components").forGetter(UniqueWithComponent::getComponents))
                 .and(GoalBuilder.numericCodec(1, i))
                 .apply(i, UniqueWithComponent::new));
@@ -62,14 +60,14 @@ public abstract class CompostItemsGoalBuilder<T> extends GoalBuilder<ItemUtil.Co
         @Getter
         private final int step;
 
-        public UniqueWithComponent(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<DataComponentType<?>> components, int min, int max, int step) {
+        public UniqueWithComponent(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<DataComponentType<?>> components, int min, int max, int step) {
             super(GoalOptionSupplier.integer("Items to compost", min, max, 1),
                     GoalProgressSupplier.unique("Items composted", _ -> {
                         List<DataComponentType<?>> itemComponents = new ArrayList<>(components.stream().map(Holder::value).toList());
                         itemComponents.add(DataComponents.COMPOSTABLE);
                         return ItemWithComponentAcceptanceCondition.hasComponents(BuiltInRegistries.ITEM.stream().toList(), itemComponents);
                     }, ItemStack::getItem),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.components = components;
             this.min = min;
             this.max = max;

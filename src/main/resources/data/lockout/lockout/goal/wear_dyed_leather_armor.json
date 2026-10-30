@@ -1,5 +1,4 @@
 {
     "type": "lockout:obtain/full_diffent_dyed_leather_armor",
-    "difficulty": 0.65,
-    "category": "lockout:obtaining_items"
+    "difficulty": 0.65
 }

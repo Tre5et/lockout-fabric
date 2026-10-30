@@ -1,7 +1,6 @@
 {
     "type": "lockout:break/component",
     "difficulty": 0.45,
-    "category": "lockout:armor",
     "components": "minecraft:equippable",
     "name": "Break any Armor Piece"
 }

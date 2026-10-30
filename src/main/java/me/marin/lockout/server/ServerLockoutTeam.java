@@ -5,9 +5,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import lombok.Getter;
 import me.marin.lockout.LockoutTeam;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.network.HintResultPayload;
+import me.marin.lockout.registries.LockoutRegistryKeys;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.TeamColor;
@@ -19,7 +23,7 @@ public class ServerLockoutTeam extends LockoutTeam {
     @Getter
     private final MinecraftServer server;
     @Getter
-    private final Map<String, Map<Integer, String>> resolvedHints = new HashMap<>();
+    private final Map<ResourceKey<GoalBuilder<?,?>>, Map<Integer, String>> resolvedHints = new HashMap<>();
 
     public ServerLockoutTeam(List<String> playerNames, TeamColor formattingColor, MinecraftServer server) {
         this(playerNames, playerNames.stream().map(n -> server.getPlayerList().getPlayerByName(n).getUUID()).toList(), formattingColor, server);
@@ -39,7 +43,7 @@ public class ServerLockoutTeam extends LockoutTeam {
         }
     }
 
-    public void storeHintResult(String goalId, int hintIndex, String data) {
+    public void storeHintResult(ResourceKey<GoalBuilder<?,?>> goalId, int hintIndex, String data) {
         resolvedHints.computeIfAbsent(goalId, _ -> new HashMap<>()).put(hintIndex, data);
     }
 
@@ -48,7 +52,7 @@ public class ServerLockoutTeam extends LockoutTeam {
                 hints.forEach((hintIndex, data) -> {
                     HintResultPayload payload = new HintResultPayload(goalId, hintIndex, Optional.ofNullable(data), Optional.empty());
                     ServerPlayNetworking.send(player, payload);
-                    LockoutServer.lockout.getBoard().getGoals().stream().filter(g -> Objects.equals(g.getId(), goalId)).findAny()
+                    LockoutServer.lockout.getBoard().getGoals().stream().filter(g -> Objects.equals(g.getBuildData().id(), goalId)).findAny()
                             .ifPresent(g -> g.getHints().get(hintIndex).onPropagateToPlayerPayload(payload, LockoutServer.server, player));
                 }
         ));
@@ -61,7 +65,7 @@ public class ServerLockoutTeam extends LockoutTeam {
         resolvedHints.forEach((t, h) -> {
             JsonObject hint = new JsonObject();
             h.forEach((i, v) -> hint.add(i.toString(), new JsonPrimitive(v)));
-            hints.add(t, hint);
+            hints.add(t.identifier().toString(), hint);
         });
         object.add("hints", hints);
         return object;
@@ -76,7 +80,7 @@ public class ServerLockoutTeam extends LockoutTeam {
             if(!object.get("hints").isJsonObject()) throw new IOException("Server board hints is not a valid json object.");
             JsonObject hints = object.getAsJsonObject("hints");
 
-            Map<String, Map<Integer, String>> newHints = new HashMap<>();
+            Map<ResourceKey<GoalBuilder<?,?>>, Map<Integer, String>> newHints = new HashMap<>();
             for(Map.Entry<String, JsonElement> goalHints : hints.entrySet()) {
                 if(!goalHints.getValue().isJsonObject()) throw new IOException("Server board goal hints is not a valid json object.");
                 Map<Integer, String> newGoalHints = new HashMap<>();
@@ -84,7 +88,7 @@ public class ServerLockoutTeam extends LockoutTeam {
                     if(!indexHint.getValue().isJsonPrimitive() || !indexHint.getValue().getAsJsonPrimitive().isString()) throw new IOException("Server board hint is not a string.");
                     newGoalHints.put(Integer.valueOf(indexHint.getKey()), indexHint.getValue().getAsString());
                 }
-                newHints.put(goalHints.getKey(), newGoalHints);
+                newHints.put(ResourceKey.create(LockoutRegistryKeys.GOAL, Identifier.parse(goalHints.getKey())), newGoalHints);
             }
             team.getResolvedHints().clear();
             team.getResolvedHints().putAll(newHints);

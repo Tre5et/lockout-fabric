@@ -10,13 +10,11 @@ import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.NumericRange;
 import me.marin.lockout.lockout.goal.builder.entity.EntityUtil;
-import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
-import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
@@ -41,8 +39,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.KilledEntity, T> {
-    public KillEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, DamageUtil.KilledEntity, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
-        super(optionSupplier, progressSupplier, idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+    public KillEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, DamageUtil.KilledEntity, ?> progressSupplier, String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, progressSupplier, namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
@@ -57,17 +55,17 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
     public void reifiedUpdater(DamageUtil.KilledEntity update) {}
 
     public static class Any extends KillEntityGoalBuilder<Void> {
-        public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("KILL", "Kill", i)
+        public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Kill", i)
                 .and(RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("entities").forGetter(Any::getEntities))
                 .apply(i, Any::new));
 
         @Getter
         private final HolderSet<EntityType<?>> entities;
 
-        public Any(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<EntityType<?>> entities) {
+        public Any(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<EntityType<?>> entities) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList())).map(e -> e.entity().getType())),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.entities = entities;
         }
 
@@ -78,7 +76,7 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
     }
 
     public static class Unique extends KillEntityGoalBuilder<Integer> implements NumericRange {
-        public static final MapCodec<Unique> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("KILL", "Kill", i)
+        public static final MapCodec<Unique> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Kill", i)
                 .and(RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("entities").forGetter(Unique::getEntities))
                 .and(GoalBuilder.numericCodec(1, i))
                 .apply(i, Unique::new));
@@ -92,10 +90,10 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
         @Getter
         private final HolderSet<EntityType<?>> entities;
 
-        public Unique(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<EntityType<?>> entities, int min, int max, int step) {
+        public Unique(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<EntityType<?>> entities, int min, int max, int step) {
             super(GoalOptionSupplier.integer("Mobs to kill", min, max, step),
                     GoalProgressSupplier.unique("Mobs killed", _ -> InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList())).map(e -> e.entity().getType()), e -> e.entity().getType()),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.entities = entities;
             this.min = min;
             this.max = max;
@@ -109,7 +107,7 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
     }
 
     public static class Total extends KillEntityGoalBuilder<Integer> implements NumericRange {
-        public static final MapCodec<Total> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("KILL", "Kill", i)
+        public static final MapCodec<Total> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Kill", i)
                 .and(RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("entities").forGetter(Total::getEntities))
                 .and(GoalBuilder.numericCodec(1, i))
                 .apply(i, Total::new));
@@ -123,10 +121,10 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
         @Getter
         private final HolderSet<EntityType<?>> entities;
 
-        public Total(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<EntityType<?>> entities, int min, int max, int step) {
+        public Total(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<EntityType<?>> entities, int min, int max, int step) {
             super(GoalOptionSupplier.integer("Mobs to kill", min, max, step),
                     GoalProgressSupplier.countTotal("Mobs killed", _ -> InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList())).map(e -> e.entity().getType())),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.entities = entities;
             this.min = min;
             this.max = max;
@@ -140,10 +138,10 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
     }
 
     public static class ColoredSheep extends KillEntityGoalBuilder<DyeColor> {
-        public static final MapCodec<ColoredSheep> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("KILL", "Kill", i)
+        public static final MapCodec<ColoredSheep> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Kill", i)
                 .apply(i, ColoredSheep::new));
 
-        public ColoredSheep(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        public ColoredSheep(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
             super(GoalOptionSupplier.list("Color", DyeColor.VALUES, new TypeToken<>() {}, "Color", DyeColor::toString),
                     GoalProgressSupplier.simple(c -> new AcceptanceCondition<>() {
                         @Override
@@ -165,7 +163,7 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
                         public List<TextureExtractor> getExamples() {
                             return List.of(EntityUtil.getEntityTextureExtractor(EntityTypes.SHEEP).overlay(ItemTextureExtractor.item(Items.DYE.pick(c)), TextureAnchor.BOTTOM_RIGHT, 10));
                         }
-                    }), idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    }), namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
 
             ArrayList<Holder<GoalRequirement>> req = new ArrayList<>(List.of(Holder.direct(GoalRequirements.COLORS)));
             req.addAll(requirements.stream().toList());
@@ -179,7 +177,7 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
     }
 
     public static class DeathType extends KillEntityGoalBuilder<Void> {
-        public static final MapCodec<DeathType> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("KILL", "Kill", i)
+        public static final MapCodec<DeathType> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Kill", i)
                 .and(i.group(
                         RegistryCodecs.holderSet(Registries.DAMAGE_TYPE).fieldOf("damage_types").forGetter(DeathType::getDamageType),
                         TextureExtractorProvider.CODEC.fieldOf("texture").forGetter(DeathType::getTexture),
@@ -193,7 +191,7 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
         @Getter
         private final HolderSet<EntityType<?>> entities;
 
-        public DeathType(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<DamageType> damageTypes, TextureExtractorProvider texture, HolderSet<EntityType<?>> entities) {
+        public DeathType(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<DamageType> damageTypes, TextureExtractorProvider texture, HolderSet<EntityType<?>> entities) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                         private final InListAcceptanceCondition<EntityType<?>, EntityType<?>> condition = InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList()));
@@ -219,7 +217,7 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
                             return condition.getExamples().stream().map(e -> e.overlay(new CycleTextureExtractor(damageCondition.getExamples()), TextureAnchor.BOTTOM_RIGHT, 10)).toList();
                         }
                     }),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.damageType = damageTypes;
             this.texture = texture;
             this.entities = entities;
@@ -232,7 +230,7 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
     }
 
     public static class Dimension extends KillEntityGoalBuilder<Void> {
-        public static final MapCodec<Dimension> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("KILL", "Kill", i)
+        public static final MapCodec<Dimension> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Kill", i)
                 .and(i.group(
                         RegistryCodecs.holderSet(Registries.DIMENSION).fieldOf("dimension").forGetter(Dimension::getDimensions),
                         TextureExtractorProvider.CODEC.fieldOf("texture").forGetter(Dimension::getTexture),
@@ -246,7 +244,7 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
         @Getter
         private final HolderSet<EntityType<?>> entities;
 
-        public Dimension(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Level> dimensions, TextureExtractorProvider texture, HolderSet<EntityType<?>> entities) {
+        public Dimension(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Level> dimensions, TextureExtractorProvider texture, HolderSet<EntityType<?>> entities) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                         private final InListAcceptanceCondition<EntityType<?>, EntityType<?>> condition = InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList()));
@@ -273,7 +271,7 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
                             )).collect(Collectors.toUnmodifiableList());
                         }
                     }),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.dimensions = dimensions;
             this.texture = texture;
             this.entities = entities;

@@ -141,7 +141,7 @@ public class LockoutClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(UpdateTimerPayload.ID, (payload, _) -> lockout.setTicks(payload.ticks()));
         ClientPlayNetworking.registerGlobalReceiver(HintResultPayload.ID, (payload, _) -> {
             Optional<ClientGoal> goal = lockout.getBoard().getGoals().stream()
-                    .filter(g -> g.getId().equals(payload.goalId()))
+                    .filter(g -> g.getBuildData().id().equals(payload.goalId()))
                     .findAny();
             if(goal.isEmpty() || goal.get().getHints().size() <= payload.hintIndex()) return;
             ClientHint<?> hint = goal.get().getHints().get(payload.hintIndex());
@@ -154,7 +154,7 @@ public class LockoutClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(GoalProgressPayload.ID, (payload, context) -> {
             if (lockout == null) return;
             lockout.getBoard().getGoals().stream()
-                    .filter(g -> g.getId().equals(payload.goalId()))
+                    .filter(g -> g.getBuildData().id().equals(payload.goalId()))
                     .findFirst()
                     .ifPresent(g -> {
                         g.updateProgress(payload.progress());

@@ -24,12 +24,10 @@ import me.marin.lockout.lockout.goal.builder.miscellanious.*;
 import me.marin.lockout.lockout.goal.builder.statistic.ChangeStatisticGoalBuilder;
 import me.marin.lockout.lockout.goal.builder.statistic.HaveStatusEffectGoalBuilder;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
-import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
-import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.option.GoalOptionGenerator;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.name.StringNameProvider;
@@ -55,14 +53,11 @@ import java.util.function.BiFunction;
 public abstract class GoalBuilder<U,T extends Object> {
     public static final Codec<GoalBuilder<?,?>> CODEC = LockoutRegistries.GOAL_BUILDER_TYPE.byNameCodec().dispatch(GoalBuilder::codec, c -> c);
 
-    public static <T extends GoalBuilder<?,?>> Products.P11<RecordCodecBuilder.Mu<T>, String, String, Holder<GoalCategory>, GoalDifficultySupplier<?>, HolderSet<GoalRequirement>, Optional<IdProvider>, Optional<NameProvider>, Optional<TextureExtractorProvider>, HolderSet<GoalGroup>, List<HintCombination<?>>, Boolean> codecBuilder(String defaultIdPrefix, String defaultNamePrefix, RecordCodecBuilder.Instance<T> instance) {
+    public static <T extends GoalBuilder<?,?>> Products.P8<RecordCodecBuilder.Mu<T>, String, GoalDifficultySupplier<?>, HolderSet<GoalRequirement>, Optional<NameProvider>, Optional<TextureExtractorProvider>, HolderSet<GoalGroup>, List<HintCombination<?>>, Boolean> codecBuilder(String defaultNamePrefix, RecordCodecBuilder.Instance<T> instance) {
         return instance.group(
-                Codec.STRING.optionalFieldOf("id_prefix", defaultIdPrefix).forGetter(GoalBuilder::getIdPrefix),
                 Codec.STRING.optionalFieldOf("name_prefix", defaultNamePrefix).forGetter(GoalBuilder::getNamePrefix),
-                RegistryCodecs.holder(LockoutRegistryKeys.GOAL_CATEGORY).fieldOf("category").forGetter(GoalBuilder::getCategory),
                 GoalDifficultySupplier.CODEC.fieldOf("difficulty").forGetter(GoalBuilder::getDifficultySupplier),
                 RegistryCodecs.holderSet(LockoutRegistryKeys.GOAL_REQUIREMENT).optionalFieldOf("requirements", HolderSet.empty()).forGetter(GoalBuilder::getRequirements),
-                IdProvider.CODEC.optionalFieldOf("id").forGetter((b) -> Optional.ofNullable(b.getCustomIdProvider())),
                 NameProvider.CODEC.optionalFieldOf("name").forGetter((b) -> Optional.ofNullable(b.getCustomNameProvider())),
                 TextureExtractorProvider.CODEC.optionalFieldOf("texture").forGetter((b) -> Optional.ofNullable(b.getCustomTextureExtractorProvider())),
                 RegistryCodecs.holderSet(LockoutRegistryKeys.GOAL_GROUP).optionalFieldOf("groups", HolderSet.empty()).forGetter(GoalBuilder::getGroups),
@@ -80,11 +75,7 @@ public abstract class GoalBuilder<U,T extends Object> {
     }
 
     @Getter
-    protected final String idPrefix;
-    @Getter
     protected final String namePrefix;
-    @Getter
-    protected final Holder<GoalCategory> category;
     @Getter
     protected final GoalDifficultySupplier<?> difficultySupplier;
     @Getter
@@ -93,8 +84,6 @@ public abstract class GoalBuilder<U,T extends Object> {
     protected final GoalProgressSupplier<T,U,?> progressSupplier;
     @Getter
     protected HolderSet<GoalRequirement> requirements = HolderSet.empty();
-    @Getter
-    private IdProvider customIdProvider = null;
     @Getter
     private NameProvider customNameProvider = null;
     @Getter
@@ -107,15 +96,12 @@ public abstract class GoalBuilder<U,T extends Object> {
     @Setter
     protected boolean enabled = true;
 
-    public GoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, U, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
-        this.idPrefix = idPrefix;
+    public GoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, U, ?> progressSupplier, String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
         this.namePrefix = namePrefix;
-        this.category = category;
         this.difficultySupplier = difficultySupplier;
         this.optionSupplier = optionSupplier;
         this.progressSupplier = progressSupplier;
         this.requirements = requirements;
-        this.customIdProvider = customIdProvider.orElse(null);
         this.customNameProvider = customNameProvider.orElse(null);
         this.customTextureExtractorProvider = customTextureExtractorProvider.orElse(null);
         this.groups = groups;
@@ -204,7 +190,6 @@ public abstract class GoalBuilder<U,T extends Object> {
 
     public ServerGoal<U> buildServer(ResourceKey<GoalBuilder<?,?>> key, T option) {
         return new ServerGoal<>(new ServerGoalBuildParameters<>(
-                getId(option),
                 getBuildData(key, option),
                 progressSupplier.getServer(option),
                 getServerHints(option),
@@ -215,7 +200,6 @@ public abstract class GoalBuilder<U,T extends Object> {
 
     public ClientGoal buildClient(ResourceKey<GoalBuilder<?,?>> key, T option) {
         return new ClientGoal(new ClientGoalBuildParameters(
-                getId(option),
                 getBuildData(key, option),
                 getName(option),
                 getTextureExtractor(option),
@@ -284,16 +268,6 @@ public abstract class GoalBuilder<U,T extends Object> {
         return buildFromSerializedData(option, this::buildClient, key);
     }
 
-    public String getStaticId() {
-        if(customIdProvider != null) return customIdProvider.get(null);
-        return formatId(idPrefix + "_" + optionSupplier.getStaticId() + "_" + progressSupplier.getStaticId());
-    }
-
-    public String getId(T option) {
-        if(customIdProvider != null) return customIdProvider.get(option);
-        return formatId(idPrefix + "_" + progressSupplier.getId(option));
-    }
-
     public Component getName(T option) {
         if(customNameProvider != null) return customNameProvider.get(option);
         return Component.literal(formatName(namePrefix + " " + progressSupplier.getName(option)));
@@ -332,15 +306,6 @@ public abstract class GoalBuilder<U,T extends Object> {
         return this;
     }*/
 
-    public GoalBuilder<U,T> customId(IdProvider idProvider) {
-        this.customIdProvider = idProvider;
-        return this;
-    }
-
-    public GoalBuilder<U,T> customId(String id) {
-        return customId(_ -> id);
-    }
-
     public GoalBuilder<U,T> customName(NameProvider nameExtractorProvider) {
         this.customNameProvider = nameExtractorProvider;
         return this;
@@ -369,11 +334,6 @@ public abstract class GoalBuilder<U,T extends Object> {
     public GoalBuilder<U,T> hint(HintCombination<?>... hint) {
         hints.addAll(Arrays.stream(hint).toList());
         return this;
-    }
-
-    @Override
-    public String toString() {
-        return getStaticId();
     }
 
     public static String formatId(String string) {

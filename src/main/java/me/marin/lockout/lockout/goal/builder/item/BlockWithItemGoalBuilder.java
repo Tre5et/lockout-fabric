@@ -5,13 +5,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
 import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
-import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
-import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
@@ -28,22 +26,22 @@ import java.util.Optional;
 
 public abstract class BlockWithItemGoalBuilder<T> extends GoalBuilder<ItemUtil.BlockedWithItem, T> {
 
-    public BlockWithItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemUtil.BlockedWithItem, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
-        super(optionSupplier, progressSupplier, idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+    public BlockWithItemGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ItemUtil.BlockedWithItem, ?> progressSupplier, String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, progressSupplier, namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
     public void reifiedUpdater(ItemUtil.BlockedWithItem update) {}
 
     public static class HaveDisabled extends BlockWithItemGoalBuilder<Void> {
-        public static final MapCodec<HaveDisabled> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("BLOCK", "Block", i)
+        public static final MapCodec<HaveDisabled> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Block", i)
                 .and(RegistryCodecs.holder(Registries.ITEM).fieldOf("item").forGetter(HaveDisabled::getItem))
                 .apply(i, HaveDisabled::new));
 
         @Getter
         private final Holder<Item> item;
 
-        public HaveDisabled(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, Holder<Item> item) {
+        public HaveDisabled(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, Holder<Item> item) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                         @Override
@@ -66,7 +64,7 @@ public abstract class BlockWithItemGoalBuilder<T> extends GoalBuilder<ItemUtil.B
                             return List.of(ItemTextureExtractor.item(item.value()).overlay(new FillTextureExtractor(ARGB.white(100)), TextureAnchor.BOTTOM_LEFT, 16, 8));
                         }
                     }),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.item = item;
 
             if(customNameProvider.isEmpty()) customName(_ -> "Have your " + ItemUtil.getItemName(item.value()) + " disabled");

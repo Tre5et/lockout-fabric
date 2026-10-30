@@ -126,7 +126,7 @@ public class BoardBuilderScreen extends Screen {
                         }
                     }, goal.getBuildData().option().orElse(null)));
                 } catch (IllegalGoalConstructionException e) {
-                    Lockout.log("Failed to render goal option selector for goal " + builder.getStaticId() + " with option" + goal.getBuildData().option().orElse("null") + ": " + e.getMessage());
+                    Lockout.log("Failed to render goal option selector for goal " + goal.getBuildData().id() + " with option" + goal.getBuildData().option().orElse("null") + ": " + e.getMessage());
                 }
 
                 closeEditDataButton = Button.builder(Component.literal("Close"), (_) -> closeEditData()).width(50).pos(x, y + height + 6).build();

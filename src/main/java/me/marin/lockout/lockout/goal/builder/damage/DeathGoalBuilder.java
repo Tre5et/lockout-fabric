@@ -6,13 +6,11 @@ import lombok.Getter;
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
-import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
-import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
@@ -33,8 +31,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public abstract class DeathGoalBuilder<T> extends GoalBuilder<DamageUtil.PlayerDied, T> {
-    public DeathGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, DamageUtil.PlayerDied, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
-        super(optionSupplier, progressSupplier, idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+    public DeathGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, DamageUtil.PlayerDied, ?> progressSupplier, String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, progressSupplier, namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
@@ -49,7 +47,7 @@ public abstract class DeathGoalBuilder<T> extends GoalBuilder<DamageUtil.PlayerD
     public void reifiedUpdater(DamageUtil.PlayerDied update) {}
 
     public static class Type extends DeathGoalBuilder<Void> {
-        public static final MapCodec<Type> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("DEATH", "Die to", i)
+        public static final MapCodec<Type> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Die to", i)
                 .and(i.group(
                         RegistryCodecs.holderSet(Registries.DAMAGE_TYPE).fieldOf("types").forGetter(Type::getTypes),
                         TextureExtractorProvider.CODEC.fieldOf("texture").forGetter(Type::getTextureExtractorProvider)
@@ -60,10 +58,10 @@ public abstract class DeathGoalBuilder<T> extends GoalBuilder<DamageUtil.PlayerD
         @Getter
         private final TextureExtractorProvider textureExtractorProvider;
 
-        public Type(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<DamageType> types, TextureExtractorProvider textureExtractorProvider) {
+        public Type(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<DamageType> types, TextureExtractorProvider textureExtractorProvider) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.damageType(textureExtractorProvider, types.stream().map(Holder::unwrapKey).filter(Optional::isPresent).map(Optional::get).toList()).mapEquals((s, t) -> s.source().typeHolder().is(t))),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.types = types;
             this.textureExtractorProvider = textureExtractorProvider;
         }
@@ -75,16 +73,16 @@ public abstract class DeathGoalBuilder<T> extends GoalBuilder<DamageUtil.PlayerD
     }
 
     public static class Entity extends DeathGoalBuilder<Void> {
-        public static final MapCodec<Entity> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("DEATH", "Die to", i)
+        public static final MapCodec<Entity> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Die to", i)
                 .and(RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("entities").forGetter(Entity::getEntities))
                 .apply(i, Entity::new));
 
         @Getter
         private final HolderSet<EntityType<?>> entities;
 
-        public Entity(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<EntityType<?>> entities) {
+        public Entity(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<EntityType<?>> entities) {
             super(GoalOptionSupplier.NONE,
-                    GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList())).map(d -> d.source().getEntity() != null ? d.source().getEntity().getType() : (d.source().getDirectEntity() != null ? d.source().getDirectEntity().getType() : null))), idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList())).map(d -> d.source().getEntity() != null ? d.source().getEntity().getType() : (d.source().getDirectEntity() != null ? d.source().getDirectEntity().getType() : null))), namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.entities = entities;
         }
 
@@ -95,17 +93,17 @@ public abstract class DeathGoalBuilder<T> extends GoalBuilder<DamageUtil.PlayerD
     }
 
     public static class FallOffBlock extends DeathGoalBuilder<Void> {
-        public static final MapCodec<FallOffBlock> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("DEATH", "Die to", i)
+        public static final MapCodec<FallOffBlock> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Die to", i)
                 .and(RegistryCodecs.holderSet(Registries.BLOCK).fieldOf("blocks").forGetter(FallOffBlock::getBlocks))
                 .apply(i, FallOffBlock::new));
 
         @Getter
         private final HolderSet<Block> blocks;
 
-        public FallOffBlock(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Block> blocks) {
+        public FallOffBlock(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Block> blocks) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.fallLocation(blocks.stream().map(b -> new Pair<FallLocation, Supplier<TextureExtractor>>(FallLocation.blockToFallLocation(b.value().defaultBlockState()), () -> ItemTextureExtractor.item(b.value().asItem()))).toList()).map(DamageUtil.PlayerDied::player)),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.blocks = blocks;
         }
 

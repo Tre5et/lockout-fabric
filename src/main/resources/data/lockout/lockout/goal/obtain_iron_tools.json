@@ -1,7 +1,6 @@
 {
     "type": "lockout:obtain/all",
     "difficulty": 0.3,
-    "category": "lockout:obtaining_items",
     "items": [
         "minecraft:iron_sword",
         "minecraft:iron_axe",

@@ -20,8 +20,8 @@ public class ClientGoalBuildParameters extends GoalBuildParameters {
     @Getter
     private final List<ClientHint<?>> hints;
 
-    public ClientGoalBuildParameters(String id, BuildData buildData, Component name, TextureExtractor textureExtractor, ClientGoalProgress<?> progress, List<ClientHint<?>> hints) {
-        super(id, buildData);
+    public ClientGoalBuildParameters(BuildData buildData, Component name, TextureExtractor textureExtractor, ClientGoalProgress<?> progress, List<ClientHint<?>> hints) {
+        super(buildData);
         this.name = name;
         this.textureExtractor = textureExtractor;
         this.progress = progress;

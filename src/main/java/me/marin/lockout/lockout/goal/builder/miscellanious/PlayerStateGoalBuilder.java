@@ -9,13 +9,11 @@ import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
-import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
-import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
@@ -34,18 +32,18 @@ import java.util.Optional;
 
 public abstract class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.Tick, T> {
 
-    public PlayerStateGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ServerPlayer, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
-        super(optionSupplier, GoalProgressSupplier.player(progressSupplier), idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+    public PlayerStateGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, ServerPlayer, ?> progressSupplier, String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, GoalProgressSupplier.player(progressSupplier), namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
     public void reifiedUpdater(BuilderUtil.Tick update) {}
 
     public static class EmptyHungerBar extends PlayerStateGoalBuilder<Void> {
-        public static final MapCodec<EmptyHungerBar> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("PLAYER", "", i)
+        public static final MapCodec<EmptyHungerBar> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("", i)
                 .apply(i, EmptyHungerBar::new));
 
-        public EmptyHungerBar(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        public EmptyHungerBar(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                         @Override
@@ -71,7 +69,7 @@ public abstract class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.
                             ), 0));
                         }
                     }),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
         }
 
         @Override
@@ -81,7 +79,7 @@ public abstract class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.
     }
 
     public static class HeightAbove extends PlayerStateGoalBuilder<Void> {
-        public static final MapCodec<HeightAbove> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("PLAYER", "", i)
+        public static final MapCodec<HeightAbove> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("", i)
                 .and(i.group(
                         Codec.INT.fieldOf("height").forGetter(HeightAbove::getHeight),
                         RegistryCodecs.holder(Registries.DIMENSION).fieldOf("height").forGetter(HeightAbove::getDimension)
@@ -92,7 +90,7 @@ public abstract class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.
         @Getter
         private final Holder<Level> dimension;
 
-        public HeightAbove(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, int height, Holder<Level> dimension) {
+        public HeightAbove(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, int height, Holder<Level> dimension) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                         @Override
@@ -120,7 +118,7 @@ public abstract class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.
                             );
                         }
                     }),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.height = height;
             this.dimension = dimension;
         }
@@ -132,14 +130,14 @@ public abstract class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.
     }
 
     public static class SleepIn extends PlayerStateGoalBuilder<Void> {
-        public static final MapCodec<SleepIn> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("PLAYER", "", i)
+        public static final MapCodec<SleepIn> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("", i)
                 .and(RegistryCodecs.holderSet(Registries.BLOCK).fieldOf("blocks").forGetter(SleepIn::getBlocks))
                 .apply(i, SleepIn::new));
 
         @Getter
         private final HolderSet<Block> blocks;
 
-        public SleepIn(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Block> blocks) {
+        public SleepIn(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Block> blocks) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> new AcceptanceCondition<ServerPlayer>() {
                         private final InListAcceptanceCondition<BlockState, Block> condition = InListAcceptanceCondition.block(blocks.stream().map(Holder::value).toList());
@@ -166,7 +164,7 @@ public abstract class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.
                             return condition.getExamples();
                         }
                     }),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.blocks = blocks;
         }
 

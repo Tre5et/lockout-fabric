@@ -4,12 +4,9 @@ import lombok.Getter;
 
 public class GoalBuildParameters {
     @Getter
-    private final String id;
-    @Getter
     private final BuildData buildData;
 
-    public GoalBuildParameters(String id, BuildData buildData) {
-        this.id = id;
+    public GoalBuildParameters(BuildData buildData) {
         this.buildData = buildData;
     }
 }

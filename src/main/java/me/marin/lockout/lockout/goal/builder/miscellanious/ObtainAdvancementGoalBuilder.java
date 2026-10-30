@@ -7,13 +7,11 @@ import me.marin.lockout.lockout.goal.acceptance.AcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.NumericRange;
-import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
-import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
@@ -34,25 +32,25 @@ import java.util.Optional;
 
 public abstract class ObtainAdvancementGoalBuilder<T> extends GoalBuilder<AdvancementHolder, T> {
 
-    public ObtainAdvancementGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Identifier, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
-        super(optionSupplier, progressSupplier.map(AdvancementHolder::id), idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+    public ObtainAdvancementGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, Identifier, ?> progressSupplier, String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, progressSupplier.map(AdvancementHolder::id), namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
     public void reifiedUpdater(AdvancementHolder update) {}
 
     public static class Any extends ObtainAdvancementGoalBuilder<Void> {
-        public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("ADVANCEMENT", "Obtain", i)
+        public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Obtain", i)
                 .and(RegistryCodecs.holderSet(Registries.ADVANCEMENT).fieldOf("advancements").forGetter(Any::getAdvancements))
                 .apply(i, Any::new));
 
         @Getter
         private final HolderSet<Advancement> advancements;
 
-        public Any(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Advancement> advancements) {
+        public Any(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Advancement> advancements) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.advancement(advancements.stream().map(Holder::unwrapKey).filter(Optional::isPresent).map(Optional::get).map(ResourceKey::identifier).toList())),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.advancements = advancements;
         }
 
@@ -63,7 +61,7 @@ public abstract class ObtainAdvancementGoalBuilder<T> extends GoalBuilder<Advanc
     }
 
     public static class Unique extends ObtainAdvancementGoalBuilder<Integer> implements NumericRange {
-        public static final MapCodec<Unique> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("ADVANCEMENT", "Obtain", i)
+        public static final MapCodec<Unique> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Obtain", i)
                 .and(GoalBuilder.numericCodec(1, i))
                 .apply(i, Unique::new));
 
@@ -74,7 +72,7 @@ public abstract class ObtainAdvancementGoalBuilder<T> extends GoalBuilder<Advanc
         @Getter
         private final int step;
 
-        public Unique(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, int min, int max, int step) {
+        public Unique(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, int min, int max, int step) {
             super(GoalOptionSupplier.integer("Advancements to obtain", min, max, step),
                     GoalProgressSupplier.unique("Advancements obtained", _ -> new AcceptanceCondition<>() {
                         @Override
@@ -97,7 +95,7 @@ public abstract class ObtainAdvancementGoalBuilder<T> extends GoalBuilder<Advanc
                             return List.of(GenericTextureExtractor.texture(Identifier.withDefaultNamespace("textures/gui/sprites/advancements/challenge_frame_obtained.png")));
                         }
                     }),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.min = min;
             this.max = max;
             this.step = step;

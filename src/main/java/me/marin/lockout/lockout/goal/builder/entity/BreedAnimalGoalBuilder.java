@@ -7,13 +7,11 @@ import me.marin.lockout.lockout.goal.acceptance.AnyAcceptanceCondition;
 import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.NumericRange;
-import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
-import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
@@ -30,8 +28,8 @@ import java.util.stream.Collectors;
 
 public abstract class BreedAnimalGoalBuilder<T> extends GoalBuilder<EntityUtil.BredEntity, T> {
 
-    public BreedAnimalGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityType<?>, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
-        super(optionSupplier, progressSupplier.map(EntityUtil.BredEntity::entity), idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+    public BreedAnimalGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityType<?>, ?> progressSupplier, String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, progressSupplier.map(EntityUtil.BredEntity::entity), namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
@@ -46,15 +44,15 @@ public abstract class BreedAnimalGoalBuilder<T> extends GoalBuilder<EntityUtil.B
     public void reifiedUpdater(EntityUtil.BredEntity update) {}
 
     public static class Any extends BreedAnimalGoalBuilder<Void> {
-        public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("BREED", "Breed", i)
+        public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Breed", i)
                 .and(RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("entities").forGetter(Any::getEntities))
                 .apply(i, Any::new));
 
         @Getter
         private final HolderSet<EntityType<?>> entities;
 
-        public Any(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<EntityType<?>> entities) {
-            super(GoalOptionSupplier.NONE, GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList()))), idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+        public Any(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<EntityType<?>> entities) {
+            super(GoalOptionSupplier.NONE, GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList()))), namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.entities = entities;
         }
 
@@ -65,7 +63,7 @@ public abstract class BreedAnimalGoalBuilder<T> extends GoalBuilder<EntityUtil.B
     }
 
     public static class Unique extends BreedAnimalGoalBuilder<Integer> implements NumericRange {
-        public static final MapCodec<Unique> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("BREED", "Breed", i)
+        public static final MapCodec<Unique> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Breed", i)
                 .and(RegistryCodecs.holderSet(Registries.ENTITY_TYPE).optionalFieldOf("entities").forGetter(Unique::getEntities))
                 .and(GoalBuilder.numericCodec(1, i))
                 .apply(i, Unique::new));
@@ -79,11 +77,11 @@ public abstract class BreedAnimalGoalBuilder<T> extends GoalBuilder<EntityUtil.B
         @Getter
         private final int step;
 
-        public Unique(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, Optional<HolderSet<EntityType<?>>> entities, int min, int max, int step) {
+        public Unique(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, Optional<HolderSet<EntityType<?>>> entities, int min, int max, int step) {
             super(
                     GoalOptionSupplier.integer("Animals to breed", min, max, 1),
                     entities.isPresent() ? GoalProgressSupplier.unique("Animals bred", _ -> InListAcceptanceCondition.entity(entities.get().stream().map(Holder::value).collect(Collectors.toUnmodifiableList()))) : GoalProgressSupplier.unique("Animals bred", _ -> new AnyAcceptanceCondition<>("ANIMALS", () -> "Animals", () -> EntityUtil.BREEDABLE.stream().map(EntityUtil::getEntityTextureExtractor).toList())),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.entities = entities;
             this.min = min;
             this.max = max;

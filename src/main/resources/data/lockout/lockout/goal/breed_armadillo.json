@@ -1,7 +1,6 @@
 {
     "type": "lockout:breed/any",
     "difficulty": 0.28,
-    "category": "lockout:breeding",
     "entities": "minecraft:armadillo",
     "requirements": "lockout:savanna"
 }

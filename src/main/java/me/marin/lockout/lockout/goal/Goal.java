@@ -16,12 +16,9 @@ import java.util.List;
 
 public abstract class Goal {
     @Getter
-    private final String id;
-    @Getter
     private final BuildData buildData;
 
     public Goal(GoalBuildParameters parameters) {
-        this.id = parameters.getId();
         this.buildData = parameters.getBuildData();
     }
 

@@ -198,7 +198,7 @@ public class LockoutServer {
             Network.send(player, lockout.getTeamsGoalsPacket());
             Network.send(player, lockout.getUpdateTimerPacket());
             for(ServerGoal<?> goal : lockout.getBoard().getGoals()) {
-                goal.getProgress().send(goal.getId(), List.of(player));
+                goal.getProgress().send(goal.getBuildData().id(), List.of(player));
             }
             ServerLockoutTeam team = lockout.getPlayerTeam(player.getUUID());
             if (team != null) {
@@ -239,7 +239,7 @@ public class LockoutServer {
             if (!lockout.isLockoutPlayer(player.getUUID())) return;
 
             ServerGoal<?> goal = lockout.getBoard().getGoals().stream()
-                    .filter(g -> g.getId().equals(payload.goalId()))
+                    .filter(g -> g.getBuildData().id().equals(payload.goalId()))
                     .findFirst()
                     .orElse(null);
             if (goal == null) return;

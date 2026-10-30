@@ -9,13 +9,11 @@ import me.marin.lockout.lockout.goal.acceptance.InListAcceptanceCondition;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.NumericRange;
 import me.marin.lockout.lockout.goal.builder.item.ItemUtil;
-import me.marin.lockout.lockout.goal.config.GoalCategory;
 import me.marin.lockout.lockout.goal.difficulty.GoalDifficultySupplier;
 import me.marin.lockout.lockout.goal.group.GoalGroup;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
 import me.marin.lockout.lockout.goal.option.GoalOptionSupplier;
 import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
-import me.marin.lockout.lockout.goal.rendering.id.IdProvider;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureAnchor;
@@ -38,15 +36,15 @@ import java.util.stream.Collectors;
 
 public abstract class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUtil.UsedItemOnEntity, T> {
 
-    public UseItemOnEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityUtil.UsedItemOnEntity, ?> progressSupplier, String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
-        super(optionSupplier, progressSupplier, idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+    public UseItemOnEntityGoalBuilder(GoalOptionSupplier<T> optionSupplier, GoalProgressSupplier<T, EntityUtil.UsedItemOnEntity, ?> progressSupplier, String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled) {
+        super(optionSupplier, progressSupplier, namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
     }
 
     @Override
     public void reifiedUpdater(EntityUtil.UsedItemOnEntity update) {}
 
     public static class Exactly extends UseItemOnEntityGoalBuilder<Void> {
-        public static final MapCodec<Exactly> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("USE", "Use", i)
+        public static final MapCodec<Exactly> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Use", i)
                 .and(i.group(
                         RegistryCodecs.holder(Registries.ITEM).fieldOf("item").forGetter(Exactly::getItem),
                         RegistryCodecs.holder(Registries.ENTITY_TYPE).fieldOf("entity").forGetter(Exactly::getEntity)
@@ -57,7 +55,7 @@ public abstract class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUt
         @Getter
         private final Holder<EntityType<?>> entity;
 
-        public Exactly(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, Holder<Item> item, Holder<EntityType<?>> entity) {
+        public Exactly(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, Holder<Item> item, Holder<EntityType<?>> entity) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                         @Override
@@ -80,7 +78,7 @@ public abstract class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUt
                             return List.of(EntityUtil.getEntityTextureExtractor(entity.value()).overlay(ItemTextureExtractor.item(item.value()), TextureAnchor.TOP_RIGHT, 10));
                         }
                     }),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.item = item;
             this.entity = entity;
         }
@@ -92,7 +90,7 @@ public abstract class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUt
     }
 
     public static class NameTag extends UseItemOnEntityGoalBuilder<Void> {
-        public static final MapCodec<NameTag> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("USE", "Use", i)
+        public static final MapCodec<NameTag> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Use", i)
                 .and(i.group(
                         Codec.STRING.fieldOf("name_tag").forGetter(NameTag::getName),
                         RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("entities").forGetter(NameTag::getEntities)
@@ -103,7 +101,7 @@ public abstract class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUt
         @Getter
         private final HolderSet<EntityType<?>> entities;
 
-        public NameTag(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, String name, HolderSet<EntityType<?>> entities) {
+        public NameTag(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, String name, HolderSet<EntityType<?>> entities) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                         private final InListAcceptanceCondition<EntityType<?>, EntityType<?>> condition = InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList()));
@@ -132,7 +130,7 @@ public abstract class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUt
                                     .toList();
                         }
                     }),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.name = name;
             this.entities = entities;
 
@@ -146,7 +144,7 @@ public abstract class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUt
     }
 
     public static class Unique extends UseItemOnEntityGoalBuilder<Integer> implements NumericRange {
-        public static final MapCodec<Unique> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("USE", "Use", i)
+        public static final MapCodec<Unique> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Use", i)
                 .and(RegistryCodecs.holderSet(Registries.ITEM).fieldOf("items").forGetter(Unique::getItems))
                 .and(GoalBuilder.numericCodec(1, i))
                 .apply(i, Unique::new));
@@ -160,10 +158,10 @@ public abstract class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUt
         @Getter
         private final int step;
 
-        public Unique(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Item> items, int min, int max, int step) {
+        public Unique(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Item> items, int min, int max, int step) {
             super(GoalOptionSupplier.integer("Entities to use on", min, max, step),
                     GoalProgressSupplier.unique("Entities used on", _ -> InListAcceptanceCondition.item(items.stream().map(Holder::value).toList()).map(EntityUtil.UsedItemOnEntity::item), EntityUtil.UsedItemOnEntity::entity),
-                    idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+                    namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.items = items;
             this.min = min;
             this.max = max;
