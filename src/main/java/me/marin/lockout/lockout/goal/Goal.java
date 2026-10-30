@@ -9,6 +9,7 @@ import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.lockout.goal.builder.BuildData;
 import me.marin.lockout.lockout.goal.builder.GoalBuildParameters;
+import me.marin.lockout.lockout.goal.hint.Hint;
 import me.marin.lockout.lockout.goal.progress.GoalProgress;
 
 import java.util.List;
@@ -26,6 +27,8 @@ public abstract class Goal {
 
     public abstract GoalProgress<?> getProgress();
 
+    public abstract List<? extends Hint<?>> getHints();
+
     public boolean hasAnyCompleted() {
         return getProgress().hasAnyCompleted();
     }
@@ -36,7 +39,7 @@ public abstract class Goal {
 
     public JsonElement serialize(boolean includeProgress) {
         JsonObject object = new JsonObject();
-        object.add("id", new JsonPrimitive(buildData.id()));
+        object.add("id", new JsonPrimitive(buildData.id().identifier().toString()));
         object.add("option", buildData.option().map(o -> (JsonElement)new JsonPrimitive(o)).orElse(JsonNull.INSTANCE));
         if(includeProgress) {
             object.add("progress", getProgress().serialize());

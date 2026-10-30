@@ -1,0 +1,20 @@
+{
+    "type": "lockout:death/damage_type",
+    "difficulty": 0.05,
+    "category": "lockout:death_damage",
+    "types": "minecraft:drown",
+    "texture": {
+        "type": "lockout:stack",
+        "extractors": [
+            {
+                "type": "lockout:sprite",
+                "sprite": "hud/air_empty"
+            },
+            {
+                "type": "lockout:sprite",
+                "sprite": "hud/air_bursting"
+            }
+        ]
+    },
+    "name": "Die by Drowning"
+}

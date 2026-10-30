@@ -57,7 +57,7 @@ public interface GoalDifficultySupplier<T> {
 
         @Override
         public Optional<Object> toType(Object option) {
-            return Optional.of(option);
+            return Optional.ofNullable(option);
         }
 
         @Override

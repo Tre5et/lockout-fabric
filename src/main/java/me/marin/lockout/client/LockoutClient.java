@@ -10,9 +10,11 @@ import me.marin.lockout.client.goal.hint.ClientHint;
 import me.marin.lockout.client.gui.*;
 import me.marin.lockout.game.GameMode;
 import me.marin.lockout.game.GameState;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.network.*;
+import me.marin.lockout.registries.LockoutRegistryKeys;
 import me.marin.lockout.server.ServerConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -65,6 +67,21 @@ public class LockoutClient implements ClientModInitializer {
 
     public static final MenuType<BoardScreenHandler> BOARD_SCREEN_HANDLER;
     public static final KeyMapping.Category LOCKOUT_CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(Constants.NAMESPACE, "keybinds"));
+
+    public static Registry<GoalBuilder<?,?>> goalRegistry() {
+        if(Minecraft.getInstance().level == null) {
+            RuntimeException t = new IllegalStateException("Illegal goal registry access without level present.");
+            Lockout.error(t);
+            throw t;
+        }
+        Optional<Registry<GoalBuilder<?,?>>> registry = Minecraft.getInstance().level.registryAccess().lookup(LockoutRegistryKeys.GOAL);
+        if(registry.isEmpty()) {
+            RuntimeException t = new IllegalStateException("Goal registry is not accessible.");
+            Lockout.error(t);
+            throw t;
+        }
+        return registry.get();
+    }
 
     static {
         BOARD_SCREEN_HANDLER = new MenuType<>(BoardScreenHandler::new, FeatureFlags.VANILLA_SET);

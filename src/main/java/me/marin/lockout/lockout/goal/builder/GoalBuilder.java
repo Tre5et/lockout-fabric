@@ -47,9 +47,10 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public abstract class GoalBuilder<U,T extends Object> {
     public static final Codec<GoalBuilder<?,?>> CODEC = LockoutRegistries.GOAL_BUILDER_TYPE.byNameCodec().dispatch(GoalBuilder::codec, c -> c);
@@ -201,10 +202,10 @@ public abstract class GoalBuilder<U,T extends Object> {
      */
     public abstract void reifiedUpdater(U update);
 
-    public ServerGoal<U> buildServer(T option) {
+    public ServerGoal<U> buildServer(ResourceKey<GoalBuilder<?,?>> key, T option) {
         return new ServerGoal<>(new ServerGoalBuildParameters<>(
                 getId(option),
-                getBuildData(option),
+                getBuildData(key, option),
                 progressSupplier.getServer(option),
                 getServerHints(option),
                 this::reifiedUpdater,
@@ -212,10 +213,10 @@ public abstract class GoalBuilder<U,T extends Object> {
         ));
     }
 
-    public ClientGoal buildClient(T option) {
+    public ClientGoal buildClient(ResourceKey<GoalBuilder<?,?>> key, T option) {
         return new ClientGoal(new ClientGoalBuildParameters(
                 getId(option),
-                getBuildData(option),
+                getBuildData(key, option),
                 getName(option),
                 getTextureExtractor(option),
                 progressSupplier.getClient(option),
@@ -223,64 +224,64 @@ public abstract class GoalBuilder<U,T extends Object> {
         ));
     }
 
-    public <G extends Goal> Optional<G> buildGenerated(GoalRequirementContext context, Function<T,G> builder) {
+    public <G extends Goal> Optional<G> buildGenerated(GoalRequirementContext context, BiFunction<ResourceKey<GoalBuilder<?,?>>,T,G> builder, ResourceKey<GoalBuilder<?,?>> key) {
         GoalOptionGenerator<T> optionGenerator = optionSupplier.get();
         if(optionGenerator == null) {
             if(requirements.stream().allMatch(r -> r.value().optionSatisfiedBy(context, null))) {
-                return Optional.of(builder.apply(null));
+                return Optional.of(builder.apply(key, null));
             }
             return Optional.empty();
         }
         Optional<T> option = optionGenerator.generate((o) -> requirements.stream()
                 .allMatch(r -> r.value().optionSatisfiedBy(context, o)));
         if(option.isEmpty()) return Optional.empty();
-        return option.map(builder);
+        return option.map((o) -> builder.apply(key, o));
     }
 
-    public Optional<ServerGoal<U>> buildGeneratedServer(GoalRequirementContext context) {
-        return buildGenerated(context, this::buildServer);
+    public Optional<ServerGoal<U>> buildGeneratedServer(GoalRequirementContext context, ResourceKey<GoalBuilder<?,?>> key) {
+        return buildGenerated(context, this::buildServer, key);
     }
 
-    public <G extends Goal> List<G> buildExamples(Function<T,G> builder) {
+    public <G extends Goal> List<G> buildExamples(BiFunction<ResourceKey<GoalBuilder<?,?>>,T,G> builder, ResourceKey<GoalBuilder<?,?>> key) {
         GoalOptionGenerator<T> optionGenerator = optionSupplier.get();
-        if(optionGenerator == null) return List.of(builder.apply(null));
+        if(optionGenerator == null) return List.of(builder.apply(key, null));
         return optionGenerator.examples().stream()
-                .map(builder)
+                .map(o -> builder.apply(key, o))
                 .toList();
     }
 
-    public List<ClientGoal> buildClientExamples() {
-        return buildExamples(this::buildClient);
+    public List<ClientGoal> buildClientExamples(ResourceKey<GoalBuilder<?,?>> key) {
+        return buildExamples(this::buildClient, key);
     }
 
     @SuppressWarnings("unchecked")
-    public <G extends Goal> G buildGeneric(Object option, Function<T,G> builder) throws IllegalGoalConstructionException {
-        if(option == null) return builder.apply(null);
+    public <G extends Goal> G buildGeneric(Object option, BiFunction<ResourceKey<GoalBuilder<?,?>>,T,G> builder, ResourceKey<GoalBuilder<?,?>> key) throws IllegalGoalConstructionException {
+        if(option == null) return builder.apply(key, null);
         try {
-            return builder.apply((T)option);
+            return builder.apply(key, (T)option);
         } catch (ClassCastException e) {
             throw new IllegalGoalConstructionException("Option is not of correct entity: " + option, e);
         }
     }
 
-    public ClientGoal buildClientGeneric(Object option) throws IllegalGoalConstructionException {
-        return buildGeneric(option, this::buildClient);
+    public ClientGoal buildClientGeneric(Object option, ResourceKey<GoalBuilder<?,?>> key) throws IllegalGoalConstructionException {
+        return buildGeneric(option, this::buildClient, key);
     }
 
-    public <G extends Goal> G buildFromSerializedData(String option, Function<T,G> builder) throws IllegalGoalConstructionException {
+    public <G extends Goal> G buildFromSerializedData(String option, BiFunction<ResourceKey<GoalBuilder<?,?>>,T,G> builder, ResourceKey<GoalBuilder<?,?>> key) throws IllegalGoalConstructionException {
         GoalOptionGenerator<T> optionGenerator = optionSupplier.get();
         if(optionGenerator == null) {
-            return builder.apply(null);
+            return builder.apply(key, null);
         }
-        return builder.apply(optionGenerator.deserialize(option));
+        return builder.apply(key, optionGenerator.deserialize(option));
     }
 
-    public ServerGoal<U> buildServerFromSerializedData(String option) throws IllegalGoalConstructionException {
-        return buildFromSerializedData(option, this::buildServer);
+    public ServerGoal<U> buildServerFromSerializedData(String option, ResourceKey<GoalBuilder<?,?>> key) throws IllegalGoalConstructionException {
+        return buildFromSerializedData(option, this::buildServer, key);
     }
 
-    public ClientGoal buildClientFromSerializedData(String option) throws IllegalGoalConstructionException {
-        return buildFromSerializedData(option, this::buildClient);
+    public ClientGoal buildClientFromSerializedData(String option, ResourceKey<GoalBuilder<?,?>> key) throws IllegalGoalConstructionException {
+        return buildFromSerializedData(option, this::buildClient, key);
     }
 
     public String getStaticId() {
@@ -319,11 +320,11 @@ public abstract class GoalBuilder<U,T extends Object> {
         return hints;
     }
 
-    public BuildData getBuildData(T option) {
+    public BuildData getBuildData(ResourceKey<GoalBuilder<?,?>> key, T option) {
         if(option == null) {
-            return new BuildData(getStaticId(), Optional.empty());
+            return new BuildData(key, Optional.empty());
         }
-        return new BuildData(getStaticId(), Optional.ofNullable(optionSupplier.get().serialize(option)));
+        return new BuildData(key, Optional.ofNullable(optionSupplier.get().serialize(option)));
     }
 
 /*    public GoalBuilder<U,T> require(Holder<GoalRequirement> requirements) {

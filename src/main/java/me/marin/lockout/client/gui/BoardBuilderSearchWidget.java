@@ -3,7 +3,6 @@ package me.marin.lockout.client.gui;
 import lombok.Getter;
 import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.client.goal.ClientGoal;
-import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,15 +15,14 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
@@ -44,7 +42,7 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
 
     public BoardBuilderSearchWidget(int x, int y, int width, int height, Component text) {
         super(x, y, width, height, text, defaultSettings(1));
-        this.registeredGoals = GoalRegistry.INSTANCE.getRegisteredGoals().stream()
+        this.registeredGoals = LockoutClient.goalRegistry().entrySet().stream()
                 .map(GoalEntry::new)
                 .toList();
         visibleGoals = new ArrayList<>(registeredGoals);
@@ -124,7 +122,7 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
     protected void updateWidgetNarration(@NonNull NarrationElementOutput builder) {}
 
     public static int getPreferredWidth(Font font) {
-        return 18 + GoalRegistry.INSTANCE.getRegisteredGoals().stream()
+        return 18 + LockoutClient.goalRegistry().entrySet().stream()
                 .map(GoalEntry::new)
                 .flatMap(e -> e.getGoalNames().stream())
                 .max(Comparator.comparingInt(font::width))
@@ -140,8 +138,8 @@ public class BoardBuilderSearchWidget extends AbstractScrollArea {
         @Getter
         private final List<String> goalNames;
 
-        public GoalEntry(GoalBuilder<?,?> goalBuilder) {
-            this.exampleGoals = goalBuilder.buildClientExamples();
+        public GoalEntry(Map.Entry<ResourceKey<GoalBuilder<?,?>>, GoalBuilder<?, ?>> goalEntry) {
+            this.exampleGoals = goalEntry.getValue().buildClientExamples(goalEntry.getKey());
             this.goalNameSuffix = exampleGoals.size() > 1 ? " (+" + (exampleGoals.size() - 1) + ")" : "";
             this.goalNames = exampleGoals.stream()
                     .map(g -> g.getName().toString() + goalNameSuffix)

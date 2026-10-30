@@ -12,7 +12,7 @@ import java.util.List;
 public class StackingTextureExtractor implements TextureExtractor {
     public static final MapCodec<StackingTextureExtractor> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.list(TextureExtractor.CODEC).fieldOf("extractors").forGetter(StackingTextureExtractor::getExtractors),
-            Codec.INT.fieldOf("scale_factor").forGetter(StackingTextureExtractor::getScaleFactor)
+            Codec.INT.optionalFieldOf("scale_factor", 0).forGetter(StackingTextureExtractor::getScaleFactor)
     ).apply(instance, StackingTextureExtractor::new));
 
     @Getter

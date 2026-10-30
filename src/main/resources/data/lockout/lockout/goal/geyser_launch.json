@@ -1,0 +1,8 @@
+{
+    "type": "lockout:custom/exactly",
+    "difficulty": 0.45,
+    "category": "lockout:misc_actions",
+    "event": "lockout:geyser_launch",
+    "name": "Get launched by Geyser",
+    "requirements": "lockout:sulfur_caves"
+}

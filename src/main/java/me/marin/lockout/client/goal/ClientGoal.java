@@ -11,12 +11,12 @@ import me.marin.lockout.client.goal.builder.ClientGoalBuildParameters;
 import me.marin.lockout.client.goal.hint.ClientHint;
 import me.marin.lockout.client.goal.progress.ClientGoalProgress;
 import me.marin.lockout.client.goal.render.ColoredTriangleRenderState;
-import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.BuildData;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
+import me.marin.lockout.registries.LockoutRegistryKeys;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -25,6 +25,8 @@ import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import org.joml.Matrix3x2f;
 import oshi.util.tuples.Pair;
 
@@ -165,8 +167,9 @@ public class ClientGoal extends Goal {
         JsonObject data = element.getAsJsonObject();
 
         if (!data.has("id") || !data.get("id").isJsonPrimitive() || !data.get("id").getAsJsonPrimitive().isString()) throw new IllegalGoalConstructionException("Server goal data does not contain a valid id.");
-        if (!GoalRegistry.INSTANCE.isRegistered(data.get("id").getAsString())) throw new IllegalGoalConstructionException("Goal with id " + data.get("id").getAsString() + " is not registered.");
-        GoalBuilder<?,?> builder = GoalRegistry.INSTANCE.get(data.get("id").getAsString());
+        ResourceKey<GoalBuilder<?,?>> key = ResourceKey.create(LockoutRegistryKeys.GOAL, Identifier.parse(data.get("id").getAsString()));
+        if (!LockoutClient.goalRegistry().containsKey(key)) throw new IllegalGoalConstructionException("Goal with id " + data.get("id").getAsString() + " is not registered.");
+        GoalBuilder<?,?> builder = LockoutClient.goalRegistry().get(key).get().value();
 
         String option = null;
         if(data.has("option")) {
@@ -174,7 +177,7 @@ public class ClientGoal extends Goal {
             if(!optionElement.isJsonPrimitive() || !optionElement.getAsJsonPrimitive().isString()) throw new IllegalGoalConstructionException("Server goal data option is invalid.");
             option = optionElement.getAsString();
         }
-        ClientGoal goal = builder.buildClientFromSerializedData(option);
+        ClientGoal goal = builder.buildClientFromSerializedData(option, key);
         if(data.has("progress")) {
             try {
                 goal.getProgress().deserialize(data.get("progress"));
@@ -189,11 +192,11 @@ public class ClientGoal extends Goal {
         List<ClientGoal> goals = new ArrayList<>();
         List<Pair<BuildData, Exception>> invalidGoals = new ArrayList<>();
         for(BuildData goal : data) {
-            if(!GoalRegistry.INSTANCE.isRegistered(goal.id())) {
+            if(!LockoutClient.goalRegistry().containsKey(goal.id())) {
                 invalidGoals.add(new Pair<>(goal, new IllegalGoalConstructionException("Goal does not exist")));
             } else {
                 try {
-                    goals.add(GoalRegistry.INSTANCE.get(goal.id()).buildClientFromSerializedData(goal.option().orElse(null)));
+                    goals.add(LockoutClient.goalRegistry().get(goal.id()).get().value().buildClientFromSerializedData(goal.option().orElse(null), goal.id()));
                 } catch (IllegalGoalConstructionException e) {
                     invalidGoals.add(new Pair<>(goal, e));
                 }

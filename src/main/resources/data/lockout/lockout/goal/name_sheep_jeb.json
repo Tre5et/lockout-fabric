@@ -1,0 +1,7 @@
+{
+    "type": "lockout:use_item_on_entity/name_tag",
+    "difficulty": 0.25,
+    "category": "lockout:misc_actions",
+    "name_tag": "jeb_",
+    "entities": "minecraft:sheep"
+}

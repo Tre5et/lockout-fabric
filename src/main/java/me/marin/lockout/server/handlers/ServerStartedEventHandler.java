@@ -1,7 +1,6 @@
 package me.marin.lockout.server.handlers;
 
 import me.marin.lockout.Lockout;
-import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContextInitializer;
@@ -27,8 +26,8 @@ public class ServerStartedEventHandler implements ServerLifecycleEvents.ServerSt
             long start = System.currentTimeMillis();
 
             GoalRequirementContext context = new GoalRequirementContextInitializer.Combined(
-                    GoalRegistry.INSTANCE.getRegisteredGoals().stream()
-                            .flatMap(g -> g.getRequirements().stream().map(Holder::value).map(GoalRequirement::getInitializer))
+                    LockoutServer.goalRegistry().entrySet().stream()
+                            .flatMap(g -> g.getValue().getRequirements().stream().map(Holder::value).map(GoalRequirement::getInitializer))
                             .toList()
             ).initialize(server);
 

@@ -6,9 +6,8 @@ import me.marin.lockout.*;
 import me.marin.lockout.game.GameState;
 import me.marin.lockout.game.LockoutGame;
 import me.marin.lockout.generator.BoardGenerator;
-import me.marin.lockout.lockout.GoalRegistry;
+import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
-import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.network.*;
@@ -31,6 +30,7 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
@@ -106,6 +106,16 @@ public class LockoutServer {
 
     public static Map<UUID, Long> waitingForVersionPacketPlayersMap = new HashMap<>();
 
+    public static Registry<GoalBuilder<?,?>> goalRegistry() {
+        Optional<Registry<GoalBuilder<?,?>>> registry = server.registryAccess().lookup(LockoutRegistryKeys.GOAL);
+        if(registry.isEmpty()) {
+            RuntimeException t = new IllegalStateException("Goal registry is not accessible.");
+            Lockout.error(t);
+            throw t;
+        }
+        return registry.get();
+    }
+
     public static void initializeServer() {
         lockout = null;
         compassHandler = null;
@@ -113,7 +123,7 @@ public class LockoutServer {
         waitingForVersionPacketPlayersMap.clear();
 
         ServerConfig.load(); // reload config every time the server starts
-        GoalPoolConfig.load(); // reload goal pool config every time the server starts
+        //GoalPoolConfig.load(); // reload goal pool config every time the server starts
 
         if (isInitialized) return;
         isInitialized = true;
@@ -383,7 +393,7 @@ public class LockoutServer {
         // Generate & set board
         ServerLockoutBoard lockoutBoard;
         if (CUSTOM_BOARD == null) {
-            BoardGenerator boardGenerator = new BoardGenerator(GoalRegistry.INSTANCE.getRegisteredGoals(), new GoalRequirementContext(
+            BoardGenerator boardGenerator = new BoardGenerator(goalRegistry().stream().toList(), new GoalRequirementContext(
                     CONTEXT.biomes(),
                     CONTEXT.structures(),
                     teams
@@ -399,7 +409,7 @@ public class LockoutServer {
                 }
                 return;
             }
-            lockoutBoard = boardGenerator.generateBoard(ServerConfig.getInstance().getBoardSize(), difficulty.get().value());
+            lockoutBoard = boardGenerator.generateBoard(ServerConfig.getInstance().getBoardSize(), difficulty.get().value(), goalRegistry());
             
             // Check if board generation failed due to insufficient goals
             if (lockoutBoard == null) {
@@ -689,12 +699,12 @@ public class LockoutServer {
     }
 
     public static int getGoals(CommandContext<CommandSourceStack> context) {
-        int goalNumber = GoalRegistry.INSTANCE.getRegisteredGoals().size();
+        int goalNumber = goalRegistry().size();
         if(goalNumber == 0) {
             context.getSource().sendSystemMessage(Component.literal("There are no goal registered."));
             return 1;
         }
-        String goals = GoalRegistry.INSTANCE.getRegisteredGoals().stream()
+        String goals = goalRegistry().stream()
                 .map(g -> "- " + g)
                 .collect(Collectors.joining("\n"));
         context.getSource().sendSystemMessage(Component.literal("There are " + goalNumber + " goals registered:\n"+goals));
@@ -830,7 +840,7 @@ public class LockoutServer {
 
     public static int reloadGoals(ServerPlayNetworking.Context context) {
         try {
-            GoalPoolConfig.load();
+            //GoalPoolConfig.load();
             context.player().sendSystemMessage(Component.literal("Goal pool configuration reloaded successfully."));
             return 1;
         } catch (Exception e) {

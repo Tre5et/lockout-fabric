@@ -5,7 +5,6 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.client.LockoutClient;
 import me.marin.lockout.client.goal.ClientGoal;
 import me.marin.lockout.client.goal.option.ClientGoalOptionGenerator;
-import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import net.minecraft.ChatFormatting;
@@ -108,7 +107,7 @@ public class BoardBuilderScreen extends Screen {
             this.addRenderableWidget(searchTextField);
         } else if (displayEditData && BoardBuilderData.INSTANCE.getModifyingIdx() != null) {
             ClientGoal goal = BoardBuilderData.INSTANCE.getModifyingGoal();
-            GoalBuilder<?,?> builder = GoalRegistry.INSTANCE.get(goal.getBuildData().id());
+            GoalBuilder<?,?> builder = LockoutClient.goalRegistry().get(goal.getBuildData().id()).get().value();
             ClientGoalOptionGenerator<?> generator = builder.getOptionSupplier().getClient();
             if(generator == null) {
                 displayEditData = false;
@@ -120,7 +119,7 @@ public class BoardBuilderScreen extends Screen {
                 try {
                     this.addRenderableWidget(generator.getWidgetUnsafe(x, y, sideBarWidth, height, textRenderer, (o) -> {
                         try {
-                            BoardBuilderData.INSTANCE.setGoal(builder.buildClientGeneric(o));
+                            BoardBuilderData.INSTANCE.setGoal(builder.buildClientGeneric(o, goal.getBuildData().id()));
                             rebuildWidgets();
                         } catch (IllegalGoalConstructionException e) {
                             Lockout.log("Failed to update goal " + builder + " with option " + o + ": " + e.getMessage());

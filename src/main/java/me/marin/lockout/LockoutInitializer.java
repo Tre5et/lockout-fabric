@@ -1,7 +1,6 @@
 package me.marin.lockout;
 
 import me.marin.lockout.lockout.DefaultGoalRegister;
-import me.marin.lockout.lockout.goal.config.GoalPoolConfig;
 import me.marin.lockout.network.Networking;
 import me.marin.lockout.registries.LockoutRegistries;
 import me.marin.lockout.registries.LockoutRegistryKeys;
@@ -41,7 +40,7 @@ public class LockoutInitializer implements ModInitializer {
 
         Networking.registerPayloads();
         DefaultGoalRegister.registerGoals();
-        GoalPoolConfig.load();
+        //GoalPoolConfig.load();
 
         LootTableEvents.REPLACE.register(((key, original, source, registries) -> {
             if (Objects.equals(key, BuiltInLootTables.PIGLIN_BARTERING)) {

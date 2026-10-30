@@ -1,0 +1,7 @@
+{
+    "type": "lockout:obtain/full_armor_of_material",
+    "difficulty": 0.95,
+    "category": "lockout:obtaining_items",
+    "material": "lockout:diamond",
+    "name": "Wear full Diamond Armor"
+}

@@ -1,0 +1,15 @@
+{
+    "type": "lockout:compost/unique_with_component",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 3,
+        "max": 7,
+        "start": 0.25,
+        "end": 0.55
+    },
+    "category": "lockout:eating_drinking",
+    "components": "minecraft:food",
+    "min": 3,
+    "max": 7,
+    "name": "Compost %d unique Foods"
+}

@@ -194,7 +194,7 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.T
         public static final MapCodec<Colored> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("OBTAIN", "Obtain", i)
                 .and(i.group(
                         RegistryCodecs.holder(LockoutRegistryKeys.COLORED_ITEM).fieldOf("item_collection").forGetter(Colored::getCollection),
-                        Codec.INT.fieldOf("count").forGetter(Colored::getCount)
+                        Codec.INT.optionalFieldOf("count", 1).forGetter(Colored::getCount)
                 )).apply(i, Colored::new));
 
         @Getter

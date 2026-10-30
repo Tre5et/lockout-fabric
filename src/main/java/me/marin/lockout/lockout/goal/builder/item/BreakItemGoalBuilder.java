@@ -75,7 +75,6 @@ public abstract class BreakItemGoalBuilder<T> extends GoalBuilder<ItemUtil.Broke
         private final HolderSet<DataComponentType<?>> components;
 
         public Component(String idPrefix, String namePrefix, Holder<GoalCategory> category, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<IdProvider> customIdProvider, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<DataComponentType<?>> components) {
-
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> ItemWithComponentAcceptanceCondition.hasComponents(Stream.concat(components.stream().map(Holder::value), Stream.of((DataComponentType<?>)DataComponents.MAX_DAMAGE)).toList())),
                     idPrefix, namePrefix, category, difficultySupplier, requirements, customIdProvider, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);

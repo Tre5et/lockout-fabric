@@ -4,16 +4,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.Getter;
 import me.marin.lockout.LockoutTeam;
-import me.marin.lockout.lockout.GoalRegistry;
 import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.BuildData;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
+import me.marin.lockout.registries.LockoutRegistryKeys;
 import me.marin.lockout.server.LockoutServer;
 import me.marin.lockout.server.game.ServerLockoutGame;
 import me.marin.lockout.server.goal.builder.ServerGoalBuildParameters;
 import me.marin.lockout.server.goal.hint.ServerHint;
 import me.marin.lockout.server.goal.progress.ServerGoalProgress;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import oshi.util.tuples.Pair;
 
@@ -88,8 +90,9 @@ public class ServerGoal<U> extends Goal {
         JsonObject data = element.getAsJsonObject();
 
         if (!data.has("id") || !data.get("id").isJsonPrimitive() || !data.get("id").getAsJsonPrimitive().isString()) throw new IllegalGoalConstructionException("Server goal data does not contain a valid id.");
-        if (!GoalRegistry.INSTANCE.isRegistered(data.get("id").getAsString())) throw new IllegalGoalConstructionException("Goal with id " + data.get("id").getAsString() + " is not registered.");
-        GoalBuilder<?,?> builder = GoalRegistry.INSTANCE.get(data.get("id").getAsString());
+        ResourceKey<GoalBuilder<?,?>> key = ResourceKey.create(LockoutRegistryKeys.GOAL, Identifier.parse(data.get("id").getAsString()));
+        if (!LockoutServer.goalRegistry().containsKey(key)) throw new IllegalGoalConstructionException("Goal with id " + data.get("id").getAsString() + " is not registered.");
+        GoalBuilder<?,?> builder = LockoutServer.goalRegistry().get(key).get().value();
 
         String option = null;
         if(data.has("option")) {
@@ -97,7 +100,7 @@ public class ServerGoal<U> extends Goal {
             if(!optionElement.isJsonPrimitive() || !optionElement.getAsJsonPrimitive().isString()) throw new IllegalGoalConstructionException("Server goal data option is invalid.");
             option = optionElement.getAsString();
         }
-        ServerGoal<?> goal = builder.buildServerFromSerializedData(option);
+        ServerGoal<?> goal = builder.buildServerFromSerializedData(option, key);
         if(data.has("progress")) {
             try {
                 goal.getProgress().deserialize(data.get("progress"));
@@ -112,11 +115,11 @@ public class ServerGoal<U> extends Goal {
         List<ServerGoal<?>> goals = new ArrayList<>();
         List<Pair<BuildData, Exception>> invalidGoals = new ArrayList<>();
         for(BuildData goal : data) {
-            if(!GoalRegistry.INSTANCE.isRegistered(goal.id())) {
+            if(!LockoutServer.goalRegistry().containsKey(goal.id())) {
                 invalidGoals.add(new Pair<>(goal, new IllegalGoalConstructionException("Goal does not exist")));
             } else {
                 try {
-                    goals.add(GoalRegistry.INSTANCE.get(goal.id()).buildServerFromSerializedData(goal.option().orElse(null)));
+                    goals.add(LockoutServer.goalRegistry().get(goal.id()).get().value().buildServerFromSerializedData(goal.option().orElse(null), goal.id()));
                 } catch (IllegalGoalConstructionException e) {
                     invalidGoals.add(new Pair<>(goal, e));
                 }

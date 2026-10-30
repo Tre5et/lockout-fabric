@@ -94,7 +94,7 @@ public abstract class UseItemOnEntityGoalBuilder<T> extends GoalBuilder<EntityUt
     public static class NameTag extends UseItemOnEntityGoalBuilder<Void> {
         public static final MapCodec<NameTag> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("USE", "Use", i)
                 .and(i.group(
-                        Codec.STRING.fieldOf("name").forGetter(NameTag::getName),
+                        Codec.STRING.fieldOf("name_tag").forGetter(NameTag::getName),
                         RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("entities").forGetter(NameTag::getEntities)
                 )).apply(i, NameTag::new));
 
