@@ -31,7 +31,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -232,36 +232,36 @@ public abstract class KillEntityGoalBuilder<T> extends GoalBuilder<DamageUtil.Ki
     public static class Dimension extends KillEntityGoalBuilder<Void> {
         public static final MapCodec<Dimension> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Kill", i)
                 .and(i.group(
-                        RegistryCodecs.holderSet(Registries.DIMENSION).fieldOf("dimension").forGetter(Dimension::getDimensions),
+                        RegistryCodecs.holderSet(Registries.DIMENSION_TYPE).fieldOf("dimension").forGetter(Dimension::getDimensions),
                         TextureExtractorProvider.CODEC.fieldOf("texture").forGetter(Dimension::getTexture),
                         RegistryCodecs.holderSet(Registries.ENTITY_TYPE).fieldOf("entities").forGetter(Dimension::getEntities)
                 )).apply(i, Dimension::new));
 
         @Getter
-        private final HolderSet<Level> dimensions;
+        private final HolderSet<DimensionType> dimensions;
         @Getter
         private final TextureExtractorProvider texture;
         @Getter
         private final HolderSet<EntityType<?>> entities;
 
-        public Dimension(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Level> dimensions, TextureExtractorProvider texture, HolderSet<EntityType<?>> entities) {
+        public Dimension(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<DimensionType> dimensions, TextureExtractorProvider texture, HolderSet<EntityType<?>> entities) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                         private final InListAcceptanceCondition<EntityType<?>, EntityType<?>> condition = InListAcceptanceCondition.entity(entities.stream().map(Holder::value).collect(Collectors.toUnmodifiableList()));
 
                         @Override
                         public boolean test(DamageUtil.KilledEntity value, ServerPlayer player) {
-                            return condition.test(value.entity().getType(), player) && dimensions.stream().anyMatch(d -> d.value().dimension().equals(value.entity().level().dimension()));
+                            return condition.test(value.entity().getType(), player) && dimensions.stream().anyMatch(d -> d.value().equals(value.entity().level().dimensionType()));
                         }
 
                         @Override
                         public String getId() {
-                            return "DIMENSION_" + dimensions.stream().map(d -> BuilderUtil.identifierToId(d.value().dimension().identifier())).collect(Collectors.joining("_OR_")) + "_" + condition.getId();
+                            return "DIMENSION_" + dimensions.stream().map(d -> BuilderUtil.identifierToId(d.unwrapKey().get().identifier())).collect(Collectors.joining("_OR_")) + "_" + condition.getId();
                         }
 
                         @Override
                         public String getName() {
-                            return condition.getName() + " in " + dimensions.stream().map(d -> BuilderUtil.identifierToName(d.value().dimension().identifier())).collect(Collectors.joining(" or "));
+                            return condition.getName() + " in " + dimensions.stream().map(d -> BuilderUtil.identifierToName(d.unwrapKey().get().identifier())).collect(Collectors.joining(" or "));
                         }
 
                         @Override

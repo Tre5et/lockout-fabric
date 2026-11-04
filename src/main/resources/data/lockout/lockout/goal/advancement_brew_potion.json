@@ -1,0 +1,6 @@
+{
+    "type": "lockout:advancement/any",
+    "difficulty": 0.68,
+    "advancements": "minecraft:nether/brew_potion",
+    "name": "Brew a Potion"
+}

@@ -1,0 +1,6 @@
+{
+    "type": "lockout:kill/any",
+    "difficulty": 0.3,
+    "entities": "minecraft:husk",
+    "requirements": "lockout:desert"
+}

@@ -1,0 +1,6 @@
+{
+    "type": "lockout:mine_block/any",
+    "difficulty": 0.38,
+    "blocks": "minecraft:turtle_egg",
+    "requirements": "lockout:beach"
+}

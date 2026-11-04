@@ -1,0 +1,9 @@
+{
+    "type": "lockout:brew/effect",
+    "difficulty": 0.68,
+    "effects": [
+        "minecraft:swiftness",
+        "minecraft:long_swiftness",
+        "minecraft:strong_swiftness"
+    ]
+}

@@ -8,12 +8,12 @@ public class DefaultGoalRegister {
             return;
         }
 
-/*        INSTANCE.register(BreakItemGoalBuilder.withComponent(GoalDifficultySupplier.of(0.45f), GoalCategory.ARMOR, DataComponents.EQUIPPABLE)
+        INSTANCE.register(BreakItemGoalBuilder.withComponent(GoalDifficultySupplier.of(0.45f), GoalCategory.ARMOR, DataComponents.EQUIPPABLE)
                 .customName(_ -> "Break any armor piece")
-                *//*.group(GoalGroups.ARMOR_SPECIAL)*//*);
+                .group(GoalGroups.ARMOR_SPECIAL));
         INSTANCE.register(BreakItemGoalBuilder.withComponent(GoalDifficultySupplier.of(0.4f), GoalCategory.TOOLS, DataComponents.TOOL)
                 .customName(_ -> "Break any tool")
-                *//*.group(GoalGroups.TOOLS)*//*);
+                .group(GoalGroups.TOOLS));
         INSTANCE.register(BreakItemGoalBuilder.any(GoalDifficultySupplier.of(0.28f), Items.FISHING_ROD));
         INSTANCE.register(BreakItemGoalBuilder.any(GoalDifficultySupplier.of(0.25f), Items.SHIELD));
 
@@ -118,30 +118,7 @@ public class DefaultGoalRegister {
 
         INSTANCE.register(AngerMobGoalBuilder.any(GoalDifficultySupplier.of(0.22f), EntityTypes.ZOMBIFIED_PIGLIN));
 
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.62f), "story/enter_the_nether").customName(_ -> "Enter The Nether"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.98f), "story/enter_the_end").customName(_ -> "Enter The End"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.84f), "story/follow_ender_eye").customName(_ -> "Enter a Stronghold"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.72f), "nether/charge_respawn_anchor").customName(_ -> "Fully charge a Respawn Anchor"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.5f), "adventure/whos_the_pillager_now").customName(_ -> "Kill a Pillager using a Crossbow")
-                .require(GoalRequirements.PILLAGER_OUTPOST));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.4f), "adventure/bullseye"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.4f), "adventure/spear_many_mobs"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.52f), "nether/distract_piglin"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.5f), "adventure/sniper_duel"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.66f), "husbandry/place_dried_ghast_in_water"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.66f), "nether/ride_strider"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.2f), "husbandry/wax_on"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.2f), "husbandry/wax_off"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(5, 30).inRange(0.4f, 0.8f), 5, 30, 1));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.78f), "adventure/spyglass_at_parrot", "adventure/spyglass_at_ghast", "adventure/spyglass_at_dragon").customName(_ -> "Obtain any Spyglass Advancement"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.32f), "adventure/trade").customName(_ -> "Trade with Villager"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.68f), "nether/brew_potion").customName(_ -> "Brew a Potion"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.32f), "story/enchant_item").customName(_ -> "Enchant Item at Enchanting Table"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.2f), "husbandry/make_a_sign_glow").customName(_ -> "Use Glow Ink on a Sign"));
-        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.66f), "nether/explore_nether"));
-
         INSTANCE.register(KillEntityGoalBuilder.any(GoalDifficultySupplier.of(0.82f), EntityTypes.END_CRYSTAL).customName(_ -> "Explode End Crystal").customTextureExtractor(_ -> ItemTextureExtractor.item(Items.END_CRYSTAL)));
-
         INSTANCE.register(KillEntityGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(5, 15).inRange(0.45f, 0.75f), 5,15, EntityUtil.HOSTILE.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Unique Hostile Mobs"));
         INSTANCE.register(KillEntityGoalBuilder.total(GoalDifficultySupplier.<Integer>linear(10, 30).inRange(0.3f, 0.6f), 10, 30, 1, EntityUtil.ARTHROPODS.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Arthropods"));
         INSTANCE.register(KillEntityGoalBuilder.total(GoalDifficultySupplier.<Integer>linear(10, 30).inRange(0.3f, 0.6f), 10, 30, 1, EntityUtil.UNDEAD.toArray(EntityType[]::new)).customName(n -> "Kill " + n + " Undead Mobs"));
@@ -173,6 +150,28 @@ public class DefaultGoalRegister {
         INSTANCE.register(KillEntityGoalBuilder.any(GoalDifficultySupplier.of(0.4f), EntityTypes.WITCH));
         INSTANCE.register(KillEntityGoalBuilder.any(GoalDifficultySupplier.of(0.66f), EntityTypes.ZOGLIN));
         INSTANCE.register(KillEntityGoalBuilder.any(GoalDifficultySupplier.of(0.4f), EntityTypes.ZOMBIE_VILLAGER));
+
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.62f), "story/enter_the_nether").customName(_ -> "Enter The Nether"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.98f), "story/enter_the_end").customName(_ -> "Enter The End"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.84f), "story/follow_ender_eye").customName(_ -> "Enter a Stronghold"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.72f), "nether/charge_respawn_anchor").customName(_ -> "Fully charge a Respawn Anchor"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.5f), "adventure/whos_the_pillager_now").customName(_ -> "Kill a Pillager using a Crossbow")
+                .require(GoalRequirements.PILLAGER_OUTPOST));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.4f), "adventure/bullseye"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.4f), "adventure/spear_many_mobs"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.52f), "nether/distract_piglin"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.5f), "adventure/sniper_duel"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.66f), "husbandry/place_dried_ghast_in_water"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.66f), "nether/ride_strider"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.2f), "husbandry/wax_on"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.2f), "husbandry/wax_off"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(5, 30).inRange(0.4f, 0.8f), 5, 30, 1));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.78f), "adventure/spyglass_at_parrot", "adventure/spyglass_at_ghast", "adventure/spyglass_at_dragon").customName(_ -> "Obtain any Spyglass Advancement"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.32f), "adventure/trade").customName(_ -> "Trade with Villager"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.68f), "nether/brew_potion").customName(_ -> "Brew a Potion"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.32f), "story/enchant_item").customName(_ -> "Enchant Item at Enchanting Table"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.2f), "husbandry/make_a_sign_glow").customName(_ -> "Use Glow Ink on a Sign"));
+        INSTANCE.register(ObtainAdvancementGoalBuilder.any(GoalDifficultySupplier.of(0.66f), "nether/explore_nether"));
 
         INSTANCE.register(ObtainItemGoalBuilder.colored(GoalDifficultySupplier.of(0.55f), Items.CONCRETE, 64, "CONCRETE"));
         INSTANCE.register(ObtainItemGoalBuilder.colored(GoalDifficultySupplier.of(0.28f), Items.WOOL, 64, "WOOL"));
@@ -320,8 +319,6 @@ public class DefaultGoalRegister {
         INSTANCE.register(HaveStatusEffectGoalBuilder.any(GoalDifficultySupplier.of(0.25f), MobEffects.POISON));
         INSTANCE.register(HaveStatusEffectGoalBuilder.any(GoalDifficultySupplier.of(0.15f), MobEffects.WEAKNESS));
 
-        INSTANCE.register(BlockWithItemGoalBuilder.disabled(GoalDifficultySupplier.of(0.25f), Items.SHIELD));
-
         INSTANCE.register(UseItemOnEntityGoalBuilder.of(GoalDifficultySupplier.of(0.2f), Items.ITEM_FRAME, EntityTypes.ITEM_FRAME).customName(_ -> "Place Item Frame in Item Frame"));
         INSTANCE.register(UseItemOnEntityGoalBuilder.of(GoalDifficultySupplier.of(0.4f), Items.WOLF_ARMOR, EntityTypes.WOLF).customName(_ -> "Put Wolf Armor on Wolf"));
         INSTANCE.register(UseItemOnEntityGoalBuilder.nameTag(GoalDifficultySupplier.of(0.68f), "Dinnerbone", EntityTypes.GHAST));
@@ -329,6 +326,8 @@ public class DefaultGoalRegister {
         INSTANCE.register(UseItemOnEntityGoalBuilder.unique(GoalDifficultySupplier.<Integer>linear(5, 20).inRange(0.35f, 0.7f), 5, 20, 1, Items.SPYGLASS).customName(n -> "Spy on " + n + " Unique Mobs"));
         INSTANCE.register(UseItemOnEntityGoalBuilder.of(GoalDifficultySupplier.of(0.2f), Items.SPYGLASS, EntityTypes.IRON_GOLEM).customName(_ -> "Spy on Iron Golem"));
         INSTANCE.register(UseItemOnEntityGoalBuilder.of(GoalDifficultySupplier.of(0.68f), Items.SPYGLASS, EntityTypes.PIGLIN_BRUTE).customName(_ -> "Spy on Piglin Brute"));
+
+        INSTANCE.register(BlockWithItemGoalBuilder.disabled(GoalDifficultySupplier.of(0.25f), Items.SHIELD));
 
         INSTANCE.register(RideEntityGoalBuilder.any(GoalDifficultySupplier.of(0.32f), EntityTypes.MINECART));
         INSTANCE.register(RideEntityGoalBuilder.any(GoalDifficultySupplier.of(0.05f), EntityTypes.CUSHION).customName(_ -> "Sit on a Cushion"));

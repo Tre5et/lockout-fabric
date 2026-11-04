@@ -1,0 +1,6 @@
+{
+    "type": "lockout:tame/any",
+    "difficulty": 0.58,
+    "entities": "minecraft:nautilus",
+    "requirements": "lockout:ocean"
+}

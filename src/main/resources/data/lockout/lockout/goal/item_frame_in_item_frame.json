@@ -1,0 +1,7 @@
+{
+    "type": "lockout:use_item_on_entity/exactly",
+    "difficulty": 0.2,
+    "item": "minecraft:item_frame",
+    "entity": "minecraft:item_frame",
+    "name": "Place Item Frame in Item Frame"
+}

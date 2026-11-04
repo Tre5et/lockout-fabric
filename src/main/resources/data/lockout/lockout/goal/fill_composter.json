@@ -1,0 +1,5 @@
+{
+    "type": "lockout:inventory/fill_block",
+    "difficulty": 0.25,
+    "block": "minecraft:composter"
+}

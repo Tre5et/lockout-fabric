@@ -1,0 +1,5 @@
+{
+    "type": "lockout:breed/any",
+    "difficulty": 0.32,
+    "entities": "minecraft:rabbit"
+}

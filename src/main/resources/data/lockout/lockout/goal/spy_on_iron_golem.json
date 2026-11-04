@@ -1,0 +1,7 @@
+{
+    "type": "lockout:use_item_on_entity/exactly",
+    "difficulty": 0.2,
+    "item": "minecraft:spyglass",
+    "entity": "minecraft:iron_golem",
+    "name": "Spy on Iron Golem"
+}

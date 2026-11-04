@@ -1,0 +1,6 @@
+{
+    "type": "lockout:block/have_disabled",
+    "difficulty": 0.25,
+    "item": "minecraft:shield",
+    "enabled": false
+}

@@ -1,0 +1,21 @@
+{
+    "type": "lockout:obtain/at_least",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 2,
+        "max": 5,
+        "start": 0.25,
+        "end": 0.55
+    },
+    "items": [
+        "minecraft:beetroot_seeds",
+        "minecraft:melon_seeds",
+        "minecraft:pumpkin_seeds",
+        "minecraft:torchflower_seeds",
+        "minecraft:wheat_seeds",
+        "minecraft:nether_wart"
+    ],
+    "min": 2,
+    "max": 5,
+    "name": "Obtain %d Unique Seeds"
+}

@@ -1,0 +1,12 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.78,
+    "items": [
+        "minecraft:minecart",
+        "minecraft:chest_minecart",
+        "minecraft:hopper_minecart",
+        "minecraft:tnt_minecart",
+        "minecraft:furnace_minecart"
+    ],
+    "name": "Obtain every type of Minecart"
+}

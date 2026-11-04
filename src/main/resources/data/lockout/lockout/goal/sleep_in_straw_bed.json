@@ -1,0 +1,5 @@
+{
+    "type": "lockout:player/sleep",
+    "difficulty": 0.12,
+    "blocks": "minecraft:straw_bed"
+}

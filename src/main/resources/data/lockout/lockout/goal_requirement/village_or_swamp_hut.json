@@ -1,0 +1,25 @@
+{
+    "type": "lockout:or",
+    "requirements": [
+        {
+            "type": "lockout:structure",
+            "name": "Village",
+            "decoration": "minecraft:village_plains",
+            "structures": [
+                "minecraft:village_plains",
+                "minecraft:village_desert",
+                "minecraft:village_savanna",
+                "minecraft:village_snowy",
+                "minecraft:village_taiga"
+            ]
+        },
+        {
+            "type": "lockout:structure",
+            "name": "Swamp Hut",
+            "decoration": "minecraft:swamp_hut",
+            "structures": [
+                "minecraft:swamp_hut"
+            ]
+        }
+    ]
+}

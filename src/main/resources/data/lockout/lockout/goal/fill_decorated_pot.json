@@ -1,0 +1,5 @@
+{
+    "type": "lockout:inventory/fill_block",
+    "difficulty": 0.18,
+    "block": "minecraft:decorated_pot"
+}

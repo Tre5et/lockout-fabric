@@ -1,0 +1,21 @@
+{
+    "type": "lockout:obtain/at_least",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 2,
+        "max": 5,
+        "start": 0.4,
+        "end": 0.72
+    },
+    "items": [
+        "minecraft:copper_horse_armor",
+        "minecraft:iron_horse_armor",
+        "minecraft:golden_horse_armor",
+        "minecraft:diamond_horse_armor",
+        "minecraft:netherite_horse_armor",
+        "minecraft:leather_horse_armor"
+    ],
+    "min": 2,
+    "max": 5,
+    "name": "Obtain %d Unique Horse Armor"
+}

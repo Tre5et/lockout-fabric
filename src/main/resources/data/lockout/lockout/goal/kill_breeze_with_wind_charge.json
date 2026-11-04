@@ -1,0 +1,11 @@
+{
+    "type": "lockout:kill/method",
+    "difficulty": 0.78,
+    "damage_types": "minecraft:wind_charge",
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:wind_charge"
+    },
+    "entities": "minecraft:breeze",
+    "requirements": "lockout:trial_chambers"
+}

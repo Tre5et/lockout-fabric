@@ -1,0 +1,6 @@
+{
+    "type": "lockout:tame/any",
+    "difficulty": 0.3,
+    "entities": "minecraft:horse",
+    "requirements": "lockout:horse_biome"
+}

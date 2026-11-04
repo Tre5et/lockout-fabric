@@ -177,6 +177,7 @@ public abstract class GoalBuilder<U,T extends Object> {
         LockoutRegistries.register(registry, "statistic/item", ChangeStatisticGoalBuilder.ItemInteraction.MAP_CODEC);
         LockoutRegistries.register(registry, "statistic/item_while_riding", ChangeStatisticGoalBuilder.ItemInteractionWhileRiding.MAP_CODEC);
         LockoutRegistries.register(registry, "status_effect/any", HaveStatusEffectGoalBuilder.Any.MAP_CODEC);
+        LockoutRegistries.register(registry, "tame/any", TameAnimalGoalBuilder.Any.MAP_CODEC);
     }
 
     public TextureExtractor applyTextureExtractor(TextureExtractor textureExtractor, T option) {

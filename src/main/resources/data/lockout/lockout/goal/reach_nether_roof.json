@@ -1,0 +1,20 @@
+{
+    "type": "lockout:player/height",
+    "difficulty": 0.7,
+    "height": 128,
+    "dimension": "minecraft:the_nether",
+    "texture": {
+        "type": "lockout:corner_icon",
+        "background": {
+            "type": "lockout:item",
+            "item": "minecraft:bedrock"
+        },
+        "icon": {
+            "type": "lockout:generic",
+            "texture": "lockout:textures/custom/up_arrow.png"
+        },
+        "size": 8
+    },
+    "name": "Reach Nether Roof",
+    "enabled": false
+}

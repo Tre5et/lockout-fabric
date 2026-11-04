@@ -1,0 +1,10 @@
+{
+    "type": "lockout:statistic/custom",
+    "difficulty": 0.1,
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:loom"
+    },
+    "statistics": "minecraft:interact_with_loom",
+    "name": "Use a Loom"
+}

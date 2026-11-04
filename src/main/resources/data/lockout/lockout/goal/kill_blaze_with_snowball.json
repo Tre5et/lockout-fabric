@@ -1,0 +1,13 @@
+{
+    "type": "lockout:kill/method",
+    "difficulty": 0.78,
+    "damage_types": "minecraft:thrown",
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:snowball"
+    },
+    "entities": "minecraft:blaze",
+    "requirements": "lockout:snowy",
+    "name": "Kill Blaze using Snowball",
+    "enabled": false
+}

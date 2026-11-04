@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.35,
+    "items": "minecraft:bookshelf",
+    "requirements": "lockout:village"
+}

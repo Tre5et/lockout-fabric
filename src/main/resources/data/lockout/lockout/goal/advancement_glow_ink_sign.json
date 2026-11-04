@@ -1,0 +1,6 @@
+{
+    "type": "lockout:advancement/any",
+    "difficulty": 0.2,
+    "advancements": "minecraft:husbandry/make_a_sign_glow",
+    "name": "Use Glow Ink on a Sign"
+}

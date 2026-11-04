@@ -1,0 +1,10 @@
+{
+    "type": "lockout:death/fall",
+    "difficulty": 0.08,
+    "blocks": [
+        "minecraft:vine",
+        "minecraft:twisting_vines",
+        "minecraft:weeping_vines"
+    ],
+    "name": "Die by Falling of Vines"
+}

@@ -1,0 +1,38 @@
+{
+    "type": "lockout:mine_block/unique",
+    "difficulty": 0.48,
+    "blocks": [
+        "minecraft:ice",
+        "minecraft:packed_ice",
+        "minecraft:blue_ice",
+        "minecraft:frosted_ice"
+    ],
+    "count": 3,
+    "name": "Mine 3 types of Ice",
+    "requirements": "lockout:snowy",
+    "texture": {
+        "type": "lockout:corner_icon",
+        "background": {
+            "type": "lockout:cycle",
+            "textures": [
+                {
+                    "type": "lockout:item",
+                    "item": "minecraft:ice"
+                },
+                {
+                    "type": "lockout:item",
+                    "item": "minecraft:packed_ice"
+                },
+                {
+                    "type": "lockout:item",
+                    "item": "minecraft:blue_ice"
+                }
+            ]
+        },
+        "icon": {
+            "type": "lockout:item",
+            "item": "minecraft:iron_pickaxe"
+        },
+        "size": 10
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "type": "lockout:brew/effect",
+    "difficulty": 0.68,
+    "effects": [
+        "minecraft:healing",
+        "minecraft:strong_healing"
+    ]
+}

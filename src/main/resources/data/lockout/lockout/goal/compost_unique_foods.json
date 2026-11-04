@@ -10,5 +10,5 @@
     "components": "minecraft:food",
     "min": 3,
     "max": 7,
-    "name": "Compost %d unique Foods"
+    "name": "Compost %d Unique Foods"
 }

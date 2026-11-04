@@ -1,0 +1,13 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.9,
+    "items": [
+        "minecraft:diamond_sword",
+        "minecraft:diamond_axe",
+        "minecraft:diamond_pickaxe",
+        "minecraft:diamond_shovel",
+        "minecraft:diamond_hoe",
+        "minecraft:diamond_spear"
+    ],
+    "name": "Obtain all Diamond Tools"
+}

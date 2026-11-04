@@ -1,0 +1,7 @@
+{
+    "type": "lockout:consume/any",
+    "difficulty": 0.18,
+    "items": "minecraft:glow_berries",
+    "requirements": "lockout:lush_caves",
+    "name": "Eat a Glow Berry"
+}

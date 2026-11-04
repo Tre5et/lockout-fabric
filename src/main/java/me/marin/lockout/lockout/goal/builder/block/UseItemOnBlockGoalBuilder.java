@@ -16,6 +16,7 @@ import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,8 +40,8 @@ public abstract class UseItemOnBlockGoalBuilder<T> extends GoalBuilder<BlockUtil
     public static class Any extends UseItemOnBlockGoalBuilder<Void> {
         public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Use", i)
                 .and(i.group(
-                        RegistryCodecs.holderSet(Registries.ITEM).fieldOf("items").forGetter(Any::getItems),
-                        RegistryCodecs.holderSet(Registries.BLOCK).fieldOf("blocks").forGetter(Any::getBlocks)
+                        RegistryCodecs.holderSet(Registries.ITEM).optionalFieldOf("items", HolderSet.empty()).forGetter(Any::getItems),
+                        RegistryCodecs.holderSet(Registries.BLOCK).optionalFieldOf("blocks", HolderSet.empty()).forGetter(Any::getBlocks)
                 )).apply(i, Any::new)
         );
 
@@ -50,9 +51,21 @@ public abstract class UseItemOnBlockGoalBuilder<T> extends GoalBuilder<BlockUtil
         private final HolderSet<Block> blocks;
 
         public Any(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Item> items, HolderSet<Block> blocks) {
-            super(GoalOptionSupplier.NONE, GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
-                        private final InListAcceptanceCondition<BlockState, Block> condition = InListAcceptanceCondition.block(blocks.stream().map(Holder::value).toList());
-                        private final InListAcceptanceCondition<ItemStack, Item> itemCondition = InListAcceptanceCondition.item(items.stream().map(Holder::value).toList());
+            super(GoalOptionSupplier.NONE, progress(items, blocks), namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
+            this.items = items;
+            this.blocks = blocks;
+        }
+
+        private static GoalProgressSupplier<Void, BlockUtil.UsedItemOnBlock, Boolean> progress(HolderSet<Item> items, HolderSet<Block> blocks) {
+            List<Block> acceptedBlocks = blocks.stream().findAny().isPresent()
+                    ? blocks.stream().map(Holder::value).toList()
+                    : BuiltInRegistries.BLOCK.stream().toList();
+            List<Item> acceptedItems = items.stream().findAny().isPresent()
+                    ? items.stream().map(Holder::value).toList()
+                    : BuiltInRegistries.ITEM.stream().toList();
+            return GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
+                        private final InListAcceptanceCondition<BlockState, Block> condition = InListAcceptanceCondition.block(acceptedBlocks);
+                        private final InListAcceptanceCondition<ItemStack, Item> itemCondition = InListAcceptanceCondition.item(acceptedItems);
 
                         @Override
                         public boolean test(BlockUtil.UsedItemOnBlock value, ServerPlayer player) {
@@ -77,9 +90,7 @@ public abstract class UseItemOnBlockGoalBuilder<T> extends GoalBuilder<BlockUtil
                                     10)
                             ).collect(Collectors.toUnmodifiableList());
                         }
-                    }), namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
-            this.items = items;
-            this.blocks = blocks;
+                    });
         }
 
         @Override

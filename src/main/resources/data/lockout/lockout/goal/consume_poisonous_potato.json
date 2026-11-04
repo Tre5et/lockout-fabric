@@ -1,0 +1,6 @@
+{
+    "type": "lockout:consume/any",
+    "difficulty": 0.18,
+    "items": "minecraft:poisonous_potato",
+    "name": "Eat a Poisonous Potato"
+}

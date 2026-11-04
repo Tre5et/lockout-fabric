@@ -1,0 +1,27 @@
+{
+    "type": "lockout:obtain/at_least",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 4,
+        "max": 7,
+        "start": 0.4,
+        "end": 0.7
+    },
+    "items": [
+        "minecraft:bucket",
+        "minecraft:water_bucket",
+        "minecraft:lava_bucket",
+        "minecraft:powder_snow_bucket",
+        "minecraft:milk_bucket",
+        "minecraft:pufferfish_bucket",
+        "minecraft:salmon_bucket",
+        "minecraft:cod_bucket",
+        "minecraft:tropical_fish_bucket",
+        "minecraft:axolotl_bucket",
+        "minecraft:sulfur_cube_bucket",
+        "minecraft:tadpole_bucket"
+    ],
+    "min": 4,
+    "max": 7,
+    "name": "Obtain %d Unique Buckets"
+}

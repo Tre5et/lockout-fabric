@@ -1,0 +1,12 @@
+{
+    "type": "lockout:breed/unique",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 4,
+        "max": 8,
+        "start": 0.3,
+        "end": 0.55
+    },
+    "min": 4,
+    "max": 8
+}

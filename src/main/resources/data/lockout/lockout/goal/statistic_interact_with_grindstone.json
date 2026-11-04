@@ -1,0 +1,10 @@
+{
+    "type": "lockout:statistic/custom",
+    "difficulty": 0.32,
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:grindstone"
+    },
+    "statistics": "minecraft:interact_with_grindstone",
+    "name": "Use a Grindstone"
+}

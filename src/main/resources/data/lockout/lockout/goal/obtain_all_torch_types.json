@@ -1,0 +1,11 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.66,
+    "items": [
+        "minecraft:torch",
+        "minecraft:soul_torch",
+        "minecraft:copper_torch",
+        "minecraft:redstone_torch"
+    ],
+    "name": "Obtain every type of Torch"
+}

@@ -1,0 +1,25 @@
+{
+    "type": "lockout:obtain/at_least",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 2,
+        "max": 5,
+        "start": 0.4,
+        "end": 0.72
+    },
+    "items": [
+        "minecraft:flower_banner_pattern",
+        "minecraft:creeper_banner_pattern",
+        "minecraft:skull_banner_pattern",
+        "minecraft:mojang_banner_pattern",
+        "minecraft:globe_banner_pattern",
+        "minecraft:piglin_banner_pattern",
+        "minecraft:flow_banner_pattern",
+        "minecraft:guster_banner_pattern",
+        "minecraft:field_masoned_banner_pattern",
+        "minecraft:bordure_indented_banner_pattern"
+    ],
+    "min": 2,
+    "max": 5,
+    "name": "Obtain %d Unique Banner Patterns"
+}

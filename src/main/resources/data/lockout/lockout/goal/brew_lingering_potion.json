@@ -1,0 +1,6 @@
+{
+    "type": "lockout:brew/type",
+    "difficulty": 0.99,
+    "items": "minecraft:lingering_potion",
+    "name": "Brew any Lingering Potion"
+}

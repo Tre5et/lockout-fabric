@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/count",
+    "difficulty": 0.3,
+    "items": "minecraft:glow_lichen",
+    "count": 16
+}

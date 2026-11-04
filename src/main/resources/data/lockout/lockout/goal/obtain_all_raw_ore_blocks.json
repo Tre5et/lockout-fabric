@@ -1,0 +1,10 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.68,
+    "items": [
+        "minecraft:raw_iron_block",
+        "minecraft:raw_copper_block",
+        "minecraft:raw_gold_block"
+    ],
+    "name": "Obtain every type of Raw Ore Block"
+}

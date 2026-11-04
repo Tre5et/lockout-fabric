@@ -1,5 +1,7 @@
 package me.marin.lockout.lockout.goal.builder.miscellanious;
 
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
@@ -17,14 +19,9 @@ import me.marin.lockout.lockout.goal.rendering.texture.GenericTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
-import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
@@ -40,16 +37,22 @@ public abstract class ObtainAdvancementGoalBuilder<T> extends GoalBuilder<Advanc
     public void reifiedUpdater(AdvancementHolder update) {}
 
     public static class Any extends ObtainAdvancementGoalBuilder<Void> {
+        private static final Codec<List<Identifier>> ADVANCEMENT_IDS_CODEC = Codec.either(Identifier.CODEC, Codec.list(Identifier.CODEC))
+                .xmap(value -> value.map(List::of, advancements -> advancements),
+                        advancements -> advancements.size() == 1
+                                ? Either.left(advancements.get(0))
+                                : Either.right(advancements));
+
         public static final MapCodec<Any> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Obtain", i)
-                .and(RegistryCodecs.holderSet(Registries.ADVANCEMENT).fieldOf("advancements").forGetter(Any::getAdvancements))
+                .and(ADVANCEMENT_IDS_CODEC.fieldOf("advancements").forGetter(Any::getAdvancements))
                 .apply(i, Any::new));
 
         @Getter
-        private final HolderSet<Advancement> advancements;
+        private final List<Identifier> advancements;
 
-        public Any(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, HolderSet<Advancement> advancements) {
+        public Any(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, List<Identifier> advancements) {
             super(GoalOptionSupplier.NONE,
-                    GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.advancement(advancements.stream().map(Holder::unwrapKey).filter(Optional::isPresent).map(Optional::get).map(ResourceKey::identifier).toList())),
+                    GoalProgressSupplier.simple(_ -> InListAcceptanceCondition.advancement(advancements)),
                     namePrefix, difficultySupplier, requirements, customNameProvider, customTextureExtractorProvider, groups, hints, enabled);
             this.advancements = advancements;
         }

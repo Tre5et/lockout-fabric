@@ -1,0 +1,5 @@
+{
+    "type": "lockout:advancement/any",
+    "difficulty": 0.52,
+    "advancements": "minecraft:nether/distract_piglin"
+}

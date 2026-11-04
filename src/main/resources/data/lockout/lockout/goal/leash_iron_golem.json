@@ -1,0 +1,7 @@
+{
+    "type": "lockout:leash/any",
+    "difficulty": 0.45,
+    "entities": [
+        "minecraft:iron_golem"
+    ]
+}

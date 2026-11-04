@@ -1,0 +1,5 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.85,
+    "items": "minecraft:netherite_scrap"
+}

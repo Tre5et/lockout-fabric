@@ -1,0 +1,6 @@
+{
+    "type": "lockout:death/entity",
+    "difficulty": 0.55,
+    "entities": "minecraft:iron_golem",
+    "requirements": "lockout:village"
+}

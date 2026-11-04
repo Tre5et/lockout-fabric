@@ -1,0 +1,10 @@
+{
+    "type": "lockout:use_item_on_block/any",
+    "difficulty": 0.66,
+    "items": "minecraft:glow_ink_sac",
+    "blocks": [
+        "minecraft:crimson_sign",
+        "minecraft:warped_sign"
+    ],
+    "name": "Make a Nether Wood Sign Glow"
+}

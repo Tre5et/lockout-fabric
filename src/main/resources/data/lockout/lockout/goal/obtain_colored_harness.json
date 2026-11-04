@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/colored",
+    "difficulty": 0.42,
+    "item_collection": "lockout:harness",
+    "count": 1
+}

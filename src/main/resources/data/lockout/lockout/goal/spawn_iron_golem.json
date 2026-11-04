@@ -1,0 +1,5 @@
+{
+    "type": "lockout:spawn/any",
+    "difficulty": 0.82,
+    "entities": "minecraft:iron_golem"
+}

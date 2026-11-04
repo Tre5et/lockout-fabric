@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.78,
+    "items": "minecraft:sulfur_cube_bucket",
+    "requirements": "lockout:sulfur_caves"
+}

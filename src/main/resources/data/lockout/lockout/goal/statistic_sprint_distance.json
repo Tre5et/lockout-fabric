@@ -1,0 +1,22 @@
+{
+    "type": "lockout:statistic/custom_total",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 50000,
+        "max": 200000,
+        "start": 0.2,
+        "end": 0.58
+    },
+    "texture": {
+        "type": "lockout:generic",
+        "texture": "minecraft:textures/mob_effect/speed.png"
+    },
+    "statistics": "minecraft:sprint_one_cm",
+    "creation_name": "Distance to Sprint",
+    "progress_name": "Distance Sprinted",
+    "scale": 100.0,
+    "min": 500,
+    "max": 2000,
+    "step": 100,
+    "name": "Sprint %dm"
+}

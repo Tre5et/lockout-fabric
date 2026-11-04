@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.88,
+    "items": "minecraft:heart_of_the_sea",
+    "requirements": "lockout:buried_treasure"
+}

@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.52,
+    "items": "minecraft:tropical_fish_bucket",
+    "requirements": "lockout:warm_ocean"
+}

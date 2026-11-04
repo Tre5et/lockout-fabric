@@ -1,0 +1,10 @@
+{
+    "type": "lockout:death/damage_type",
+    "difficulty": 0.74,
+    "types": "minecraft:falling_anvil",
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:anvil"
+    },
+    "name": "Die to falling Anvil"
+}

@@ -1,0 +1,13 @@
+{
+    "type": "lockout:advancement/unique",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 5,
+        "max": 30,
+        "start": 0.4,
+        "end": 0.8
+    },
+    "min": 5,
+    "max": 30,
+    "step": 1
+}

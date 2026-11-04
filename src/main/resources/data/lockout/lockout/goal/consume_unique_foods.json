@@ -1,0 +1,14 @@
+{
+    "type": "lockout:consume/unique_with_components",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 5,
+        "max": 25,
+        "start": 0.25,
+        "end": 0.55
+    },
+    "components": "minecraft:food",
+    "min": 5,
+    "max": 25,
+    "name": "Eat %d Unique Foods"
+}

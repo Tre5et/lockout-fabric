@@ -1,0 +1,7 @@
+{
+    "type": "lockout:advancement/any",
+    "difficulty": 0.5,
+    "advancements": "minecraft:adventure/whos_the_pillager_now",
+    "name": "Kill a Pillager using a Crossbow",
+    "requirements": "lockout:pillager_outpost"
+}

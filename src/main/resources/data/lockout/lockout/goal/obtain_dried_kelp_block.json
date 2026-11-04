@@ -1,0 +1,5 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.22,
+    "items": "minecraft:dried_kelp_block"
+}

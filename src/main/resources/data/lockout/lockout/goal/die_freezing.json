@@ -1,0 +1,11 @@
+{
+    "type": "lockout:death/damage_type",
+    "difficulty": 0.32,
+    "types": "minecraft:freeze",
+    "texture": {
+        "type": "lockout:sprite",
+        "sprite": "minecraft:hud/heart/frozen_full"
+    },
+    "name": "Die by Freezing",
+    "requirements": "lockout:snowy"
+}

@@ -1,0 +1,10 @@
+{
+    "type": "lockout:mine_block/any",
+    "difficulty": 0.7,
+    "blocks": [
+        "minecraft:spawner",
+        "minecraft:trial_spawner"
+    ],
+    "name": "Mine a Spawner",
+    "requirements": "lockout:spawner_structure"
+}

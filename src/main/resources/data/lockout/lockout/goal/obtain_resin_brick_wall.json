@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.52,
+    "items": "minecraft:resin_brick_wall",
+    "requirements": "lockout:pale_garden"
+}

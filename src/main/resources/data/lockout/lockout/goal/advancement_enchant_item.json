@@ -1,0 +1,6 @@
+{
+    "type": "lockout:advancement/any",
+    "difficulty": 0.32,
+    "advancements": "minecraft:story/enchant_item",
+    "name": "Enchant Item at Enchanting Table"
+}

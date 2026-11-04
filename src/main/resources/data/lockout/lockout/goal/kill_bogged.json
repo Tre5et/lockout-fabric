@@ -1,0 +1,6 @@
+{
+    "type": "lockout:kill/any",
+    "difficulty": 0.4,
+    "entities": "minecraft:bogged",
+    "requirements": "lockout:swamp_or_trial_chambers"
+}

@@ -1,0 +1,6 @@
+{
+    "type": "lockout:ride/any",
+    "difficulty": 0.05,
+    "entities": "minecraft:cushion",
+    "name": "Sit on a Cushion"
+}

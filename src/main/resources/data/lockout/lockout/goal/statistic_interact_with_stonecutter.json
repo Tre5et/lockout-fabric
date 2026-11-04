@@ -1,0 +1,10 @@
+{
+    "type": "lockout:statistic/custom",
+    "difficulty": 0.1,
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:stonecutter"
+    },
+    "statistics": "minecraft:interact_with_stonecutter",
+    "name": "Use a Stonecutter"
+}

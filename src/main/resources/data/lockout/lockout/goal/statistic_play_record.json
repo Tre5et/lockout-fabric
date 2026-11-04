@@ -1,0 +1,10 @@
+{
+    "type": "lockout:statistic/custom",
+    "difficulty": 0.2,
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:jukebox"
+    },
+    "statistics": "minecraft:play_record",
+    "name": "Play a Music Disk in a Jukebox"
+}

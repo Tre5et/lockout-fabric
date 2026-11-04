@@ -1,0 +1,10 @@
+{
+    "type": "lockout:use_item_on_block/any",
+    "difficulty": 0.2,
+    "items": [
+        "minecraft:flint_and_steel",
+        "minecraft:fire_charge"
+    ],
+    "blocks": "minecraft:candle",
+    "name": "Light a Candle"
+}

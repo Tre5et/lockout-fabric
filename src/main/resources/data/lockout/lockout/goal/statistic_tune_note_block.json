@@ -1,0 +1,10 @@
+{
+    "type": "lockout:statistic/custom",
+    "difficulty": 0.2,
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:note_block"
+    },
+    "statistics": "minecraft:tune_noteblock",
+    "name": "Tune a Note Block"
+}

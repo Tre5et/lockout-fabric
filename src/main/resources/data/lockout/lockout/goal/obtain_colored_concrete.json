@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/colored",
+    "difficulty": 0.55,
+    "item_collection": "lockout:concrete",
+    "count": 64
+}

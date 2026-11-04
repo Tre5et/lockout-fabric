@@ -1,0 +1,6 @@
+{
+    "type": "lockout:consume/with_status_effect",
+    "difficulty": 0.18,
+    "items": "minecraft:milk_bucket",
+    "name": "Remove Effect using Milk Bucket"
+}

@@ -1,0 +1,6 @@
+{
+    "type": "lockout:tame/any",
+    "difficulty": 0.3,
+    "entities": "minecraft:cat",
+    "requirements": "lockout:village_or_swamp_hut"
+}

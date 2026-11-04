@@ -1,0 +1,6 @@
+{
+    "type": "lockout:breed/any",
+    "difficulty": 0.32,
+    "entities": "minecraft:goat",
+    "requirements": "lockout:snowy_mountains"
+}

@@ -1,0 +1,15 @@
+{
+    "type": "lockout:obtain/any",
+    "difficulty": 0.35,
+    "items": [
+        "minecraft:copper_chest",
+        "minecraft:exposed_copper_chest",
+        "minecraft:weathered_copper_chest",
+        "minecraft:oxidized_copper_chest",
+        "minecraft:waxed_copper_chest",
+        "minecraft:waxed_exposed_copper_chest",
+        "minecraft:waxed_weathered_copper_chest",
+        "minecraft:waxed_oxidized_copper_chest"
+    ],
+    "name": "Obtain Copper Chest"
+}

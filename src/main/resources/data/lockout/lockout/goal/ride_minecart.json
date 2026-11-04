@@ -1,0 +1,5 @@
+{
+    "type": "lockout:ride/any",
+    "difficulty": 0.32,
+    "entities": "minecraft:minecart"
+}

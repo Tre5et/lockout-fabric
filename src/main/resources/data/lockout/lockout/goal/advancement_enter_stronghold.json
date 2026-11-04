@@ -1,0 +1,6 @@
+{
+    "type": "lockout:advancement/any",
+    "difficulty": 0.84,
+    "advancements": "minecraft:story/follow_ender_eye",
+    "name": "Enter a Stronghold"
+}

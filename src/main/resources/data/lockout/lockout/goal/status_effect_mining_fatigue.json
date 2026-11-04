@@ -1,0 +1,10 @@
+{
+    "type": "lockout:status_effect/any",
+    "difficulty": 0.75,
+    "effects": [
+        "minecraft:mining_fatigue"
+    ],
+    "requirements": [
+        "lockout:ocean_monument"
+    ]
+}

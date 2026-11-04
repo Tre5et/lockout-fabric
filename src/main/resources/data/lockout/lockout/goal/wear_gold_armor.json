@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/full_armor_of_material",
+    "difficulty": 0.58,
+    "material": "lockout:gold",
+    "name": "Wear full Gold Armor"
+}

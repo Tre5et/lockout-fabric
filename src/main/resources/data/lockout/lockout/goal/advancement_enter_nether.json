@@ -1,0 +1,6 @@
+{
+    "type": "lockout:advancement/any",
+    "difficulty": 0.62,
+    "advancements": "minecraft:story/enter_the_nether",
+    "name": "Enter The Nether"
+}

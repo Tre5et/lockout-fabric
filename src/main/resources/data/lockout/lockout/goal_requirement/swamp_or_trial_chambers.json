@@ -1,0 +1,22 @@
+{
+    "type": "lockout:or",
+    "requirements": [
+        {
+            "type": "lockout:biome",
+            "name": "Swamp",
+            "decoration": "lockout:swamp",
+            "biomes": [
+                "minecraft:swamp",
+                "minecraft:mangrove_swamp"
+            ]
+        },
+        {
+            "type": "lockout:structure",
+            "name": "Trial Chambers",
+            "decoration": "minecraft:trial_chambers",
+            "structures": [
+                "minecraft:trial_chambers"
+            ]
+        }
+    ]
+}

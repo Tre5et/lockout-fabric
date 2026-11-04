@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/full_armor_of_material",
+    "difficulty": 0.68,
+    "material": "lockout:iron",
+    "name": "Wear full Iron Armor"
+}

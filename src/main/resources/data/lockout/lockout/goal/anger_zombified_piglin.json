@@ -1,0 +1,5 @@
+{
+    "type": "lockout:anger/any",
+    "difficulty": 0.22,
+    "entities": "minecraft:zombified_piglin"
+}

@@ -1,0 +1,7 @@
+{
+    "type": "lockout:status_effect/any",
+    "difficulty": 0.15,
+    "effects": [
+        "minecraft:weakness"
+    ]
+}

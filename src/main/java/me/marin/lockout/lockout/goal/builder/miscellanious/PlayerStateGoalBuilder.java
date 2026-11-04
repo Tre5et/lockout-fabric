@@ -23,9 +23,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.List;
 import java.util.Optional;
@@ -82,30 +82,30 @@ public abstract class PlayerStateGoalBuilder<T> extends GoalBuilder<BuilderUtil.
         public static final MapCodec<HeightAbove> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("", i)
                 .and(i.group(
                         Codec.INT.fieldOf("height").forGetter(HeightAbove::getHeight),
-                        RegistryCodecs.holder(Registries.DIMENSION).fieldOf("height").forGetter(HeightAbove::getDimension)
+                        RegistryCodecs.holder(Registries.DIMENSION_TYPE).fieldOf("dimension").forGetter(HeightAbove::getDimension)
                 )).apply(i, HeightAbove::new));
 
         @Getter
         private final int height;
         @Getter
-        private final Holder<Level> dimension;
+        private final Holder<DimensionType> dimension;
 
-        public HeightAbove(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, int height, Holder<Level> dimension) {
+        public HeightAbove(String namePrefix, GoalDifficultySupplier<?> difficultySupplier, HolderSet<GoalRequirement> requirements, Optional<NameProvider> customNameProvider, Optional<TextureExtractorProvider> customTextureExtractorProvider, HolderSet<GoalGroup> groups, List<HintCombination<?>> hints, boolean enabled, int height, Holder<DimensionType> dimension) {
             super(GoalOptionSupplier.NONE,
                     GoalProgressSupplier.simple(_ -> new AcceptanceCondition<>() {
                         @Override
                         public boolean test(ServerPlayer value, ServerPlayer player) {
-                            return value.getY() > height && value.level().dimension() == dimension.value().dimension();
+                            return value.getY() > height && value.level().dimensionType().equals(dimension.value());
                         }
 
                         @Override
                         public String getId() {
-                            return "HEIGHT_" + height + "_" + BuilderUtil.identifierToId(dimension.value().dimension().identifier());
+                            return "HEIGHT_" + height + "_" + BuilderUtil.identifierToId(dimension.unwrapKey().get().identifier());
                         }
 
                         @Override
                         public String getName() {
-                            return "Reach height " + height + " in " + BuilderUtil.identifierToName(dimension.value().dimension().identifier());
+                            return "Reach height " + height + " in " + BuilderUtil.identifierToName(dimension.unwrapKey().get().identifier());
                         }
 
                         @Override

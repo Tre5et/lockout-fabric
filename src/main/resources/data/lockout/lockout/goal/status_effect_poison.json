@@ -1,0 +1,7 @@
+{
+    "type": "lockout:status_effect/any",
+    "difficulty": 0.25,
+    "effects": [
+        "minecraft:poison"
+    ]
+}

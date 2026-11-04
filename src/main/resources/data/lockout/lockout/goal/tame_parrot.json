@@ -1,0 +1,6 @@
+{
+    "type": "lockout:tame/any",
+    "difficulty": 0.42,
+    "entities": "minecraft:parrot",
+    "requirements": "lockout:jungle"
+}

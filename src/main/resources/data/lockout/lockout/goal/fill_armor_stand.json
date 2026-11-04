@@ -1,0 +1,5 @@
+{
+    "type": "lockout:inventory/fill_entity",
+    "difficulty": 0.18,
+    "entity": "minecraft:armor_stand"
+}

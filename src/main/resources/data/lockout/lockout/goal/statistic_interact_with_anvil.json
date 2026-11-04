@@ -1,0 +1,10 @@
+{
+    "type": "lockout:statistic/custom",
+    "difficulty": 0.7,
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:anvil"
+    },
+    "statistics": "minecraft:interact_with_anvil",
+    "name": "Use an Anvil"
+}

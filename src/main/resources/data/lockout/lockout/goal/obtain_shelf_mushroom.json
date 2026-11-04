@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.22,
+    "items": "minecraft:shelf_mushroom",
+    "requirements": "lockout:dappled_forest"
+}

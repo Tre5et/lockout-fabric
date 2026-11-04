@@ -1,0 +1,27 @@
+{
+    "type": "lockout:obtain/at_least",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 4,
+        "max": 7,
+        "start": 0.4,
+        "end": 0.7
+    },
+    "items": [
+        "minecraft:loom",
+        "minecraft:composter",
+        "minecraft:barrel",
+        "minecraft:smoker",
+        "minecraft:blast_furnace",
+        "minecraft:cartography_table",
+        "minecraft:fletching_table",
+        "minecraft:grindstone",
+        "minecraft:smithing_table",
+        "minecraft:stonecutter",
+        "minecraft:cauldron",
+        "minecraft:brewing_stand"
+    ],
+    "min": 4,
+    "max": 7,
+    "name": "Obtain %d Unique Workstations"
+}

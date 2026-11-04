@@ -1,0 +1,6 @@
+{
+    "type": "lockout:consume/any",
+    "difficulty": 0.18,
+    "items": "minecraft:pumpkin_pie",
+    "name": "Eat Pumpkin Pie"
+}

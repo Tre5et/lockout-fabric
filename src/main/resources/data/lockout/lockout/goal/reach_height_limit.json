@@ -1,0 +1,7 @@
+{
+    "type": "lockout:player/height",
+    "difficulty": 0.42,
+    "height": 320,
+    "dimension": "minecraft:overworld",
+    "name": "Reach height limit"
+}

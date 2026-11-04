@@ -1,0 +1,5 @@
+{
+    "type": "lockout:kill/any",
+    "difficulty": 0.4,
+    "entities": "minecraft:witch"
+}

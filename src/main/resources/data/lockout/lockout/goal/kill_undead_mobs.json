@@ -1,0 +1,32 @@
+{
+    "type": "lockout:kill/total",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 10,
+        "max": 30,
+        "start": 0.3,
+        "end": 0.6
+    },
+    "entities": [
+        "minecraft:camel_husk",
+        "minecraft:drowned",
+        "minecraft:husk",
+        "minecraft:zombie_horse",
+        "minecraft:zombie_nautilus",
+        "minecraft:zombie_villager",
+        "minecraft:zombified_piglin",
+        "minecraft:bogged",
+        "minecraft:parched",
+        "minecraft:skeleton",
+        "minecraft:skeleton_horse",
+        "minecraft:stray",
+        "minecraft:wither",
+        "minecraft:wither_skeleton",
+        "minecraft:phantom",
+        "minecraft:zoglin",
+        "minecraft:zombie"
+    ],
+    "min": 10,
+    "max": 30,
+    "name": "Kill %d Undead Mobs"
+}

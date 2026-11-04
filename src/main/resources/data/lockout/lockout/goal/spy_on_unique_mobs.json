@@ -1,0 +1,17 @@
+{
+    "type": "lockout:use_item_on_entity/unique",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 5,
+        "max": 20,
+        "start": 0.35,
+        "end": 0.7
+    },
+    "items": [
+        "minecraft:spyglass"
+    ],
+    "min": 5,
+    "max": 20,
+    "step": 1,
+    "name": "Spy on %d Unique Mobs"
+}

@@ -1,0 +1,9 @@
+{
+    "type": "lockout:mine_block/any",
+    "difficulty": 0.72,
+    "blocks": [
+        "minecraft:emerald_ore",
+        "minecraft:deepslate_emerald_ore"
+    ],
+    "name": "Mine Emerald Ore"
+}

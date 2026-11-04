@@ -1,0 +1,5 @@
+{
+    "type": "lockout:break/any",
+    "difficulty": 0.25,
+    "items": "minecraft:shield"
+}

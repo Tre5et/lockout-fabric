@@ -1,0 +1,6 @@
+{
+    "type": "lockout:death/entity",
+    "difficulty": 0.55,
+    "entities": "minecraft:warden",
+    "requirements": "lockout:deep_dark"
+}

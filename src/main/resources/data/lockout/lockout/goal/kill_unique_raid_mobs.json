@@ -1,0 +1,21 @@
+{
+    "type": "lockout:kill/unique",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 3,
+        "max": 6,
+        "start": 0.6,
+        "end": 0.85
+    },
+    "entities": [
+        "minecraft:pillager",
+        "minecraft:vindicator",
+        "minecraft:ravager",
+        "minecraft:witch",
+        "minecraft:evoker",
+        "minecraft:vex"
+    ],
+    "min": 3,
+    "max": 6,
+    "name": "Kill %d Raid Mobs"
+}

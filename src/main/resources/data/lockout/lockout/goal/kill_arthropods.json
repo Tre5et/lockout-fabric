@@ -1,0 +1,20 @@
+{
+    "type": "lockout:kill/total",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 10,
+        "max": 30,
+        "start": 0.3,
+        "end": 0.6
+    },
+    "entities": [
+        "minecraft:bee",
+        "minecraft:cave_spider",
+        "minecraft:endermite",
+        "minecraft:silverfish",
+        "minecraft:spider"
+    ],
+    "min": 10,
+    "max": 30,
+    "name": "Kill %d Arthropods"
+}

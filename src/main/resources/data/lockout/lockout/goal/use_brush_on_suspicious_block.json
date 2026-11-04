@@ -1,0 +1,11 @@
+{
+    "type": "lockout:use_item_on_block/any",
+    "difficulty": 0.48,
+    "items": "minecraft:brush",
+    "blocks": [
+        "minecraft:suspicious_gravel",
+        "minecraft:suspicious_sand"
+    ],
+    "name": "Brush Suspicious Block",
+    "requirements": "lockout:suspicious"
+}

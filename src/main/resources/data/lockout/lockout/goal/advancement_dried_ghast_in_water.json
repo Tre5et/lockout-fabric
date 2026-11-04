@@ -1,0 +1,5 @@
+{
+    "type": "lockout:advancement/any",
+    "difficulty": 0.66,
+    "advancements": "minecraft:husbandry/place_dried_ghast_in_water"
+}

@@ -1,0 +1,6 @@
+{
+    "type": "lockout:breed/any",
+    "difficulty": 0.32,
+    "entities": "minecraft:camel",
+    "requirements": "lockout:desert_or_desert_village"
+}

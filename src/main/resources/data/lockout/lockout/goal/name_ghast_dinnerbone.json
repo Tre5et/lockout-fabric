@@ -1,0 +1,6 @@
+{
+    "type": "lockout:use_item_on_entity/name_tag",
+    "difficulty": 0.68,
+    "name_tag": "Dinnerbone",
+    "entities": "minecraft:ghast"
+}

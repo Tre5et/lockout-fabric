@@ -1,0 +1,7 @@
+{
+    "type": "lockout:break/component",
+    "difficulty": 0.4,
+    "components": "minecraft:tool",
+    "name": "Break any tool",
+    "groups": "lockout:tools"
+}

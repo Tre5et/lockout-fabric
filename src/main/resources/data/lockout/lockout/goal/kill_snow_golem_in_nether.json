@@ -1,0 +1,11 @@
+{
+    "type": "lockout:kill/dimension",
+    "difficulty": 0.7,
+    "dimension": "minecraft:the_nether",
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:netherrack"
+    },
+    "entities": "minecraft:snow_golem",
+    "requirements": "lockout:snowy"
+}

@@ -1,0 +1,6 @@
+{
+    "type": "lockout:breed/any",
+    "difficulty": 0.65,
+    "entities": "minecraft:allay",
+    "requirements": "lockout:allay_structure"
+}

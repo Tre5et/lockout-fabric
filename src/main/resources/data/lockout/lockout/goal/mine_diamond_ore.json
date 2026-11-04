@@ -1,0 +1,9 @@
+{
+    "type": "lockout:mine_block/any",
+    "difficulty": 0.65,
+    "blocks": [
+        "minecraft:diamond_ore",
+        "minecraft:deepslate_diamond_ore"
+    ],
+    "name": "Mine Diamond Ore"
+}

@@ -1,0 +1,10 @@
+{
+    "type": "lockout:death/damage_type",
+    "difficulty": 0.99,
+    "types": "minecraft:out_of_world",
+    "texture": {
+        "type": "lockout:generic",
+        "texture": "minecraft:textures/particle/spark_4.png"
+    },
+    "name": "Die by Falling in Void"
+}

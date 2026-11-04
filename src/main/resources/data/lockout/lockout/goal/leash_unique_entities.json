@@ -1,0 +1,13 @@
+{
+    "type": "lockout:leash/unique",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 3,
+        "max": 8,
+        "start": 0.35,
+        "end": 0.62
+    },
+    "min": 3,
+    "max": 8,
+    "step": 1
+}

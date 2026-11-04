@@ -1,0 +1,5 @@
+{
+    "type": "lockout:death/entity",
+    "difficulty": 0.15,
+    "entities": "minecraft:bee"
+}

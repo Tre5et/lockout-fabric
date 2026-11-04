@@ -1,0 +1,10 @@
+{
+    "type": "lockout:status_effect/any",
+    "difficulty": 0.38,
+    "effects": [
+        "minecraft:nausea"
+    ],
+    "requirements": [
+        "lockout:nausea_biome"
+    ]
+}

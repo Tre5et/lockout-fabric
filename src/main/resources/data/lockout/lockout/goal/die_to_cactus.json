@@ -1,0 +1,11 @@
+{
+    "type": "lockout:death/damage_type",
+    "difficulty": 0.08,
+    "types": "minecraft:cactus",
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:cactus"
+    },
+    "name": "Die to Cactus",
+    "requirements": "lockout:desert_like"
+}

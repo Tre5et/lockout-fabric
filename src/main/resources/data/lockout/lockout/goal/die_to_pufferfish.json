@@ -1,0 +1,6 @@
+{
+    "type": "lockout:death/entity",
+    "difficulty": 0.2,
+    "entities": "minecraft:pufferfish",
+    "requirements": "lockout:warm_ocean"
+}

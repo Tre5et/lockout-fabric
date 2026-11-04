@@ -1,0 +1,6 @@
+{
+    "type": "lockout:advancement/any",
+    "difficulty": 0.72,
+    "advancements": "minecraft:nether/charge_respawn_anchor",
+    "name": "Fully charge a Respawn Anchor"
+}

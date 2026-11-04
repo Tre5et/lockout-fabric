@@ -1,0 +1,19 @@
+{
+    "type": "lockout:death/damage_type",
+    "difficulty": 0.74,
+    "types": "minecraft:bad_respawn_point",
+    "texture": {
+        "type": "lockout:cycle",
+        "textures": [
+            {
+                "type": "lockout:item",
+                "item": "minecraft:red_bed"
+            },
+            {
+                "type": "lockout:item",
+                "item": "minecraft:respawn_anchor"
+            }
+        ]
+    },
+    "name": "Die to [Intentional Game Design]"
+}

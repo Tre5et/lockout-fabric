@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.88,
+    "items": "minecraft:sponge",
+    "requirements": "lockout:ocean_monument"
+}

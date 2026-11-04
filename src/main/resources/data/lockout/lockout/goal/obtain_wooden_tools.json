@@ -1,0 +1,13 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.07,
+    "items": [
+        "minecraft:wooden_sword",
+        "minecraft:wooden_axe",
+        "minecraft:wooden_pickaxe",
+        "minecraft:wooden_shovel",
+        "minecraft:wooden_hoe",
+        "minecraft:wooden_spear"
+    ],
+    "name": "Obtain all Wooden Tools"
+}

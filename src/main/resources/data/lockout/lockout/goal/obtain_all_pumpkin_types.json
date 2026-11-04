@@ -1,0 +1,10 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.22,
+    "items": [
+        "minecraft:pumpkin",
+        "minecraft:carved_pumpkin",
+        "minecraft:jack_o_lantern"
+    ],
+    "name": "Obtain every type of Pumpkin"
+}

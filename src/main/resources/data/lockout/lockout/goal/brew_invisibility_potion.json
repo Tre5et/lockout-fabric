@@ -1,0 +1,8 @@
+{
+    "type": "lockout:brew/effect",
+    "difficulty": 0.72,
+    "effects": [
+        "minecraft:invisibility",
+        "minecraft:long_invisibility"
+    ]
+}

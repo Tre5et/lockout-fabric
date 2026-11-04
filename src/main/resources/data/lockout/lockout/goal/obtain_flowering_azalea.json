@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.22,
+    "items": "minecraft:flowering_azalea",
+    "requirements": "lockout:lush_caves"
+}

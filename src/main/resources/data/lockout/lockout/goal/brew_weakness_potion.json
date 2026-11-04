@@ -1,0 +1,8 @@
+{
+    "type": "lockout:brew/effect",
+    "difficulty": 0.68,
+    "effects": [
+        "minecraft:weakness",
+        "minecraft:long_weakness"
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "type": "lockout:death/damage_type",
+    "difficulty": 0.3,
+    "types": "minecraft:fireworks",
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:firework_rocket"
+    },
+    "name": "Die to Firework Rocket"
+}

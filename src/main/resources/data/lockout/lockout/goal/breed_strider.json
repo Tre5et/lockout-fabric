@@ -1,0 +1,5 @@
+{
+    "type": "lockout:breed/any",
+    "difficulty": 0.68,
+    "entities": "minecraft:strider"
+}

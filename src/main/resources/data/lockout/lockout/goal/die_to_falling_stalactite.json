@@ -1,0 +1,20 @@
+{
+    "type": "lockout:death/damage_type",
+    "difficulty": 0.28,
+    "types": "minecraft:falling_stalactite",
+    "texture": {
+        "type": "lockout:cycle",
+        "textures": [
+            {
+                "type": "lockout:item",
+                "item": "minecraft:pointed_dripstone"
+            },
+            {
+                "type": "lockout:item",
+                "item": "minecraft:sulfur_spike"
+            }
+        ]
+    },
+    "name": "Die to falling Stalactite",
+    "requirements": "lockout:spiky_caves"
+}

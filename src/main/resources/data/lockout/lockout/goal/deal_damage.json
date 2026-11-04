@@ -1,0 +1,13 @@
+{
+    "type": "lockout:deal_damage/total",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 100,
+        "max": 500,
+        "start": 0.45,
+        "end": 0.8
+    },
+    "min": 100,
+    "max": 500,
+    "step": 25
+}

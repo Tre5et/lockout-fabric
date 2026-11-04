@@ -1,0 +1,10 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.35,
+    "items": [
+        "minecraft:furnace",
+        "minecraft:blast_furnace",
+        "minecraft:smoker"
+    ],
+    "name": "Obtain every type of Furnace"
+}

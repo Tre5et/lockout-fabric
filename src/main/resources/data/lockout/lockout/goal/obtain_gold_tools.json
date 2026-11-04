@@ -1,0 +1,13 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.35,
+    "items": [
+        "minecraft:golden_sword",
+        "minecraft:golden_axe",
+        "minecraft:golden_pickaxe",
+        "minecraft:golden_shovel",
+        "minecraft:golden_hoe",
+        "minecraft:golden_spear"
+    ],
+    "name": "Obtain all Gold Tools"
+}

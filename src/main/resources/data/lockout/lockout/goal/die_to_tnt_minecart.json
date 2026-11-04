@@ -1,0 +1,6 @@
+{
+    "type": "lockout:death/entity",
+    "difficulty": 0.3,
+    "entities": "minecraft:tnt_minecart",
+    "name": "Die to TNT Minecart"
+}

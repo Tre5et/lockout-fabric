@@ -1,0 +1,19 @@
+{
+    "type": "lockout:consume/unique",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 2,
+        "max": 4,
+        "start": 0.3,
+        "end": 0.55
+    },
+    "items": [
+        "minecraft:rabbit_stew",
+        "minecraft:beetroot_soup",
+        "minecraft:mushroom_stew",
+        "minecraft:suspicious_stew"
+    ],
+    "min": 2,
+    "max": 4,
+    "name": "Eat %d Unique Soups"
+}

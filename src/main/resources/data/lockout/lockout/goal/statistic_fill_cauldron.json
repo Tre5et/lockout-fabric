@@ -1,0 +1,10 @@
+{
+    "type": "lockout:statistic/custom",
+    "difficulty": 0.12,
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:cauldron"
+    },
+    "statistics": "minecraft:fill_cauldron",
+    "name": "Fill a Cauldron with Water"
+}

@@ -1,0 +1,6 @@
+{
+    "type": "lockout:kill/any",
+    "difficulty": 0.9,
+    "entities": "minecraft:elder_guardian",
+    "requirements": "lockout:ocean_monument"
+}

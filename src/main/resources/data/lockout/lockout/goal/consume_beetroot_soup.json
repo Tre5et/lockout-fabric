@@ -1,0 +1,6 @@
+{
+    "type": "lockout:consume/any",
+    "difficulty": 0.35,
+    "items": "minecraft:beetroot_soup",
+    "name": "Eat Beetroot Soup"
+}

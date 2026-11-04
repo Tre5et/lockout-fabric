@@ -1,0 +1,7 @@
+{
+    "type": "lockout:consume/any",
+    "difficulty": 0.18,
+    "items": "minecraft:cookie",
+    "requirements": "lockout:jungle",
+    "name": "Eat a Cookie"
+}

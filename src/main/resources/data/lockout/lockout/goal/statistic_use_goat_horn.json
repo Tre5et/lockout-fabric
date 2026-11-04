@@ -1,0 +1,7 @@
+{
+    "type": "lockout:statistic/item",
+    "difficulty": 0.25,
+    "statistic": "minecraft:used",
+    "items": "minecraft:goat_horn",
+    "name": "Toot a Goat Horn"
+}

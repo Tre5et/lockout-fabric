@@ -1,0 +1,6 @@
+{
+    "type": "lockout:spawn/any",
+    "difficulty": 0.3,
+    "entities": "minecraft:snow_golem",
+    "requirements": "lockout:snowy"
+}

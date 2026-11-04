@@ -1,0 +1,5 @@
+{
+    "type": "lockout:spawn/any",
+    "difficulty": 0.42,
+    "entities": "minecraft:copper_golem"
+}

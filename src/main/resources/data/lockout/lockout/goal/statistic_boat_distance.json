@@ -1,0 +1,22 @@
+{
+    "type": "lockout:statistic/custom_total",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 50000,
+        "max": 300000,
+        "start": 0.3,
+        "end": 0.75
+    },
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:oak_boat"
+    },
+    "statistics": "minecraft:boat_one_cm",
+    "creation_name": "Distance to Boat",
+    "progress_name": "Distance Boated",
+    "scale": 100.0,
+    "min": 500,
+    "max": 3000,
+    "step": 100,
+    "name": "Boat %dm"
+}

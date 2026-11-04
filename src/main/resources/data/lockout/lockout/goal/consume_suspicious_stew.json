@@ -1,0 +1,6 @@
+{
+    "type": "lockout:consume/any",
+    "difficulty": 0.15,
+    "items": "minecraft:suspicious_stew",
+    "name": "Eat Suspicious Stew"
+}

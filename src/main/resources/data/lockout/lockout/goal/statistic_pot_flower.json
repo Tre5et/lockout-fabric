@@ -1,0 +1,10 @@
+{
+    "type": "lockout:statistic/custom",
+    "difficulty": 0.1,
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:flower_pot"
+    },
+    "statistics": "minecraft:pot_flower",
+    "name": "Pot any Flower"
+}

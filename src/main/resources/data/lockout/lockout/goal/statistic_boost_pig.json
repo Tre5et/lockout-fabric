@@ -1,0 +1,8 @@
+{
+    "type": "lockout:statistic/item_while_riding",
+    "difficulty": 0.4,
+    "statistic": "minecraft:used",
+    "items": "minecraft:carrot_on_a_stick",
+    "entity": "minecraft:pig",
+    "name": "Use Carrot on a Stick to boost a Pig"
+}

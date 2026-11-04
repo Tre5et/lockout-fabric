@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/count",
+    "difficulty": 0.08,
+    "items": "minecraft:coarse_dirt",
+    "count": 64
+}

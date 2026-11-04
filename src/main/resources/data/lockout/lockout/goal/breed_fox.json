@@ -1,0 +1,6 @@
+{
+    "type": "lockout:breed/any",
+    "difficulty": 0.42,
+    "entities": "minecraft:fox",
+    "requirements": "lockout:taiga"
+}

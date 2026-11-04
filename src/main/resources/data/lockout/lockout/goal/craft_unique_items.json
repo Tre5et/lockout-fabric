@@ -1,0 +1,13 @@
+{
+    "type": "lockout:craft/unique",
+    "difficulty": {
+        "type": "lockout:linear",
+        "min": 20,
+        "max": 100,
+        "start": 0.5,
+        "end": 0.9
+    },
+    "min": 20,
+    "max": 100,
+    "step": 10
+}

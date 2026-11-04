@@ -1,0 +1,13 @@
+{
+    "type": "lockout:death/damage_type",
+    "difficulty": 0.3,
+    "types": [
+        "minecraft:magic",
+        "minecraft:indirect_magic"
+    ],
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:potion"
+    },
+    "name": "Die by Magic"
+}

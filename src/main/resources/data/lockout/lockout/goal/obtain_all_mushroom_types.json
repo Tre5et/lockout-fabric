@@ -1,0 +1,11 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.66,
+    "items": [
+        "minecraft:brown_mushroom",
+        "minecraft:red_mushroom",
+        "minecraft:crimson_fungus",
+        "minecraft:warped_fungus"
+    ],
+    "name": "Obtain every type of Mushroom"
+}

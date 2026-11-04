@@ -1,0 +1,7 @@
+{
+    "type": "lockout:use_item_on_entity/exactly",
+    "difficulty": 0.4,
+    "item": "minecraft:wolf_armor",
+    "entity": "minecraft:wolf",
+    "name": "Put Wolf Armor on Wolf"
+}

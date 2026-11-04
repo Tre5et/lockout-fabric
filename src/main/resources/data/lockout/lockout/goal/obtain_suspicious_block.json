@@ -1,0 +1,10 @@
+{
+    "type": "lockout:obtain/any",
+    "difficulty": 0.52,
+    "items": [
+        "minecraft:suspicious_sand",
+        "minecraft:suspicious_gravel"
+    ],
+    "requirements": "lockout:suspicious",
+    "name": "Obtain Suspicious Block"
+}

@@ -1,0 +1,11 @@
+{
+    "type": "lockout:death/damage_type",
+    "difficulty": 0.08,
+    "types": "minecraft:sweet_berry_bush",
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:sweet_berries"
+    },
+    "name": "Die to Berry Bush",
+    "requirements": "lockout:taiga"
+}

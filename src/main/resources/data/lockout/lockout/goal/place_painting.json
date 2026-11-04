@@ -1,0 +1,10 @@
+{
+    "type": "lockout:use_item_on_block/any",
+    "difficulty": 0.12,
+    "items": "minecraft:painting",
+    "name": "Place a Painting",
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:painting"
+    }
+}

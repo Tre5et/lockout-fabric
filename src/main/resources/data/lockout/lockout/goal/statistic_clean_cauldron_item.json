@@ -1,0 +1,14 @@
+{
+    "type": "lockout:statistic/custom",
+    "difficulty": 0.15,
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:cauldron"
+    },
+    "statistics": [
+        "minecraft:clean_armor",
+        "minecraft:clean_banner",
+        "minecraft:clean_shulker_box"
+    ],
+    "name": "Clean an Item in a Cauldron"
+}

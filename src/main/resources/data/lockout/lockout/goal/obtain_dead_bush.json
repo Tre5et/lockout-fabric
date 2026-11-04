@@ -1,0 +1,6 @@
+{
+    "type": "lockout:obtain/all",
+    "difficulty": 0.38,
+    "items": "minecraft:dead_bush",
+    "requirements": "lockout:dead_biome"
+}

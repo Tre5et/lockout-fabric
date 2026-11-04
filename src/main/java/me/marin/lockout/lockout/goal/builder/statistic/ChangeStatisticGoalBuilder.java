@@ -118,7 +118,7 @@ public abstract class ChangeStatisticGoalBuilder<T> extends GoalBuilder<Statisti
         public static final MapCodec<ItemInteraction> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("", i)
                 .and(i.group(
                         RegistryCodecs.holder(Registries.STAT_TYPE)
-                                .comapFlatMap(s -> Registries.ITEM.isFor(s.value().getRegistry().key()) ? DataResult.success(Holder.direct((StatType<Item>)s.value())) : DataResult.error(() -> "StatType is not an item stat"), s -> Holder.direct(s.value()))
+                                .comapFlatMap(s -> Registries.ITEM.identifier().equals(s.value().getRegistry().key().identifier()) ? DataResult.success(Holder.direct((StatType<Item>)s.value())) : DataResult.error(() -> "StatType is not an item stat"), s -> Holder.direct(s.value()))
                                 .fieldOf("statistic").forGetter(ItemInteraction::getStatistic),
                         RegistryCodecs.holderSet(Registries.ITEM).fieldOf("items").forGetter(ItemInteraction::getItems)
                 )).apply(i, ItemInteraction::new));
@@ -146,7 +146,7 @@ public abstract class ChangeStatisticGoalBuilder<T> extends GoalBuilder<Statisti
         public static final MapCodec<ItemInteractionWhileRiding> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("", i)
                 .and(i.group(
                         RegistryCodecs.holder(Registries.STAT_TYPE)
-                                .comapFlatMap(s -> Registries.ITEM.isFor(s.value().getRegistry().key()) ? DataResult.success(Holder.direct((StatType<Item>)s.value())) : DataResult.error(() -> "StatType is not an item stat"), s -> Holder.direct(s.value()))
+                                .comapFlatMap(s -> Registries.ITEM.identifier().equals(s.value().getRegistry().key().identifier()) ? DataResult.success(Holder.direct((StatType<Item>)s.value())) : DataResult.error(() -> "StatType is not an item stat"), s -> Holder.direct(s.value()))
                                 .fieldOf("statistic").forGetter(ItemInteractionWhileRiding::getStatistic),
                         RegistryCodecs.holderSet(Registries.ITEM).fieldOf("items").forGetter(ItemInteractionWhileRiding::getItems),
                         RegistryCodecs.holder(Registries.ENTITY_TYPE).fieldOf("entity").forGetter(ItemInteractionWhileRiding::getEntity)

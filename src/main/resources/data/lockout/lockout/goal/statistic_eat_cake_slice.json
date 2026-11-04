@@ -1,0 +1,10 @@
+{
+    "type": "lockout:statistic/custom",
+    "difficulty": 0.38,
+    "texture": {
+        "type": "lockout:item",
+        "item": "minecraft:cake"
+    },
+    "statistics": "minecraft:eat_cake_slice",
+    "name": "Eat a slice of Cake"
+}
