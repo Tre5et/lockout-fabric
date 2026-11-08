@@ -14,7 +14,7 @@ import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.network.*;
-import me.marin.lockout.registries.LockoutRegistryKeys;
+import me.marin.lockout.registries.LockoutRegistries;
 import me.marin.lockout.server.ServerConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -74,7 +74,7 @@ public class LockoutClient implements ClientModInitializer {
             Lockout.error(t);
             throw t;
         }
-        Optional<Registry<GoalBuilder<?,?>>> registry = Minecraft.getInstance().level.registryAccess().lookup(LockoutRegistryKeys.GOAL);
+        Optional<Registry<GoalBuilder<?,?>>> registry = Minecraft.getInstance().level.registryAccess().lookup(LockoutRegistries.GOAL);
         if(registry.isEmpty()) {
             RuntimeException t = new IllegalStateException("Goal registry is not accessible.");
             Lockout.error(t);

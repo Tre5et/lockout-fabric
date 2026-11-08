@@ -2,7 +2,7 @@ package me.marin.lockout.network;
 
 import me.marin.lockout.Constants;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
-import me.marin.lockout.registries.LockoutRegistryKeys;
+import me.marin.lockout.registries.LockoutRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -15,7 +15,7 @@ import java.util.Optional;
 public record HintResultPayload(ResourceKey<GoalBuilder<?,?>> goalId, int hintIndex, Optional<String> data, Optional<String> error) implements CustomPacketPayload {
     public static final Type<HintResultPayload> ID = new Type<>(Constants.HINT_RESULT_PACKET);
     public static final StreamCodec<RegistryFriendlyByteBuf, HintResultPayload> CODEC = StreamCodec.composite(
-            ResourceKey.streamCodec(LockoutRegistryKeys.GOAL),
+            ResourceKey.streamCodec(LockoutRegistries.GOAL),
             HintResultPayload::goalId,
             ByteBufCodecs.INT,
             HintResultPayload::hintIndex,

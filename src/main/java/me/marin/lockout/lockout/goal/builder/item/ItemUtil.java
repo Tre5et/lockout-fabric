@@ -4,7 +4,7 @@ import me.marin.lockout.lockout.goal.builder.BuilderUtil;
 import me.marin.lockout.lockout.goal.rendering.texture.ItemTextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.mixin.server.PlayerInventoryAccessor;
-import me.marin.lockout.registries.LockoutRegistries;
+import me.marin.lockout.registries.LockoutBuiltInRegistries;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -114,36 +114,36 @@ public class ItemUtil {
     }
 
     public static void bootstrapColoredItems(Registry<ColorCollection<Item>> registry) {
-        LockoutRegistries.register(registry, "wool", Items.WOOL);
-        LockoutRegistries.register(registry, "wool_slab", Items.WOOL_SLAB);
-        LockoutRegistries.register(registry, "wool_stairs", Items.WOOL_STAIRS);
-        LockoutRegistries.register(registry, "cushion", Items.CUSHION);
-        LockoutRegistries.register(registry, "carpet", Items.CARPET);
-        LockoutRegistries.register(registry, "dyed_terracotta", Items.DYED_TERRACOTTA);
-        LockoutRegistries.register(registry, "glazed_terracotta", Items.GLAZED_TERRACOTTA);
-        LockoutRegistries.register(registry, "concrete", Items.CONCRETE);
-        LockoutRegistries.register(registry, "concrete_powder", Items.CONCRETE_POWDER);
-        LockoutRegistries.register(registry, "concrete_slab", Items.CONCRETE_SLAB);
-        LockoutRegistries.register(registry, "concrete_stairs", Items.CONCRETE_STAIRS);
-        LockoutRegistries.register(registry, "stained_glass", Items.STAINED_GLASS);
-        LockoutRegistries.register(registry, "stained_glass_pane", Items.STAINED_GLASS_PANE);
-        LockoutRegistries.register(registry, "dyed_shulker_box", Items.DYED_SHULKER_BOX);
-        LockoutRegistries.register(registry, "harness", Items.HARNESS);
-        LockoutRegistries.register(registry, "bed", Items.BED);
-        LockoutRegistries.register(registry, "dye", Items.DYE);
-        LockoutRegistries.register(registry, "dyed_bundle", Items.DYED_BUNDLE);
-        LockoutRegistries.register(registry, "dyed_candle", Items.DYED_CANDLE);
+        LockoutBuiltInRegistries.register(registry, "wool", Items.WOOL);
+        LockoutBuiltInRegistries.register(registry, "wool_slab", Items.WOOL_SLAB);
+        LockoutBuiltInRegistries.register(registry, "wool_stairs", Items.WOOL_STAIRS);
+        LockoutBuiltInRegistries.register(registry, "cushion", Items.CUSHION);
+        LockoutBuiltInRegistries.register(registry, "carpet", Items.CARPET);
+        LockoutBuiltInRegistries.register(registry, "dyed_terracotta", Items.DYED_TERRACOTTA);
+        LockoutBuiltInRegistries.register(registry, "glazed_terracotta", Items.GLAZED_TERRACOTTA);
+        LockoutBuiltInRegistries.register(registry, "concrete", Items.CONCRETE);
+        LockoutBuiltInRegistries.register(registry, "concrete_powder", Items.CONCRETE_POWDER);
+        LockoutBuiltInRegistries.register(registry, "concrete_slab", Items.CONCRETE_SLAB);
+        LockoutBuiltInRegistries.register(registry, "concrete_stairs", Items.CONCRETE_STAIRS);
+        LockoutBuiltInRegistries.register(registry, "stained_glass", Items.STAINED_GLASS);
+        LockoutBuiltInRegistries.register(registry, "stained_glass_pane", Items.STAINED_GLASS_PANE);
+        LockoutBuiltInRegistries.register(registry, "dyed_shulker_box", Items.DYED_SHULKER_BOX);
+        LockoutBuiltInRegistries.register(registry, "harness", Items.HARNESS);
+        LockoutBuiltInRegistries.register(registry, "bed", Items.BED);
+        LockoutBuiltInRegistries.register(registry, "dye", Items.DYE);
+        LockoutBuiltInRegistries.register(registry, "dyed_bundle", Items.DYED_BUNDLE);
+        LockoutBuiltInRegistries.register(registry, "dyed_candle", Items.DYED_CANDLE);
     }
 
     public static void bootstrapArmorMaterials(Registry<ArmorMaterial> registry) {
-        LockoutRegistries.register(registry, "netherite", ArmorMaterials.NETHERITE);
-        LockoutRegistries.register(registry, "diamond", ArmorMaterials.DIAMOND);
-        LockoutRegistries.register(registry, "gold", ArmorMaterials.GOLD);
-        LockoutRegistries.register(registry, "iron", ArmorMaterials.IRON);
-        LockoutRegistries.register(registry, "chainmail", ArmorMaterials.CHAINMAIL);
-        LockoutRegistries.register(registry, "copper", ArmorMaterials.COPPER);
-        LockoutRegistries.register(registry, "leather", ArmorMaterials.LEATHER);
-        LockoutRegistries.register(registry, "turtle_scute", ArmorMaterials.TURTLE_SCUTE);
+        LockoutBuiltInRegistries.register(registry, "netherite", ArmorMaterials.NETHERITE);
+        LockoutBuiltInRegistries.register(registry, "diamond", ArmorMaterials.DIAMOND);
+        LockoutBuiltInRegistries.register(registry, "gold", ArmorMaterials.GOLD);
+        LockoutBuiltInRegistries.register(registry, "iron", ArmorMaterials.IRON);
+        LockoutBuiltInRegistries.register(registry, "chainmail", ArmorMaterials.CHAINMAIL);
+        LockoutBuiltInRegistries.register(registry, "copper", ArmorMaterials.COPPER);
+        LockoutBuiltInRegistries.register(registry, "leather", ArmorMaterials.LEATHER);
+        LockoutBuiltInRegistries.register(registry, "turtle_scute", ArmorMaterials.TURTLE_SCUTE);
     }
 
     public static final List<Item> POTTERY_SHERDS = List.of(

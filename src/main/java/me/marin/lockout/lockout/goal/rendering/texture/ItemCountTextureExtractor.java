@@ -1,9 +1,9 @@
 package me.marin.lockout.lockout.goal.rendering.texture;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
+import me.marin.lockout.util.LockoutCodecs;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public class ItemCountTextureExtractor implements TextureExtractor {
     public static final MapCodec<ItemCountTextureExtractor> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Codec.STRING.fieldOf("text").forGetter(t -> t.getText().getString()),
+            LockoutCodecs.NUMBER_OR_STRING.fieldOf("count").forGetter(t -> t.getText().getString()),
             TextColor.CODEC.optionalFieldOf("color", TextColor.WHITE).forGetter(t -> Optional.ofNullable(t.getText().getStyle().getColor()).orElse(TextColor.WHITE))
     ).apply(instance, (t,c) -> new ItemCountTextureExtractor(Component.literal(t).withColor(c))));
 

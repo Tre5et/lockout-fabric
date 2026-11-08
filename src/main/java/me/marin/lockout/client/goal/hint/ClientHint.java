@@ -6,14 +6,14 @@ import com.mojang.serialization.MapCodec;
 import me.marin.lockout.lockout.goal.hint.GoalHintResult;
 import me.marin.lockout.lockout.goal.hint.Hint;
 import me.marin.lockout.network.HintResultPayload;
-import me.marin.lockout.registries.LockoutRegistries;
+import me.marin.lockout.registries.LockoutBuiltInRegistries;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 
 public interface ClientHint<T> extends Hint<T> {
-    Codec<ClientHint<?>> CODEC = LockoutRegistries.CLIENT_HINT_TYPE.byNameCodec().dispatch(ClientHint::codec, c -> c);
+    Codec<ClientHint<?>> CODEC = LockoutBuiltInRegistries.CLIENT_HINT_TYPE.byNameCodec().dispatch(ClientHint::codec, c -> c);
 
     Component getTitle();
     T getData();
@@ -24,7 +24,7 @@ public interface ClientHint<T> extends Hint<T> {
     MapCodec<? extends ClientHint<?>> codec();
 
     static void bootstrap(Registry<MapCodec<? extends ClientHint<?>>> registry) {
-        LockoutRegistries.register(registry, "position", PositionClientHint.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "position", PositionClientHint.MAP_CODEC);
     }
 
     default void update(GoalHintResult<T> result) {

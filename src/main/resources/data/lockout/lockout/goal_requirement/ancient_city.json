@@ -2,7 +2,5 @@
     "type": "lockout:structure",
     "name": "Ancient City",
     "decoration": "minecraft:ancient_city",
-    "structures": [
-        "minecraft:ancient_city"
-    ]
+    "structures": "minecraft:ancient_city"
 }

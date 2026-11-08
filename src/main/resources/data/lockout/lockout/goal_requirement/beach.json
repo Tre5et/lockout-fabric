@@ -2,7 +2,5 @@
     "type": "lockout:biome",
     "name": "beach",
     "decoration": "minecraft:banner_yellow",
-    "biomes": [
-        "minecraft:beach"
-    ]
+    "biomes": "minecraft:beach"
 }

@@ -3,14 +3,14 @@ package me.marin.lockout.lockout.goal.difficulty;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import me.marin.lockout.registries.LockoutRegistries;
+import me.marin.lockout.registries.LockoutBuiltInRegistries;
 import net.minecraft.core.Registry;
 
 import java.util.Optional;
 
 public interface GoalDifficultySupplier<T> {
     Codec<GoalDifficultySupplier<?>> CODEC = Codec.withAlternative(
-            LockoutRegistries.DIFFICULTY_SUPPLIER_VOID_TYPE.byNameCodec().dispatch(GoalDifficultySupplier::codec, c -> c),
+            LockoutBuiltInRegistries.DIFFICULTY_SUPPLIER_VOID_TYPE.byNameCodec().dispatch(GoalDifficultySupplier::codec, c -> c),
             Codec.floatRange(0f,1f).<GoalDifficultySupplier<Object>>xmap(GoalDifficultySupplier::of, d -> d.getInternal(null))
     );
 
@@ -36,8 +36,8 @@ public interface GoalDifficultySupplier<T> {
     }
 
     static void bootstrap(Registry<MapCodec<? extends GoalDifficultySupplier<? super Number>>> registry) {
-        LockoutRegistries.register(registry, "simple", Simple.MAP_CODEC);
-        LockoutRegistries.register(registry, "linear", Linear.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "simple", Simple.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "linear", Linear.MAP_CODEC);
     }
 
     record Simple(float difficulty) implements GoalDifficultySupplier<Object> {

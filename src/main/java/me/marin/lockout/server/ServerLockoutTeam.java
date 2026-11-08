@@ -7,7 +7,7 @@ import lombok.Getter;
 import me.marin.lockout.LockoutTeam;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.network.HintResultPayload;
-import me.marin.lockout.registries.LockoutRegistryKeys;
+import me.marin.lockout.registries.LockoutRegistries;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -88,7 +88,7 @@ public class ServerLockoutTeam extends LockoutTeam {
                     if(!indexHint.getValue().isJsonPrimitive() || !indexHint.getValue().getAsJsonPrimitive().isString()) throw new IOException("Server board hint is not a string.");
                     newGoalHints.put(Integer.valueOf(indexHint.getKey()), indexHint.getValue().getAsString());
                 }
-                newHints.put(ResourceKey.create(LockoutRegistryKeys.GOAL, Identifier.parse(goalHints.getKey())), newGoalHints);
+                newHints.put(ResourceKey.create(LockoutRegistries.GOAL, Identifier.parse(goalHints.getKey())), newGoalHints);
             }
             team.getResolvedHints().clear();
             team.getResolvedHints().putAll(newHints);

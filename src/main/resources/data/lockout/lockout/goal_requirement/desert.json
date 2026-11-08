@@ -2,7 +2,5 @@
     "type": "lockout:biome",
     "name": "Desert",
     "decoration": "minecraft:banner_yellow",
-    "biomes": [
-        "minecraft:desert"
-    ]
+    "biomes": "minecraft:desert"
 }

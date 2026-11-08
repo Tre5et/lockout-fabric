@@ -21,7 +21,7 @@ import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.*;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirements;
-import me.marin.lockout.registries.LockoutRegistryKeys;
+import me.marin.lockout.registries.LockoutRegistries;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
@@ -191,7 +191,7 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.T
     public static class Colored extends ObtainItemGoalBuilder<DyeColor> {
         public static final MapCodec<Colored> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Obtain", i)
                 .and(i.group(
-                        RegistryCodecs.holder(LockoutRegistryKeys.COLORED_ITEM).fieldOf("item_collection").forGetter(Colored::getCollection),
+                        RegistryCodecs.holder(LockoutRegistries.COLORED_ITEM).fieldOf("item_collection").forGetter(Colored::getCollection),
                         Codec.INT.optionalFieldOf("count", 1).forGetter(Colored::getCount)
                 )).apply(i, Colored::new));
 
@@ -329,7 +329,7 @@ public abstract class ObtainItemGoalBuilder<T> extends GoalBuilder<BuilderUtil.T
 
     public static class FullArmorOfMaterial extends ObtainItemGoalBuilder<Void> {
         public static final MapCodec<FullArmorOfMaterial> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("Wear", i)
-                .and(RegistryCodecs.holder(LockoutRegistryKeys.ARMOR_MATERIAL).fieldOf("material").forGetter(FullArmorOfMaterial::getMaterial))
+                .and(RegistryCodecs.holder(LockoutRegistries.ARMOR_MATERIAL).fieldOf("material").forGetter(FullArmorOfMaterial::getMaterial))
                 .apply(i, FullArmorOfMaterial::new));
 
         @Getter

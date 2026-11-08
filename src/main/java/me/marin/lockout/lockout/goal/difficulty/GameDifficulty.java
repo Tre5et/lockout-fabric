@@ -9,7 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
-import me.marin.lockout.registries.LockoutRegistryKeys;
+import me.marin.lockout.registries.LockoutRegistries;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
@@ -50,7 +50,7 @@ public class GameDifficulty {
         public Identifier parse(StringReader stringReader) throws CommandSyntaxException {
             String s = stringReader.readString();
             if(Minecraft.getInstance().level == null) throw new SimpleCommandExceptionType(Component.literal("The level is not accessible.")).createWithContext(stringReader);
-            Optional<Registry<GameDifficulty>> registry = Minecraft.getInstance().level.registryAccess().lookup(LockoutRegistryKeys.DIFFICULTY);
+            Optional<Registry<GameDifficulty>> registry = Minecraft.getInstance().level.registryAccess().lookup(LockoutRegistries.DIFFICULTY);
             if(registry.isEmpty()) throw new SimpleCommandExceptionType(Component.literal("Unable to access difficulty registry.")).createWithContext(stringReader);
             Optional<Map.Entry<ResourceKey<GameDifficulty>, GameDifficulty>> difficulty = registry.get().entrySet().stream().filter(d -> Objects.equals(d.getValue().getName(), s)).findAny();
             if(difficulty.isEmpty()) throw new SimpleCommandExceptionType(Component.literal("Unable to access difficulty " + s + ".")).createWithContext(stringReader);
@@ -60,7 +60,7 @@ public class GameDifficulty {
         @Override
         public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
             if(Minecraft.getInstance().level == null) return SharedSuggestionProvider.suggest(List.of(), builder);
-            Optional<Registry<GameDifficulty>> registry = Minecraft.getInstance().level.registryAccess().lookup(LockoutRegistryKeys.DIFFICULTY);
+            Optional<Registry<GameDifficulty>> registry = Minecraft.getInstance().level.registryAccess().lookup(LockoutRegistries.DIFFICULTY);
             return registry.map(gameDifficulties -> SharedSuggestionProvider.suggest(gameDifficulties.stream().map(GameDifficulty::getName), builder)).orElseGet(() -> SharedSuggestionProvider.suggest(List.of(), builder));
         }
     }

@@ -7,7 +7,12 @@
     ],
     "texture": {
         "type": "lockout:item",
-        "item": "minecraft:potion"
+        "item": {
+            "id": "minecraft:potion",
+            "components": {
+                "minecraft:potion_contents": "minecraft:harming"
+            }
+        }
     },
     "name": "Die by Magic"
 }

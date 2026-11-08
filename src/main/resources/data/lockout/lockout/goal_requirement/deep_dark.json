@@ -2,7 +2,5 @@
     "type": "lockout:biome",
     "name": "Deep Dark",
     "decoration": "minecraft:ancient_city",
-    "biomes": [
-        "minecraft:deep_dark"
-    ]
+    "biomes": "minecraft:deep_dark"
 }

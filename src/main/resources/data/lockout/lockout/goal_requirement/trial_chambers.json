@@ -2,7 +2,5 @@
     "type": "lockout:structure",
     "name": "Trial Chambers",
     "decoration": "minecraft:trial_chambers",
-    "structures": [
-        "minecraft:trial_chambers"
-    ]
+    "structures": "minecraft:trial_chambers"
 }

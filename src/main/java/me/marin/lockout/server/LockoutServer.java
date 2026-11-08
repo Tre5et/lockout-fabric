@@ -11,7 +11,7 @@ import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
 import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
 import me.marin.lockout.network.*;
-import me.marin.lockout.registries.LockoutRegistryKeys;
+import me.marin.lockout.registries.LockoutRegistries;
 import me.marin.lockout.server.game.ServerLockoutBoard;
 import me.marin.lockout.server.game.ServerLockoutGame;
 import me.marin.lockout.server.goal.ServerGoal;
@@ -107,7 +107,7 @@ public class LockoutServer {
     public static Map<UUID, Long> waitingForVersionPacketPlayersMap = new HashMap<>();
 
     public static Registry<GoalBuilder<?,?>> goalRegistry() {
-        Optional<Registry<GoalBuilder<?,?>>> registry = server.registryAccess().lookup(LockoutRegistryKeys.GOAL);
+        Optional<Registry<GoalBuilder<?,?>>> registry = server.registryAccess().lookup(LockoutRegistries.GOAL);
         if(registry.isEmpty()) {
             RuntimeException t = new IllegalStateException("Goal registry is not accessible.");
             Lockout.error(t);
@@ -826,7 +826,7 @@ public class LockoutServer {
     }
 
     public static int setDifficulty(Identifier difficultyKey, ServerPlayNetworking.Context context) {
-        Optional<Holder.Reference<GameDifficulty>> difficulty = server.registryAccess().lookup(LockoutRegistryKeys.DIFFICULTY).flatMap(r -> r.get(difficultyKey));
+        Optional<Holder.Reference<GameDifficulty>> difficulty = server.registryAccess().lookup(LockoutRegistries.DIFFICULTY).flatMap(r -> r.get(difficultyKey));
         if(difficulty.isEmpty()) {
             context.player().sendSystemMessage(Component.literal("Unable to find difficulty " + difficultyKey.toString() + "."));
             return 1;

@@ -2,7 +2,5 @@
     "type": "lockout:biome",
     "name": "Sulfur Caves",
     "decoration": "minecraft:banner_yellow",
-    "biomes": [
-        "lockout:sulfur_caves"
-    ]
+    "biomes": "lockout:sulfur_caves"
 }

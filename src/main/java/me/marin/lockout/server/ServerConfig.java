@@ -10,7 +10,7 @@ import me.marin.lockout.Lockout;
 import me.marin.lockout.lockout.goal.difficulty.GameDifficulty;
 import me.marin.lockout.network.Network;
 import me.marin.lockout.network.ServerConfigPayload;
-import me.marin.lockout.registries.LockoutRegistryKeys;
+import me.marin.lockout.registries.LockoutRegistries;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -92,7 +92,7 @@ public class ServerConfig {
     }
 
     public Optional<Holder.Reference<GameDifficulty>> getDifficulty(RegistryAccess registryAccess) {
-        return registryAccess.lookup(LockoutRegistryKeys.DIFFICULTY).flatMap(r -> r.get(this.difficulty));
+        return registryAccess.lookup(LockoutRegistries.DIFFICULTY).flatMap(r -> r.get(this.difficulty));
     }
 
     public void setDifficulty(Holder.Reference<GameDifficulty> difficulty) {

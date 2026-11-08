@@ -12,7 +12,7 @@ import me.marin.lockout.lockout.goal.progress.GoalProgressSupplier;
 import me.marin.lockout.lockout.goal.rendering.name.NameProvider;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
-import me.marin.lockout.registries.LockoutRegistryKeys;
+import me.marin.lockout.registries.LockoutRegistries;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.codec.RegistryCodecs;
@@ -31,7 +31,7 @@ public abstract class CustomEventGoalBuilder<T> extends GoalBuilder<CustomEvent,
 
     public static class Exactly extends CustomEventGoalBuilder<Void> {
         public static final MapCodec<Exactly> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> GoalBuilder.codecBuilder("", i)
-                .and(RegistryCodecs.holder(LockoutRegistryKeys.CUSTOM_EVENT).fieldOf("event").forGetter(Exactly::getEvent))
+                .and(RegistryCodecs.holder(LockoutRegistries.CUSTOM_EVENT).fieldOf("event").forGetter(Exactly::getEvent))
                 .apply(i, Exactly::new));
 
         @Getter

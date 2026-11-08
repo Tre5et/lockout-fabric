@@ -7,22 +7,22 @@ import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.hint.GoalHintResult;
 import me.marin.lockout.lockout.goal.hint.Hint;
 import me.marin.lockout.network.HintResultPayload;
-import me.marin.lockout.registries.LockoutRegistries;
+import me.marin.lockout.registries.LockoutBuiltInRegistries;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 public interface ServerHint<T> extends Hint<T> {
-    Codec<ServerHint<?>> CODEC = LockoutRegistries.SERVER_HINT_TYPE.byNameCodec().dispatch(ServerHint::codec, c -> c);
+    Codec<ServerHint<?>> CODEC = LockoutBuiltInRegistries.SERVER_HINT_TYPE.byNameCodec().dispatch(ServerHint::codec, c -> c);
 
     MapCodec<? extends ServerHint<?>> codec();
 
     GoalHintResult<T> resolve(MinecraftServer server, ServerPlayer player);
 
     static void bootstrap(Registry<MapCodec<? extends ServerHint<?>>> registry) {
-        LockoutRegistries.register(registry, "biome", BiomeServerHint.MAP_CODEC);
-        LockoutRegistries.register(registry, "structure", StructureServerHint.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "biome", BiomeServerHint.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "structure", StructureServerHint.MAP_CODEC);
     }
 
     void onPropagateToPlayer(T result, MinecraftServer server, ServerPlayer player);

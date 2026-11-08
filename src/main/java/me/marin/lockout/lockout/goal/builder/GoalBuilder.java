@@ -35,8 +35,8 @@ import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractor;
 import me.marin.lockout.lockout.goal.rendering.texture.TextureExtractorProvider;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirement;
 import me.marin.lockout.lockout.goal.requirements.GoalRequirementContext;
+import me.marin.lockout.registries.LockoutBuiltInRegistries;
 import me.marin.lockout.registries.LockoutRegistries;
-import me.marin.lockout.registries.LockoutRegistryKeys;
 import me.marin.lockout.server.goal.ServerGoal;
 import me.marin.lockout.server.goal.builder.ServerGoalBuildParameters;
 import me.marin.lockout.server.goal.hint.ServerHint;
@@ -51,16 +51,16 @@ import java.util.*;
 import java.util.function.BiFunction;
 
 public abstract class GoalBuilder<U,T extends Object> {
-    public static final Codec<GoalBuilder<?,?>> CODEC = LockoutRegistries.GOAL_BUILDER_TYPE.byNameCodec().dispatch(GoalBuilder::codec, c -> c);
+    public static final Codec<GoalBuilder<?,?>> CODEC = LockoutBuiltInRegistries.GOAL_BUILDER_TYPE.byNameCodec().dispatch(GoalBuilder::codec, c -> c);
 
     public static <T extends GoalBuilder<?,?>> Products.P8<RecordCodecBuilder.Mu<T>, String, GoalDifficultySupplier<?>, HolderSet<GoalRequirement>, Optional<NameProvider>, Optional<TextureExtractorProvider>, HolderSet<GoalGroup>, List<HintCombination<?>>, Boolean> codecBuilder(String defaultNamePrefix, RecordCodecBuilder.Instance<T> instance) {
         return instance.group(
                 Codec.STRING.optionalFieldOf("name_prefix", defaultNamePrefix).forGetter(GoalBuilder::getNamePrefix),
                 GoalDifficultySupplier.CODEC.fieldOf("difficulty").forGetter(GoalBuilder::getDifficultySupplier),
-                RegistryCodecs.holderSet(LockoutRegistryKeys.GOAL_REQUIREMENT).optionalFieldOf("requirements", HolderSet.empty()).forGetter(GoalBuilder::getRequirements),
+                RegistryCodecs.holderSet(LockoutRegistries.GOAL_REQUIREMENT).optionalFieldOf("requirements", HolderSet.empty()).forGetter(GoalBuilder::getRequirements),
                 NameProvider.CODEC.optionalFieldOf("name").forGetter((b) -> Optional.ofNullable(b.getCustomNameProvider())),
                 TextureExtractorProvider.CODEC.optionalFieldOf("texture").forGetter((b) -> Optional.ofNullable(b.getCustomTextureExtractorProvider())),
-                RegistryCodecs.holderSet(LockoutRegistryKeys.GOAL_GROUP).optionalFieldOf("groups", HolderSet.empty()).forGetter(GoalBuilder::getGroups),
+                RegistryCodecs.holderSet(LockoutRegistries.GOAL_GROUP).optionalFieldOf("groups", HolderSet.empty()).forGetter(GoalBuilder::getGroups),
                 Codec.list(HintCombination.CODEC).optionalFieldOf("hints", List.of()).forGetter(GoalBuilder::getHints),
                 Codec.BOOL.optionalFieldOf("enabled", true).forGetter(GoalBuilder::isEnabled)
         );
@@ -112,72 +112,72 @@ public abstract class GoalBuilder<U,T extends Object> {
     public abstract MapCodec<? extends GoalBuilder<?,?>> codec();
 
     public static void bootstrap(Registry<MapCodec<? extends GoalBuilder<?,?>>> registry) {
-        LockoutRegistries.register(registry, "mine_block/any", MineBlockGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "mine_block/unique", MineBlockGoalBuilder.Unique.MAP_CODEC);
-        LockoutRegistries.register(registry, "use_item_on_block/any", UseItemOnBlockGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "deal_damage/total", DealDamageGoalBuilder.Total.MAP_CODEC);
-        LockoutRegistries.register(registry, "death/damage_type", DeathGoalBuilder.Type.MAP_CODEC);
-        LockoutRegistries.register(registry, "death/entity", DeathGoalBuilder.Entity.MAP_CODEC);
-        LockoutRegistries.register(registry, "death/fall", DeathGoalBuilder.FallOffBlock.MAP_CODEC);
-        LockoutRegistries.register(registry, "kill/any", KillEntityGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "kill/unique", KillEntityGoalBuilder.Unique.MAP_CODEC);
-        LockoutRegistries.register(registry, "kill/total", KillEntityGoalBuilder.Total.MAP_CODEC);
-        LockoutRegistries.register(registry, "kill/colored_sheep", KillEntityGoalBuilder.ColoredSheep.MAP_CODEC);
-        LockoutRegistries.register(registry, "kill/method", KillEntityGoalBuilder.DeathType.MAP_CODEC);
-        LockoutRegistries.register(registry, "kill/dimension", KillEntityGoalBuilder.Dimension.MAP_CODEC);
-        LockoutRegistries.register(registry, "take_damage/total", TakeDamageGoalBuilder.Total.MAP_CODEC);
-        LockoutRegistries.register(registry, "age_lock/any", AgeLockMobGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "anger/any", AngerMobGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "breed/any", BreedAnimalGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "breed/unique", BreedAnimalGoalBuilder.Unique.MAP_CODEC);
-        LockoutRegistries.register(registry, "leash/any", LeashEntityGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "leash/unique", LeashEntityGoalBuilder.Unique.MAP_CODEC);
-        LockoutRegistries.register(registry, "spawn/any", SpawnEntityGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "use_item_on_entity/exactly", UseItemOnEntityGoalBuilder.Exactly.MAP_CODEC);
-        LockoutRegistries.register(registry, "use_item_on_entity/name_tag", UseItemOnEntityGoalBuilder.NameTag.MAP_CODEC);
-        LockoutRegistries.register(registry, "use_item_on_entity/unique", UseItemOnEntityGoalBuilder.Unique.MAP_CODEC);
-        LockoutRegistries.register(registry, "experience/total", ReachExperienceLevelGoalBuilder.Total.MAP_CODEC);
-        LockoutRegistries.register(registry, "inventory/fill_block", UpdateInventoryGoalBuilder.FillBlock.MAP_CODEC);
-        LockoutRegistries.register(registry, "inventory/fill_entity", UpdateInventoryGoalBuilder.FillEntity.MAP_CODEC);
-        LockoutRegistries.register(registry, "block/have_disabled", BlockWithItemGoalBuilder.HaveDisabled.MAP_CODEC);
-        LockoutRegistries.register(registry, "break/any", BreakItemGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "break/component", BreakItemGoalBuilder.Component.MAP_CODEC);
-        LockoutRegistries.register(registry, "brew/effect", BrewPotionGoalBuilder.Effect.MAP_CODEC);
-        LockoutRegistries.register(registry, "brew/type", BrewPotionGoalBuilder.Type.MAP_CODEC);
-        LockoutRegistries.register(registry, "compost/unique_with_component", CompostItemsGoalBuilder.UniqueWithComponent.MAP_CODEC);
-        LockoutRegistries.register(registry, "consume/any", ConsumeItemGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "consume/unique", ConsumeItemGoalBuilder.Unique.MAP_CODEC);
-        LockoutRegistries.register(registry, "consume/unique_with_components", ConsumeItemGoalBuilder.UniqueWithComponents.MAP_CODEC);
-        LockoutRegistries.register(registry, "consume/with_status_effect", ConsumeItemGoalBuilder.WithStatusEffect.MAP_CODEC);
-        LockoutRegistries.register(registry, "craft/any", CraftItemGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "craft/unique", CraftItemGoalBuilder.Unique.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/all", ObtainItemGoalBuilder.All.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/any", ObtainItemGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/at_least", ObtainItemGoalBuilder.AtLeast.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/count", ObtainItemGoalBuilder.WithCount.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/full_stack", ObtainItemGoalBuilder.AnyFullStack.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/colored", ObtainItemGoalBuilder.Colored.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/shield_with_banner", ObtainItemGoalBuilder.ShieldWithBanner.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/full_inventory_distinct", ObtainItemGoalBuilder.AllDistinct.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/armor_piece", ObtainItemGoalBuilder.ArmorPiece.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/dyed_armor_piece", ObtainItemGoalBuilder.DyedArmorPiece.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/full_armor_of_material", ObtainItemGoalBuilder.FullArmorOfMaterial.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/full_enchanted_armor", ObtainItemGoalBuilder.AllEnchantedArmor.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/full_armor_of_different_material", ObtainItemGoalBuilder.AllDifferentArmorMaterial.MAP_CODEC);
-        LockoutRegistries.register(registry, "obtain/full_diffent_dyed_leather_armor", ObtainItemGoalBuilder.AllDifferentDyedLeatherArmor.MAP_CODEC);
-        LockoutRegistries.register(registry, "custom/exactly", CustomEventGoalBuilder.Exactly.MAP_CODEC);
-        LockoutRegistries.register(registry, "advancement/any", ObtainAdvancementGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "advancement/unique", ObtainAdvancementGoalBuilder.Unique.MAP_CODEC);
-        LockoutRegistries.register(registry, "player/empty_hunger", PlayerStateGoalBuilder.EmptyHungerBar.MAP_CODEC);
-        LockoutRegistries.register(registry, "player/height", PlayerStateGoalBuilder.HeightAbove.MAP_CODEC);
-        LockoutRegistries.register(registry, "player/sleep", PlayerStateGoalBuilder.SleepIn.MAP_CODEC);
-        LockoutRegistries.register(registry, "ride/any", RideEntityGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "statistic/custom", ChangeStatisticGoalBuilder.Custom.MAP_CODEC);
-        LockoutRegistries.register(registry, "statistic/custom_total", ChangeStatisticGoalBuilder.CustomTotal.MAP_CODEC);
-        LockoutRegistries.register(registry, "statistic/item", ChangeStatisticGoalBuilder.ItemInteraction.MAP_CODEC);
-        LockoutRegistries.register(registry, "statistic/item_while_riding", ChangeStatisticGoalBuilder.ItemInteractionWhileRiding.MAP_CODEC);
-        LockoutRegistries.register(registry, "status_effect/any", HaveStatusEffectGoalBuilder.Any.MAP_CODEC);
-        LockoutRegistries.register(registry, "tame/any", TameAnimalGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "mine_block/any", MineBlockGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "mine_block/unique", MineBlockGoalBuilder.Unique.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "use_item_on_block/any", UseItemOnBlockGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "deal_damage/total", DealDamageGoalBuilder.Total.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "death/damage_type", DeathGoalBuilder.Type.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "death/entity", DeathGoalBuilder.Entity.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "death/fall", DeathGoalBuilder.FallOffBlock.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "kill/any", KillEntityGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "kill/unique", KillEntityGoalBuilder.Unique.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "kill/total", KillEntityGoalBuilder.Total.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "kill/colored_sheep", KillEntityGoalBuilder.ColoredSheep.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "kill/method", KillEntityGoalBuilder.DeathType.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "kill/dimension", KillEntityGoalBuilder.Dimension.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "take_damage/total", TakeDamageGoalBuilder.Total.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "age_lock/any", AgeLockMobGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "anger/any", AngerMobGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "breed/any", BreedAnimalGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "breed/unique", BreedAnimalGoalBuilder.Unique.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "leash/any", LeashEntityGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "leash/unique", LeashEntityGoalBuilder.Unique.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "spawn/any", SpawnEntityGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "use_item_on_entity/exactly", UseItemOnEntityGoalBuilder.Exactly.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "use_item_on_entity/name_tag", UseItemOnEntityGoalBuilder.NameTag.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "use_item_on_entity/unique", UseItemOnEntityGoalBuilder.Unique.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "experience/total", ReachExperienceLevelGoalBuilder.Total.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "inventory/fill_block", UpdateInventoryGoalBuilder.FillBlock.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "inventory/fill_entity", UpdateInventoryGoalBuilder.FillEntity.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "block/have_disabled", BlockWithItemGoalBuilder.HaveDisabled.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "break/any", BreakItemGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "break/component", BreakItemGoalBuilder.Component.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "brew/effect", BrewPotionGoalBuilder.Effect.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "brew/type", BrewPotionGoalBuilder.Type.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "compost/unique_with_component", CompostItemsGoalBuilder.UniqueWithComponent.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "consume/any", ConsumeItemGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "consume/unique", ConsumeItemGoalBuilder.Unique.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "consume/unique_with_components", ConsumeItemGoalBuilder.UniqueWithComponents.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "consume/with_status_effect", ConsumeItemGoalBuilder.WithStatusEffect.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "craft/any", CraftItemGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "craft/unique", CraftItemGoalBuilder.Unique.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/all", ObtainItemGoalBuilder.All.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/any", ObtainItemGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/at_least", ObtainItemGoalBuilder.AtLeast.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/count", ObtainItemGoalBuilder.WithCount.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/full_stack", ObtainItemGoalBuilder.AnyFullStack.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/colored", ObtainItemGoalBuilder.Colored.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/shield_with_banner", ObtainItemGoalBuilder.ShieldWithBanner.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/full_inventory_distinct", ObtainItemGoalBuilder.AllDistinct.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/armor_piece", ObtainItemGoalBuilder.ArmorPiece.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/dyed_armor_piece", ObtainItemGoalBuilder.DyedArmorPiece.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/full_armor_of_material", ObtainItemGoalBuilder.FullArmorOfMaterial.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/full_enchanted_armor", ObtainItemGoalBuilder.AllEnchantedArmor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/full_armor_of_different_material", ObtainItemGoalBuilder.AllDifferentArmorMaterial.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "obtain/full_diffent_dyed_leather_armor", ObtainItemGoalBuilder.AllDifferentDyedLeatherArmor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "custom/exactly", CustomEventGoalBuilder.Exactly.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "advancement/any", ObtainAdvancementGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "advancement/unique", ObtainAdvancementGoalBuilder.Unique.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "player/empty_hunger", PlayerStateGoalBuilder.EmptyHungerBar.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "player/height", PlayerStateGoalBuilder.HeightAbove.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "player/sleep", PlayerStateGoalBuilder.SleepIn.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "ride/any", RideEntityGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "statistic/custom", ChangeStatisticGoalBuilder.Custom.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "statistic/custom_total", ChangeStatisticGoalBuilder.CustomTotal.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "statistic/item", ChangeStatisticGoalBuilder.ItemInteraction.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "statistic/item_while_riding", ChangeStatisticGoalBuilder.ItemInteractionWhileRiding.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "status_effect/any", HaveStatusEffectGoalBuilder.Any.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "tame/any", TameAnimalGoalBuilder.Any.MAP_CODEC);
     }
 
     public TextureExtractor applyTextureExtractor(TextureExtractor textureExtractor, T option) {

@@ -2,7 +2,5 @@
     "type": "lockout:biome",
     "name": "Lush Caves",
     "decoration": "minecraft:banner_green",
-    "biomes": [
-        "minecraft:lush_caves"
-    ]
+    "biomes": "minecraft:lush_caves"
 }

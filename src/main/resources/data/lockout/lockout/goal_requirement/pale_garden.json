@@ -2,7 +2,5 @@
     "type": "lockout:biome",
     "name": "Pale Garden",
     "decoration": "minecraft:banner_light_gray",
-    "biomes": [
-        "minecraft:pale_garden"
-    ]
+    "biomes": "minecraft:pale_garden"
 }

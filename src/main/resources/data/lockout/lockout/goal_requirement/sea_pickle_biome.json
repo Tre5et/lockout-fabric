@@ -1,0 +1,9 @@
+{
+    "type": "lockout:biome",
+    "name": "Sea-pickle Biome",
+    "decoration": "minecraft:banner_cyan",
+    "biomes": [
+        "minecraft:warm_ocean",
+        "minecraft:lukewarm_ocean"
+    ]
+}

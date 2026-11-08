@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import lombok.Getter;
-import me.marin.lockout.registries.LockoutRegistries;
+import me.marin.lockout.registries.LockoutBuiltInRegistries;
 import net.minecraft.core.Registry;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.Random;
 import java.util.function.Function;
 
 public abstract class DifficultyCheckFunction {
-    public static final Codec<DifficultyCheckFunction> CODEC = LockoutRegistries.DIFFICULTY_CHECK_TYPE.byNameCodec().dispatch(DifficultyCheckFunction::codec, c -> c);
+    public static final Codec<DifficultyCheckFunction> CODEC = LockoutBuiltInRegistries.DIFFICULTY_CHECK_TYPE.byNameCodec().dispatch(DifficultyCheckFunction::codec, c -> c);
 
     private static final Random RANDOM = new Random();
 
@@ -25,8 +25,8 @@ public abstract class DifficultyCheckFunction {
     public abstract MapCodec<? extends DifficultyCheckFunction> codec();
 
     public static Registry<MapCodec<? extends DifficultyCheckFunction>> bootstrap(Registry<MapCodec<? extends DifficultyCheckFunction>> registry) {
-        LockoutRegistries.register(registry, "allow_all", AllowAll.MAP_CODEC);
-        LockoutRegistries.register(registry, "absolute_distance", AbsoluteDistance.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "allow_all", AllowAll.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "absolute_distance", AbsoluteDistance.MAP_CODEC);
         return registry;
     }
 
@@ -100,11 +100,11 @@ public abstract class DifficultyCheckFunction {
     }
 
     public static abstract class Modifier {
-        public static final Codec<Modifier> CODEC = LockoutRegistries.DIFFICULTY_CHECK_MODIFIER_TYPE.byNameCodec().dispatch(Modifier::codec, c -> c);
+        public static final Codec<Modifier> CODEC = LockoutBuiltInRegistries.DIFFICULTY_CHECK_MODIFIER_TYPE.byNameCodec().dispatch(Modifier::codec, c -> c);
 
         public static Registry<MapCodec<? extends Modifier>> bootstrap(Registry<MapCodec<? extends Modifier>> registry) {
-            LockoutRegistries.register(registry, "scale", Scale.MAP_CODEC);
-            LockoutRegistries.register(registry, "allow_between", AllowBetween.MAP_CODEC);
+            LockoutBuiltInRegistries.register(registry, "scale", Scale.MAP_CODEC);
+            LockoutBuiltInRegistries.register(registry, "allow_between", AllowBetween.MAP_CODEC);
             return registry;
         }
 

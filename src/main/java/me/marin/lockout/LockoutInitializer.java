@@ -1,8 +1,8 @@
 package me.marin.lockout;
 
 import me.marin.lockout.network.Networking;
+import me.marin.lockout.registries.LockoutBuiltInRegistries;
 import me.marin.lockout.registries.LockoutRegistries;
-import me.marin.lockout.registries.LockoutRegistryKeys;
 import me.marin.lockout.util.LockoutMapDecorationTypes;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
@@ -34,8 +34,8 @@ public class LockoutInitializer implements ModInitializer {
     public void onInitialize() {
         MOD_VERSION = FabricLoader.getInstance().getModContainer(NAMESPACE).get().getMetadata().getVersion();
 
-        LockoutRegistryKeys.initialize();
         LockoutRegistries.initialize();
+        LockoutBuiltInRegistries.initialize();
 
         Networking.registerPayloads();
         //DefaultGoalRegister.registerGoals();

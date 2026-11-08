@@ -7,10 +7,11 @@ import lombok.Getter;
 import me.marin.lockout.client.goal.hint.ClientHint;
 import me.marin.lockout.client.goal.hint.PositionClientHint;
 import me.marin.lockout.lockout.goal.hint.HintCombination;
-import me.marin.lockout.registries.LockoutRegistries;
+import me.marin.lockout.registries.LockoutBuiltInRegistries;
 import me.marin.lockout.server.goal.hint.BiomeServerHint;
 import me.marin.lockout.server.goal.hint.ServerHint;
 import me.marin.lockout.server.goal.hint.StructureServerHint;
+import me.marin.lockout.util.LockoutCodecs;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -26,7 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class GoalRequirement {
-    public static final Codec<GoalRequirement> CODEC = LockoutRegistries.GOAL_REQUIREMENT_TYPE.byNameCodec().dispatch(GoalRequirement::codec, c -> c);
+    public static final Codec<GoalRequirement> CODEC = LockoutBuiltInRegistries.GOAL_REQUIREMENT_TYPE.byNameCodec().dispatch(GoalRequirement::codec, c -> c);
 
     public abstract MapCodec<? extends GoalRequirement> codec();
 
@@ -74,21 +75,21 @@ public abstract class GoalRequirement {
     }
 
     public static void bootstrap(Registry<MapCodec<? extends GoalRequirement>> registry) {
-        LockoutRegistries.register(registry, "biome", AnyBiome.MAP_CODEC);
-        LockoutRegistries.register(registry, "structure", AnyStructure.MAP_CODEC);
-        LockoutRegistries.register(registry, "min_teams", TeamCountMin.MAP_CODEC);
-        LockoutRegistries.register(registry, "max_teams", TeamCountMax.MAP_CODEC);
-        LockoutRegistries.register(registry, "option_limited", LimitedToOptions.MAP_CODEC);
-        LockoutRegistries.register(registry, "and", AndCombined.MAP_CODEC);
-        LockoutRegistries.register(registry, "or", OrCombined.MAP_CODEC);
-        LockoutRegistries.register(registry, "xor", ExactlyCombined.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "biome", AnyBiome.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "structure", AnyStructure.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "min_teams", TeamCountMin.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "max_teams", TeamCountMax.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "option_limited", LimitedToOptions.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "and", AndCombined.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "or", OrCombined.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "xor", ExactlyCombined.MAP_CODEC);
     }
 
     public static class AnyBiome extends GoalRequirement {
         public static final MapCodec<AnyBiome> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.STRING.fieldOf("name").forGetter(AnyBiome::getName),
                 MapDecorationType.CODEC.fieldOf("decoration").forGetter(AnyBiome::getDecoration),
-                Codec.list(ResourceKey.codec(Registries.BIOME)).fieldOf("biomes").forGetter(AnyBiome::getBiomes)
+                LockoutCodecs.list(ResourceKey.codec(Registries.BIOME)).fieldOf("biomes").forGetter(AnyBiome::getBiomes)
         ).apply(instance, AnyBiome::new));
 
         @Getter
@@ -128,7 +129,7 @@ public abstract class GoalRequirement {
         public static final MapCodec<AnyStructure> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.STRING.fieldOf("name").forGetter(AnyStructure::getName),
                 MapDecorationType.CODEC.fieldOf("decoration").forGetter(AnyStructure::getDecoration),
-                Codec.list(ResourceKey.codec(Registries.STRUCTURE)).fieldOf("structures").forGetter(AnyStructure::getStructures)
+                LockoutCodecs.list(ResourceKey.codec(Registries.STRUCTURE)).fieldOf("structures").forGetter(AnyStructure::getStructures)
         ).apply(instance, AnyStructure::new));
 
         @Getter

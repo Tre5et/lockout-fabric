@@ -17,9 +17,7 @@
             "type": "lockout:structure",
             "name": "Swamp Hut",
             "decoration": "minecraft:swamp_hut",
-            "structures": [
-                "minecraft:swamp_hut"
-            ]
+            "structures": "minecraft:swamp_hut"
         }
     ]
 }

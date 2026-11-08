@@ -5,17 +5,13 @@
             "type": "lockout:biome",
             "name": "Desert",
             "decoration": "minecraft:banner_yellow",
-            "biomes": [
-                "minecraft:desert"
-            ]
+            "biomes": "minecraft:desert"
         },
         {
             "type": "lockout:structure",
             "name": "Desert Village",
             "decoration": "minecraft:village_desert",
-            "structures": [
-                "minecraft:village_desert"
-            ]
+            "structures": "minecraft:village_desert"
         }
     ]
 }

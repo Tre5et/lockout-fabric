@@ -8,7 +8,7 @@ import me.marin.lockout.lockout.goal.Goal;
 import me.marin.lockout.lockout.goal.builder.BuildData;
 import me.marin.lockout.lockout.goal.builder.GoalBuilder;
 import me.marin.lockout.lockout.goal.builder.IllegalGoalConstructionException;
-import me.marin.lockout.registries.LockoutRegistryKeys;
+import me.marin.lockout.registries.LockoutRegistries;
 import me.marin.lockout.server.LockoutServer;
 import me.marin.lockout.server.game.ServerLockoutGame;
 import me.marin.lockout.server.goal.builder.ServerGoalBuildParameters;
@@ -90,7 +90,7 @@ public class ServerGoal<U> extends Goal {
         JsonObject data = element.getAsJsonObject();
 
         if (!data.has("id") || !data.get("id").isJsonPrimitive() || !data.get("id").getAsJsonPrimitive().isString()) throw new IllegalGoalConstructionException("Server goal data does not contain a valid id.");
-        ResourceKey<GoalBuilder<?,?>> key = ResourceKey.create(LockoutRegistryKeys.GOAL, Identifier.parse(data.get("id").getAsString()));
+        ResourceKey<GoalBuilder<?,?>> key = ResourceKey.create(LockoutRegistries.GOAL, Identifier.parse(data.get("id").getAsString()));
         if (!LockoutServer.goalRegistry().containsKey(key)) throw new IllegalGoalConstructionException("Goal with id " + data.get("id").getAsString() + " is not registered.");
         GoalBuilder<?,?> builder = LockoutServer.goalRegistry().get(key).get().value();
 

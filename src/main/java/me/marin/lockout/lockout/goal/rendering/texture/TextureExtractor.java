@@ -2,29 +2,27 @@ package me.marin.lockout.lockout.goal.rendering.texture;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import me.marin.lockout.registries.LockoutRegistries;
+import me.marin.lockout.registries.LockoutBuiltInRegistries;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Registry;
 
-import java.awt.*;
-
 public interface TextureExtractor {
-    Codec<TextureExtractor> CODEC = LockoutRegistries.TEXTURE_EXTRACTOR_TYPE.byNameCodec().dispatch(TextureExtractor::codec, c -> c);
+    Codec<TextureExtractor> CODEC = LockoutBuiltInRegistries.TEXTURE_EXTRACTOR_TYPE.byNameCodec().dispatch(TextureExtractor::codec, c -> c);
 
     static void bootstrap(Registry<MapCodec<? extends TextureExtractor>> registry) {
-        LockoutRegistries.register(registry, "blank", Blank.MAP_CODEC);
-        LockoutRegistries.register(registry, "corner_icon", CornerIconTextureExtractor.MAP_CODEC);
-        LockoutRegistries.register(registry, "cycle", CycleTextureExtractor.MAP_CODEC);
-        LockoutRegistries.register(registry, "fill", FillTextureExtractor.MAP_CODEC);
-        LockoutRegistries.register(registry, "generic", GenericTextureExtractor.MAP_CODEC);
-        LockoutRegistries.register(registry, "item_count", ItemCountTextureExtractor.MAP_CODEC);
-        LockoutRegistries.register(registry, "item_decoration", ItemDecorationTextureExtractor.MAP_CODEC);
-        LockoutRegistries.register(registry, "item", ItemTextureExtractor.MAP_CODEC);
-        LockoutRegistries.register(registry, "overlay", OverlayTextureExtractor.MAP_CODEC);
-        LockoutRegistries.register(registry, "sprite", SpriteTextureExtractor.MAP_CODEC);
-        LockoutRegistries.register(registry, "stack", StackingTextureExtractor.MAP_CODEC);
-        LockoutRegistries.register(registry, "text", TextTextureExtractor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "blank", Blank.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "corner_icon", CornerIconTextureExtractor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "cycle", CycleTextureExtractor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "fill", FillTextureExtractor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "generic", GenericTextureExtractor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "item_count", ItemCountTextureExtractor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "item_decoration", ItemDecorationTextureExtractor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "item", ItemTextureExtractor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "overlay", OverlayTextureExtractor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "sprite", SpriteTextureExtractor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "stack", StackingTextureExtractor.MAP_CODEC);
+        LockoutBuiltInRegistries.register(registry, "text", TextTextureExtractor.MAP_CODEC);
     }
 
     /**
